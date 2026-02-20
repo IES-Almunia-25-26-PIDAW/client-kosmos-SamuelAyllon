@@ -87,11 +87,17 @@ class Subscription extends Model
      */
     public function upgradeToPremium(string $plan): void
     {
+        $days = match($plan) {
+            'premium_monthly' => 30,
+            'premium_yearly'  => 365,
+            default           => null,
+        };
+
         $this->update([
-            'plan' => $plan,
-            'status' => 'active',
+            'plan'       => $plan,
+            'status'     => 'active',
             'started_at' => now(),
-            'expires_at' => now()->addDays($this->getDurationInDays()),
+            'expires_at' => $days ? now()->addDays($days) : null,
         ]);
 
         // Actualizar rol del usuario
