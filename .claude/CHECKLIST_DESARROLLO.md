@@ -407,8 +407,10 @@ Para cada feature (Task, Idea, Project, Box, Resource, Voice, AI):
 ✓ Límites respetados (free: 5 tareas pending)
 ✓ Tests: 143/143 pasando (551 assertions) ← Feb 2026
 ✓ Documentación actualizada (.claude/)
-✗ Frontend implementado (solo placeholders TSX)
-✗ Dashboard con datos reales
+✓ Dashboard implementado con datos reales (free/premium/admin)
+✓ Vistas admin: dashboard, users (index+show), payments, subscriptions
+✓ Types TypeScript organizados en subcarpetas
+✗ Vistas usuario pendientes (tasks/create, ideas/*, projects/*, boxes/*)
 ✗ Landing page con contenido Flowly
 ```
 

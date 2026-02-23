@@ -422,7 +422,38 @@ Claude tendrá todo el contexto listo.
 
 ---
 
+---
+
+## 🗂️ TIPOS TYPESCRIPT (`resources/js/types/`)
+
+```
+import type { Task } from '@/types';              // modelo
+import type { DashboardProps } from '@/types';    // props de página
+import type { AdminUsersIndexProps } from '@/types'; // props de vista admin
+import type { PaginatedData } from '@/types';     // paginación genérica
+```
+
+| Subcarpeta | Tipos exportados |
+|-----------|-----------------|
+| `models/` | `Task`, `Idea`, `Subscription`, `Payment`, `RecentPayment`, `Role` |
+| `shared/` | `PaginatedData<T>` |
+| `pages/`  | `DashboardProps`, `TasksProps` |
+| `admin/`  | `AdminStats`, `AdminUser`, `AdminDashboardProps`, `AdminUsersIndexProps`, `AdminUserShowProps`, `AdminUserDashboardData`, `AdminPaymentsProps`, `AdminSubscriptionsProps` |
+
+> Todos re-exportados desde `@/types` (barrel en `types/index.ts`)
+
+---
+
+## 📡 INERTIA — DATOS COMPARTIDOS (todas las páginas)
+
+```tsx
+const { auth } = usePage<{ auth: { user: User; is_admin: boolean; is_premium: boolean } }>().props;
+```
+Definido en `HandleInertiaRequests::share()`.
+
+---
+
 **Última actualización:** Febrero 2026
-**Versión:** 1.1 Flowly (143 tests pasando)
+**Versión:** 1.2 Flowly (143 tests + admin UI + dashboard)
 
 Imprime esto o mantenlo en una pestaña. Te ahorrará tiempo. 📌

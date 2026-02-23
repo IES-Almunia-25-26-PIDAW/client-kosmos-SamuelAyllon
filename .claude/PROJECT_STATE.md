@@ -1,5 +1,5 @@
 # Flowly — Estado Real del Proyecto
-> Última actualización: 2026-02-20. Actualizar este archivo al completar cada sección.
+> Última actualización: 2026-02-23. Actualizar este archivo al completar cada sección.
 
 ---
 
@@ -18,8 +18,10 @@
 | Tests | ✅ 143/143 pasando — TaskController, IdeaController, ProjectController, BoxController, ResourceController, CheckoutController, SubscriptionController, AdminControllers, Auth, Settings |
 | Frontend — Auth | ✅ Páginas login, register, 2FA, forgot-password (Fortify) |
 | Frontend — Settings | ✅ Páginas profile, password, appearance, two-factor |
-| Frontend — Dashboard | ⚠️ Página básica existe, sin datos reales |
-| Frontend — Features | ⚠️ Placeholders creados (sin implementación UI real) |
+| Frontend — Dashboard | ✅ Implementado (free: tareas+ideas, premium: +proyectos, admin: redirige) |
+| Frontend — Admin | ✅ Las 5 vistas admin implementadas con UI real |
+| Frontend — Types | ✅ Reorganizado en subcarpetas models/ shared/ pages/ admin/ |
+| Frontend — Features | ⚠️ Vistas user parciales (tasks/index skeleton, resto placeholders) |
 | Frontend — Landing | ⚠️ welcome.tsx existe pero sin contenido Flowly |
 
 ---
@@ -127,25 +129,26 @@ toggle, toggle-group, tooltip
 - `use-initials.tsx` — iniciales de nombre
 - `use-clipboard.ts`, `use-current-url.ts`, `use-mobile-navigation.ts`, `use-two-factor-auth.ts`
 
-### ✅ Páginas existentes
+### ✅ Páginas existentes con UI real
 - `pages/welcome.tsx` — landing (pendiente de contenido Flowly)
-- `pages/dashboard.tsx` — dashboard básico (pendiente de datos reales)
+- `pages/dashboard.tsx` — dashboard con datos reales (free/premium condicional)
 - `pages/auth/` — login, register, 2FA, reset, verify, forgot
 - `pages/settings/` — profile, password, appearance, two-factor
+- `pages/admin/dashboard.tsx` — stats globales + pagos/usuarios recientes
+- `pages/admin/users/index.tsx` — lista paginada con roles, plan, conteos
+- `pages/admin/users/show.tsx` — detalle usuario: actividad, suscripción, pagos
+- `pages/admin/payments/index.tsx` — resumen + lista paginada con estado e importe
+- `pages/admin/subscriptions/index.tsx` — resumen por plan + lista paginada
 
-### ⚠️ Páginas placeholder (existen pero sin UI real — solo retornan un div vacío)
-Estas páginas satisfacen los tests pero necesitan implementación real:
-- `pages/tasks/index.tsx` + `edit.tsx`
-- `pages/ideas/index.tsx` + `edit.tsx`
-- `pages/projects/index.tsx` + `show.tsx`
-- `pages/boxes/index.tsx` + `show.tsx`
-- `pages/resources/create.tsx`
-- `pages/subscription/index.tsx`
-- `pages/checkout/index.tsx`
-- `pages/admin/dashboard.tsx`
-- `pages/admin/users/index.tsx` + `show.tsx`
-- `pages/admin/payments/index.tsx`
-- `pages/admin/subscriptions/index.tsx`
+### ⚠️ Páginas placeholder o skeleton (existen pero sin UI completa)
+- `pages/tasks/index.tsx` — skeleton funcional (lista + complete/reopen/delete)
+- `pages/tasks/edit.tsx` — placeholder
+- `pages/ideas/index.tsx` + `edit.tsx` — placeholder
+- `pages/projects/index.tsx` + `show.tsx` — placeholder
+- `pages/boxes/index.tsx` + `show.tsx` — placeholder
+- `pages/resources/create.tsx` — placeholder
+- `pages/subscription/index.tsx` — placeholder
+- `pages/checkout/index.tsx` — placeholder
 
 ### ❌ Páginas aún no creadas (ni placeholder)
 - `pages/tasks/create.tsx`
@@ -153,6 +156,27 @@ Estas páginas satisfacen los tests pero necesitan implementación real:
 - `pages/projects/create.tsx` + `edit.tsx`
 - `pages/boxes/create.tsx` + `edit.tsx`
 - `pages/resources/edit.tsx`
+
+### ✅ Estructura de tipos TypeScript (`resources/js/types/`)
+```
+types/
+├── auth.ts          → User (auth), Auth, TwoFactorSetupData
+├── navigation.ts    → NavItem, BreadcrumbItem
+├── ui.ts
+├── models/          → Task, Idea, Subscription, Payment, RecentPayment, Role
+├── shared/          → PaginatedData<T>
+├── pages/           → DashboardProps, TasksProps
+├── admin/           → AdminStats, AdminUser, AdminDashboardProps,
+│                      AdminUsersIndexProps, AdminUserShowProps,
+│                      AdminPaymentsProps, AdminSubscriptionsProps
+└── index.ts         → barrel (7 líneas usando sub-barrels)
+```
+
+### ✅ Middleware HandleInertiaRequests
+Comparte en todas las páginas vía `usePage().props.auth`:
+- `is_admin: boolean`
+- `is_premium: boolean`
+- `user: User`
 
 ---
 
@@ -169,9 +193,10 @@ Fixes aplicados para llegar a 143/143:
 ---
 
 ## Próximo paso sugerido
-1. Implementar páginas React reales (empezar por `tasks/index.tsx` + `ideas/index.tsx` — más simples)
-2. Actualizar `dashboard.tsx` con datos reales via `getDashboardData()`
-3. Implementar páginas admin con tablas y estadísticas
+1. Implementar vistas usuario: `tasks/create.tsx`, `ideas/index.tsx`, `ideas/create.tsx`
+2. Implementar `subscription/index.tsx` y `checkout/index.tsx`
+3. Implementar vistas premium: `projects/*`, `boxes/*`, `resources/*`
+4. Landing page `welcome.tsx` con contenido Flowly real
 
 ## Notas de implementación
 - `ResourceController` usa rutas anidadas bajo `/boxes/{box}/resources` para create/store

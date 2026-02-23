@@ -2,20 +2,7 @@ import { Head, Link, router } from '@inertiajs/react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
-import type { BreadcrumbItem, AdminUser } from '@/types';
-
-interface DashboardData {
-    active_tasks: number;
-    completed_this_month: number;
-    total_ideas: number;
-    total_projects: number;
-    is_premium: boolean;
-}
-
-interface Props {
-    user: AdminUser;
-    dashboardData: DashboardData;
-}
+import type { BreadcrumbItem, AdminUserShowProps } from '@/types';
 
 const planLabels: Record<string, string> = {
     free: 'Gratuito', premium_monthly: 'Premium mensual', premium_yearly: 'Premium anual',
@@ -39,7 +26,7 @@ const paymentStatusColors: Record<string, string> = {
     failed:    'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
 };
 
-export default function AdminUserShow({ user, dashboardData }: Props) {
+export default function AdminUserShow({ user, dashboardData }: AdminUserShowProps) {
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Admin', href: '/admin/dashboard' },
         { title: 'Usuarios', href: '/admin/users' },

@@ -1,9 +1,9 @@
 import { AdminStats } from './admin-stats';
-import { Payment } from '../models/payment';
+import { RecentPayment } from '../models/payment';
 import { User } from '../models/user';
 
 export interface AdminDashboardProps {
     stats: AdminStats;
-    recentPayments: Payment[];
+    recentPayments: RecentPayment[];
     recentUsers: User[];
 }

@@ -217,44 +217,68 @@ flowly/
 ├── app/
 │   ├── Http/
 │   │   ├── Controllers/
+│   │   │   ├── DashboardController.php
 │   │   │   ├── TaskController.php
 │   │   │   ├── IdeaController.php
 │   │   │   ├── ProjectController.php
-│   │   │   ├── VoiceController.php
-│   │   │   ├── AiAssistantController.php
+│   │   │   ├── BoxController.php
+│   │   │   ├── ResourceController.php
+│   │   │   ├── SubscriptionController.php
+│   │   │   ├── CheckoutController.php
 │   │   │   └── Admin/
+│   │   │       ├── AdminDashboardController.php
+│   │   │       ├── AdminUserController.php
+│   │   │       ├── AdminPaymentController.php
+│   │   │       └── AdminSubscriptionController.php
+│   │   ├── Middleware/
+│   │   │   └── HandleInertiaRequests.php  ← comparte is_admin, is_premium
 │   │   └── Requests/
-│   │       ├── StoreTaskRequest.php
-│   │       ├── StoreIdeaRequest.php
+│   │       ├── StoreTaskRequest.php / UpdateTaskRequest.php
+│   │       ├── StoreIdeaRequest.php / UpdateIdeaRequest.php
 │   │       └── ...
-│   └── Models/
-│       ├── User.php
-│       ├── Task.php
-│       ├── Idea.php
-│       ├── Project.php
-│       ├── Subscription.php
-│       ├── Payment.php
-│       └── ...
+│   ├── Models/
+│   │   ├── User.php, Task.php, Idea.php, Project.php
+│   │   ├── Subscription.php, Payment.php
+│   │   ├── Box.php, Resource.php
+│   │   └── AiConversation.php, VoiceRecording.php
+│   └── Policies/
+│       └── TaskPolicy.php, IdeaPolicy.php, ...
 ├── database/
 │   ├── migrations/
 │   ├── factories/
-│   └── seeders/
+│   └── seeders/  ← RoleSeeder + UserSeeder
 ├── resources/
-│   ├── js/
-│   │   ├── Pages/
-│   │   ├── Components/
-│   │   └── Layouts/
-│   └── views/
-│       └── app.blade.php
+│   └── js/
+│       ├── pages/                    ← minúsculas (convención del proyecto)
+│       │   ├── dashboard.tsx         ✅ implementada
+│       │   ├── tasks/index.tsx       ⚠️ skeleton
+│       │   ├── ideas/                ⚠️ placeholder
+│       │   ├── projects/             ⚠️ placeholder
+│       │   ├── boxes/                ⚠️ placeholder
+│       │   ├── subscription/         ⚠️ placeholder
+│       │   ├── checkout/             ⚠️ placeholder
+│       │   └── admin/                ✅ todas implementadas
+│       │       ├── dashboard.tsx
+│       │       ├── users/index.tsx + show.tsx
+│       │       ├── payments/index.tsx
+│       │       └── subscriptions/index.tsx
+│       ├── components/
+│       │   ├── ui/               ← shadcn/ui primitives
+│       │   ├── app-sidebar.tsx   ← navegación por rol
+│       │   └── nav-main.tsx
+│       ├── layouts/
+│       ├── types/
+│       │   ├── models/           ← Task, Idea, Subscription, Payment, Role
+│       │   ├── shared/           ← PaginatedData<T>
+│       │   ├── pages/            ← DashboardProps, TasksProps
+│       │   ├── admin/            ← AdminDashboardProps, AdminUsersIndexProps, ...
+│       │   └── index.ts          ← barrel (7 líneas)
+│       └── routes/               ← Wayfinder (rutas tipadas)
 ├── routes/
 │   └── web.php
 ├── tests/
-│   └── Feature/
-├── config/
-├── storage/
-├── public/
+│   └── Feature/  ← 143 tests Pest
 ├── .env.example
-├── README.md
 └── composer.json
 ```
 
@@ -659,12 +683,16 @@ Desarrollado como proyecto intermodular para aprender:
 
 ## 🚀 Próximos Pasos
 
-1. **Instala el proyecto** (ver [Instalación Rápida](#instalación-rápida))
-2. **Lee la documentación técnica** (1_CONTROLHUB_DescripcionTecnica.md)
-3. **Ejecuta los tests** (`php artisan test`)
-4. **Comienza a desarrollar** (`npm run dev` + `php artisan serve`)
-5. **Haz commits frecuentes** (`git commit -am 'feat: ...'`)
-6. **Deploya cuando esté listo**
+**Estado actual (Feb 2026):**
+- ✅ Backend 100% — 143/143 tests pasando
+- ✅ Admin panel completo (5 vistas)
+- ✅ Dashboard usuario (free/premium)
+- ⚠️ Vistas usuario pendientes: tasks/create, ideas/*, projects/*, boxes/*
+
+**Para continuar:**
+1. `php artisan migrate:fresh --seed` + `php artisan serve` + `npm run dev`
+2. Login con `admin@flowly.test / password`
+3. Siguientes vistas a implementar: `tasks/create.tsx`, `ideas/index.tsx`
 
 ---
 
