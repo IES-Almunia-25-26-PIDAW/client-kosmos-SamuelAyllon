@@ -10,23 +10,16 @@ use App\Http\Controllers\IdeaController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ResourceController;
 use App\Http\Controllers\SubscriptionController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\TaskController;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
-use Laravel\Fortify\Features;
 
-Route::get('/', function () {
-    return Inertia::render('welcome', [
-        'canRegister' => Features::enabled(Features::registration()),
-    ]);
-})->name('home');
-
-Route::get('dashboard', function () {
-    return Inertia::render('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/', fn() => redirect()->route('login'))->name('home');
 
 // ==================== RUTAS AUTENTICADAS (todos los roles) ====================
 Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
     Route::resource('tasks', TaskController::class)->except(['show']);
     Route::patch('tasks/{task}/complete', [TaskController::class, 'complete'])->name('tasks.complete');
     Route::patch('tasks/{task}/reopen', [TaskController::class, 'reopen'])->name('tasks.reopen');
