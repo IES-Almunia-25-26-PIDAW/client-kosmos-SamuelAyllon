@@ -4,43 +4,45 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
-import type { BreadcrumbItem, Box } from '@/types';
+import type { BreadcrumbItem, Resource } from '@/types';
 
 interface Props {
-    box: Box;
+    resource: Resource;
 }
 
-export default function ResourceCreate({ box }: Props) {
+export default function ResourceEdit({ resource }: Props) {
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Cajas', href: '/boxes' },
-        { title: box.name, href: `/boxes/${box.id}` },
-        { title: 'Nuevo recurso', href: '#' },
+        ...(resource.box ? [{ title: resource.box.name, href: `/boxes/${resource.box_id}` }] : []),
+        { title: 'Editar recurso', href: '#' },
     ];
 
-    const { data, setData, post, processing, errors } = useForm({
-        name: '',
-        description: '',
-        url: '',
-        type: 'link' as 'link' | 'document' | 'video' | 'image' | 'other',
+    const { data, setData, put, processing, errors } = useForm({
+        name: resource.name,
+        description: resource.description ?? '',
+        url: resource.url ?? '',
+        type: resource.type,
     });
 
     function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
-        post(`/boxes/${box.id}/resources`);
+        put(`/resources/${resource.id}`);
     }
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Nuevo recurso" />
+            <Head title="Editar recurso" />
 
             <div className="flex flex-col gap-6 p-6">
 
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold">Nuevo recurso</h1>
-                        <p className="text-sm text-muted-foreground">En la caja: <span className="font-medium">{box.name}</span></p>
+                        <h1 className="text-2xl font-bold">Editar recurso</h1>
+                        {resource.box && (
+                            <p className="text-sm text-muted-foreground">En la caja: <span className="font-medium">{resource.box.name}</span></p>
+                        )}
                     </div>
-                    <Link href={`/boxes/${box.id}`}>
+                    <Link href={`/boxes/${resource.box_id}`}>
                         <Button variant="outline">← Volver</Button>
                     </Link>
                 </div>
@@ -78,7 +80,6 @@ export default function ResourceCreate({ box }: Props) {
                                     value={data.name}
                                     onChange={e => setData('name', e.target.value)}
                                     placeholder="Nombre del recurso"
-                                    autoFocus
                                 />
                                 {errors.name && <p className="text-xs text-red-600">{errors.name}</p>}
                             </div>
@@ -112,9 +113,9 @@ export default function ResourceCreate({ box }: Props) {
 
                             <div className="flex gap-3 pt-2">
                                 <Button type="submit" disabled={processing}>
-                                    {processing ? 'Añadiendo...' : 'Añadir recurso'}
+                                    {processing ? 'Guardando...' : 'Guardar cambios'}
                                 </Button>
-                                <Link href={`/boxes/${box.id}`}>
+                                <Link href={`/boxes/${resource.box_id}`}>
                                     <Button type="button" variant="outline">Cancelar</Button>
                                 </Link>
                             </div>

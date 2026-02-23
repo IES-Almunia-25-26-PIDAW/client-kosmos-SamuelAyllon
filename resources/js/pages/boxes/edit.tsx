@@ -10,36 +10,32 @@ interface Props {
     box: Box;
 }
 
-export default function ResourceCreate({ box }: Props) {
+export default function BoxEdit({ box }: Props) {
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Cajas', href: '/boxes' },
         { title: box.name, href: `/boxes/${box.id}` },
-        { title: 'Nuevo recurso', href: '#' },
+        { title: 'Editar', href: '#' },
     ];
 
-    const { data, setData, post, processing, errors } = useForm({
-        name: '',
-        description: '',
-        url: '',
-        type: 'link' as 'link' | 'document' | 'video' | 'image' | 'other',
+    const { data, setData, put, processing, errors } = useForm({
+        name: box.name,
+        description: box.description ?? '',
+        category: box.category ?? '',
     });
 
     function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
-        post(`/boxes/${box.id}/resources`);
+        put(`/boxes/${box.id}`);
     }
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Nuevo recurso" />
+            <Head title={`Editar — ${box.name}`} />
 
             <div className="flex flex-col gap-6 p-6">
 
                 <div className="flex items-center justify-between">
-                    <div>
-                        <h1 className="text-2xl font-bold">Nuevo recurso</h1>
-                        <p className="text-sm text-muted-foreground">En la caja: <span className="font-medium">{box.name}</span></p>
-                    </div>
+                    <h1 className="text-2xl font-bold">Editar caja</h1>
                     <Link href={`/boxes/${box.id}`}>
                         <Button variant="outline">← Volver</Button>
                     </Link>
@@ -47,28 +43,10 @@ export default function ResourceCreate({ box }: Props) {
 
                 <Card className="max-w-xl">
                     <CardHeader className="pb-2">
-                        <CardTitle className="text-base">Datos del recurso</CardTitle>
+                        <CardTitle className="text-base">Datos de la caja</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-
-                            {/* Tipo */}
-                            <div className="flex flex-col gap-1.5">
-                                <Label htmlFor="type">Tipo *</Label>
-                                <select
-                                    id="type"
-                                    value={data.type}
-                                    onChange={e => setData('type', e.target.value as typeof data.type)}
-                                    className="border-input bg-background ring-offset-background focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-                                >
-                                    <option value="link">Enlace</option>
-                                    <option value="document">Documento</option>
-                                    <option value="video">Video</option>
-                                    <option value="image">Imagen</option>
-                                    <option value="other">Otro</option>
-                                </select>
-                                {errors.type && <p className="text-xs text-red-600">{errors.type}</p>}
-                            </div>
 
                             {/* Nombre */}
                             <div className="flex flex-col gap-1.5">
@@ -77,23 +55,21 @@ export default function ResourceCreate({ box }: Props) {
                                     id="name"
                                     value={data.name}
                                     onChange={e => setData('name', e.target.value)}
-                                    placeholder="Nombre del recurso"
-                                    autoFocus
+                                    placeholder="Nombre de la caja"
                                 />
                                 {errors.name && <p className="text-xs text-red-600">{errors.name}</p>}
                             </div>
 
-                            {/* URL */}
+                            {/* Categoría */}
                             <div className="flex flex-col gap-1.5">
-                                <Label htmlFor="url">URL</Label>
+                                <Label htmlFor="category">Categoría</Label>
                                 <Input
-                                    id="url"
-                                    type="url"
-                                    value={data.url}
-                                    onChange={e => setData('url', e.target.value)}
-                                    placeholder="https://..."
+                                    id="category"
+                                    value={data.category}
+                                    onChange={e => setData('category', e.target.value)}
+                                    placeholder="Ej: Programación, Diseño, Marketing..."
                                 />
-                                {errors.url && <p className="text-xs text-red-600">{errors.url}</p>}
+                                {errors.category && <p className="text-xs text-red-600">{errors.category}</p>}
                             </div>
 
                             {/* Descripción */}
@@ -112,7 +88,7 @@ export default function ResourceCreate({ box }: Props) {
 
                             <div className="flex gap-3 pt-2">
                                 <Button type="submit" disabled={processing}>
-                                    {processing ? 'Añadiendo...' : 'Añadir recurso'}
+                                    {processing ? 'Guardando...' : 'Guardar cambios'}
                                 </Button>
                                 <Link href={`/boxes/${box.id}`}>
                                     <Button type="button" variant="outline">Cancelar</Button>

@@ -4,71 +4,44 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
-import type { BreadcrumbItem, Box } from '@/types';
+import type { BreadcrumbItem } from '@/types';
 
-interface Props {
-    box: Box;
-}
+const breadcrumbs: BreadcrumbItem[] = [
+    { title: 'Cajas', href: '/boxes' },
+    { title: 'Nueva caja', href: '#' },
+];
 
-export default function ResourceCreate({ box }: Props) {
-    const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Cajas', href: '/boxes' },
-        { title: box.name, href: `/boxes/${box.id}` },
-        { title: 'Nuevo recurso', href: '#' },
-    ];
-
+export default function BoxCreate() {
     const { data, setData, post, processing, errors } = useForm({
         name: '',
         description: '',
-        url: '',
-        type: 'link' as 'link' | 'document' | 'video' | 'image' | 'other',
+        category: '',
     });
 
     function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
-        post(`/boxes/${box.id}/resources`);
+        post('/boxes');
     }
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Nuevo recurso" />
+            <Head title="Nueva caja" />
 
             <div className="flex flex-col gap-6 p-6">
 
                 <div className="flex items-center justify-between">
-                    <div>
-                        <h1 className="text-2xl font-bold">Nuevo recurso</h1>
-                        <p className="text-sm text-muted-foreground">En la caja: <span className="font-medium">{box.name}</span></p>
-                    </div>
-                    <Link href={`/boxes/${box.id}`}>
+                    <h1 className="text-2xl font-bold">Nueva caja</h1>
+                    <Link href="/boxes">
                         <Button variant="outline">← Volver</Button>
                     </Link>
                 </div>
 
                 <Card className="max-w-xl">
                     <CardHeader className="pb-2">
-                        <CardTitle className="text-base">Datos del recurso</CardTitle>
+                        <CardTitle className="text-base">Datos de la caja</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-
-                            {/* Tipo */}
-                            <div className="flex flex-col gap-1.5">
-                                <Label htmlFor="type">Tipo *</Label>
-                                <select
-                                    id="type"
-                                    value={data.type}
-                                    onChange={e => setData('type', e.target.value as typeof data.type)}
-                                    className="border-input bg-background ring-offset-background focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-                                >
-                                    <option value="link">Enlace</option>
-                                    <option value="document">Documento</option>
-                                    <option value="video">Video</option>
-                                    <option value="image">Imagen</option>
-                                    <option value="other">Otro</option>
-                                </select>
-                                {errors.type && <p className="text-xs text-red-600">{errors.type}</p>}
-                            </div>
 
                             {/* Nombre */}
                             <div className="flex flex-col gap-1.5">
@@ -77,23 +50,22 @@ export default function ResourceCreate({ box }: Props) {
                                     id="name"
                                     value={data.name}
                                     onChange={e => setData('name', e.target.value)}
-                                    placeholder="Nombre del recurso"
+                                    placeholder="Nombre de la caja"
                                     autoFocus
                                 />
                                 {errors.name && <p className="text-xs text-red-600">{errors.name}</p>}
                             </div>
 
-                            {/* URL */}
+                            {/* Categoría */}
                             <div className="flex flex-col gap-1.5">
-                                <Label htmlFor="url">URL</Label>
+                                <Label htmlFor="category">Categoría</Label>
                                 <Input
-                                    id="url"
-                                    type="url"
-                                    value={data.url}
-                                    onChange={e => setData('url', e.target.value)}
-                                    placeholder="https://..."
+                                    id="category"
+                                    value={data.category}
+                                    onChange={e => setData('category', e.target.value)}
+                                    placeholder="Ej: Programación, Diseño, Marketing..."
                                 />
-                                {errors.url && <p className="text-xs text-red-600">{errors.url}</p>}
+                                {errors.category && <p className="text-xs text-red-600">{errors.category}</p>}
                             </div>
 
                             {/* Descripción */}
@@ -112,9 +84,9 @@ export default function ResourceCreate({ box }: Props) {
 
                             <div className="flex gap-3 pt-2">
                                 <Button type="submit" disabled={processing}>
-                                    {processing ? 'Añadiendo...' : 'Añadir recurso'}
+                                    {processing ? 'Creando...' : 'Crear caja'}
                                 </Button>
-                                <Link href={`/boxes/${box.id}`}>
+                                <Link href="/boxes">
                                     <Button type="button" variant="outline">Cancelar</Button>
                                 </Link>
                             </div>
