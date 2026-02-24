@@ -1,5 +1,5 @@
 # Flowly — Estado Real del Proyecto
-> Última actualización: 2026-02-24. Actualizar este archivo al completar cada sección.
+> Última actualización: 2026-02-24 (sesión 2). Actualizar este archivo al completar cada sección.
 
 ---
 
@@ -8,14 +8,14 @@
 | Capa | Estado |
 |------|--------|
 | Migraciones | ✅ Todas creadas (13 tablas) |
-| Modelos Eloquent | ✅ Todos creados (10 modelos) |
+| Modelos Eloquent | ✅ Todos creados — Task e Idea sin SoftDeletes (hard delete desde sesión 2) |
 | Seeders | ✅ RoleSeeder + UserSeeder + DatabaseSeeder — 3 usuarios, 3 roles, 3 suscripciones |
 | Rutas | ✅ Todas creadas (tasks, ideas, projects, boxes, resources, subscription, checkout, admin) |
 | Controladores features | ✅ TaskController, IdeaController, ProjectController, BoxController, ResourceController, SubscriptionController, CheckoutController |
 | Controladores admin | ✅ AdminDashboardController, AdminUserController, AdminPaymentController, AdminSubscriptionController |
 | Form Requests | ✅ StoreTask/Update, StoreIdea/Update, StoreProject/Update, StoreBox/Update, StoreResource/Update, CheckoutRequest |
 | Policies | ✅ TaskPolicy, IdeaPolicy, ProjectPolicy, BoxPolicy, ResourcePolicy |
-| Tests | ✅ 143/143 pasando — TaskController, IdeaController, ProjectController, BoxController, ResourceController, CheckoutController, SubscriptionController, AdminControllers, Auth, Settings |
+| Tests | ✅ 143/143 pasando (551 assertions) |
 | Frontend — Auth | ✅ Páginas login, register, 2FA, forgot-password (Fortify) |
 | Frontend — Settings | ✅ Páginas profile, password, appearance, two-factor |
 | Frontend — Dashboard | ✅ Implementado (free: tareas+ideas, premium: +proyectos, admin: redirige) |
@@ -23,11 +23,15 @@
 | Frontend — Types | ✅ Reorganizado en subcarpetas models/ shared/ pages/ admin/ |
 | Frontend — Features usuario | ✅ Todas las vistas de usuario implementadas con UI real |
 | Frontend — Features premium | ✅ Todas las vistas premium implementadas con UI real |
-| Frontend — Landing | ⚠️ welcome.tsx existe pero sin contenido Flowly |
+| Frontend — Landing | ✅ welcome.tsx con hero, features, pricing y footer |
+| Frontend — Design System | ✅ Flowly Design System aplicado (colores, fuentes, radius, shadows) |
+| Frontend — Logo | ✅ Logo real en todas las vistas (navbar, auth layouts, sidebar) |
+| Base de datos | ✅ Migrada de SQLite a TiDB Cloud Serverless (MySQL) |
 | Despliegue (Docker) | ✅ Dockerfile + docker-compose.yml + .dockerignore + docker-entrypoint.sh |
-| Manual de usuario | ❌ Pendiente — documento para el usuario final |
-| Justificación técnica | ❌ Pendiente — decisiones de arquitectura documentadas |
-| Ramas Git | ❌ Solo rama main — usar feature branches |
+| Manual de usuario | ✅ docs/manual-usuario.md — 10 secciones |
+| Justificación técnica | ✅ docs/decisiones-tecnicas.md — 9 secciones |
+| Ramas Git | ✅ Justificado en docs/decisiones-tecnicas.md §8 (proyecto unipersonal) |
+| Código comentado | ✅ Comentarios en lógica compleja (orderByRaw, diffInDays, canAddTask, etc.) |
 
 ---
 
@@ -37,12 +41,12 @@
 - `create_users_table` (base Laravel)
 - `add_two_factor_columns_to_users_table` (Fortify)
 - `create_permission_tables` (Spatie)
-- `add_fields_to_users_table` ⚠️ **VACÍA — pendiente de definir qué añadir**
+- `add_fields_to_users_table` ⚠️ **VACÍA — no hay columnas extra en users**
 - `create_subscriptions_table`
 - `create_payments_table`
 - `create_projects_table`
-- `create_tasks_table`
-- `create_ideas_table`
+- `create_tasks_table` — tiene columna `deleted_at` (de la migración original) pero el modelo ya no usa SoftDeletes
+- `create_ideas_table` — ídem
 - `create_boxes_table`
 - `create_resources_table`
 - `create_ai_conversations_table`
@@ -50,6 +54,14 @@
 
 ### ✅ Modelos creados
 Todos en `app/Models/`: User, Subscription, Payment, Project, Task, Idea, Box, Resource, AiConversation, VoiceRecording
+
+**Notas importantes de modelos:**
+- `Task` e `Idea` — **SoftDeletes ELIMINADO** en sesión 2. `delete()` hace hard delete físico.
+  La columna `deleted_at` sigue en la BD pero Eloquent ya no la gestiona.
+- `AiConversation` — `$timestamps = false`, solo tiene `created_at`
+- `Task::markAsPending()` existe, NO `markAsInProgress()`
+- `Idea::markAsResolved()` / `markAsActive()`, NO `archive()` / `activate()`
+- `Task::scopeActive()` sigue en el modelo pero es redundante (siempre filtra `deleted_at IS NULL`, que siempre es NULL ahora)
 
 ### ✅ Seeders creados
 En `database/seeders/`:
@@ -84,7 +96,7 @@ En `app/Http/Requests/`:
 
 ### ✅ Policies creadas
 En `app/Policies/`:
-- `TaskPolicy` — update + delete (owner check)
+- `TaskPolicy` — update + delete (owner check: `$user->id === $task->user_id`)
 - `IdeaPolicy` — update + delete (owner check)
 - `ProjectPolicy` — view + update + delete (owner check)
 - `BoxPolicy` — view + update + delete (owner check)
@@ -113,6 +125,37 @@ admin.subscriptions.* → AdminSubscriptionController@index
 ---
 
 ## Frontend — Detalle
+
+### ✅ Design System Flowly
+Aplicado en `resources/css/app.css` y `resources/views/app.blade.php`:
+
+**Colores (shadcn tokens → Flowly):**
+- `--background`: `#E9EDC9` (bgBase)
+- `--card`: `#DAD7CD` (bgElevated)
+- `--primary`: `#3A5A40` (verde Flowly)
+- `--secondary` / `--muted`: `#CAD2C5` (bgMuted)
+- `--foreground`: `#333333` (textMain)
+- `--muted-foreground`: `rgba(51,51,51,0.7)` (textMuted)
+- `--ring`: `#A1B285` (primarySoft — focus rings)
+- `--border` / `--input`: `rgba(51,51,51,0.12)` (borderSubtle)
+- `--accent`: `#DAD7CD` (bgElevated — hover en menús)
+- Charts: paleta Flowly `#3A5A40` → `#884A37`
+
+**Radius:** lg=16px, md=10px, sm=6px
+
+**Fuentes cargadas desde fonts.bunny.net:**
+- Nunito 400,600,700,800 → h1, h2, h3 (via `@layer base`)
+- Open Sans 400,600 → body (font-sans por defecto)
+- Inter 400,500,600 → button, label (via `@layer base`)
+
+**Dark mode:** fondos verde-oscuro (`#1a1e1b`), primary aclarado a `#6b9b73`
+
+### ✅ Logo
+Logo real (`resources/js/assets/logo.png`) aplicado en:
+- `app-logo.tsx` — header del sidebar, texto "Flowly"
+- `app-header.tsx` — drawer mobile
+- `auth-card-layout.tsx`, `auth-simple-layout.tsx`, `auth-split-layout.tsx`
+- `welcome.tsx` — navbar y footer
 
 ### ✅ Componentes UI disponibles (shadcn/ui)
 En `resources/js/components/ui/`:
@@ -168,11 +211,8 @@ toggle, toggle-group, tooltip
 - `pages/resources/create.tsx` — formulario con tipo, nombre, URL, descripción
 - `pages/resources/edit.tsx` — ídem pre-rellenado, vuelve a la caja padre
 
-### ⚠️ Pendiente
-- `pages/welcome.tsx` — landing page (existe pero sin contenido Flowly)
-- ~~`Dockerfile` + `docker-compose.yml`~~ — ✅ Completado
-- `docs/manual-usuario.md` — manual de usuario final (requisito intermodular)
-- `docs/decisiones-tecnicas.md` — justificación de decisiones de arquitectura (requisito intermodular)
+### ✅ Landing page (`pages/welcome.tsx`)
+Hero con badge + headline + CTA, sección features (6 tarjetas Free/Premium), pricing (3 planes: Free/9.99€/99.99€), footer.
 
 ### ✅ Estructura de tipos TypeScript (`resources/js/types/`)
 ```
@@ -204,15 +244,28 @@ Comparte en todas las páginas vía `usePage().props.auth`:
 
 ---
 
+## Base de datos
+
+### ✅ TiDB Cloud Serverless (MySQL)
+Migrado de SQLite en sesión 1.
+- Host: `gateway01.eu-central-1.prod.aws.tidbcloud.com` port `4000`
+- SSL: ISRG Root X1 CA en `storage/app/tidb-ca.pem` (en .gitignore)
+- `.env`: `DB_CONNECTION=mysql`, `MYSQL_ATTR_SSL_CA=...`
+- `config/database.php` ya tenía soporte SSL via `array_filter([PDO::MYSQL_ATTR_SSL_CA => env(...)])`
+
+---
+
 ## Tests — Estado actual
 ✅ **143/143 tests pasando** (551 assertions)
 
-Fixes aplicados para llegar a 143/143:
+Historial de fixes:
 - `app.blade.php` — quitado el componente de página de `@vite()` (solo queda `app.tsx`)
 - `app/Http/Controllers/Controller.php` — añadido trait `AuthorizesRequests`
 - `app/Models/User.php` — añadido trait `TwoFactorAuthenticatable` (Fortify)
 - `database/factories/ProjectFactory.php` — `color` siempre genera valor (era `optional()`)
 - Creados 16 archivos TSX placeholder en `resources/js/pages/`
+- `routes/web.php` — ruta home usa `inertia('welcome')` en lugar de redirect a login
+- `TaskControllerTest` + `IdeaControllerTest` — `assertSoftDeleted` → `assertDatabaseMissing`
 
 ---
 
@@ -224,10 +277,10 @@ Fixes aplicados para llegar a 143/143:
 | Repositorio Git con commits frecuentes | ✅ | Activo en GitHub |
 | Documentación inicial en README | ✅ | README.md muy completo |
 | CRUD completo sobre 2+ entidades | ✅ | Task, Idea, Project, Box, Resource |
-| Acceso a BD con ORM | ✅ | Eloquent + SQLite |
+| Acceso a BD con ORM | ✅ | Eloquent + TiDB Cloud (MySQL) |
 | Validación de datos en servidor | ✅ | Form Requests con messages() en español |
 | Autenticación | ✅ | Laravel Fortify (registro, login, 2FA) |
-| Interfaz usable y responsive | ✅ | React 18 + shadcn/ui + Tailwind |
+| Interfaz usable y responsive | ✅ | React 18 + shadcn/ui + Tailwind + Flowly Design System |
 | Formularios con validación en cliente | ✅ | useForm Inertia + errores en UI |
 | Navegación clara (menús, rutas) | ✅ | Sidebar por rol (admin/premium/free) |
 | Registro/Login de usuarios | ✅ | Fortify |
@@ -235,21 +288,16 @@ Fixes aplicados para llegar a 143/143:
 | Tests básicos (2 unit + 1 funcional) | ✅ | 143 tests Feature, 551 assertions |
 | Código organizado | ✅ | Estructura estándar Laravel + TypeScript organizado |
 | **Despliegue (Docker o servidor remoto)** | **✅** | Dockerfile multi-stage + docker-compose.yml + entrypoint |
-| **Base de datos separada de la lógica** | **✅** | Volumen Docker `flowly_database` separado del contenedor de la app |
-| **Uso de ramas en Git** | **✅ JUSTIFICADO** | Proyecto unipersonal: ramas paralelas no aplican. Ver `docs/decisiones-tecnicas.md` §8 |
-| **Landing page funcional** | **✅ Completado** | `welcome.tsx` con hero, features, pricing (Free/Premium mensual/anual) y footer |
-| **Manual de usuario** | **✅ Completado** | `docs/manual-usuario.md` — 10 secciones con todas las funcionalidades |
-| **Justificación técnica de decisiones** | **✅ Completado** | `docs/decisiones-tecnicas.md` — 9 secciones (stack, BD, auth, pagos, Docker, ramas, etc.) |
-| **Código comentado** | **✅ Completado** | Comentarios añadidos a lógica compleja (orderByRaw, diffInDays, process, sidebarOpen, etc.) |
+| **Base de datos separada de la lógica** | **✅** | TiDB Cloud Serverless (externa) + volumen Docker separado |
+| **Uso de ramas en Git** | **✅ JUSTIFICADO** | Proyecto unipersonal: ver `docs/decisiones-tecnicas.md` §8 |
+| **Landing page funcional** | **✅** | `welcome.tsx` con hero, features, pricing — Design System aplicado |
+| **Manual de usuario** | **✅** | `docs/manual-usuario.md` — 10 secciones |
+| **Justificación técnica de decisiones** | **✅** | `docs/decisiones-tecnicas.md` — 9 secciones |
+| **Código comentado** | **✅** | Comentarios en lógica compleja |
 
-### Próximos pasos por prioridad
+### Todo completado — sin pendientes críticos
 
-1. ~~**[CRÍTICO] Dockerfile + docker-compose.yml**~~ — ✅ Completado
-2. ~~**[CRÍTICO] Ramas Git**~~ — ✅ Justificado (proyecto unipersonal, ver `docs/decisiones-tecnicas.md` §8)
-3. ~~**[ALTO] Landing page**~~ — ✅ Completado (`resources/js/pages/welcome.tsx`)
-4. ~~**[ALTO] Manual de usuario**~~ — ✅ Completado (`docs/manual-usuario.md`)
-5. ~~**[ALTO] Justificación técnica**~~ — ✅ Completado (`docs/decisiones-tecnicas.md`)
-6. ~~**[MEDIO] Comentarios en código**~~ — ✅ Completado
+---
 
 ## Notas de implementación
 - `ResourceController` usa rutas anidadas bajo `/boxes/{box}/resources` para create/store
@@ -258,3 +306,6 @@ Fixes aplicados para llegar a 143/143:
 - `tasks.index` ordena: primero pendientes, luego completadas; dentro de cada grupo por prioridad DESC
 - Campos en BD: Task y Idea usan `name` (NO `title`) — los tipos TypeScript están actualizados
 - Error de pago en checkout viene como error de página (`usePage().props.errors.payment`), no como error de campo de formulario
+- Task e Idea: `deleted_at` existe en la BD pero Eloquent ya NO la gestiona (SoftDeletes eliminado)
+- `canAddTask()` cuenta tareas con `status='pending'`, no usa `deleted_at`
+- Delete en frontend: `router.delete(url)` de `@inertiajs/react` — HTTP DELETE real, no form spoofing

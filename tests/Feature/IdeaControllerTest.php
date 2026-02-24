@@ -131,7 +131,7 @@ it('user can delete own idea', function () {
         ->delete(route('ideas.destroy', $idea))
         ->assertRedirect(route('ideas.index'));
 
-    $this->assertSoftDeleted('ideas', ['id' => $idea->id]);
+    $this->assertDatabaseMissing('ideas', ['id' => $idea->id]);
 });
 
 it('user cannot delete another user idea', function () {

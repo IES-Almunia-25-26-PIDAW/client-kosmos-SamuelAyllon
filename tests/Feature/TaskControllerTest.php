@@ -145,7 +145,7 @@ it('user can delete own task', function () {
         ->delete(route('tasks.destroy', $task))
         ->assertRedirect(route('tasks.index'));
 
-    $this->assertSoftDeleted('tasks', ['id' => $task->id]);
+    $this->assertDatabaseMissing('tasks', ['id' => $task->id]);
 });
 
 it('user cannot delete another user task', function () {
