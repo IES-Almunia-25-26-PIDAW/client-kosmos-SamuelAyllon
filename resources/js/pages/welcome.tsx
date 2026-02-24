@@ -12,10 +12,10 @@ import {
     BookMarked,
     Mic,
     Bot,
-    Zap,
     Shield,
     Star,
 } from 'lucide-react';
+import logo from '@/assets/logo.png';
 
 export default function Welcome({ canRegister = true }: { canRegister?: boolean }) {
     const { auth } = usePage().props as { auth: { user: unknown } };
@@ -30,9 +30,7 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
                 <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-sm">
                     <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
                         <div className="flex items-center gap-2">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-                                <Zap className="h-4 w-4 text-primary-foreground" />
-                            </div>
+                            <img src={logo} alt="Flowly" className="h-8 w-auto object-contain" />
                             <span className="text-xl font-bold tracking-tight">Flowly</span>
                         </div>
 
@@ -265,9 +263,7 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
                 {/* ── Footer ── */}
                 <footer className="mx-auto max-w-6xl px-6 py-10 text-center text-sm text-muted-foreground">
                     <div className="mb-4 flex items-center justify-center gap-2">
-                        <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary">
-                            <Zap className="h-3 w-3 text-primary-foreground" />
-                        </div>
+                        <img src={logo} alt="Flowly" className="h-6 w-auto object-contain" />
                         <span className="font-semibold text-foreground">Flowly</span>
                     </div>
                     <p>© {new Date().getFullYear()} Flowly · Proyecto Intermodular 2º DAM</p>
