@@ -1,5 +1,5 @@
 # Flowly — Estado Real del Proyecto
-> Última actualización: 2026-02-23. Actualizar este archivo al completar cada sección.
+> Última actualización: 2026-02-24. Actualizar este archivo al completar cada sección.
 
 ---
 
@@ -24,6 +24,10 @@
 | Frontend — Features usuario | ✅ Todas las vistas de usuario implementadas con UI real |
 | Frontend — Features premium | ✅ Todas las vistas premium implementadas con UI real |
 | Frontend — Landing | ⚠️ welcome.tsx existe pero sin contenido Flowly |
+| Despliegue (Docker) | ✅ Dockerfile + docker-compose.yml + .dockerignore + docker-entrypoint.sh |
+| Manual de usuario | ❌ Pendiente — documento para el usuario final |
+| Justificación técnica | ❌ Pendiente — decisiones de arquitectura documentadas |
+| Ramas Git | ❌ Solo rama main — usar feature branches |
 
 ---
 
@@ -166,6 +170,9 @@ toggle, toggle-group, tooltip
 
 ### ⚠️ Pendiente
 - `pages/welcome.tsx` — landing page (existe pero sin contenido Flowly)
+- ~~`Dockerfile` + `docker-compose.yml`~~ — ✅ Completado
+- `docs/manual-usuario.md` — manual de usuario final (requisito intermodular)
+- `docs/decisiones-tecnicas.md` — justificación de decisiones de arquitectura (requisito intermodular)
 
 ### ✅ Estructura de tipos TypeScript (`resources/js/types/`)
 ```
@@ -209,8 +216,40 @@ Fixes aplicados para llegar a 143/143:
 
 ---
 
-## Próximo paso sugerido
-1. Landing page `welcome.tsx` con contenido Flowly real (pricing, features, CTA)
+## Requisitos del proyecto intermodular — Estado
+
+| Requisito | Estado | Notas |
+|-----------|--------|-------|
+| Idea definida y realista (descripción, roles, MVP) | ✅ | Flowly: productividad personal freemium |
+| Repositorio Git con commits frecuentes | ✅ | Activo en GitHub |
+| Documentación inicial en README | ✅ | README.md muy completo |
+| CRUD completo sobre 2+ entidades | ✅ | Task, Idea, Project, Box, Resource |
+| Acceso a BD con ORM | ✅ | Eloquent + SQLite |
+| Validación de datos en servidor | ✅ | Form Requests con messages() en español |
+| Autenticación | ✅ | Laravel Fortify (registro, login, 2FA) |
+| Interfaz usable y responsive | ✅ | React 18 + shadcn/ui + Tailwind |
+| Formularios con validación en cliente | ✅ | useForm Inertia + errores en UI |
+| Navegación clara (menús, rutas) | ✅ | Sidebar por rol (admin/premium/free) |
+| Registro/Login de usuarios | ✅ | Fortify |
+| 2+ roles con control de permisos | ✅ | admin, premium_user, free_user + Spatie + Policies |
+| Tests básicos (2 unit + 1 funcional) | ✅ | 143 tests Feature, 551 assertions |
+| Código organizado | ✅ | Estructura estándar Laravel + TypeScript organizado |
+| **Despliegue (Docker o servidor remoto)** | **✅** | Dockerfile multi-stage + docker-compose.yml + entrypoint |
+| **Base de datos separada de la lógica** | **✅** | Volumen Docker `flowly_database` separado del contenedor de la app |
+| **Uso de ramas en Git** | **❌ PENDIENTE** | Solo rama `main`; usar feature branches |
+| **Landing page funcional** | **⚠️ PENDIENTE** | welcome.tsx existe pero sin contenido Flowly |
+| **Manual de usuario** | **❌ PENDIENTE** | No existe ningún documento |
+| **Justificación técnica de decisiones** | **❌ PENDIENTE** | No hay documento explicando decisiones de arquitectura |
+| **Código comentado** | **⚠️ POR VERIFICAR** | Revisar que el código complejo tenga comentarios |
+
+### Próximos pasos por prioridad
+
+1. ~~**[CRÍTICO] Dockerfile + docker-compose.yml**~~ — ✅ Completado
+2. **[CRÍTICO] Ramas Git** — crear feature branches para los próximos desarrollos
+3. **[ALTO] Landing page** — implementar `welcome.tsx` con contenido Flowly real (pricing, features, CTA)
+4. **[ALTO] Manual de usuario** — documento PDF/Markdown explicando cómo usar la app
+5. **[ALTO] Justificación técnica** — documento con decisiones de arquitectura y tecnologías elegidas
+6. **[MEDIO] Comentarios en código** — añadir comentarios a lógica compleja (User::canAddTask, Payment::process, etc.)
 
 ## Notas de implementación
 - `ResourceController` usa rutas anidadas bajo `/boxes/{box}/resources` para create/store

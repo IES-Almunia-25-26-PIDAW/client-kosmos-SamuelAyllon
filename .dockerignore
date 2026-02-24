@@ -1,0 +1,37 @@
+# Dependencias (se instalan durante el build)
+node_modules/
+vendor/
+
+# Entorno local (nunca incluir secretos en la imagen)
+.env
+
+# Git y herramientas de desarrollo
+.git/
+.github/
+.claude/
+
+# Storage generado en runtime (se monta como volumen)
+storage/logs/
+storage/framework/cache/data/
+storage/framework/sessions/
+storage/framework/views/
+bootstrap/cache/
+
+# Build del frontend (se regenera en el stage 1)
+public/build/
+public/hot
+
+# Base de datos local (se crea en el volumen Docker)
+*.sqlite
+database/database.sqlite
+
+# Tests (no necesarios en producción)
+tests/
+
+# Documentación y configuración de IDE
+*.md
+.editorconfig
+.prettierrc
+.prettierignore
+eslint.config.js
+pint.json

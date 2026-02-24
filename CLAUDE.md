@@ -9,8 +9,13 @@ Auth: Laravel Fortify | Roles: Spatie Permission 6
 ## Estado actual del proyecto
 > Ver `.claude/PROJECT_STATE.md` para detalle de qué está hecho y qué falta.
 
-Lo que está creado: **migraciones + modelos** (10 entidades).
-Lo que falta: controladores de features, rutas, Form Requests, seeders de roles, páginas React.
+Lo que está creado: **todo el backend + frontend de features** (migraciones, modelos, seeders, controladores, Form Requests, Policies, rutas, tests 143/143, todas las páginas React).
+Lo que falta (pendiente para entrega):
+- Landing page (`welcome.tsx`) — existe pero sin contenido Flowly
+- ~~Dockerfile / configuración de despliegue~~ — ✅ Completado (Dockerfile + docker-compose.yml)
+- Manual de usuario — requisito del proyecto intermodular
+- Justificación técnica de decisiones — requisito del proyecto intermodular
+- Ramas Git (feature branches) — usar `git checkout -b feature/nombre` para nuevos desarrollos
 
 ## Convenciones — Backend (Laravel)
 
