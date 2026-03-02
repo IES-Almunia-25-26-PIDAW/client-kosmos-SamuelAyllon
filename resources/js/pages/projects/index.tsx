@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Pencil, Trash2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -23,6 +24,17 @@ const statusLabels: Record<string, string> = {
 export default function ProjectsIndex({ projects }: { projects: Project[] }) {
     const { props } = usePage<{ flash?: { success?: string } }>();
     const flash = props.flash;
+
+    const [statusFilter, setStatusFilter] = useState<'all' | 'created' | 'active' | 'completed'>('all');
+
+    const filtered = projects.filter(p => statusFilter === 'all' || p.status === statusFilter);
+
+    const statuses: Array<{ value: 'all' | 'created' | 'active' | 'completed'; label: string }> = [
+        { value: 'all', label: 'Todos' },
+        { value: 'created', label: 'Creado' },
+        { value: 'active', label: 'Activo' },
+        { value: 'completed', label: 'Completado' },
+    ];
 
     function handleDelete(project: Project) {
         if (confirm(`¿Eliminar "${project.name}"? Se eliminarán también sus tareas.`)) {
@@ -51,6 +63,21 @@ export default function ProjectsIndex({ projects }: { projects: Project[] }) {
                     </Link>
                 </div>
 
+                {/* Filtros por estado */}
+                <div className="flex flex-wrap gap-1">
+                    {statuses.map(({ value, label }) => (
+                        <Button
+                            key={value}
+                            size="sm"
+                            variant={statusFilter === value ? 'default' : 'outline'}
+                            className="h-7 px-3 text-xs"
+                            onClick={() => setStatusFilter(value)}
+                        >
+                            {label}
+                        </Button>
+                    ))}
+                </div>
+
                 {/* Flash */}
                 {flash?.success && (
                     <div className="rounded-lg bg-green-100 px-4 py-3 text-sm text-green-700 dark:bg-green-900/30 dark:text-green-400">
@@ -70,15 +97,24 @@ export default function ProjectsIndex({ projects }: { projects: Project[] }) {
                     </Card>
                 )}
 
+                {projects.length > 0 && filtered.length === 0 && (
+                    <Card>
+                        <CardContent className="flex items-center justify-center py-12">
+                            <p className="text-muted-foreground">
+                                No hay proyectos con estado "{statusLabels[statusFilter]}".
+                            </p>
+                        </CardContent>
+                    </Card>
+                )}
+
                 {/* Cuadrícula de proyectos */}
-                {projects.length > 0 && (
+                {filtered.length > 0 && (
                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                        {projects.map(project => (
+                        {filtered.map(project => (
                             <Card key={project.id} className={`flex flex-col ${project.status === 'completed' ? 'opacity-60' : ''}`}>
                                 <CardHeader className="pb-2">
                                     <div className="flex items-start justify-between gap-2">
                                         <div className="flex items-center gap-2 min-w-0">
-                                            {/* Checkbox de completar */}
                                             <Checkbox
                                                 className="shrink-0"
                                                 checked={project.status === 'completed'}

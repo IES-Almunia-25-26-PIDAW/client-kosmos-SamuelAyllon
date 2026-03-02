@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Pencil, Trash2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -38,7 +39,6 @@ function IdeaCard({ idea }: { idea: Idea }) {
     return (
         <div className={`flex items-start gap-3 rounded-lg border p-4 ${idea.status === 'resolved' ? 'opacity-60' : ''}`}>
 
-            {/* Checkbox */}
             <Checkbox
                 className="mt-0.5 shrink-0"
                 checked={idea.status === 'resolved'}
@@ -46,7 +46,6 @@ function IdeaCard({ idea }: { idea: Idea }) {
                 title={idea.status === 'active' ? 'Marcar como resuelta' : 'Reactivar idea'}
             />
 
-            {/* Contenido */}
             <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
                     <p className={`font-medium ${idea.status === 'resolved' ? 'line-through text-muted-foreground' : ''}`}>
@@ -64,7 +63,6 @@ function IdeaCard({ idea }: { idea: Idea }) {
                 </p>
             </div>
 
-            {/* Acciones */}
             <div className="flex shrink-0 gap-1">
                 <Link href={`/ideas/${idea.id}/edit`}>
                     <Button size="sm" variant="ghost" title="Editar">
@@ -83,8 +81,18 @@ export default function IdeasIndex({ ideas }: IdeasProps) {
     const { props } = usePage<{ flash?: { success?: string } }>();
     const flash = props.flash;
 
-    const active = ideas.filter(i => i.status === 'active');
-    const resolved = ideas.filter(i => i.status === 'resolved');
+    const [priorityFilter, setPriorityFilter] = useState<'all' | 'high' | 'medium' | 'low'>('all');
+
+    const filtered = ideas.filter(i => priorityFilter === 'all' || i.priority === priorityFilter);
+    const active = filtered.filter(i => i.status === 'active');
+    const resolved = filtered.filter(i => i.status === 'resolved');
+
+    const priorities: Array<{ value: 'all' | 'high' | 'medium' | 'low'; label: string }> = [
+        { value: 'all', label: 'Todas' },
+        { value: 'high', label: 'Alta' },
+        { value: 'medium', label: 'Media' },
+        { value: 'low', label: 'Baja' },
+    ];
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -105,6 +113,21 @@ export default function IdeasIndex({ ideas }: IdeasProps) {
                     </Link>
                 </div>
 
+                {/* Filtros */}
+                <div className="flex flex-wrap gap-1">
+                    {priorities.map(({ value, label }) => (
+                        <Button
+                            key={value}
+                            size="sm"
+                            variant={priorityFilter === value ? 'default' : 'outline'}
+                            className="h-7 px-3 text-xs"
+                            onClick={() => setPriorityFilter(value)}
+                        >
+                            {label}
+                        </Button>
+                    ))}
+                </div>
+
                 {/* Flash */}
                 {flash?.success && (
                     <div className="rounded-lg bg-green-100 px-4 py-3 text-sm text-green-700 dark:bg-green-900/30 dark:text-green-400">
@@ -120,6 +143,14 @@ export default function IdeasIndex({ ideas }: IdeasProps) {
                             <Link href="/ideas/create">
                                 <Button>Crear primera idea</Button>
                             </Link>
+                        </CardContent>
+                    </Card>
+                )}
+
+                {ideas.length > 0 && filtered.length === 0 && (
+                    <Card>
+                        <CardContent className="flex items-center justify-center py-12">
+                            <p className="text-muted-foreground">No hay ideas con prioridad {priorityLabels[priorityFilter]}.</p>
                         </CardContent>
                     </Card>
                 )}
