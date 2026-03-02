@@ -36,6 +36,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 // ==================== RUTAS PREMIUM (premium_user + admin) ====================
 Route::middleware(['auth', 'verified', 'role:premium_user|admin'])->group(function () {
     Route::resource('projects', ProjectController::class);
+    Route::patch('projects/{project}/complete', [ProjectController::class, 'complete'])->name('projects.complete');
 
     Route::resource('boxes', BoxController::class);
 

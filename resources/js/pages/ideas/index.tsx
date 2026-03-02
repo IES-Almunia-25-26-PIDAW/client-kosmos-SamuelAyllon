@@ -1,6 +1,8 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Pencil, Trash2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem, IdeasProps, Idea } from '@/types';
 
@@ -19,6 +21,14 @@ const priorityLabels: Record<string, string> = {
 };
 
 function IdeaCard({ idea }: { idea: Idea }) {
+    function handleToggle() {
+        if (idea.status === 'active') {
+            router.patch(`/ideas/${idea.id}/resolve`);
+        } else {
+            router.patch(`/ideas/${idea.id}/reactivate`);
+        }
+    }
+
     function handleDelete() {
         if (confirm(`¿Eliminar "${idea.name}"?`)) {
             router.delete(`/ideas/${idea.id}`);
@@ -26,7 +36,15 @@ function IdeaCard({ idea }: { idea: Idea }) {
     }
 
     return (
-        <div className={`flex flex-wrap items-start justify-between gap-3 rounded-lg border p-4 ${idea.status === 'resolved' ? 'opacity-60' : ''}`}>
+        <div className={`flex items-start gap-3 rounded-lg border p-4 ${idea.status === 'resolved' ? 'opacity-60' : ''}`}>
+
+            {/* Checkbox */}
+            <Checkbox
+                className="mt-0.5 shrink-0"
+                checked={idea.status === 'resolved'}
+                onCheckedChange={handleToggle}
+                title={idea.status === 'active' ? 'Marcar como resuelta' : 'Reactivar idea'}
+            />
 
             {/* Contenido */}
             <div className="min-w-0 flex-1">
@@ -47,21 +65,14 @@ function IdeaCard({ idea }: { idea: Idea }) {
             </div>
 
             {/* Acciones */}
-            <div className="flex shrink-0 gap-2">
-                {idea.status === 'active' ? (
-                    <Button size="sm" variant="outline" onClick={() => router.patch(`/ideas/${idea.id}/resolve`)}>
-                        Resolver
-                    </Button>
-                ) : (
-                    <Button size="sm" variant="outline" onClick={() => router.patch(`/ideas/${idea.id}/reactivate`)}>
-                        Reactivar
-                    </Button>
-                )}
+            <div className="flex shrink-0 gap-1">
                 <Link href={`/ideas/${idea.id}/edit`}>
-                    <Button size="sm" variant="outline">Editar</Button>
+                    <Button size="sm" variant="ghost" title="Editar">
+                        <Pencil className="h-4 w-4" />
+                    </Button>
                 </Link>
-                <Button size="sm" variant="destructive" onClick={handleDelete}>
-                    Eliminar
+                <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive" title="Eliminar" onClick={handleDelete}>
+                    <Trash2 className="h-4 w-4" />
                 </Button>
             </div>
         </div>

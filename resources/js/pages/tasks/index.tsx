@@ -1,6 +1,8 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Pencil, Trash2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem, TasksProps, Task } from '@/types';
 
@@ -21,6 +23,14 @@ const priorityLabels: Record<string, string> = {
 function TaskCard({ task, canAddTask }: { task: Task; canAddTask: boolean }) {
     const isOverdue = task.due_date && task.status === 'pending' && new Date(task.due_date) < new Date();
 
+    function handleToggle() {
+        if (task.status === 'pending') {
+            router.patch(`/tasks/${task.id}/complete`);
+        } else if (canAddTask) {
+            router.patch(`/tasks/${task.id}/reopen`);
+        }
+    }
+
     function handleDelete() {
         if (confirm(`¿Eliminar "${task.name}"?`)) {
             router.delete(`/tasks/${task.id}`);
@@ -28,7 +38,16 @@ function TaskCard({ task, canAddTask }: { task: Task; canAddTask: boolean }) {
     }
 
     return (
-        <div className={`flex flex-wrap items-start justify-between gap-3 rounded-lg border p-4 ${task.status === 'completed' ? 'opacity-60' : ''}`}>
+        <div className={`flex items-start gap-3 rounded-lg border p-4 ${task.status === 'completed' ? 'opacity-60' : ''}`}>
+
+            {/* Checkbox */}
+            <Checkbox
+                className="mt-0.5 shrink-0"
+                checked={task.status === 'completed'}
+                disabled={task.status === 'completed' && !canAddTask}
+                onCheckedChange={handleToggle}
+                title={task.status === 'pending' ? 'Marcar como completada' : 'Reabrir tarea'}
+            />
 
             {/* Contenido */}
             <div className="min-w-0 flex-1">
@@ -57,21 +76,14 @@ function TaskCard({ task, canAddTask }: { task: Task; canAddTask: boolean }) {
             </div>
 
             {/* Acciones */}
-            <div className="flex shrink-0 gap-2">
-                {task.status === 'pending' ? (
-                    <Button size="sm" variant="outline" onClick={() => router.patch(`/tasks/${task.id}/complete`)}>
-                        Completar
-                    </Button>
-                ) : (
-                    <Button size="sm" variant="outline" disabled={!canAddTask} onClick={() => router.patch(`/tasks/${task.id}/reopen`)}>
-                        Reabrir
-                    </Button>
-                )}
+            <div className="flex shrink-0 gap-1">
                 <Link href={`/tasks/${task.id}/edit`}>
-                    <Button size="sm" variant="outline">Editar</Button>
+                    <Button size="sm" variant="ghost" title="Editar">
+                        <Pencil className="h-4 w-4" />
+                    </Button>
                 </Link>
-                <Button size="sm" variant="destructive" onClick={handleDelete}>
-                    Eliminar
+                <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive" title="Eliminar" onClick={handleDelete}>
+                    <Trash2 className="h-4 w-4" />
                 </Button>
             </div>
         </div>

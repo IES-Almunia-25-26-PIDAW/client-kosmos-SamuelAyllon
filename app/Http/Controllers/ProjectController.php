@@ -78,6 +78,19 @@ class ProjectController extends Controller
         return redirect()->route('projects.show', $project)->with('success', 'Proyecto actualizado correctamente.');
     }
 
+    public function complete(Project $project): RedirectResponse
+    {
+        $this->authorize('update', $project);
+
+        // Alterna entre completado y activo
+        $project->update([
+            'status' => $project->status === 'completed' ? 'active' : 'completed',
+            'user_modified_at' => now(),
+        ]);
+
+        return redirect()->route('projects.index');
+    }
+
     public function destroy(Project $project): RedirectResponse
     {
         $this->authorize('delete', $project);

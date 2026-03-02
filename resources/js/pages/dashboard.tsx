@@ -96,7 +96,7 @@ export default function Dashboard({ pendingTasks, activeIdeas, activeProjects, s
                                             <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${priorityColors[task.priority]}`}>
                                                 {priorityLabels[task.priority]}
                                             </span>
-                                            <span className="truncate text-sm">{task.title}</span>
+                                            <span className="truncate text-sm">{task.name}</span>
                                         </div>
                                         <Button
                                             size="sm"
@@ -126,7 +126,7 @@ export default function Dashboard({ pendingTasks, activeIdeas, activeProjects, s
                             ) : (
                                 activeIdeas.slice(0, 5).map(idea => (
                                     <div key={idea.id} className="rounded-lg border p-3">
-                                        <p className="text-sm font-medium">{idea.title}</p>
+                                        <p className="text-sm font-medium">{idea.name}</p>
                                         {idea.description && (
                                             <p className="mt-1 truncate text-xs text-muted-foreground">{idea.description}</p>
                                         )}
