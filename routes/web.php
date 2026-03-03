@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminPaymentController;
 use App\Http\Controllers\Admin\AdminSubscriptionController;
 use App\Http\Controllers\Admin\AdminUserController;
+use App\Http\Controllers\AiChatController;
 use App\Http\Controllers\BoxController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\IdeaController;
@@ -52,6 +53,10 @@ Route::middleware(['auth', 'verified', 'role:premium_user'])->group(function () 
     Route::delete('resources/{resource}', [ResourceController::class, 'destroy'])->name('resources.destroy');
 
     Route::post('voice/transcribe', [VoiceRecordingController::class, 'transcribe'])->name('voice.transcribe');
+
+    Route::get('ai-chats', [AiChatController::class, 'index'])->name('ai-chats.index');
+    Route::post('ai-chats', [AiChatController::class, 'store'])->name('ai-chats.store');
+    Route::delete('ai-chats', [AiChatController::class, 'destroy'])->name('ai-chats.destroy');
 });
 
 // ==================== RUTAS ADMIN ====================

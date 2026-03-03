@@ -1,5 +1,5 @@
 # Flowly — Estado Real del Proyecto
-> Última actualización: 2026-03-03 (sesión 5). Actualizar este archivo al completar cada sección.
+> Última actualización: 2026-03-03 (sesión 6). Actualizar este archivo al completar cada sección.
 
 ---
 
@@ -13,24 +13,24 @@
 | Rutas | ✅ Todas creadas (tasks, ideas, projects, boxes, resources, subscription, checkout, admin) |
 | Controladores features | ✅ TaskController, IdeaController, ProjectController, BoxController, ResourceController, SubscriptionController, CheckoutController |
 | Controladores admin | ✅ AdminDashboardController, AdminUserController, AdminPaymentController, AdminSubscriptionController |
-| Form Requests | ✅ StoreTask/Update, StoreIdea/Update, StoreProject/Update, StoreBox/Update, StoreResource/Update, CheckoutRequest, StoreVoiceRecording |
+| Form Requests | ✅ StoreTask/Update, StoreIdea/Update, StoreProject/Update, StoreBox/Update, StoreResource/Update, CheckoutRequest, StoreVoiceRecording, StoreAiChatRequest |
 | Policies | ✅ TaskPolicy, IdeaPolicy, ProjectPolicy, BoxPolicy, ResourcePolicy |
-| Tests | ✅ 160/160 pasando (596 assertions) |
+| Tests | ✅ 180/180 pasando (692 assertions) |
 | Frontend — Auth | ✅ Páginas login, register, 2FA, forgot-password (Fortify) |
 | Frontend — Settings | ✅ Páginas profile, password, appearance, two-factor |
 | Frontend — Dashboard | ✅ Implementado (free: tareas+ideas, premium: +proyectos, admin: redirige) |
 | Frontend — Admin | ✅ Las 5 vistas admin implementadas con UI real |
 | Frontend — Types | ✅ Reorganizado en subcarpetas models/ shared/ pages/ admin/ |
 | Frontend — Features usuario | ✅ Todas las vistas de usuario implementadas con UI real + voz (Whisper) |
-| Frontend — Features premium | ✅ Todas las vistas premium implementadas con UI real |
+| Frontend — Features premium | ✅ Todas las vistas premium implementadas con UI real + Asistente IA |
 | Frontend — Landing | ✅ welcome.tsx con hero, features, pricing y footer |
 | Frontend — Design System | ✅ Flowly Design System aplicado (colores, fuentes, radius, shadows) |
 | Frontend — Tutorial | ✅ Chatbot tutorial interactivo para nuevos usuarios |
 | Frontend — Logo | ✅ Logo real en todas las vistas (navbar, auth layouts, sidebar) |
 | Base de datos | ✅ Migrada de SQLite a TiDB Cloud Serverless (MySQL) |
 | Despliegue (Docker) | ✅ Dockerfile + docker-compose.yml + .dockerignore + docker-entrypoint.sh |
-| Manual de usuario | ✅ docs/manual-usuario.md — 10 secciones |
-| Justificación técnica | ✅ docs/decisiones-tecnicas.md — 9 secciones |
+| Manual de usuario | ✅ docs/manual-usuario.md — 13 secciones |
+| Justificación técnica | ✅ docs/decisiones-tecnicas.md — 12 secciones |
 | Ramas Git | ✅ Justificado en docs/decisiones-tecnicas.md §8 (proyecto unipersonal) |
 | Código comentado | ✅ Comentarios en lógica compleja (orderByRaw, diffInDays, canAddTask, etc.) |
 
@@ -81,6 +81,7 @@ En `app/Http/Controllers/`:
 - `CheckoutController` — index + store (pago simulado via Payment::process())
 - `VoiceRecordingController` — transcribe (recibe audio, llama OpenAI Whisper API, devuelve JSON con transcripción)
 - `TutorialController` — complete (marca tutorial como completado para el usuario)
+- `AiChatController` — index (vista chat) + store (enviar mensaje a IA) + destroy (limpiar historial)
 
 En `app/Http/Controllers/Admin/`:
 - `AdminDashboardController` — stats globales + recent payments/users
@@ -97,6 +98,7 @@ En `app/Http/Requests/`:
 - `StoreResourceRequest` / `UpdateResourceRequest`
 - `CheckoutRequest`
 - `StoreVoiceRecordingRequest`
+- `StoreAiChatRequest`
 
 ### ✅ Policies creadas
 En `app/Policies/`:
@@ -119,6 +121,7 @@ projects.*       → ProjectController (CRUD)
 boxes.*          → BoxController (CRUD)
 resources.*      → ResourceController (create/store nested en box; edit/update/destroy standalone)
 voice.transcribe → VoiceRecordingController@transcribe (POST, JSON response)
+ai-chats.*       → AiChatController (index, store, destroy)
 
 // Admin (/admin/*)
 admin.dashboard  → AdminDashboardController@index
@@ -215,6 +218,7 @@ toggle, toggle-group, tooltip
 - `pages/boxes/edit.tsx` — ídem pre-rellenado
 - `pages/resources/create.tsx` — formulario con tipo, nombre, URL, descripción
 - `pages/resources/edit.tsx` — ídem pre-rellenado, vuelve a la caja padre
+- `pages/ai-chats/index.tsx` — chat con asistente IA, historial, sugerencias, limpiar historial
 
 ### ✅ Landing page (`pages/welcome.tsx`)
 Hero con badge + headline + CTA, sección features (6 tarjetas Free/Premium), pricing (3 planes: Free/9.99€/99.99€), footer.
@@ -226,10 +230,10 @@ types/
 ├── navigation.ts    → NavItem, BreadcrumbItem
 ├── ui.ts
 ├── models/          → Task, Idea, Project, Box, Resource,
-│                      Subscription, Payment, RecentPayment, Role, VoiceRecording
+│                      Subscription, Payment, RecentPayment, Role, VoiceRecording, AiMessage
 ├── shared/          → PaginatedData<T>
 ├── pages/           → DashboardProps, TasksProps, IdeasProps,
-│                      SubscriptionProps (+ Plan), CheckoutProps (+ CheckoutPlan)
+│                      SubscriptionProps (+ Plan), CheckoutProps (+ CheckoutPlan), AiChatsProps
 ├── admin/           → AdminStats, AdminUser, AdminDashboardProps,
 │                      AdminUsersIndexProps, AdminUserShowProps,
 │                      AdminPaymentsProps, AdminSubscriptionsProps
@@ -261,7 +265,7 @@ Migrado de SQLite en sesión 1.
 ---
 
 ## Tests — Estado actual
-✅ **160/160 tests pasando** (596 assertions)
+✅ **180/180 tests pasando** (692 assertions)
 
 Historial de fixes:
 - `app.blade.php` — quitado el componente de página de `@vite()` (solo queda `app.tsx`)
@@ -292,14 +296,14 @@ Historial de fixes:
 | Navegación clara (menús, rutas) | ✅ | Sidebar por rol (admin/premium/free) |
 | Registro/Login de usuarios | ✅ | Fortify |
 | 2+ roles con control de permisos | ✅ | admin, premium_user, free_user + Spatie + Policies |
-| Tests básicos (2 unit + 1 funcional) | ✅ | 143 tests Feature, 551 assertions |
+| Tests básicos (2 unit + 1 funcional) | ✅ | 180 tests Feature, 692 assertions |
 | Código organizado | ✅ | Estructura estándar Laravel + TypeScript organizado |
 | **Despliegue (Docker o servidor remoto)** | **✅** | Dockerfile multi-stage + docker-compose.yml + entrypoint |
 | **Base de datos separada de la lógica** | **✅** | TiDB Cloud Serverless (externa) + volumen Docker separado |
 | **Uso de ramas en Git** | **✅ JUSTIFICADO** | Proyecto unipersonal: ver `docs/decisiones-tecnicas.md` §8 |
 | **Landing page funcional** | **✅** | `welcome.tsx` con hero, features, pricing — Design System aplicado |
-| **Manual de usuario** | **✅** | `docs/manual-usuario.md` — 10 secciones |
-| **Justificación técnica de decisiones** | **✅** | `docs/decisiones-tecnicas.md` — 9 secciones |
+| **Manual de usuario** | **✅** | `docs/manual-usuario.md` — 13 secciones |
+| **Justificación técnica de decisiones** | **✅** | `docs/decisiones-tecnicas.md` — 12 secciones |
 | **Código comentado** | **✅** | Comentarios en lógica compleja |
 
 ### Todo completado — sin pendientes críticos
@@ -342,3 +346,21 @@ Historial de fixes:
 - Integrado en Dashboard: aparece automáticamente a usuarios nuevos, pasa `isPremium` al componente
 - Tipo TypeScript `User` actualizado con `tutorial_completed_at`
 - 4 nuevos tests en `TutorialControllerTest.php`
+
+### ✅ Sesión 6 — Cambios
+- **Asistente IA con chat** implementado para usuarios premium
+- Controlador `AiChatController` con métodos `index`, `store`, `destroy`
+- Form Request `StoreAiChatRequest` (validación mensaje max 2000 chars)
+- Página `pages/ai-chats/index.tsx` — chat UI completo:
+  - Historial de mensajes con auto-scroll
+  - Mensajes optimistas mientras espera respuesta
+  - Sugerencias rápidas para nuevos usuarios
+  - Botón "Limpiar" para eliminar historial
+  - Enter para enviar, Shift+Enter para nueva línea
+- Modelo `AiConversation` ya existía — se usa para persistir mensajes
+- Integración OpenAI GPT-3.5-turbo con system prompt de productividad
+- Tipos TypeScript: `AiMessage`, `AiChatsProps`
+- Sidebar actualizado con item "Asistente IA" (icono Sparkles) para premium
+- Tutorial chatbot actualizado: ahora 8 pasos para premium (incluye Asistente IA)
+- 20 nuevos tests en `AiChatControllerTest.php`
+- Documentación actualizada: manual-usuario (sección 9), decisiones-tecnicas (sección 10)

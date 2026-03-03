@@ -18,6 +18,7 @@ const getTutorialId = (href: NavItem['href']): string | undefined => {
         '/ideas': 'ideas',
         '/projects': 'projects',
         '/boxes': 'boxes',
+        '/ai-chats': 'ai-chats',
         '/subscription': 'subscription',
     };
     return mapping[hrefString];

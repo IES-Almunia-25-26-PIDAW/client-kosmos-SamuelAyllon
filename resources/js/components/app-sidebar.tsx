@@ -7,6 +7,7 @@ import {
     LayoutGrid,
     Lightbulb,
     Shield,
+    Sparkles,
     Star,
     Users,
 } from 'lucide-react';
@@ -57,6 +58,11 @@ export function AppSidebar() {
                 title: 'Cajas',
                 href: '/boxes',
                 icon: Archive,
+            },
+            {
+                title: 'Asistente IA',
+                href: '/ai-chats',
+                icon: Sparkles,
             },
         ] : []),
         {

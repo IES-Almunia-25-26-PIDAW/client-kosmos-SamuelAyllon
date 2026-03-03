@@ -3,3 +3,4 @@ export type * from './tasks-props';
 export type * from './ideas-props';
 export type * from './subscription-props';
 export type * from './checkout-props';
+export type * from './ai-chats-props';

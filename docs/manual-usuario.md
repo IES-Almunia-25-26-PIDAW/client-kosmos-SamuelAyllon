@@ -14,7 +14,7 @@ Flowly es una plataforma de productividad personal que te ayuda a:
 - Agrupar tareas en **proyectos** con seguimiento de progreso *(Premium)*
 - Organizar recursos (enlaces, documentos, vídeos) en **cajas** *(Premium)*
 - Grabar **notas de voz** *(Premium)*
-- Chatear con un **asistente de IA** *(Premium)*
+- Chatear con un **asistente de IA** para organizar tu día y priorizar tareas *(Premium)*
 
 ---
 
@@ -28,10 +28,11 @@ Flowly es una plataforma de productividad personal que te ayuda a:
 6. [Creación por voz (Premium)](#6-creación-por-voz-premium)
 7. [Proyectos (Premium)](#7-proyectos-premium)
 8. [Cajas de recursos (Premium)](#8-cajas-de-recursos-premium)
-9. [Suscripción y planes](#9-suscripción-y-planes)
-10. [Configuración de cuenta](#10-configuración-de-cuenta)
-11. [Panel de administración (Admin)](#11-panel-de-administración-admin)
-12. [Preguntas frecuentes](#12-preguntas-frecuentes)
+9. [Asistente IA (Premium)](#9-asistente-ia-premium)
+10. [Suscripción y planes](#10-suscripción-y-planes)
+11. [Configuración de cuenta](#11-configuración-de-cuenta)
+12. [Panel de administración (Admin)](#12-panel-de-administración-admin)
+13. [Preguntas frecuentes](#13-preguntas-frecuentes)
 
 ---
 
@@ -320,7 +321,63 @@ Los recursos de tipo **Enlace** son clicables directamente desde la lista.
 
 ---
 
-## 9. Suscripción y planes
+## 9. Asistente IA *(Premium)*
+
+El Asistente IA de Flowly es tu copiloto de productividad. Puedes chatear con él para obtener sugerencias sobre cómo organizar tu día, priorizar tareas o mejorar tu productividad.
+
+### Acceder al asistente
+
+Accede desde el sidebar a **"Asistente IA"** (icono de estrellas). Verás una pantalla de chat donde puedes escribir tus preguntas o peticiones.
+
+---
+
+### Iniciar una conversación
+
+1. Escribe tu mensaje en el campo de texto de la parte inferior.
+2. Pulsa **Enter** o haz clic en el botón de enviar.
+3. El asistente procesará tu mensaje y te responderá en segundos.
+
+> Puedes usar **Shift + Enter** para escribir mensajes de varias líneas.
+
+---
+
+### ¿Qué puedes preguntarle?
+
+El asistente está especializado en productividad personal:
+
+- **"¿Cómo priorizo mis tareas?"** — Te explicará técnicas como la matriz de Eisenhower.
+- **"Ayúdame a organizar mi día"** — Te dará consejos para planificar tu jornada.
+- **"¿Qué es la técnica Pomodoro?"** — Te explicará técnicas de productividad.
+- **"Tengo muchas ideas pero no sé por dónde empezar"** — Te ayudará a estructurarlas.
+- **"Cómo evitar la procrastinación"** — Consejos prácticos para ser más productivo.
+
+---
+
+### Sugerencias rápidas
+
+Si no sabes por dónde empezar, la pantalla inicial muestra tres sugerencias que puedes usar haciendo clic en ellas:
+- "¿Cómo priorizo mis tareas?"
+- "Ayúdame a organizar mi día"
+- "Técnicas de productividad"
+
+---
+
+### Historial de conversación
+
+Tu historial de chat se guarda automáticamente. Cada vez que accedas al asistente verás tus conversaciones anteriores.
+
+---
+
+### Limpiar historial
+
+Si deseas empezar de cero:
+1. Haz clic en el botón **"Limpiar"** en la esquina superior derecha del chat.
+2. Confirma que deseas eliminar todo el historial.
+3. La conversación se borrará permanentemente.
+
+---
+
+## 10. Suscripción y planes
 
 ### Ver tu plan actual
 
@@ -347,7 +404,7 @@ Accede desde el sidebar a **"Suscripción"**. Verás:
 
 ---
 
-## 10. Configuración de cuenta
+## 11. Configuración de cuenta
 
 Accede desde el menú de usuario (esquina superior derecha) o desde el sidebar → **"Configuración"**.
 
@@ -376,7 +433,7 @@ En **"Apariencia"** puedes alternar entre el **tema claro** y el **tema oscuro**
 
 ---
 
-## 11. Panel de administración *(Admin)*
+## 12. Panel de administración *(Admin)*
 
 Los usuarios con rol de administrador tienen acceso a un panel de gestión en `/admin`.
 
@@ -415,7 +472,7 @@ En **"Suscripciones"** el administrador puede ver:
 
 ---
 
-## 12. Preguntas frecuentes
+## 13. Preguntas frecuentes
 
 **¿Puedo tener más de 5 tareas en el plan gratuito?**
 No. El plan gratuito tiene un límite de 5 tareas en estado "pendiente" simultáneamente. Puedes completar tareas existentes para liberar espacio, o actualizar a Premium para tener tareas ilimitadas.

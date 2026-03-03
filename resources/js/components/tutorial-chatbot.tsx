@@ -98,6 +98,13 @@ const premiumUserSteps: TutorialStep[] = [
     },
     {
         id: 7,
+        botMessage: 'El Asistente IA es tu copiloto de productividad. Pregúntale cómo priorizar tareas, organizar tu día o cualquier duda sobre gestión del tiempo.',
+        target: 'ai-chats',
+        icon: '✨',
+        position: 'right',
+    },
+    {
+        id: 8,
         botMessage: '¡Eso es todo! Tienes acceso completo a Flowly. Explora cada sección y aprovecha el dictado por voz. ¡Buena productividad!',
         icon: '🎉',
     },

@@ -9,7 +9,7 @@ Auth: Laravel Fortify | Roles: Spatie Permission 6
 ## Estado actual del proyecto
 > Ver `.claude/PROJECT_STATE.md` para detalle completo.
 
-**TODO completado. 160/160 tests pasando (596 assertions).**
+**TODO completado. 180/180 tests pasando (692 assertions).**
 
 Lo que está creado: migraciones, modelos, seeders, controladores, Form Requests, Policies, rutas, tests, todas las páginas React con UI real, Design System Flowly, landing page, Docker, documentación, integración OpenAI Whisper (voz a texto), tutorial chatbot para nuevos usuarios.
 
@@ -68,6 +68,7 @@ Aplicado en `resources/css/app.css` y `resources/views/app.blade.php`:
 **Resources:** create, edit
 **Subscription:** index
 **Checkout:** index
+**AI Chats:** index (chat con asistente IA, solo premium)
 **Landing:** `welcome.tsx` con hero, features (6 tarjetas), pricing (Free/9.99€/99.99€), footer
 **Admin:** dashboard, users/index, users/show, payments/index, subscriptions/index
 
@@ -78,10 +79,10 @@ types/
 ├── auth.ts          → User (auth), Auth, TwoFactorSetupData
 ├── navigation.ts    → NavItem, BreadcrumbItem
 ├── models/          → Task, Idea, Project, Box, Resource,
-│                      Subscription, Payment, RecentPayment, Role, VoiceRecording
+│                      Subscription, Payment, RecentPayment, Role, VoiceRecording, AiMessage
 ├── shared/          → PaginatedData<T>
 ├── pages/           → DashboardProps, TasksProps, IdeasProps,
-│                      SubscriptionProps (+ Plan), CheckoutProps (+ CheckoutPlan)
+│                      SubscriptionProps (+ Plan), CheckoutProps (+ CheckoutPlan), AiChatsProps
 ├── admin/           → AdminStats, AdminUser, AdminDashboardProps,
 │                      AdminUsersIndexProps, AdminUserShowProps,
 │                      AdminPaymentsProps, AdminSubscriptionsProps
@@ -165,6 +166,17 @@ Límite de tareas: `User::canAddTask()` cuenta WHERE status='pending'
 - **Componente:** `resources/js/components/voice-recorder.tsx` — `MediaRecorder` nativo + fetch + estados idle/recording/processing
 - **UI:** Botón "Dictar" en tasks/index, ideas/index (quick-create), tasks/create, ideas/create (dictado de nombre)
 - **Ideas con voz:** `source: 'voice'` se pasa desde el frontend; `IdeaController::store` usa `$request->validated('source') ?? 'manual'`
+
+## Integración OpenAI Chat (Asistente IA)
+
+- **Modelo:** `gpt-3.5-turbo` via API OpenAI Chat Completions
+- **Endpoint:** `GET/POST/DELETE /ai-chats` (bajo middleware `role:premium_user`)
+- **Controller:** `AiChatController` — index (vista), store (enviar mensaje), destroy (limpiar historial)
+- **Form Request:** `StoreAiChatRequest` — valida mensaje (max 2000 chars)
+- **Modelo Eloquent:** `AiConversation` — almacena mensajes con rol `user` o `assistant`
+- **System Prompt:** Especializado en productividad (Eisenhower, Pomodoro, organización, priorización)
+- **Historial:** Se envían los últimos 20 mensajes como contexto a la API
+- **Componente:** `resources/js/pages/ai-chats/index.tsx` — chat UI completo con sugerencias, auto-scroll, mensajes optimistas
 
 ## Archivos clave
 

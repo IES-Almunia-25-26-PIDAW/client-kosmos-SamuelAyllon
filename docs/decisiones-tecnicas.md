@@ -176,7 +176,36 @@
 
 ---
 
-## 10. Estructura de tipos TypeScript
+## 10. Asistente IA — OpenAI GPT-3.5-turbo
+
+**Decisión:** integrar la API de OpenAI Chat Completions con el modelo `gpt-3.5-turbo` para proporcionar un asistente conversacional de productividad.
+
+**Justificación:**
+- GPT-3.5-turbo ofrece un excelente balance entre calidad de respuestas, velocidad y coste, siendo ideal para un chat de productividad.
+- El modelo es capaz de mantener contexto conversacional al recibir el historial de mensajes previos.
+- La API devuelve respuestas en 1-3 segundos, suficientemente rápido para una experiencia de chat fluida sin necesidad de streaming.
+- El sistema de prompts permite especializar al asistente en temas de productividad personal (organización, priorización, técnicas como Pomodoro/Eisenhower).
+
+**Implementación técnica:**
+- Controller `AiChatController` con métodos `index()` (vista), `store()` (enviar mensaje) y `destroy()` (limpiar historial)
+- Form Request `StoreAiChatRequest` valida mensajes (max 2000 caracteres)
+- Modelo `AiConversation` ya existente — almacena mensajes con rol `user` o `assistant`
+- Historial limitado a 20 mensajes más recientes para contexto (evita exceder tokens)
+- System prompt personalizado con el nombre del usuario y enfocado en productividad
+- Rutas bajo middleware `role:premium_user` — funcionalidad exclusiva Premium
+- Frontend con React: chat UI completo, mensajes optimistas, sugerencias iniciales, auto-scroll
+
+**Paquete:** `openai-php/client` — mismo paquete ya utilizado para Whisper.
+
+**Alternativas descartadas:**
+- GPT-4: mayor calidad pero 10x más costoso y más lento; innecesario para este caso de uso
+- Claude API: requiere cuenta de pago desde el inicio
+- Ollama local: requiere GPU significativa para respuestas rápidas
+- Chatbot basado en reglas: funcionalidad muy limitada comparada con un LLM
+
+---
+
+## 11. Estructura de tipos TypeScript
 
 **Decisión:** organizar los tipos en subcarpetas temáticas (`models/`, `pages/`, `admin/`, `shared/`) en lugar de un único archivo `types.ts`.
 
@@ -187,7 +216,7 @@
 
 ---
 
-## 11. Tutorial interactivo para nuevos usuarios
+## 12. Tutorial interactivo para nuevos usuarios
 
 **Decisión:** implementar un tour guiado con spotlight que aparece automáticamente la primera vez que un usuario accede al dashboard, señalando visualmente cada sección de la aplicación.
 

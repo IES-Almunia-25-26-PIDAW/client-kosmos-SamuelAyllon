@@ -7,3 +7,4 @@ export type * from './resource';
 export type * from './box';
 export type * from './project';
 export type * from './voice-recording';
+export type * from './ai-message';
