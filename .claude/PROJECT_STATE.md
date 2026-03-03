@@ -325,11 +325,20 @@ Historial de fixes:
 - `IdeaController::store` acepta `source` desde request (default `manual`), permitiendo `source: 'voice'`
 - `openai-php/client` v0.19 instalado, config en `services.openai.key`
 ### ✅ Sesión 5 — Cambios
-- **Tutorial chatbot** implementado para nuevos usuarios
+- **Tutorial chatbot con tour guiado** implementado para nuevos usuarios
 - Migración `add_tutorial_completed_at_to_users_table` — columna `tutorial_completed_at` en users
 - Modelo User: métodos `hasCompletedTutorial()` y `completeTutorial()`
-- Componente `tutorial-chatbot.tsx` — diálogo interactivo de 6 pasos con efecto de escritura
+- Componente `tutorial-chatbot.tsx` — tour guiado con:
+  - **Spotlight** (overlay oscuro con "agujero" en el elemento resaltado)
+  - **Tooltip posicionado** junto al elemento del sidebar que se explica
+  - **data-tutorial attributes** en `nav-main.tsx` para identificar elementos
+  - Borde brillante animado (pulse) alrededor del elemento activo
+  - Efecto de escritura progresiva del bot
+  - Portal de React para estar siempre encima de todo
+  - **Tutorial diferenciado por rol:**
+    - **Free users** (6 pasos): Dashboard, Tareas (límite 5), Ideas, Suscripción (promoción Premium)
+    - **Premium users** (7 pasos): Dashboard, Tareas (+voz), Ideas (+voz), Proyectos, Cajas
 - `TutorialController` con ruta `POST /tutorial/complete`
-- Integrado en Dashboard: aparece automáticamente a usuarios nuevos
+- Integrado en Dashboard: aparece automáticamente a usuarios nuevos, pasa `isPremium` al componente
 - Tipo TypeScript `User` actualizado con `tutorial_completed_at`
 - 4 nuevos tests en `TutorialControllerTest.php`

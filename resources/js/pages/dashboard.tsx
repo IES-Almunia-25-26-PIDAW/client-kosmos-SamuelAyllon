@@ -43,7 +43,9 @@ export default function Dashboard({ pendingTasks, activeIdeas, activeProjects, s
             {/* Tutorial chatbot para nuevos usuarios */}
             <TutorialChatbot 
                 show={showTutorial} 
-                onComplete={() => setShowTutorial(false)} 
+                onComplete={() => setShowTutorial(false)}
+                isPremium={isPremium}
+                userName={auth.user.name}
             />
 
             <div className="flex flex-col gap-6 p-6">

@@ -4,13 +4,11 @@ import { Pencil, Trash2, Table2, LayoutGrid, Package } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
-import type { BreadcrumbItem, Box } from '@/types';
+import type { BreadcrumbItem, Box, SimpleViewType } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Cajas', href: '/boxes' },
 ];
-
-type ViewType = 'table' | 'gallery';
 
 function deleteBox(box: Box) {
     if (confirm(`¿Eliminar "${box.name}"? Se eliminarán también sus recursos.`)) {
@@ -126,13 +124,13 @@ export default function BoxesIndex({ boxes }: { boxes: Box[] }) {
     const { props } = usePage<{ flash?: { success?: string } }>();
     const flash = props.flash;
 
-    const [view, setView] = useState<ViewType>('gallery');
+    const [view, setView] = useState<SimpleViewType>('gallery');
     const [categoryFilter, setCategoryFilter] = useState<string>('all');
 
     const categories = [...new Set(boxes.map(b => b.category).filter((c): c is string => c !== null && c !== ''))];
     const filtered = boxes.filter(b => categoryFilter === 'all' || b.category === categoryFilter);
 
-    const viewButtons: Array<{ value: ViewType; icon: React.ReactNode; title: string }> = [
+    const viewButtons: Array<{ value: SimpleViewType; icon: React.ReactNode; title: string }> = [
         { value: 'table',   icon: <Table2 className="h-4 w-4" />,    title: 'Vista tabla' },
         { value: 'gallery', icon: <LayoutGrid className="h-4 w-4" />, title: 'Vista galería' },
     ];

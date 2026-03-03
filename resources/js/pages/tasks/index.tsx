@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import VoiceRecorder from '@/components/voice-recorder';
 import { Checkbox } from '@/components/ui/checkbox';
 import AppLayout from '@/layouts/app-layout';
-import type { BreadcrumbItem, TasksProps, Task } from '@/types';
+import type { BreadcrumbItem, TasksProps, Task, ViewType } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Tareas', href: '/tasks' },
@@ -21,8 +21,6 @@ const priorityColors: Record<string, string> = {
 const priorityLabels: Record<string, string> = {
     high: 'Alta', medium: 'Media', low: 'Baja',
 };
-
-type ViewType = 'table' | 'calendar' | 'gallery';
 
 // ── Acciones comunes ────────────────────────────────────────────────────────
 

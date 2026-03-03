@@ -77,23 +77,37 @@ Una vez activado, cada inicio de sesión te pedirá el código de tu aplicación
 
 ## 2. Tutorial inicial
 
-La primera vez que accedas a Flowly después de registrarte, aparecerá un **tutorial interactivo** en forma de chatbot para guiarte por las funciones principales de la aplicación.
+La primera vez que accedas a Flowly después de registrarte, aparecerá un **tour guiado interactivo** que te mostrará las funciones principales de la aplicación señalándolas directamente en la interfaz.
 
 ### El asistente Flowy
 
-Flowy es el asistente virtual de Flowly. Te dará la bienvenida y te explicará:
+Flowy es el asistente virtual de Flowly. Te guiará por la aplicación resaltando cada sección mientras te explica su función. El contenido del tutorial varía según tu tipo de cuenta:
 
-1. **Dashboard** — Tu centro de control con el resumen de actividad
-2. **Tareas** — Cómo crear y gestionar tus tareas diarias
-3. **Ideas** — Cómo capturar inspiración al vuelo
-4. **Funciones Premium** — Proyectos, cajas y voz disponibles con suscripción
+**Si tienes plan gratuito**, Flowy te mostrará:
+1. **Dashboard** — Tu centro de control con tareas e ideas
+2. **Tareas** — Cómo crear y gestionar (máx. 5 pendientes)
+3. **Ideas** — Cómo capturar inspiración sin límites
+4. **Suscripción** — Qué incluye Premium: tareas ilimitadas, proyectos, cajas y dictado por voz
+
+**Si tienes plan Premium**, Flowy te mostrará:
+1. **Dashboard** — Tu centro de control completo
+2. **Tareas** — Crear tareas sin límites + dictado por voz
+3. **Ideas** — Capturar ideas + dictado por voz
+4. **Proyectos** — Agrupar tareas en proyectos con progreso
+5. **Cajas** — Organizar recursos (enlaces, documentos, vídeos)
+
+### Cómo funciona el tour
+
+- La pantalla se oscurece y se resalta el elemento del que Flowy está hablando
+- El cuadro de diálogo se posiciona junto al elemento resaltado
+- Una flecha y un borde brillante indican el elemento activo
 
 ### Navegación del tutorial
 
 - Utiliza **"Siguiente"** para avanzar paso a paso
 - Utiliza **"Anterior"** para volver a un paso previo
 - Los **puntos de progreso** muestran en qué paso estás
-- Haz clic en **"Saltar tutorial"** si prefieres explorar por tu cuenta
+- Haz clic en **"Saltar"** si prefieres explorar por tu cuenta
 
 ### ¿Se puede volver a ver el tutorial?
 

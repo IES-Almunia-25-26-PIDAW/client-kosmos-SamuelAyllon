@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import AppLayout from '@/layouts/app-layout';
-import type { BreadcrumbItem, Project } from '@/types';
+import type { BreadcrumbItem, Project, ViewType } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Proyectos', href: '/projects' },
@@ -20,8 +20,6 @@ const statusColors: Record<string, string> = {
 const statusLabels: Record<string, string> = {
     inactive: 'Inactivo', active: 'Activo', completed: 'Completado',
 };
-
-type ViewType = 'table' | 'calendar' | 'gallery';
 
 function deleteProject(project: Project) {
     if (confirm(`¿Eliminar "${project.name}"? Se eliminarán también sus tareas.`)) {

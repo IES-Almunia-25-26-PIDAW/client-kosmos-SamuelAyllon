@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import VoiceRecorder from '@/components/voice-recorder';
 import { Checkbox } from '@/components/ui/checkbox';
 import AppLayout from '@/layouts/app-layout';
-import type { BreadcrumbItem, IdeasProps, Idea } from '@/types';
+import type { BreadcrumbItem, IdeasProps, Idea, SimpleViewType } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Ideas', href: '/ideas' },
@@ -26,8 +26,6 @@ const statusBadge: Record<string, string> = {
     active:   'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
     resolved: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300',
 };
-
-type ViewType = 'table' | 'gallery';
 
 function toggleIdea(idea: Idea) {
     if (idea.status === 'active') router.patch(`/ideas/${idea.id}/resolve`);
@@ -173,7 +171,7 @@ export default function IdeasIndex({ ideas }: IdeasProps) {
     const flash = props.flash;
     const isPremium = props.auth.is_premium;
 
-    const [view, setView] = useState<ViewType>('table');
+    const [view, setView] = useState<SimpleViewType>('table');
     const [priorityFilter, setPriorityFilter] = useState<'all' | 'high' | 'medium' | 'low'>('all');
 
     const filtered = ideas.filter(i => priorityFilter === 'all' || i.priority === priorityFilter);
@@ -187,7 +185,7 @@ export default function IdeasIndex({ ideas }: IdeasProps) {
         { value: 'low', label: 'Baja' },
     ];
 
-    const viewButtons: Array<{ value: ViewType; icon: React.ReactNode; title: string }> = [
+    const viewButtons: Array<{ value: SimpleViewType; icon: React.ReactNode; title: string }> = [
         { value: 'table',   icon: <Table2 className="h-4 w-4" />,    title: 'Vista tabla' },
         { value: 'gallery', icon: <LayoutGrid className="h-4 w-4" />, title: 'Vista galería' },
     ];

@@ -189,12 +189,14 @@
 
 ## 11. Tutorial interactivo para nuevos usuarios
 
-**Decisión:** implementar un chatbot tutorial que aparece automáticamente la primera vez que un usuario accede al dashboard.
+**Decisión:** implementar un tour guiado con spotlight que aparece automáticamente la primera vez que un usuario accede al dashboard, señalando visualmente cada sección de la aplicación.
 
 **Justificación:**
 - Los usuarios nuevos en aplicaciones de productividad pueden sentirse abrumados por las múltiples funcionalidades disponibles.
-- Un tutorial guiado paso a paso reduce la curva de aprendizaje y mejora la retención de usuarios (onboarding efectivo).
+- Un tour guiado que resalta visualmente cada elemento reduce la curva de aprendizaje y mejora la retención de usuarios (onboarding efectivo).
 - El formato de chat con un asistente virtual ("Flowy") es más amigable e interactivo que un manual de texto estático.
+- El **spotlight** (oscurecimiento del fondo con "agujero" en el elemento activo) enfoca la atención del usuario exactamente donde debe mirar.
+- El tooltip posicionado junto al elemento evita que el usuario pierda contexto mientras lee las instrucciones.
 - El efecto de escritura progresiva simula una conversación real, haciendo la experiencia más personal.
 - La posibilidad de "saltar" respeta a usuarios experimentados que prefieren explorar por su cuenta.
 - Se persiste en BD (`tutorial_completed_at`) para no volver a mostrar el tutorial, reduciendo fricción en usos posteriores.
@@ -202,10 +204,15 @@
 **Implementación técnica:**
 - Migración `add_tutorial_completed_at_to_users_table` añade el campo al usuario
 - `TutorialController` con ruta `POST /tutorial/complete` marca el tutorial como completado
-- Componente React `tutorial-chatbot.tsx` con Dialog de shadcn/ui y efecto de escritura
+- Componente React `tutorial-chatbot.tsx` con:
+  - SVG mask para crear el efecto spotlight (agujero en el overlay)
+  - Cálculo dinámico de posición del tooltip usando `getBoundingClientRect()`
+  - `data-tutorial` attributes en los elementos del sidebar para identificarlos
+  - Portal de React (`createPortal`) para renderizar encima de todo el DOM
+  - Borde animado (`ring-4 animate-pulse`) alrededor del elemento activo
 - Se muestra condicionalmente en el Dashboard basándose en `auth.user.tutorial_completed_at`
 
 **Alternativas descartadas:**
-- Tour de producto con tooltips (más intrusivo, requiere librerías adicionales como Shepherd.js)
-- Modal de bienvenida estático (menos interactivo, menor engagement)
+- Shepherd.js / Driver.js (librerías de tour de terceros): añaden dependencias npm y menos control sobre el diseño
+- Modal de bienvenida estático (menos interactivo, no señala elementos visualmente)
 - Vídeo tutorial (mayor barrera de entrada, requiere infraestructura de hosting de vídeo)
