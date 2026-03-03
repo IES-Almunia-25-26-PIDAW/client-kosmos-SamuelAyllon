@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { Pencil, Trash2, Table2, LayoutGrid } from 'lucide-react';
+import { Pencil, Trash2, Table2, LayoutGrid, Package } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
@@ -85,7 +85,10 @@ function GalleryView({ boxes }: { boxes: Box[] }) {
             {boxes.map(box => (
                 <Card key={box.id} className="flex flex-col">
                     <CardHeader className="pb-2">
-                        <CardTitle className="truncate text-base">{box.name}</CardTitle>
+                        <div className="flex items-center gap-2">
+                            <Package className="h-4 w-4 shrink-0 text-primary" />
+                            <CardTitle className="truncate text-base">{box.name}</CardTitle>
+                        </div>
                         {box.category && (
                             <span className="text-xs text-muted-foreground">{box.category}</span>
                         )}

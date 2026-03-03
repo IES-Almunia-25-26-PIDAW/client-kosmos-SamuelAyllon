@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { Pencil, Trash2, Table2, Calendar, LayoutGrid, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Pencil, Trash2, Table2, Calendar, LayoutGrid, ChevronLeft, ChevronRight, FolderOpen } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -217,6 +217,7 @@ function GalleryView({ projects }: { projects: Project[] }) {
                                 {project.color && (
                                     <span className="shrink-0 h-3 w-3 rounded-full" style={{ backgroundColor: project.color }} />
                                 )}
+                                <FolderOpen className="h-4 w-4 shrink-0 text-primary" />
                                 <CardTitle className={`truncate text-base ${project.status === 'completed' ? 'line-through text-muted-foreground' : ''}`}>
                                     {project.name}
                                 </CardTitle>

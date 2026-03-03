@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { Pencil, Trash2, Table2, LayoutGrid } from 'lucide-react';
+import { Pencil, Trash2, Table2, LayoutGrid, Lightbulb } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -127,6 +127,7 @@ function GalleryView({ ideas }: { ideas: Idea[] }) {
                                 onCheckedChange={() => toggleIdea(idea)}
                                 title={idea.status === 'active' ? 'Marcar como resuelta' : 'Reactivar idea'}
                             />
+                            <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-yellow-500" />
                             <CardTitle className={`text-sm font-medium leading-snug ${idea.status === 'resolved' ? 'line-through text-muted-foreground' : ''}`}>
                                 {idea.name}
                             </CardTitle>
