@@ -22,14 +22,14 @@
 
 ```
 ┌─────────────────┬──────────────┬──────────────┬──────────────┐
-│ Feature         │ Free (max 5) │ Premium (∞)  │ Admin (all)  │
+│ Feature         │ Free (max 5) │ Premium (∞)  │ Admin        │
 ├─────────────────┼──────────────┼──────────────┼──────────────┤
 │ Ideas           │ ✅           │ ✅           │ ✅           │
 │ Tasks           │ 5 máx        │ ∞            │ ∞            │
-│ Projects        │ ❌           │ ✅           │ ✅           │
-│ Boxes/Resources │ ❌           │ ✅           │ ✅           │
-│ Voice (Whisper) │ ❌           │ ✅           │ ✅           │
-│ IA Assistant    │ ❌           │ ✅           │ ✅           │
+│ Projects        │ ❌           │ ✅           │ ❌           │
+│ Boxes/Resources │ ❌           │ ✅           │ ❌           │
+│ Voice (Whisper) │ ❌           │ ✅           │ ❌           │
+│ IA Assistant    │ ❌           │ ✅           │ ❌           │
 │ Admin Panel     │ ❌           │ ❌           │ ✅           │
 └─────────────────┴──────────────┴──────────────┴──────────────┘
 ```

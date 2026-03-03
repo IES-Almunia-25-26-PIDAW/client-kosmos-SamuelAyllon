@@ -37,8 +37,8 @@ Idea → User (muchos a 1)
 
 ### 3 Roles del Sistema
 ```
-admin:         Acceso a todo + admin panel
-premium_user:  Tareas ilimitadas, proyectos, voz, IA
+admin:         Solo panel de administración (/admin/*) — NO accede a rutas premium
+premium_user:  Tareas ilimitadas, proyectos, cajas, recursos, voz, IA
 free_user:     5 tareas máx, solo ideas, sin premium features
 ```
 

@@ -33,8 +33,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('checkout', [CheckoutController::class, 'store'])->name('checkout.store');
 });
 
-// ==================== RUTAS PREMIUM (premium_user + admin) ====================
-Route::middleware(['auth', 'verified', 'role:premium_user|admin'])->group(function () {
+// ==================== RUTAS PREMIUM (premium_user) ====================
+Route::middleware(['auth', 'verified', 'role:premium_user'])->group(function () {
     Route::resource('projects', ProjectController::class);
     Route::patch('projects/{project}/complete', [ProjectController::class, 'complete'])->name('projects.complete');
 

@@ -3,9 +3,11 @@
 namespace Tests\Feature\Auth;
 
 use App\Models\User;
+use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\RateLimiter;
 use Laravel\Fortify\Features;
+use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
 class AuthenticationTest extends TestCase
@@ -21,7 +23,11 @@ class AuthenticationTest extends TestCase
 
     public function test_users_can_authenticate_using_the_login_screen()
     {
+        $this->seed(RoleSeeder::class);
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
+
         $user = User::factory()->create();
+        $user->assignRole('free_user');
 
         $response = $this->post(route('login.store'), [
             'email' => $user->email,
@@ -43,7 +49,11 @@ class AuthenticationTest extends TestCase
             'confirmPassword' => true,
         ]);
 
+        $this->seed(RoleSeeder::class);
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
+
         $user = User::factory()->create();
+        $user->assignRole('free_user');
 
         $user->forceFill([
             'two_factor_secret' => encrypt('test-secret'),

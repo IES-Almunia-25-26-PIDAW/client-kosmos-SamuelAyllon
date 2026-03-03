@@ -110,7 +110,7 @@ ideas.*          → IdeaController (CRUD + resolve + reactivate)
 subscription.*   → SubscriptionController (index)
 checkout.*       → CheckoutController (index + store)
 
-// Premium (premium_user|admin)
+// Premium (solo premium_user — admin NO tiene acceso)
 projects.*       → ProjectController (CRUD)
 boxes.*          → BoxController (CRUD)
 resources.*      → ResourceController (create/store nested en box; edit/update/destroy standalone)

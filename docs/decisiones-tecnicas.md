@@ -92,9 +92,10 @@
 
 **Justificación:**
 - Es el paquete de autorización más descargado del ecosistema Laravel (>20M descargas en Packagist).
-- Permite asignar roles (`admin`, `premium_user`, `free_user`) y aplicarlos como middleware directamente en rutas: `role:premium_user|admin`.
+- Permite asignar roles (`admin`, `premium_user`, `free_user`) y aplicarlos como middleware directamente en rutas: `role:premium_user`, `role:admin`.
 - Las Policies de Laravel complementan a Spatie para la autorización a nivel de recurso (solo el propietario puede modificar su tarea).
 - La combinación Middleware + Policy cubre todos los niveles de autorización sin redundancias.
+- **Aislamiento de roles:** el rol `admin` tiene acceso exclusivo al panel de administración (`/admin/*`) y no a las rutas premium (`/projects`, `/boxes`, `/resources`). Esta separación garantiza que la gestión de la plataforma y el uso de funcionalidades de usuario son responsabilidades completamente distintas.
 
 ---
 

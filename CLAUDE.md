@@ -127,12 +127,12 @@ types/
 ## Roles y acceso
 
 ```
-admin          → todo (incluyendo /admin/*)
+admin          → solo panel de administración (/admin/*), NO accede a rutas premium
 premium_user   → tareas ilimitadas + projects, boxes, resources, voice, ai-chats
 free_user      → solo ideas + máx 5 tareas activas (status='pending')
 ```
 
-Middleware Spatie: `role:admin`, `role:premium_user|admin`
+Middleware Spatie: `role:admin`, `role:premium_user`
 Límite de tareas: `User::canAddTask()` cuenta WHERE status='pending'
 
 ## Advertencias importantes
