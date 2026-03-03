@@ -35,7 +35,7 @@ class IdeaController extends Controller
     {
         Auth::user()->ideas()->create([
             ...$request->validated(),
-            'source' => 'manual',
+            'source' => $request->validated('source') ?? 'manual',
             'status' => 'active',
             'user_modified_at' => now(),
         ]);

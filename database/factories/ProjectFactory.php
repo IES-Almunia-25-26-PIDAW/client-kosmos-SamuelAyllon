@@ -13,7 +13,7 @@ class ProjectFactory extends Factory
             'user_id' => User::factory(),
             'name' => fake()->words(3, true),
             'description' => fake()->optional()->paragraph(),
-            'status' => 'created',
+            'status' => 'inactive',
             'color' => fake()->hexColor(),
             'user_modified_at' => null,
         ];

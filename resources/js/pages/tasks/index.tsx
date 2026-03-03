@@ -3,6 +3,7 @@ import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Pencil, Trash2, Table2, Calendar, LayoutGrid, ChevronLeft, ChevronRight, ClipboardList } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import VoiceRecorder from '@/components/voice-recorder';
 import { Checkbox } from '@/components/ui/checkbox';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem, TasksProps, Task } from '@/types';
@@ -265,9 +266,10 @@ function GalleryView({ tasks, canAddTask }: { tasks: Task[]; canAddTask: boolean
 // ── Página principal ────────────────────────────────────────────────────────
 
 export default function TasksIndex({ tasks, canAddTask, isFreeUser }: TasksProps) {
-    const { props } = usePage<{ flash?: { success?: string }; errors?: { limit?: string } }>();
+    const { props } = usePage<{ flash?: { success?: string }; errors?: { limit?: string }; auth: { is_premium: boolean } }>();
     const flash = props.flash;
     const errors = props.errors;
+    const isPremium = props.auth.is_premium;
 
     const today = new Date().toISOString().split('T')[0];
     const [view, setView] = useState<ViewType>('table');
@@ -319,6 +321,11 @@ export default function TasksIndex({ tasks, canAddTask, isFreeUser }: TasksProps
                                 </Button>
                             ))}
                         </div>
+                        {isPremium && canAddTask && (
+                            <VoiceRecorder
+                                onTranscription={(text) => router.post('/tasks', { name: text, priority: 'medium' })}
+                            />
+                        )}
                         {canAddTask ? (
                             <Link href="/tasks/create"><Button>Nueva tarea</Button></Link>
                         ) : (

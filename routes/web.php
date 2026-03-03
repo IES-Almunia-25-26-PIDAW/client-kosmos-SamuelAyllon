@@ -12,6 +12,7 @@ use App\Http\Controllers\ResourceController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\VoiceRecordingController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn() => inertia('welcome'))->name('home');
@@ -47,6 +48,8 @@ Route::middleware(['auth', 'verified', 'role:premium_user'])->group(function () 
     Route::put('resources/{resource}', [ResourceController::class, 'update'])->name('resources.update');
     Route::patch('resources/{resource}', [ResourceController::class, 'update']);
     Route::delete('resources/{resource}', [ResourceController::class, 'destroy'])->name('resources.destroy');
+
+    Route::post('voice/transcribe', [VoiceRecordingController::class, 'transcribe'])->name('voice.transcribe');
 });
 
 // ==================== RUTAS ADMIN ====================

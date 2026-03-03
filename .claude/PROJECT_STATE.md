@@ -1,5 +1,5 @@
 # Flowly — Estado Real del Proyecto
-> Última actualización: 2026-02-24 (sesión 2). Actualizar este archivo al completar cada sección.
+> Última actualización: 2026-03-03 (sesión 4). Actualizar este archivo al completar cada sección.
 
 ---
 
@@ -13,15 +13,15 @@
 | Rutas | ✅ Todas creadas (tasks, ideas, projects, boxes, resources, subscription, checkout, admin) |
 | Controladores features | ✅ TaskController, IdeaController, ProjectController, BoxController, ResourceController, SubscriptionController, CheckoutController |
 | Controladores admin | ✅ AdminDashboardController, AdminUserController, AdminPaymentController, AdminSubscriptionController |
-| Form Requests | ✅ StoreTask/Update, StoreIdea/Update, StoreProject/Update, StoreBox/Update, StoreResource/Update, CheckoutRequest |
+| Form Requests | ✅ StoreTask/Update, StoreIdea/Update, StoreProject/Update, StoreBox/Update, StoreResource/Update, CheckoutRequest, StoreVoiceRecording |
 | Policies | ✅ TaskPolicy, IdeaPolicy, ProjectPolicy, BoxPolicy, ResourcePolicy |
-| Tests | ✅ 143/143 pasando (551 assertions) |
+| Tests | ✅ 156/156 pasando (590 assertions) |
 | Frontend — Auth | ✅ Páginas login, register, 2FA, forgot-password (Fortify) |
 | Frontend — Settings | ✅ Páginas profile, password, appearance, two-factor |
 | Frontend — Dashboard | ✅ Implementado (free: tareas+ideas, premium: +proyectos, admin: redirige) |
 | Frontend — Admin | ✅ Las 5 vistas admin implementadas con UI real |
 | Frontend — Types | ✅ Reorganizado en subcarpetas models/ shared/ pages/ admin/ |
-| Frontend — Features usuario | ✅ Todas las vistas de usuario implementadas con UI real |
+| Frontend — Features usuario | ✅ Todas las vistas de usuario implementadas con UI real + voz (Whisper) |
 | Frontend — Features premium | ✅ Todas las vistas premium implementadas con UI real |
 | Frontend — Landing | ✅ welcome.tsx con hero, features, pricing y footer |
 | Frontend — Design System | ✅ Flowly Design System aplicado (colores, fuentes, radius, shadows) |
@@ -78,6 +78,7 @@ En `app/Http/Controllers/`:
 - `ResourceController` — create/store (nested bajo box) + edit/update/destroy (authorize via ResourcePolicy)
 - `SubscriptionController` — index (muestra planes y suscripción activa)
 - `CheckoutController` — index + store (pago simulado via Payment::process())
+- `VoiceRecordingController` — transcribe (recibe audio, llama OpenAI Whisper API, devuelve JSON con transcripción)
 
 En `app/Http/Controllers/Admin/`:
 - `AdminDashboardController` — stats globales + recent payments/users
@@ -93,6 +94,7 @@ En `app/Http/Requests/`:
 - `StoreBoxRequest` / `UpdateBoxRequest`
 - `StoreResourceRequest` / `UpdateResourceRequest`
 - `CheckoutRequest`
+- `StoreVoiceRecordingRequest`
 
 ### ✅ Policies creadas
 En `app/Policies/`:
@@ -114,6 +116,7 @@ checkout.*       → CheckoutController (index + store)
 projects.*       → ProjectController (CRUD)
 boxes.*          → BoxController (CRUD)
 resources.*      → ResourceController (create/store nested en box; edit/update/destroy standalone)
+voice.transcribe → VoiceRecordingController@transcribe (POST, JSON response)
 
 // Admin (/admin/*)
 admin.dashboard  → AdminDashboardController@index
@@ -190,11 +193,11 @@ toggle, toggle-group, tooltip
 - `pages/admin/subscriptions/index.tsx` — resumen por plan + lista paginada
 
 ### ✅ Páginas con UI real — Features usuario (todos)
-- `pages/tasks/index.tsx` — lista pendientes/completadas, prioridad, fecha vencimiento, proyecto
-- `pages/tasks/create.tsx` — formulario completo, proyectos opcionales (premium)
+- `pages/tasks/index.tsx` — lista pendientes/completadas, prioridad, fecha vencimiento, proyecto, botón voz (premium)
+- `pages/tasks/create.tsx` — formulario completo, proyectos opcionales (premium), dictado por voz (premium)
 - `pages/tasks/edit.tsx` — formulario pre-rellenado
-- `pages/ideas/index.tsx` — lista activas/resueltas, prioridad, resolve/reactivate/delete
-- `pages/ideas/create.tsx` — formulario completo
+- `pages/ideas/index.tsx` — lista activas/resueltas, prioridad, resolve/reactivate/delete, botón voz (premium)
+- `pages/ideas/create.tsx` — formulario completo, dictado por voz (premium)
 - `pages/ideas/edit.tsx` — formulario pre-rellenado
 - `pages/subscription/index.tsx` — plan actual + comparativa de planes
 - `pages/checkout/index.tsx` — selector de plan + formulario de tarjeta simulado
@@ -221,7 +224,7 @@ types/
 ├── navigation.ts    → NavItem, BreadcrumbItem
 ├── ui.ts
 ├── models/          → Task, Idea, Project, Box, Resource,
-│                      Subscription, Payment, RecentPayment, Role
+│                      Subscription, Payment, RecentPayment, Role, VoiceRecording
 ├── shared/          → PaginatedData<T>
 ├── pages/           → DashboardProps, TasksProps, IdeasProps,
 │                      SubscriptionProps (+ Plan), CheckoutProps (+ CheckoutPlan)
@@ -256,7 +259,7 @@ Migrado de SQLite en sesión 1.
 ---
 
 ## Tests — Estado actual
-✅ **143/143 tests pasando** (551 assertions)
+✅ **156/156 tests pasando** (590 assertions)
 
 Historial de fixes:
 - `app.blade.php` — quitado el componente de página de `@vite()` (solo queda `app.tsx`)
@@ -266,6 +269,8 @@ Historial de fixes:
 - Creados 16 archivos TSX placeholder en `resources/js/pages/`
 - `routes/web.php` — ruta home usa `inertia('welcome')` en lugar de redirect a login
 - `TaskControllerTest` + `IdeaControllerTest` — `assertSoftDeleted` → `assertDatabaseMissing`
+- `ProjectFactory` — status default `'created'` → `'inactive'` (sesión 4)
+- `ProjectControllerTest` — assertion status `'created'` → `'inactive'` (sesión 4)
 
 ---
 
@@ -309,3 +314,11 @@ Historial de fixes:
 - Task e Idea: `deleted_at` existe en la BD pero Eloquent ya NO la gestiona (SoftDeletes eliminado)
 - `canAddTask()` cuenta tareas con `status='pending'`, no usa `deleted_at`
 - Delete en frontend: `router.delete(url)` de `@inertiajs/react` — HTTP DELETE real, no form spoofing
+
+### Sesión 4 — Cambios
+- Project status enum: `created` → `inactive` (migración, modelo, factory, controller, requests, tests, frontend)
+- Iconos gallery: ClipboardList (tareas), Lightbulb (ideas), FolderOpen (proyectos), Package (cajas)
+- OpenAI Whisper integrado: `VoiceRecordingController`, `StoreVoiceRecordingRequest`, componente `voice-recorder.tsx`
+- Voice recording en tareas/ideas: botón "Dictar" en index (quick-create) y create (dictado nombre)
+- `IdeaController::store` acepta `source` desde request (default `manual`), permitiendo `source: 'voice'`
+- `openai-php/client` v0.19 instalado, config en `services.openai.key`

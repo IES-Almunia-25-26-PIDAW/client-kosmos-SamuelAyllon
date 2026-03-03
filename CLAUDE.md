@@ -9,9 +9,9 @@ Auth: Laravel Fortify | Roles: Spatie Permission 6
 ## Estado actual del proyecto
 > Ver `.claude/PROJECT_STATE.md` para detalle completo.
 
-**TODO completado. 143/143 tests pasando (551 assertions).**
+**TODO completado. 156/156 tests pasando (590 assertions).**
 
-Lo que está creado: migraciones, modelos, seeders, controladores, Form Requests, Policies, rutas, tests, todas las páginas React con UI real, Design System Flowly, landing page, Docker, documentación.
+Lo que está creado: migraciones, modelos, seeders, controladores, Form Requests, Policies, rutas, tests, todas las páginas React con UI real, Design System Flowly, landing page, Docker, documentación, integración OpenAI Whisper (voz a texto).
 
 **Sin pendientes.** Todo el proyecto intermodular está entregable.
 
@@ -61,8 +61,8 @@ Aplicado en `resources/css/app.css` y `resources/views/app.blade.php`:
 **Auth:** login, register, two-factor-challenge, forgot-password, reset-password, confirm-password, verify-email
 **Settings:** profile, password, appearance, two-factor
 **Dashboard:** datos reales con condicional free/premium/admin
-**Tasks:** index, create, edit
-**Ideas:** index, create, edit
+**Tasks:** index (+ voice quick-create), create (+ voice dictation), edit
+**Ideas:** index (+ voice quick-create), create (+ voice dictation), edit
 **Projects:** index, show, create, edit
 **Boxes:** index, show, create, edit
 **Resources:** create, edit
@@ -78,7 +78,7 @@ types/
 ├── auth.ts          → User (auth), Auth, TwoFactorSetupData
 ├── navigation.ts    → NavItem, BreadcrumbItem
 ├── models/          → Task, Idea, Project, Box, Resource,
-│                      Subscription, Payment, RecentPayment, Role
+│                      Subscription, Payment, RecentPayment, Role, VoiceRecording
 ├── shared/          → PaginatedData<T>
 ├── pages/           → DashboardProps, TasksProps, IdeasProps,
 │                      SubscriptionProps (+ Plan), CheckoutProps (+ CheckoutPlan)
@@ -93,7 +93,7 @@ types/
 - **Siempre** usar Form Requests para validación (`authorize()` + `rules()` + `messages()` en español)
 - **Siempre** usar Route Model Binding (nunca `string $id`)
 - **Siempre** eager loading con `with()` para evitar N+1
-- Respuestas via `Inertia::render()` o `redirect()` — **sin JSON/API REST**
+- Respuestas via `Inertia::render()` o `redirect()` — **sin JSON/API REST** (excepción: `VoiceRecordingController::transcribe` devuelve JSON para `fetch()` del componente de voz)
 - Rutas en `routes/web.php`
 - Controladores en `app/Http/Controllers/` (admin en subcarpeta `Admin/`)
 - Tests en `tests/Feature/` usando Pest con `RefreshDatabase`
@@ -128,8 +128,8 @@ types/
 
 ```
 admin          → solo panel de administración (/admin/*), NO accede a rutas premium
-premium_user   → tareas ilimitadas + projects, boxes, resources, voice, ai-chats
-free_user      → solo ideas + máx 5 tareas activas (status='pending')
+premium_user   → tareas ilimitadas + projects, boxes, resources, voice (Whisper), ai-chats
+free_user      → solo ideas + máx 5 tareas activas (status='pending'), NO voice
 ```
 
 Middleware Spatie: `role:admin`, `role:premium_user`
@@ -154,6 +154,17 @@ Límite de tareas: `User::canAddTask()` cuenta WHERE status='pending'
 
 - `Dockerfile` multi-stage + `docker-compose.yml` + `docker-entrypoint.sh`
 - El entrypoint ejecuta migraciones y seeders al arrancar el contenedor
+
+## Integración OpenAI Whisper (Speech-to-Text)
+
+- **Paquete:** `openai-php/client` (Composer)
+- **Config:** `config/services.php` → `openai.key`, `.env` → `OPENAI_API_KEY`
+- **Endpoint:** `POST /voice/transcribe` (JSON, bajo middleware `role:premium_user`)
+- **Controller:** `VoiceRecordingController::transcribe` — guarda audio, llama Whisper API, devuelve transcripción
+- **Form Request:** `StoreVoiceRecordingRequest` — valida audio (mimes: webm,ogg,mp4,m4a,wav,mp3, max 25MB)
+- **Componente:** `resources/js/components/voice-recorder.tsx` — `MediaRecorder` nativo + fetch + estados idle/recording/processing
+- **UI:** Botón "Dictar" en tasks/index, ideas/index (quick-create), tasks/create, ideas/create (dictado de nombre)
+- **Ideas con voz:** `source: 'voice'` se pasa desde el frontend; `IdeaController::store` usa `$request->validated('source') ?? 'manual'`
 
 ## Archivos clave
 

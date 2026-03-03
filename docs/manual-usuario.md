@@ -24,12 +24,13 @@ Flowly es una plataforma de productividad personal que te ayuda a:
 2. [Dashboard](#2-dashboard)
 3. [Gestión de tareas](#3-gestión-de-tareas)
 4. [Gestión de ideas](#4-gestión-de-ideas)
-5. [Proyectos (Premium)](#5-proyectos-premium)
-6. [Cajas de recursos (Premium)](#6-cajas-de-recursos-premium)
-7. [Suscripción y planes](#7-suscripción-y-planes)
-8. [Configuración de cuenta](#8-configuración-de-cuenta)
-9. [Panel de administración (Admin)](#9-panel-de-administración-admin)
-10. [Preguntas frecuentes](#10-preguntas-frecuentes)
+5. [Creación por voz (Premium)](#5-creación-por-voz-premium)
+6. [Proyectos (Premium)](#6-proyectos-premium)
+7. [Cajas de recursos (Premium)](#7-cajas-de-recursos-premium)
+8. [Suscripción y planes](#8-suscripción-y-planes)
+9. [Configuración de cuenta](#9-configuración-de-cuenta)
+10. [Panel de administración (Admin)](#10-panel-de-administración-admin)
+11. [Preguntas frecuentes](#11-preguntas-frecuentes)
 
 ---
 
@@ -104,7 +105,7 @@ Cada tarea muestra su nombre, prioridad (🔴 Alta / 🟡 Media / 🟢 Baja), fe
 
 1. Haz clic en el botón **"Nueva tarea"**.
 2. Rellena el formulario:
-   - **Nombre** *(obligatorio)*: descripción breve de la tarea
+   - **Nombre** *(obligatorio)*: descripción breve de la tarea. Si eres Premium, puedes usar el botón **"Dictar"** para rellenar este campo con tu voz.
    - **Descripción** *(opcional)*: detalles adicionales
    - **Prioridad**: Baja / Media / Alta (por defecto: Baja)
    - **Fecha de vencimiento** *(opcional)*: cuándo debe estar terminada
@@ -153,7 +154,7 @@ Accede desde el sidebar a **"Ideas"**. Se muestran primero las **activas** y lue
 
 1. Haz clic en **"Nueva idea"**.
 2. Rellena:
-   - **Nombre** *(obligatorio)*
+   - **Nombre** *(obligatorio)*: si eres Premium, puedes usar el botón **"Dictar"** para rellenar este campo con tu voz.
    - **Descripción** *(opcional)*
    - **Prioridad**: Baja / Media / Alta
 3. Haz clic en **"Guardar idea"**.
@@ -175,7 +176,35 @@ Igual que con las tareas, usa los iconos de lápiz y papelera junto a cada idea.
 
 ---
 
-## 5. Proyectos *(Premium)*
+## 5. Creación por voz *(Premium)*
+
+Los usuarios Premium pueden crear tareas e ideas utilizando su voz, gracias a la integración con OpenAI Whisper.
+
+### Crear rápido por voz desde el listado
+
+1. En la página de **Tareas** o **Ideas**, busca el botón **"Dictar"** junto al botón de crear.
+2. Haz clic en **"Dictar"**. Tu navegador te pedirá permiso para acceder al micrófono.
+3. Habla claramente. El botón cambiará a rojo pulsante indicando que está grabando.
+4. Haz clic en **"Detener"** cuando termines.
+5. El audio se enviará automáticamente al servidor para su transcripción.
+6. Se creará la tarea o idea con el texto transcrito como nombre y prioridad media por defecto.
+
+> Las ideas creadas por voz se marcan automáticamente con origen **"Voz"**.
+
+---
+
+### Dictar el nombre en un formulario
+
+1. En el formulario de **nueva tarea** o **nueva idea**, junto al campo "Nombre", verás el botón **"Dictar"**.
+2. Haz clic para grabar y luego para detener.
+3. El texto transcrito se rellenará automáticamente en el campo Nombre.
+4. Puedes editarlo antes de enviar el formulario.
+
+> Se requiere un navegador compatible con la API `MediaRecorder` (Chrome, Firefox, Edge, Safari 14.5+).
+
+---
+
+## 6. Proyectos *(Premium)*
 
 Los proyectos permiten agrupar tareas relacionadas bajo un mismo objetivo.
 
@@ -192,7 +221,7 @@ Accede desde el sidebar a **"Proyectos"**. Verás una cuadrícula con todos tus 
    - **Nombre** *(obligatorio)*
    - **Descripción** *(opcional)*
    - **Color**: elige un color identificativo
-   - **Estado**: Creado / Activo / Completado
+   - **Estado**: Inactivo / Activo / Completado
 3. Haz clic en **"Crear proyecto"**.
 
 ---
@@ -212,7 +241,7 @@ Al crear o editar una tarea (en el formulario de tareas), aparece un selector de
 
 ---
 
-## 6. Cajas de recursos *(Premium)*
+## 7. Cajas de recursos *(Premium)*
 
 Las cajas son colecciones de recursos organizados por tema (enlaces, documentos, vídeos, imágenes, etc.).
 
@@ -248,7 +277,7 @@ Los recursos de tipo **Enlace** son clicables directamente desde la lista.
 
 ---
 
-## 7. Suscripción y planes
+## 8. Suscripción y planes
 
 ### Ver tu plan actual
 
@@ -275,7 +304,7 @@ Accede desde el sidebar a **"Suscripción"**. Verás:
 
 ---
 
-## 8. Configuración de cuenta
+## 9. Configuración de cuenta
 
 Accede desde el menú de usuario (esquina superior derecha) o desde el sidebar → **"Configuración"**.
 
@@ -304,7 +333,7 @@ En **"Apariencia"** puedes alternar entre el **tema claro** y el **tema oscuro**
 
 ---
 
-## 9. Panel de administración *(Admin)*
+## 10. Panel de administración *(Admin)*
 
 Los usuarios con rol de administrador tienen acceso a un panel de gestión en `/admin`.
 
@@ -343,7 +372,7 @@ En **"Suscripciones"** el administrador puede ver:
 
 ---
 
-## 10. Preguntas frecuentes
+## 11. Preguntas frecuentes
 
 **¿Puedo tener más de 5 tareas en el plan gratuito?**
 No. El plan gratuito tiene un límite de 5 tareas en estado "pendiente" simultáneamente. Puedes completar tareas existentes para liberar espacio, o actualizar a Premium para tener tareas ilimitadas.

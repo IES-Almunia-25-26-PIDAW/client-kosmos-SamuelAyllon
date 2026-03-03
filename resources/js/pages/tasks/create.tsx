@@ -1,9 +1,10 @@
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
+import VoiceRecorder from '@/components/voice-recorder';
 import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -16,6 +17,8 @@ interface Props {
 }
 
 export default function TaskCreate({ projects }: Props) {
+    const { props } = usePage<{ auth: { is_premium: boolean } }>();
+    const isPremium = props.auth.is_premium;
     const { data, setData, post, processing, errors } = useForm({
         name: '',
         description: '',
@@ -52,13 +55,21 @@ export default function TaskCreate({ projects }: Props) {
                             {/* Nombre */}
                             <div className="flex flex-col gap-1.5">
                                 <Label htmlFor="name">Nombre *</Label>
-                                <Input
-                                    id="name"
-                                    value={data.name}
-                                    onChange={e => setData('name', e.target.value)}
-                                    placeholder="Nombre de la tarea"
-                                    autoFocus
-                                />
+                                <div className="flex gap-2">
+                                    <Input
+                                        id="name"
+                                        value={data.name}
+                                        onChange={e => setData('name', e.target.value)}
+                                        placeholder="Nombre de la tarea"
+                                        autoFocus
+                                    />
+                                    {isPremium && (
+                                        <VoiceRecorder
+                                            onTranscription={(text) => setData('name', text)}
+                                            disabled={processing}
+                                        />
+                                    )}
+                                </div>
                                 {errors.name && <p className="text-xs text-red-600">{errors.name}</p>}
                             </div>
 

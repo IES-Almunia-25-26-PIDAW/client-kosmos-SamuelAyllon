@@ -129,7 +129,7 @@
 - Pest proporciona una API más expresiva y legible que PHPUnit, con funciones globales como `it()`, `test()`, `beforeEach()`.
 - Es totalmente compatible con PHPUnit (corre sobre él), por lo que no sacrifica funcionalidad.
 - El trait `RefreshDatabase` garantiza que cada test parte de una base de datos limpia, haciendo los tests independientes entre sí.
-- **Resultado:** 143 tests / 551 assertions pasando al 100%.
+- **Resultado:** 156 tests / 590 assertions pasando al 100%.
 
 ---
 
@@ -156,7 +156,27 @@
 
 ---
 
-## 9. Estructura de tipos TypeScript
+## 9. Integración de voz — OpenAI Whisper
+
+**Decisión:** integrar la API de OpenAI Whisper (`whisper-1`) para transcripción de audio a texto, permitiendo crear tareas e ideas por voz.
+
+**Justificación:**
+- OpenAI Whisper es el modelo de speech-to-text más preciso disponible como API, con soporte nativo para español y más de 50 idiomas.
+- Usar la API en lugar de ejecutar Whisper localmente (Python + ffmpeg) elimina la dependencia de un entorno Python, simplifica el despliegue Docker y evita la necesidad de GPU para la inferencia.
+- La respuesta es lo suficientemente rápida (1-5 segundos para grabaciones cortas) como para no necesitar procesamiento asíncrono con colas, reduciendo la complejidad arquitectónica.
+- El componente frontend usa la API nativa `MediaRecorder` del navegador, sin dependencias de npm adicionales para la captura de audio.
+- La funcionalidad está restringida al rol `premium_user`, coherente con el modelo freemium del proyecto.
+
+**Paquete:** `openai-php/client` v0.19 — cliente PHP oficial para la API de OpenAI, instalado via Composer.
+
+**Alternativas descartadas:**
+- Whisper local (Python): requiere Python, ffmpeg y opcionalmente GPU; innecesariamente complejo para un proyecto académico.
+- Google Cloud Speech-to-Text: requiere cuenta GCP con facturación activa.
+- Web Speech API del navegador: solo funciona en Chrome, precisión inferior y no permite almacenar las grabaciones.
+
+---
+
+## 10. Estructura de tipos TypeScript
 
 **Decisión:** organizar los tipos en subcarpetas temáticas (`models/`, `pages/`, `admin/`, `shared/`) en lugar de un único archivo `types.ts`.
 

@@ -17,6 +17,7 @@ class StoreIdeaRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:2000'],
             'priority' => ['required', 'in:low,medium,high'],
+            'source' => ['nullable', 'in:manual,voice,ai_suggestion'],
         ];
     }
 

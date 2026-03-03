@@ -3,6 +3,7 @@ import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Pencil, Trash2, Table2, LayoutGrid, Lightbulb } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import VoiceRecorder from '@/components/voice-recorder';
 import { Checkbox } from '@/components/ui/checkbox';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem, IdeasProps, Idea } from '@/types';
@@ -168,8 +169,9 @@ function GalleryView({ ideas }: { ideas: Idea[] }) {
 // ── Página principal ────────────────────────────────────────────────────────
 
 export default function IdeasIndex({ ideas }: IdeasProps) {
-    const { props } = usePage<{ flash?: { success?: string } }>();
+    const { props } = usePage<{ flash?: { success?: string }; auth: { is_premium: boolean } }>();
     const flash = props.flash;
+    const isPremium = props.auth.is_premium;
 
     const [view, setView] = useState<ViewType>('table');
     const [priorityFilter, setPriorityFilter] = useState<'all' | 'high' | 'medium' | 'low'>('all');
@@ -213,6 +215,11 @@ export default function IdeasIndex({ ideas }: IdeasProps) {
                                 </Button>
                             ))}
                         </div>
+                        {isPremium && (
+                            <VoiceRecorder
+                                onTranscription={(text) => router.post('/ideas', { name: text, priority: 'medium', source: 'voice' })}
+                            />
+                        )}
                         <Link href="/ideas/create"><Button>Nueva idea</Button></Link>
                     </div>
                 </div>
