@@ -113,7 +113,7 @@ export default function AiChatsIndex({ messages: initialMessages }: AiChatsProps
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Asistente IA" />
 
-            <div className="flex flex-col h-[calc(100vh-8rem)] p-6">
+            <div className="flex flex-col h-[calc(100vh-4rem)] p-6">
                 {/* Header con gradiente */}
                 <div className="mb-4 rounded-2xl bg-gradient-to-r from-violet-500/10 via-purple-500/10 to-fuchsia-500/10 border-2 border-violet-500/20 p-5">
                     <div className="flex items-center justify-between">
