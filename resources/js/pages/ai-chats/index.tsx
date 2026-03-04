@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, FormEvent } from 'react';
-import { Head, router } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
 import axios from '@/lib/axios';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -98,7 +98,7 @@ export default function AiChatsIndex({ messages: initialMessages }: AiChatsProps
         try {
             await axios.delete('/ai-chats');
             setMessages([]);
-        } catch {
+        } catch (err: any) {
             setError('Error al limpiar el historial');
         }
     };

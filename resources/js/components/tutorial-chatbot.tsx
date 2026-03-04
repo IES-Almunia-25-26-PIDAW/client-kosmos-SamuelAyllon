@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { router, usePage } from '@inertiajs/react';
+import { router } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -135,14 +135,6 @@ export default function TutorialChatbot({ show, onComplete, isPremium, userName 
     // Seleccionar pasos según el tipo de usuario y personalizar con el nombre
     const tutorialSteps = isPremium ? premiumUserSteps : freeUserSteps;
     
-    // Personalizar el mensaje de bienvenida con el nombre del usuario
-    const getPersonalizedMessage = (message: string) => {
-        if (currentStep === 0) {
-            return message.replace('¡Hola!', `¡Hola, ${userName}!`);
-        }
-        return message;
-    };
-
     const step = tutorialSteps[currentStep];
     const isFirstStep = currentStep === 0;
     const isLastStep = currentStep === tutorialSteps.length - 1;
@@ -203,7 +195,9 @@ export default function TutorialChatbot({ show, onComplete, isPremium, userName 
         setIsTyping(true);
         setDisplayedMessage('');
 
-        const message = getPersonalizedMessage(step.botMessage);
+        const message = currentStep === 0
+            ? step.botMessage.replace('¡Hola!', `¡Hola, ${userName}!`)
+            : step.botMessage;
         let index = 0;
 
         const typingInterval = setInterval(() => {
