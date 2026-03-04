@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, FormEvent } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Head } from '@inertiajs/react';
 import axios from '@/lib/axios';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -47,7 +47,7 @@ export default function AiChatsIndex({ messages: initialMessages }: AiChatsProps
         textareaRef.current?.focus();
     }, []);
 
-    const handleSubmit = async (e: FormEvent) => {
+    const handleSubmit = async (e: React.SyntheticEvent) => {
         e.preventDefault();
         
         const message = input.trim();
@@ -76,10 +76,11 @@ export default function AiChatsIndex({ messages: initialMessages }: AiChatsProps
                 data.user_message,
                 data.assistant_message,
             ]);
-        } catch (err: any) {
+        } catch (err: unknown) {
             // Quitar mensaje temporal en caso de error
             setMessages(prev => prev.slice(0, -1));
-            const errorMessage = err.response?.data?.error || err.response?.data?.message || err.message || 'Error desconocido';
+            const e = err as { response?: { data?: { error?: string; message?: string } }; message?: string };
+            const errorMessage = e.response?.data?.error || e.response?.data?.message || e.message || 'Error desconocido';
             setError(errorMessage);
         } finally {
             setIsLoading(false);
@@ -98,7 +99,7 @@ export default function AiChatsIndex({ messages: initialMessages }: AiChatsProps
         try {
             await axios.delete('/ai-chats');
             setMessages([]);
-        } catch (err: any) {
+        } catch {
             setError('Error al limpiar el historial');
         }
     };
