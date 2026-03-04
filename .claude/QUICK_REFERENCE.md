@@ -455,7 +455,12 @@ Definido en `HandleInertiaRequests::share()`.
 
 ---
 
-**Última actualización:** Marzo 2026
-**Versión:** 1.5 Flowly (180 tests / 692 assertions — proyecto completo y entregable)
+**Última actualización:** Marzo 2026 (sesión 8)
+**Versión:** 1.6 Flowly (180 tests / 692 assertions — proyecto completo y entregable)
+
+Cambios recientes (sesión 8):
+- Task `due_date` ahora obligatorio en creación
+- Auto-asignación de proyecto al crear tarea desde `projects/show` (`?project_id=X`)
+- Vistas admin con UI profesional (Badge shadcn, AlertDialog, iconos lucide, estados vacíos)
 
 Imprime esto o mantenlo en una pestaña. Te ahorrará tiempo. 📌

@@ -32,7 +32,7 @@
 
 **Flowly** es una plataforma web de productividad personal freemium que actúa como tu **centro de mando integrado** para gestionar:
 
-- 📝 **Tareas** — Gestor completo con prioridades y fechas de vencimiento
+- 📝 **Tareas** — Gestor completo con prioridades, fechas de vencimiento obligatorias y asignación a proyecto
 - 💡 **Ideas** — Captura rápida de inspiraciones y pensamientos
 - 📊 **Proyectos** — Agrupa tareas en proyectos con seguimiento de progreso *(Premium)*
 - 📚 **Cajas de Recursos** — Centraliza enlaces, documentos y vídeos *(Premium)*
@@ -67,10 +67,11 @@
 - ✅ Asistente IA conversacional con contexto real del usuario (Groq Llama 3.3 / OpenAI GPT)
 
 ### Admin Features — ✅ Completado
-- ✅ Dashboard con estadísticas globales de la plataforma
-- ✅ Gestión de usuarios (lista paginada + detalle + eliminar)
-- ✅ Historial de pagos con resumen de ingresos
+- ✅ Dashboard con estadísticas globales (iconos por stat, cards mejoradas)
+- ✅ Gestión de usuarios (lista paginada + detalle + AlertDialog para eliminar)
+- ✅ Historial de pagos con resumen de ingresos (badges shadcn, iconos lucide)
 - ✅ Control de suscripciones con distribución por plan
+- ✅ UI admin al mismo nivel visual que vistas de usuario (headers, Badge, AlertDialog, estados vacíos)
 
 ---
 

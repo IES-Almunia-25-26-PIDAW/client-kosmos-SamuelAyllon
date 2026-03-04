@@ -34,7 +34,7 @@ Stack: Laravel 12 + Inertia.js 2 + React 18 + TypeScript + TiDB Cloud Serverless
 - Asistente IA conversacional (`GET|POST|DELETE /ai-chats`) — Groq / OpenAI-compatible
 
 ### Admin (`admin`)
-- Panel de administración exclusivo en `/admin/*`
+- Panel de administración exclusivo en `/admin/*` con UI profesional (Badge, AlertDialog, iconos lucide)
 - Gestión de usuarios, pagos y suscripciones
 - **Admin NO accede** a rutas premium (/projects, /boxes, /resources, /ai-chats)
 
@@ -115,6 +115,8 @@ php artisan test --filter=TaskControllerTest
 - `Task` e `Idea` — **SIN SoftDeletes**. `delete()` hace hard delete físico.
 - `Project.status` — valores: `active | inactive | completed` — SIN 'created', SIN 'archived'
 - `Task.status` — valores: `pending | completed` — SIN 'in_progress'
+- `Task.due_date` — **obligatorio** en creación (`required` en StoreTaskRequest)
 - Admin NO accede a rutas premium; premium NO accede a `/admin/*`
 - `AiConversation` — `$timestamps = false` (solo `created_at`)
 - `Task` e `Idea` usan campo `name` (NO `title`)
+- `TaskController::create()` acepta `?project_id=X` → auto-asigna proyecto en formulario

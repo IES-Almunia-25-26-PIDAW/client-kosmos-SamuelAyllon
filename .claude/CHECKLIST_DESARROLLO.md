@@ -408,7 +408,7 @@ Para cada feature (Task, Idea, Project, Box, Resource, Voice, AI):
 ✓ Tests: 180/180 pasando (692 assertions) ← Mar 2026
 ✓ Documentación actualizada (.claude/ + docs/)
 ✓ Dashboard implementado con datos reales (free/premium/admin) + tutorial chatbot
-✓ Vistas admin: dashboard, users (index+show), payments, subscriptions
+✓ Vistas admin con UI profesional: Badge shadcn, AlertDialog, iconos lucide, estados vacíos
 ✓ Types TypeScript organizados en subcarpetas
 ✓ Todas las vistas de usuario implementadas con UI real
 ✓ Landing page completa (hero, features, pricing, footer)
@@ -416,6 +416,7 @@ Para cada feature (Task, Idea, Project, Box, Resource, Voice, AI):
 ✓ Asistente IA conversacional (Groq/OpenAI-compatible, solo premium)
 ✓ Tutorial interactivo para nuevos usuarios (spotlight + chatbot Flowy)
 ✓ Docker multi-stage (Dockerfile + docker-compose + entrypoint)
+✓ Task due_date obligatorio + auto-asignación de proyecto desde projects/show
 ```
 
 ---
@@ -433,5 +434,5 @@ Para cada feature (Task, Idea, Project, Box, Resource, Voice, AI):
 
 **Imprime esto. Úsalo todos los días. Te ahorrará horas de debugging. ✓**
 
-**Última actualización:** Marzo 2026
-**Versión:** 1.5 Flowly
+**Última actualización:** Marzo 2026 (sesión 8)
+**Versión:** 1.6 Flowly

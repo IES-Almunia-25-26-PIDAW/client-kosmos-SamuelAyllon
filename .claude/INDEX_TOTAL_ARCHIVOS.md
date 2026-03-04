@@ -182,7 +182,7 @@ resources/js/pages/
 │   └── two-factor.tsx                 ✅
 ├── tasks/
 │   ├── index.tsx                      ✅ Lista + quick-create + voice recorder
-│   ├── create.tsx                     ✅ Formulario completo + voice dictation
+│   ├── create.tsx                     ✅ Formulario completo + voice dictation + due_date obligatorio + auto-assign project
 │   └── edit.tsx                       ✅
 ├── ideas/
 │   ├── index.tsx                      ✅ Lista + quick-create + voice recorder
@@ -207,13 +207,13 @@ resources/js/pages/
 │   └── index.tsx                      ✅
 ├── ai-chats/
 │   └── index.tsx                      ✅ Chat UI completo, sugerencias, auto-scroll
-└── admin/
-    ├── dashboard.tsx                  ✅
+└── admin/                           ← UI profesional: Badge, AlertDialog, iconos lucide, estados vacíos
+    ├── dashboard.tsx                  ✅ Stats con iconos + cards mejoradas
     ├── users/
-    │   ├── index.tsx                  ✅
-    │   └── show.tsx                   ✅
-    ├── payments/index.tsx             ✅
-    └── subscriptions/index.tsx        ✅
+    │   ├── index.tsx                  ✅ Badge roles + AlertDialog eliminar
+    │   └── show.tsx                   ✅ Actividad con iconos + suscripción Badge
+    ├── payments/index.tsx             ✅ Summary icons + Badge status
+    └── subscriptions/index.tsx        ✅ Summary icons + Badge plan/status
 ```
 
 ### Componentes

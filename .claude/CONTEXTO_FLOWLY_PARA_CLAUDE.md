@@ -9,7 +9,7 @@ Copia todo este contenido y pégalo en Claude para que tenga el contexto complet
 **Proyecto:** Flowly - Plataforma de Productividad Personal  
 **Stack:** Laravel 12 + Inertia.js + React + SQLite  
 **Modelo:** Freemium (3 roles: admin, premium_user, free_user)  
-**Estado:** Fase de Desarrollo  
+**Estado:** Proyecto completado y entregable
 **Objetivo:** Centro de mando integrado para gestionar tareas, ideas, proyectos y conocimiento  
 
 ---
@@ -75,17 +75,17 @@ GET  /dashboard           Dashboard personal
 GET  /tasks               Listar tareas (límite 5 para free)
 POST /tasks               Crear tarea
 PUT  /tasks/{id}          Actualizar tarea
-DELETE /tasks/{id}        Eliminar tarea (soft delete)
+DELETE /tasks/{id}        Eliminar tarea (hard delete)
 GET  /ideas               Listar ideas
 POST /ideas               Crear idea
 PUT  /ideas/{id}          Actualizar idea
-DELETE /ideas/{id}        Eliminar idea (soft delete)
+DELETE /ideas/{id}        Eliminar idea (hard delete)
 GET  /subscription        Ver suscripción actual
 GET  /checkout            Formulario de pago
 POST /checkout            Procesar pago
 ```
 
-### Premium (premium_user + admin)
+### Premium (solo premium_user — admin NO tiene acceso)
 ```
 GET  /projects            Listar proyectos
 POST /projects            Crear proyecto
@@ -239,7 +239,7 @@ Free User:
 - ✅ Gestor de tareas (5 para free, ∞ para premium)
 - ✅ Dashboard personal con estadísticas
 - ✅ Filtros y búsqueda
-- ✅ Soft deletes (recuperar datos)
+- ✅ Hard delete para tareas e ideas (sin soft deletes)
 
 ### Premium Only
 - ✅ Proyectos con jerarquía de tareas
@@ -266,7 +266,7 @@ Free User:
 ✅ Scopes en modelos para queries reutilizables
 ✅ Gates/Policies para autorización
 ✅ user_modified_at en todas las entidades principales
-✅ Soft deletes para Task e Idea
+✅ Hard delete para Task e Idea (SoftDeletes eliminado)
 ✅ Cascade delete para relaciones padre-hijo
 ```
 
@@ -283,7 +283,7 @@ Free User:
 ```
 ✅ Pest para testing
 ✅ Tests en tests/Feature/
-✅ 143 tests pasando (551 assertions)
+✅ 180 tests pasando (692 assertions)
 ✅ Tests de Feature, no unitarios
 ✅ Usar RefreshDatabase para resetear BD entre tests
 ✅ withoutVite() en beforeEach (Pest.php)
@@ -347,7 +347,7 @@ Métodos:
 belongsTo User
 hasMany Tasks (cascade delete)
 
-// Status: 'active' | 'created' | 'completed' — SIN 'archived'
+// Status: 'active' | 'inactive' | 'completed' — SIN 'archived', SIN 'created'
 // Color: hex string, siempre requerido (NOT NULL, default '#3B82F6')
 
 Scopes:
@@ -361,7 +361,7 @@ Métodos:
 ### Task
 ```php
 belongsTo User, Project (nullable)
-Soft deletes
+Hard delete (SIN SoftDeletes)
 
 // Status: 'pending' | 'completed' — SIN 'in_progress'
 // Priority: 'low' | 'medium' | 'high'
@@ -379,7 +379,7 @@ Métodos:
 ### Idea
 ```php
 belongsTo User
-Soft deletes
+Hard delete (SIN SoftDeletes)
 
 // Status: 'active' | 'resolved' — SIN 'archived'
 // Source: 'manual' | 'voice' | 'ai_suggestion'
@@ -438,7 +438,7 @@ Métodos:
 ### 1. Autorización por Rol
 ```
 Middleware: role:admin
-Middleware: role:premium_user|admin
+Middleware: role:premium_user
 Middleware: role:free_user|premium_user|admin
 ```
 
@@ -471,7 +471,7 @@ No guardar tokens en BD
 
 ---
 
-## 🧪 TESTING (143 TESTS — TODOS PASANDO ✅)
+## 🧪 TESTING (180 TESTS — TODOS PASANDO ✅)
 
 ```
 TaskControllerTest (16 tests)
@@ -630,11 +630,11 @@ Mi código es: [código]
 
 ### Rutas a Proteger
 ```
-/projects/*          → role:premium_user|admin
-/boxes/*             → role:premium_user|admin
-/resources/*         → role:premium_user|admin
-/voice/transcribe    → role:premium_user|admin
-/ai-chats/*          → role:premium_user|admin
+/projects/*          → role:premium_user
+/boxes/*             → role:premium_user
+/resources/*         → role:premium_user
+/voice/transcribe    → role:premium_user
+/ai-chats/*          → role:premium_user
 /admin/*             → role:admin
 ```
 

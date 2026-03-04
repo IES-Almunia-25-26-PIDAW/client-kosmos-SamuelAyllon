@@ -49,6 +49,7 @@ it('free user can create a task', function () {
         ->post(route('tasks.store'), [
             'name' => 'Nueva tarea',
             'priority' => 'medium',
+            'due_date' => now()->addDays(7)->format('Y-m-d'),
         ])
         ->assertRedirect(route('tasks.index'));
 
@@ -72,7 +73,7 @@ it('free user is blocked when already has 5 pending tasks', function () {
     Task::factory()->count(5)->create(['user_id' => $user->id, 'status' => 'pending']);
 
     $this->actingAs($user)
-        ->post(route('tasks.store'), ['name' => 'Sexta tarea', 'priority' => 'low'])
+        ->post(route('tasks.store'), ['name' => 'Sexta tarea', 'priority' => 'low', 'due_date' => now()->addDays(7)->format('Y-m-d')])
         ->assertSessionHasErrors('limit');
 
     $this->assertDatabaseMissing('tasks', ['name' => 'Sexta tarea']);
@@ -83,7 +84,7 @@ it('premium user can create more than 5 tasks', function () {
     Task::factory()->count(5)->create(['user_id' => $user->id, 'status' => 'pending']);
 
     $this->actingAs($user)
-        ->post(route('tasks.store'), ['name' => 'Sexta tarea', 'priority' => 'low'])
+        ->post(route('tasks.store'), ['name' => 'Sexta tarea', 'priority' => 'low', 'due_date' => now()->addDays(7)->format('Y-m-d')])
         ->assertRedirect(route('tasks.index'));
 
     expect(Task::where('user_id', $user->id)->count())->toBe(6);

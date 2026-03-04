@@ -1,8 +1,16 @@
+import { useState } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import {
+    AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+    AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem, AdminUser, AdminUsersIndexProps } from '@/types';
+import { Users, Eye, Trash2, ClipboardList, Lightbulb, FolderOpen } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Admin', href: '/admin/dashboard' },
@@ -10,9 +18,9 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 const roleColors: Record<string, string> = {
-    admin:        'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
-    premium_user: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
-    free_user:    'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300',
+    admin:        'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800',
+    premium_user: 'bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-800',
+    free_user:    'bg-gray-100 text-gray-600 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700',
 };
 
 const roleLabels: Record<string, string> = {
@@ -23,12 +31,6 @@ const planLabels: Record<string, string> = {
     free: 'Free', premium_monthly: 'Premium mensual', premium_yearly: 'Premium anual',
 };
 
-function confirmDelete(user: AdminUser) {
-    if (confirm(`¿Eliminar a ${user.name}? Esta acción no se puede deshacer.`)) {
-        router.delete(`/admin/users/${user.id}`);
-    }
-}
-
 export default function AdminUsersIndex({ users }: AdminUsersIndexProps) {
     const roleName = (user: AdminUser) => user.roles?.[0]?.name ?? 'free_user';
 
@@ -36,36 +38,47 @@ export default function AdminUsersIndex({ users }: AdminUsersIndexProps) {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Admin — Usuarios" />
 
-            <div className="flex flex-col gap-6 p-6">
+            <div className="flex flex-col gap-6 p-4 md:p-6">
 
-                {/* Cabecera */}
-                <div className="flex items-center justify-between">
+                {/* Header */}
+                <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                        <Users className="h-5 w-5 text-primary" />
+                    </div>
                     <div>
-                        <h1 className="text-2xl font-bold">Usuarios</h1>
+                        <h1 className="text-2xl font-bold tracking-tight">Usuarios</h1>
                         <p className="text-sm text-muted-foreground">{users.total} usuarios registrados</p>
                     </div>
                 </div>
 
-                {/* Tabla */}
-                <Card>
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-base">Lista de usuarios</CardTitle>
+                {/* Table */}
+                <Card className="shadow-sm">
+                    <CardHeader className="border-b bg-muted/30 pb-4">
+                        <div className="flex items-center gap-2">
+                            <Users className="h-4 w-4 text-primary" />
+                            <CardTitle className="text-base font-semibold">Lista de usuarios</CardTitle>
+                        </div>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="pt-4">
                         {users.data.length === 0 ? (
-                            <p className="text-sm text-muted-foreground">Sin usuarios registrados.</p>
+                            <div className="rounded-xl border-2 border-dashed py-12 text-center">
+                                <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-muted/50">
+                                    <Users className="h-6 w-6 text-muted-foreground" />
+                                </div>
+                                <p className="text-sm text-muted-foreground">Sin usuarios registrados.</p>
+                            </div>
                         ) : (
                             <div className="flex flex-col gap-2">
                                 {users.data.map(user => (
-                                    <div key={user.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-4">
+                                    <div key={user.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-4 transition-colors hover:bg-muted/30">
 
                                         {/* Info principal */}
                                         <div className="min-w-0 flex-1">
                                             <div className="flex items-center gap-2">
                                                 <p className="truncate font-medium">{user.name}</p>
-                                                <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${roleColors[roleName(user)]}`}>
+                                                <Badge variant="outline" className={roleColors[roleName(user)]}>
                                                     {roleLabels[roleName(user)] ?? roleName(user)}
-                                                </span>
+                                                </Badge>
                                             </div>
                                             <p className="truncate text-sm text-muted-foreground">{user.email}</p>
                                         </div>
@@ -78,41 +91,62 @@ export default function AdminUsersIndex({ users }: AdminUsersIndexProps) {
                                             </p>
                                         </div>
 
-                                        {/* Conteos */}
+                                        {/* Counts */}
                                         <div className="flex shrink-0 gap-4 text-center">
-                                            <div>
-                                                <p className="text-xs text-muted-foreground">Tareas</p>
-                                                <p className="text-sm font-medium">{user.tasks_count ?? 0}</p>
+                                            <div className="flex items-center gap-1.5">
+                                                <ClipboardList className="h-3.5 w-3.5 text-muted-foreground" />
+                                                <span className="text-sm font-medium">{user.tasks_count ?? 0}</span>
                                             </div>
-                                            <div>
-                                                <p className="text-xs text-muted-foreground">Ideas</p>
-                                                <p className="text-sm font-medium">{user.ideas_count ?? 0}</p>
+                                            <div className="flex items-center gap-1.5">
+                                                <Lightbulb className="h-3.5 w-3.5 text-muted-foreground" />
+                                                <span className="text-sm font-medium">{user.ideas_count ?? 0}</span>
                                             </div>
-                                            <div>
-                                                <p className="text-xs text-muted-foreground">Proyectos</p>
-                                                <p className="text-sm font-medium">{user.projects_count ?? 0}</p>
+                                            <div className="flex items-center gap-1.5">
+                                                <FolderOpen className="h-3.5 w-3.5 text-muted-foreground" />
+                                                <span className="text-sm font-medium">{user.projects_count ?? 0}</span>
                                             </div>
                                         </div>
 
-                                        {/* Acciones */}
+                                        {/* Actions */}
                                         <div className="flex shrink-0 gap-2">
                                             <Link href={`/admin/users/${user.id}`}>
-                                                <Button size="sm" variant="outline">Ver</Button>
+                                                <Button size="sm" variant="outline" className="gap-1.5">
+                                                    <Eye className="h-3.5 w-3.5" />
+                                                    Ver
+                                                </Button>
                                             </Link>
-                                            <Button
-                                                size="sm"
-                                                variant="destructive"
-                                                onClick={() => confirmDelete(user)}
-                                            >
-                                                Eliminar
-                                            </Button>
+                                            <AlertDialog>
+                                                <AlertDialogTrigger asChild>
+                                                    <Button size="sm" variant="destructive" className="gap-1.5">
+                                                        <Trash2 className="h-3.5 w-3.5" />
+                                                        Eliminar
+                                                    </Button>
+                                                </AlertDialogTrigger>
+                                                <AlertDialogContent>
+                                                    <AlertDialogHeader>
+                                                        <AlertDialogTitle>¿Eliminar a {user.name}?</AlertDialogTitle>
+                                                        <AlertDialogDescription>
+                                                            Esta acción no se puede deshacer. Se eliminarán todos los datos asociados a este usuario.
+                                                        </AlertDialogDescription>
+                                                    </AlertDialogHeader>
+                                                    <AlertDialogFooter>
+                                                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                                        <AlertDialogAction
+                                                            onClick={() => router.delete(`/admin/users/${user.id}`)}
+                                                            className="bg-destructive text-white hover:bg-destructive/90"
+                                                        >
+                                                            Eliminar
+                                                        </AlertDialogAction>
+                                                    </AlertDialogFooter>
+                                                </AlertDialogContent>
+                                            </AlertDialog>
                                         </div>
                                     </div>
                                 ))}
                             </div>
                         )}
 
-                        {/* Paginación */}
+                        {/* Pagination */}
                         {users.last_page > 1 && (
                             <div className="mt-4 flex items-center justify-center gap-1">
                                 {users.links.map((link, i) => (
@@ -120,7 +154,7 @@ export default function AdminUsersIndex({ users }: AdminUsersIndexProps) {
                                         key={i}
                                         disabled={!link.url || link.active}
                                         onClick={() => link.url && router.get(link.url)}
-                                        className={`rounded px-3 py-1 text-sm ${
+                                        className={`rounded px-3 py-1 text-sm transition-colors ${
                                             link.active
                                                 ? 'bg-primary text-primary-foreground font-medium'
                                                 : link.url

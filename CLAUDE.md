@@ -2,7 +2,7 @@
 
 ## Proyecto
 Plataforma de productividad personal (freemium). Proyecto escolar 2º DAM.
-Stack: **Laravel 11 + Inertia.js 2 + React 18 + TypeScript + TiDB Cloud Serverless (MySQL) + Pest**
+Stack: **Laravel 12 + Inertia.js 2 + React 18 + TypeScript + TiDB Cloud Serverless (MySQL) + Pest**
 UI: **shadcn/ui** (components en `resources/js/components/ui/`)
 Auth: Laravel Fortify | Roles: Spatie Permission 6
 
@@ -61,7 +61,7 @@ Aplicado en `resources/css/app.css` y `resources/views/app.blade.php`:
 **Auth:** login, register, two-factor-challenge, forgot-password, reset-password, confirm-password, verify-email
 **Settings:** profile, password, appearance, two-factor
 **Dashboard:** datos reales con condicional free/premium/admin + tutorial chatbot para nuevos usuarios
-**Tasks:** index (+ voice quick-create), create (+ voice dictation), edit
+**Tasks:** index (+ voice quick-create), create (+ voice dictation + auto-assign project via query param), edit
 **Ideas:** index (+ voice quick-create), create (+ voice dictation), edit
 **Projects:** index, show, create, edit
 **Boxes:** index, show, create, edit
@@ -70,7 +70,7 @@ Aplicado en `resources/css/app.css` y `resources/views/app.blade.php`:
 **Checkout:** index
 **AI Chats:** index (chat con asistente IA, solo premium)
 **Landing:** `welcome.tsx` con hero, features (6 tarjetas), pricing (Free/9.99€/99.99€), footer
-**Admin:** dashboard, users/index, users/show, payments/index, subscriptions/index
+**Admin:** dashboard, users/index, users/show, payments/index, subscriptions/index — UI mejorada con iconos lucide, Badge shadcn, AlertDialog para eliminar, estados vacíos elaborados
 
 ## Estructura de tipos TypeScript (`resources/js/types/`)
 
@@ -150,6 +150,9 @@ Límite de tareas: `User::canAddTask()` cuenta WHERE status='pending'
 - Error de pago en checkout: `usePage().props.errors.payment` (error de página, no de campo)
 - `tasks.index` ordena: pendientes antes que completadas; dentro de cada grupo por prioridad DESC
 - Task e Idea usan campo `name` (NO `title`)
+- `Task.due_date` es **obligatorio** (`required` en `StoreTaskRequest`) — el frontend marca el campo con asterisco y atributo `required`
+- `TaskController::create()` acepta query param `?project_id=X` y lo pasa como prop `defaultProjectId` — el formulario pre-selecciona el proyecto
+- Vistas admin usan componentes shadcn: `Badge` (roles, estados, planes), `AlertDialog` (confirmación de eliminación), iconos `lucide-react` en headers y stats
 
 ## Despliegue (Docker)
 

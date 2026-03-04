@@ -1,5 +1,5 @@
 # Flowly — Estado Real del Proyecto
-> Última actualización: 2026-03-04 (sesión 7). Actualizar este archivo al completar cada sección.
+> Última actualización: 2026-03-04 (sesión 8). Actualizar este archivo al completar cada sección.
 
 ---
 
@@ -19,7 +19,7 @@
 | Frontend — Auth | ✅ Páginas login, register, 2FA, forgot-password (Fortify) |
 | Frontend — Settings | ✅ Páginas profile, password, appearance, two-factor |
 | Frontend — Dashboard | ✅ Implementado (free: tareas+ideas, premium: +proyectos, admin: redirige) |
-| Frontend — Admin | ✅ Las 5 vistas admin implementadas con UI real |
+| Frontend — Admin | ✅ Las 5 vistas admin con UI profesional (iconos, Badge, AlertDialog) |
 | Frontend — Types | ✅ Reorganizado en subcarpetas models/ shared/ pages/ admin/ |
 | Frontend — Features usuario | ✅ Todas las vistas de usuario implementadas con UI real + voz (Whisper) |
 | Frontend — Features premium | ✅ Todas las vistas premium implementadas con UI real + Asistente IA |
@@ -167,10 +167,10 @@ Logo real (`resources/js/assets/logo.png`) aplicado en:
 
 ### ✅ Componentes UI disponibles (shadcn/ui)
 En `resources/js/components/ui/`:
-alert, avatar, badge, breadcrumb, button, card, checkbox, collapsible,
+alert, alert-dialog, avatar, badge, breadcrumb, button, card, checkbox, collapsible,
 dialog, dropdown-menu, icon, input, input-otp, label, navigation-menu,
-placeholder-pattern, select, separator, sheet, sidebar, skeleton, spinner,
-toggle, toggle-group, tooltip
+placeholder-pattern, scroll-area, select, separator, sheet, sidebar, skeleton, spinner,
+textarea, toggle, toggle-group, tooltip
 
 ### ✅ Layouts disponibles
 - `app-layout.tsx` — layout principal con sidebar
@@ -191,15 +191,15 @@ toggle, toggle-group, tooltip
 
 ### ✅ Páginas con UI real — Dashboard y Admin
 - `pages/dashboard.tsx` — dashboard con datos reales (free/premium condicional)
-- `pages/admin/dashboard.tsx` — stats globales + pagos/usuarios recientes
-- `pages/admin/users/index.tsx` — lista paginada con roles, plan, conteos
-- `pages/admin/users/show.tsx` — detalle usuario: actividad, suscripción, pagos
-- `pages/admin/payments/index.tsx` — resumen + lista paginada con estado e importe
-- `pages/admin/subscriptions/index.tsx` — resumen por plan + lista paginada
+- `pages/admin/dashboard.tsx` — stats globales con iconos lucide + cards mejoradas + pagos/usuarios recientes con Badge shadcn
+- `pages/admin/users/index.tsx` — lista paginada con Badge (roles), iconos (conteos), AlertDialog (eliminar)
+- `pages/admin/users/show.tsx` — detalle usuario: actividad con iconos, suscripción con Badge, pagos con Badge, AlertDialog
+- `pages/admin/payments/index.tsx` — summary cards con iconos + lista paginada con Badge + fechas con icono Calendar
+- `pages/admin/subscriptions/index.tsx` — summary cards con iconos + lista paginada con Badge (plan + estado)
 
 ### ✅ Páginas con UI real — Features usuario (todos)
 - `pages/tasks/index.tsx` — lista pendientes/completadas, prioridad, fecha vencimiento, proyecto, botón voz (premium)
-- `pages/tasks/create.tsx` — formulario completo, proyectos opcionales (premium), dictado por voz (premium)
+- `pages/tasks/create.tsx` — formulario completo, due_date obligatorio, proyectos opcionales (premium) con auto-asignación vía query param, dictado por voz (premium)
 - `pages/tasks/edit.tsx` — formulario pre-rellenado
 - `pages/ideas/index.tsx` — lista activas/resueltas, prioridad, resolve/reactivate/delete, botón voz (premium)
 - `pages/ideas/create.tsx` — formulario completo, dictado por voz (premium)
@@ -380,3 +380,19 @@ Historial de fixes:
 - Tutorial chatbot actualizado: ahora 8 pasos para premium (incluye Asistente IA)
 - 20 nuevos tests en `AiChatControllerTest.php`
 - Documentación actualizada: manual-usuario (sección 9), decisiones-tecnicas (sección 10)
+
+### ✅ Sesión 8 — Cambios (2026-03-04)
+- **Task `due_date` ahora obligatorio**: `StoreTaskRequest` cambiado de `nullable` a `required`, mensaje de error añadido, frontend con `required` y asterisco
+- **Auto-asignación de proyecto al crear tarea desde proyecto**: `projects/show.tsx` pasa `?project_id=X` en el link, `TaskController::create()` lee query param y pasa `defaultProjectId` como prop, `tasks/create.tsx` inicializa `project_id` con el valor
+- **Mejora visual completa de las 5 vistas admin**:
+  - Headers decorativos con icono en caja redondeada (`bg-primary/10`) + título con `tracking-tight`
+  - Stats cards con iconos lucide-react coloridos (Users, Crown, CreditCard, TrendingUp, DollarSign, Activity, etc.)
+  - Card headers con borde inferior y fondo `bg-muted/30`
+  - Componente `Badge` de shadcn reemplaza todos los `<span>` manuales de status/rol/plan
+  - `AlertDialog` de shadcn reemplaza `confirm()` nativo para eliminación de usuarios
+  - Estados vacíos mejorados con icono centrado en círculo + texto descriptivo
+  - Hover effects en filas (`transition-colors hover:bg-muted/30`)
+  - Iconos en conteos de users index (ClipboardList, Lightbulb, FolderOpen)
+  - Botones con iconos (Eye, Trash2, ArrowLeft)
+- **Tests actualizados**: 3 tests de `TaskControllerTest` añaden `due_date` en los datos de store
+- **180/180 tests pasando (692 assertions)**
