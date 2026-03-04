@@ -198,7 +198,9 @@ OPENAI_MODEL=llama-3.3-70b-versatile             # modelo a usar
 - Form Request `StoreAiChatRequest` valida mensajes (max 2000 caracteres)
 - Modelo `AiConversation` almacena mensajes con rol `user` o `assistant`
 - Historial limitado a 20 mensajes más recientes para contexto (evita exceder tokens)
-- System prompt personalizado con el nombre del usuario y enfocado en productividad
+- **System prompt contextual**: inyecta datos reales del usuario (tareas pendientes con prioridad y fecha de vencimiento, ideas activas, proyectos activos, tareas completadas este mes) para dar consejos personalizados
+- **Instrucciones de razonamiento**: el prompt incluye directrices de razonamiento paso a paso, respuestas estructuradas y referencias a datos reales del usuario
+- Parámetros de la API: `temperature: 0.4` (respuestas enfocadas), `max_tokens: 1500` (razonamiento detallado)
 - Rutas bajo middleware `role:premium_user` — funcionalidad exclusiva Premium
 - Frontend con React: chat UI completo, mensajes optimistas, sugerencias iniciales, auto-scroll
 - `config/services.php` expone `services.openai.key` y `services.openai.base_url`

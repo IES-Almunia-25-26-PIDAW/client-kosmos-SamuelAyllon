@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreAiChatRequest;
 use App\Models\AiConversation;
+use App\Models\Idea;
+use App\Models\Project;
+use App\Models\Task;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -73,8 +76,8 @@ class AiChatController extends Controller
                     ],
                     ...$history,
                 ],
-                'max_tokens' => 1000,
-                'temperature' => 0.7,
+                'max_tokens' => 1500,
+                'temperature' => 0.4,
             ]);
 
             $assistantMessage = trim($response->choices[0]->message->content);
@@ -129,29 +132,77 @@ class AiChatController extends Controller
      */
     private function getSystemPrompt($user): string
     {
+        $context = $this->getUserContext($user);
+
         return <<<PROMPT
-Eres un asistente de productividad personal llamado Flowly AI. Tu objetivo es ayudar a los usuarios a:
+Eres Flowly AI, un asistente experto en productividad personal integrado en la plataforma Flowly. Tu rol es ser un coach de productividad inteligente que da consejos precisos, prácticos y personalizados.
 
-1. **Organizar sus ideas**: Ayúdales a estructurar pensamientos, hacer brainstorming y desarrollar conceptos.
+## Tus áreas de especialización
 
-2. **Priorizar tareas**: Sugiere cómo ordenar tareas por importancia y urgencia usando la matriz de Eisenhower u otras técnicas.
+1. **Priorización de tareas** — Matriz de Eisenhower, método ABCDE, regla 80/20 (Pareto), MoSCoW
+2. **Gestión del tiempo** — Pomodoro, time-blocking, batching de tareas, ley de Parkinson
+3. **Organización de ideas** — Mapas mentales, método SCAMPER, brainstorming estructurado, second brain (Zettelkasten)
+4. **Planificación de proyectos** — Desglose en tareas (WBS), hitos, dependencias, estimación realista
+5. **Hábitos y motivación** — Atomic Habits (hábitos atómicos), sistemas vs objetivos, gestión de energía
 
-3. **Planificar su jornada**: Ayuda a crear rutinas productivas, distribuir el tiempo y establecer objetivos diarios realistas.
+## Datos actuales del usuario
 
-4. **Mejorar su productividad**: Ofrece consejos sobre gestión del tiempo, técnicas como Pomodoro, y cómo evitar la procrastinación.
+- **Nombre:** {$user->name}
+{$context}
 
-5. **Gestionar proyectos**: Asiste en la descomposición de proyectos grandes en tareas manejables.
+## Cómo debes razonar y responder
 
-Contexto del usuario:
-- Nombre: {$user->name}
-- Es usuario premium de Flowly, una plataforma de productividad personal.
+1. **Analiza la situación**: Antes de dar consejos, considera el contexto real del usuario (sus tareas pendientes, carga de trabajo, prioridades).
+2. **Razona paso a paso**: Cuando el usuario pida ayuda para priorizar o planificar, explica brevemente tu razonamiento antes de dar la recomendación.
+3. **Sé concreto y accionable**: En lugar de "deberías organizarte mejor", di exactamente qué hacer, en qué orden, y por qué.
+4. **Referencia sus datos reales**: Si el usuario tiene tareas pendientes o proyectos, menciónalos por nombre cuando sea relevante.
+5. **Estructura tus respuestas**: Usa listas, pasos numerados o categorías claras. No escribas bloques de texto sin formato.
 
-Directrices:
+## Directrices
+
 - Responde siempre en español.
-- Sé conciso pero útil. No uses más de 3-4 párrafos por respuesta.
-- Usa emojis moderadamente para hacer la conversación más amigable.
-- Si el usuario pide ayuda con algo fuera de productividad, amablemente redirige la conversación.
-- Puedes sugerir crear tareas, ideas o proyectos en Flowly cuando sea relevante.
+- Sé directo y útil. Máximo 4-5 párrafos por respuesta, pero prioriza calidad sobre brevedad.
+- Usa emojis con moderación para hacer la conversación amigable.
+- Si el usuario pregunta algo fuera de productividad, redirige amablemente la conversación.
+- Cuando sea útil, sugiere crear tareas, ideas o proyectos en Flowly para poner en práctica tus consejos.
+- Si no tienes suficiente información para dar un consejo preciso, haz preguntas clarificadoras antes de responder.
 PROMPT;
+    }
+
+    /**
+     * Obtener contexto real del usuario para el system prompt
+     */
+    private function getUserContext($user): string
+    {
+        $pendingTasks = Task::where('user_id', $user->id)->where('status', 'pending')->get();
+        $completedThisMonth = Task::where('user_id', $user->id)
+            ->where('status', 'completed')
+            ->where('completed_at', '>=', now()->startOfMonth())
+            ->count();
+        $activeIdeas = Idea::where('user_id', $user->id)->where('status', 'active')->count();
+        $activeProjects = Project::where('user_id', $user->id)->where('status', 'active')->count();
+
+        $lines = [];
+        $lines[] = "- **Tareas pendientes:** {$pendingTasks->count()}";
+        $lines[] = "- **Tareas completadas este mes:** {$completedThisMonth}";
+        $lines[] = "- **Ideas activas:** {$activeIdeas}";
+        $lines[] = "- **Proyectos activos:** {$activeProjects}";
+
+        // Detalle de tareas pendientes (nombre + prioridad + fecha vencimiento)
+        if ($pendingTasks->isNotEmpty()) {
+            $lines[] = '';
+            $lines[] = '### Tareas pendientes del usuario';
+            foreach ($pendingTasks as $task) {
+                $priority = match ($task->priority) {
+                    'high' => '🔴 Alta',
+                    'medium' => '🟡 Media',
+                    default => '🟢 Baja',
+                };
+                $due = $task->due_date ? " — vence: {$task->due_date->format('d/m/Y')}" : '';
+                $lines[] = "- [{$priority}] {$task->name}{$due}";
+            }
+        }
+
+        return implode("\n", $lines);
     }
 }

@@ -357,6 +357,11 @@ Historial de fixes:
   - Proveedor por defecto: **Groq** (gratuito, OpenAI-compatible, llama-3.3-70b-versatile)
   - `.env` configurado con `OPENAI_BASE_URL=https://api.groq.com/openai/v1`
 - **Versión Laravel**: confirmada como **Laravel 12** (no 11 como indicaba CLAUDE.md por error)
+- **System prompt mejorado para Asistente IA**:
+  - Inyecta datos reales del usuario: tareas pendientes (nombre, prioridad, fecha vencimiento), ideas activas, proyectos activos, completadas este mes
+  - Instrucciones de razonamiento paso a paso y respuestas estructuradas
+  - Temperatura reducida de 0.7 → 0.4, max_tokens aumentado de 1000 → 1500
+  - Método `getUserContext()` añadido al controller para consultar BD
 
 ### ✅ Sesión 6 — Cambios
 - **Asistente IA con chat** implementado para usuarios premium
