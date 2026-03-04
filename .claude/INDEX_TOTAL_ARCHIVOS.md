@@ -1,6 +1,6 @@
 # 📚 FLOWLY - ÍNDICE DE ARCHIVOS DEL PROYECTO
 
-> Última actualización: Febrero 2026 — Estado real del proyecto en disco.
+> Última actualización: Marzo 2026 — Estado real del proyecto en disco.
 
 ---
 
@@ -8,13 +8,11 @@
 
 | Archivo | Propósito |
 |---------|-----------|
-| `PROJECT_STATE.md` | **Estado actual del proyecto** — qué está hecho y qué falta |
+| `PROJECT_STATE.md` | **Estado actual del proyecto** — sesiones y cambios |
 | `QUICK_REFERENCE.md` | Referencia rápida: roles, rutas, enums, errores comunes |
-| `CONTEXTO_FLOWLY_PARA_CLAUDE.md` | Contexto completo para pasar a Claude en nuevas sesiones |
 | `CHECKLIST_DESARROLLO.md` | Checklist de desarrollo y deployment |
 | `INDEX_TOTAL_ARCHIVOS.md` | Este archivo — mapa del proyecto |
 | `README.md` | Intro al proyecto |
-| `setup-flowly.sh` | Script de instalación inicial |
 
 ---
 
@@ -24,14 +22,17 @@
 ```
 app/Http/Controllers/
 ├── Controller.php                     ← Base (tiene AuthorizesRequests trait)
+├── DashboardController.php            ← index
 ├── TaskController.php                 ← CRUD + complete + reopen
 ├── IdeaController.php                 ← CRUD + resolve + reactivate
 ├── ProjectController.php              ← CRUD (premium only)
 ├── BoxController.php                  ← CRUD (premium only)
 ├── ResourceController.php             ← Nested en box + standalone
 ├── SubscriptionController.php         ← index (planes + suscripción activa)
-├── CheckoutController.php             ← index + store (pago simulado)
-├── DashboardController.php            ← index
+├── CheckoutController.php             ← index + store (pago simulado 80/20)
+├── VoiceRecordingController.php       ← transcribe (JSON, Whisper API)
+├── AiChatController.php               ← index + store + destroy (Groq/OpenAI)
+├── TutorialController.php             ← complete (marca tutorial_completed_at)
 └── Admin/
     ├── AdminDashboardController.php   ← stats + recentPayments + recentUsers
     ├── AdminUserController.php        ← index + show + destroy
@@ -42,12 +43,12 @@ app/Http/Controllers/
 ### Modelos
 ```
 app/Models/
-├── User.php             ← HasRoles + TwoFactorAuthenticatable
+├── User.php             ← HasRoles + TwoFactorAuthenticatable + canAddTask()
 ├── Subscription.php
-├── Payment.php
-├── Project.php
-├── Task.php             ← SoftDeletes
-├── Idea.php             ← SoftDeletes
+├── Payment.php          ← Payment::process() simula pago (80% éxito)
+├── Project.php          ← status: active|inactive|completed (SIN 'created')
+├── Task.php             ← SIN SoftDeletes — hard delete físico
+├── Idea.php             ← SIN SoftDeletes — hard delete físico
 ├── Box.php
 ├── Resource.php
 ├── AiConversation.php   ← $timestamps = false (solo created_at)
@@ -62,7 +63,15 @@ app/Http/Requests/
 ├── StoreProjectRequest.php / UpdateProjectRequest.php
 ├── StoreBoxRequest.php / UpdateBoxRequest.php
 ├── StoreResourceRequest.php / UpdateResourceRequest.php
-└── CheckoutRequest.php
+├── CheckoutRequest.php
+├── StoreVoiceRecordingRequest.php   ← valida audio (mimes + max 25MB)
+└── StoreAiChatRequest.php           ← valida mensaje (max 2000 chars)
+```
+
+### Auth / Responses
+```
+app/Http/Controllers/Auth/AuthController.php  ← valida credenciales + rol
+app/Http/Responses/LoginResponse.php          ← redirige admin→/admin/dashboard
 ```
 
 ### Policies
@@ -79,13 +88,13 @@ app/Policies/
 
 ## 📁 `database/` — Base de Datos
 
-### Migraciones (13 tablas)
+### Migraciones (14 tablas)
 ```
 database/migrations/
 ├── create_users_table.php
 ├── add_two_factor_columns_to_users_table.php
-├── create_permission_tables.php         ← Spatie
-├── add_fields_to_users_table.php        ← ⚠️ VACÍA — pendiente
+├── create_permission_tables.php               ← Spatie
+├── add_fields_to_users_table.php              ← ⚠️ VACÍA — existe pero sin columnas
 ├── create_subscriptions_table.php
 ├── create_payments_table.php
 ├── create_projects_table.php
@@ -94,7 +103,8 @@ database/migrations/
 ├── create_boxes_table.php
 ├── create_resources_table.php
 ├── create_ai_conversations_table.php
-└── create_voice_recordings_table.php
+├── create_voice_recordings_table.php
+└── add_tutorial_completed_at_to_users_table.php  ← tutorial_completed_at nullable
 ```
 
 ### Seeders
@@ -124,74 +134,113 @@ database/factories/
 
 ```
 tests/
-├── Pest.php                                ← Setup global: withoutVite, RoleSeeder, helpers
+├── Pest.php                                     ← Setup global: withoutVite, RoleSeeder, helpers
 ├── Feature/
-│   ├── TaskControllerTest.php              ← 16 tests ✅
-│   ├── IdeaControllerTest.php              ← 12 tests ✅
-│   ├── ProjectControllerTest.php           ← 15 tests ✅
-│   ├── BoxControllerTest.php               ← 11 tests ✅
-│   ├── ResourceControllerTest.php          ← 10 tests ✅
-│   ├── CheckoutControllerTest.php          ← 7 tests ✅
-│   ├── SubscriptionControllerTest.php      ← 4 tests ✅
-│   ├── AdminControllerTest.php             ← 17 tests ✅
-│   ├── DashboardTest.php                   ✅
-│   ├── ExampleTest.php                     ✅
-│   ├── Auth/                               ← 6 archivos Auth ✅
-│   └── Settings/                           ← PasswordUpdate, ProfileUpdate, TwoFactor ✅
+│   ├── TaskControllerTest.php                   ✅
+│   ├── IdeaControllerTest.php                   ✅
+│   ├── ProjectControllerTest.php                ✅
+│   ├── BoxControllerTest.php                    ✅
+│   ├── ResourceControllerTest.php               ✅
+│   ├── CheckoutControllerTest.php               ✅
+│   ├── SubscriptionControllerTest.php           ✅
+│   ├── VoiceRecordingControllerTest.php         ✅
+│   ├── AiChatControllerTest.php                 ✅
+│   ├── AdminControllerTest.php                  ✅
+│   ├── DashboardTest.php                        ✅
+│   ├── ExampleTest.php                          ✅
+│   ├── Auth/                                    ← 6 archivos Auth ✅
+│   └── Settings/                               ← PasswordUpdate, ProfileUpdate, TwoFactor ✅
 └── Unit/
     └── ExampleTest.php
 ```
 
-**Total: 143 tests / 551 assertions — Todos pasando ✅**
+**Total: 180 tests / 692 assertions — Todos pasando ✅**
+
+Helpers globales en `Pest.php`: `createAdmin()`, `createPremiumUser()`, `createFreeUser()`
 
 ---
 
 ## 📁 `resources/js/` — Frontend React
 
-### Páginas existentes con implementación real
+### Páginas (todas con UI real)
 ```
 resources/js/pages/
-├── welcome.tsx                    ⚠️ sin contenido Flowly
-├── dashboard.tsx                  ⚠️ sin datos reales
+├── welcome.tsx                        ✅ Landing: hero, features, pricing, footer
+├── dashboard.tsx                      ✅ Datos reales free/premium/admin + tutorial chatbot
 ├── auth/
-│   ├── login.tsx                  ✅
-│   ├── register.tsx               ✅
-│   ├── two-factor-challenge.tsx   ✅
-│   ├── forgot-password.tsx        ✅
-│   ├── reset-password.tsx         ✅
-│   ├── confirm-password.tsx       ✅
-│   └── verify-email.tsx           ✅
-└── settings/
-    ├── profile.tsx                ✅
-    ├── password.tsx               ✅
-    ├── appearance.tsx             ✅
-    └── two-factor.tsx             ✅
-```
-
-### Páginas placeholder (existen para pasar tests, sin UI real)
-```
-resources/js/pages/
-├── tasks/index.tsx + edit.tsx
-├── ideas/index.tsx + edit.tsx
-├── projects/index.tsx + show.tsx
-├── boxes/index.tsx + show.tsx
-├── resources/create.tsx
-├── subscription/index.tsx
-├── checkout/index.tsx
+│   ├── login.tsx                      ✅
+│   ├── register.tsx                   ✅
+│   ├── two-factor-challenge.tsx       ✅
+│   ├── forgot-password.tsx            ✅
+│   ├── reset-password.tsx             ✅
+│   ├── confirm-password.tsx           ✅
+│   └── verify-email.tsx               ✅
+├── settings/
+│   ├── profile.tsx                    ✅
+│   ├── password.tsx                   ✅
+│   ├── appearance.tsx                 ✅
+│   └── two-factor.tsx                 ✅
+├── tasks/
+│   ├── index.tsx                      ✅ Lista + quick-create + voice recorder
+│   ├── create.tsx                     ✅ Formulario completo + voice dictation
+│   └── edit.tsx                       ✅
+├── ideas/
+│   ├── index.tsx                      ✅ Lista + quick-create + voice recorder
+│   ├── create.tsx                     ✅ Formulario completo + voice dictation
+│   └── edit.tsx                       ✅
+├── projects/
+│   ├── index.tsx                      ✅
+│   ├── show.tsx                       ✅
+│   ├── create.tsx                     ✅
+│   └── edit.tsx                       ✅
+├── boxes/
+│   ├── index.tsx                      ✅
+│   ├── show.tsx                       ✅
+│   ├── create.tsx                     ✅
+│   └── edit.tsx                       ✅
+├── resources/
+│   ├── create.tsx                     ✅
+│   └── edit.tsx                       ✅
+├── subscription/
+│   └── index.tsx                      ✅
+├── checkout/
+│   └── index.tsx                      ✅
+├── ai-chats/
+│   └── index.tsx                      ✅ Chat UI completo, sugerencias, auto-scroll
 └── admin/
-    ├── dashboard.tsx
-    ├── users/index.tsx + show.tsx
-    ├── payments/index.tsx
-    └── subscriptions/index.tsx
+    ├── dashboard.tsx                  ✅
+    ├── users/
+    │   ├── index.tsx                  ✅
+    │   └── show.tsx                   ✅
+    ├── payments/index.tsx             ✅
+    └── subscriptions/index.tsx        ✅
 ```
 
-### Páginas aún no creadas (ni placeholder)
+### Componentes
 ```
-pages/tasks/create.tsx
-pages/ideas/create.tsx
-pages/projects/create.tsx + edit.tsx
-pages/boxes/create.tsx + edit.tsx
-pages/resources/edit.tsx
+resources/js/components/
+├── ui/                              ← shadcn/ui primitives (NO crear nuevos)
+├── app-sidebar.tsx                  ← navegación por rol
+├── nav-main.tsx
+├── app-logo.tsx                     ← logo.png
+├── voice-recorder.tsx               ← MediaRecorder + fetch + estados idle/recording/processing
+└── tutorial-chatbot.tsx             ← spotlight SVG mask + tooltip posicionado + chatbot Flowy
+```
+
+### Tipos TypeScript
+```
+resources/js/types/
+├── auth.ts          → User (auth), Auth, TwoFactorSetupData
+├── navigation.ts    → NavItem, BreadcrumbItem
+├── models/          → Task, Idea, Project, Box, Resource,
+│                      Subscription, Payment, RecentPayment, Role, VoiceRecording, AiMessage
+├── shared/          → PaginatedData<T>
+├── pages/           → DashboardProps, TasksProps, IdeasProps,
+│                      SubscriptionProps (+ Plan), CheckoutProps (+ CheckoutPlan), AiChatsProps
+├── admin/           → AdminStats, AdminUser, AdminDashboardProps,
+│                      AdminUsersIndexProps, AdminUserShowProps,
+│                      AdminPaymentsProps, AdminSubscriptionsProps
+└── index.ts         → barrel (re-exports de sub-barrels)
 ```
 
 ---
@@ -199,22 +248,57 @@ pages/resources/edit.tsx
 ## 📁 `routes/web.php` — Rutas
 
 ```
+Públicas:
+  GET /                → welcome (landing)
+  GET /login, POST /login (Fortify)
+  GET /register, POST /register (Fortify)
+  + forgot-password, reset-password, etc.
+
 Autenticadas (todos los roles):
-  tasks.*        → TaskController
-  ideas.*        → IdeaController
+  dashboard.*    → DashboardController
+  tasks.*        → TaskController (+ complete, reopen)
+  ideas.*        → IdeaController (+ resolve, reactivate)
   subscription.* → SubscriptionController
   checkout.*     → CheckoutController
+  POST /tutorial/complete → TutorialController
 
-Premium (premium_user|admin):
-  projects.*     → ProjectController
-  boxes.*        → BoxController
-  resources.*    → ResourceController
+Premium (solo role:premium_user — admin NO):
+  projects.*         → ProjectController
+  boxes.*            → BoxController
+  resources.*        → ResourceController
+  POST /voice/transcribe → VoiceRecordingController
+  GET/POST/DELETE /ai-chats → AiChatController
 
-Admin:
+Admin (role:admin):
   admin.dashboard           → AdminDashboardController
   admin.users.*             → AdminUserController
   admin.payments.index      → AdminPaymentController
   admin.subscriptions.index → AdminSubscriptionController
+```
+
+---
+
+## 📁 Otros archivos clave
+
+```
+config/
+├── services.php     ← openai.key + openai.base_url (configurable para Groq/OpenAI)
+└── fortify.php      ← features: registration, resetPasswords, 2FA, etc.
+
+resources/
+├── css/app.css          ← Design System Flowly (tokens shadcn, fuentes)
+├── views/app.blade.php  ← carga fuentes fonts.bunny.net
+└── js/assets/logo.png   ← logo del proyecto
+
+storage/app/tidb-ca.pem  ← cert SSL TiDB (en .gitignore, NO commitear)
+
+Dockerfile               ← multi-stage (builder Node + PHP-FPM + Nginx)
+docker-compose.yml
+docker-entrypoint.sh     ← ejecuta migrate + seed al arrancar
+
+docs/
+├── decisiones-tecnicas.md  ← justificación técnica (requisito intermodular)
+└── manual-usuario.md       ← manual de usuario (requisito intermodular)
 ```
 
 ---
@@ -231,6 +315,6 @@ free@flowly.test     / password  → free_user
 php artisan serve                  # Backend
 npm run dev                        # Frontend Vite
 php artisan migrate:fresh --seed   # Resetear BD
-php artisan test                   # Todos los tests
+php artisan test                   # Todos los tests (180/692)
 php artisan test --filter NombreTest  # Un test específico
 ```

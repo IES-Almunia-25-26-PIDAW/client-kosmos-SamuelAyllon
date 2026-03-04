@@ -405,13 +405,17 @@ Para cada feature (Task, Idea, Project, Box, Resource, Voice, AI):
 ✓ Policies (Task, Idea, Project, Box, Resource)
 ✓ Autorización por rol (Spatie Permission)
 ✓ Límites respetados (free: 5 tareas pending)
-✓ Tests: 143/143 pasando (551 assertions) ← Feb 2026
-✓ Documentación actualizada (.claude/)
-✓ Dashboard implementado con datos reales (free/premium/admin)
+✓ Tests: 180/180 pasando (692 assertions) ← Mar 2026
+✓ Documentación actualizada (.claude/ + docs/)
+✓ Dashboard implementado con datos reales (free/premium/admin) + tutorial chatbot
 ✓ Vistas admin: dashboard, users (index+show), payments, subscriptions
 ✓ Types TypeScript organizados en subcarpetas
-✗ Vistas usuario pendientes (tasks/create, ideas/*, projects/*, boxes/*)
-✗ Landing page con contenido Flowly
+✓ Todas las vistas de usuario implementadas con UI real
+✓ Landing page completa (hero, features, pricing, footer)
+✓ Integración OpenAI Whisper (voz a texto, solo premium)
+✓ Asistente IA conversacional (Groq/OpenAI-compatible, solo premium)
+✓ Tutorial interactivo para nuevos usuarios (spotlight + chatbot Flowy)
+✓ Docker multi-stage (Dockerfile + docker-compose + entrypoint)
 ```
 
 ---
@@ -429,5 +433,5 @@ Para cada feature (Task, Idea, Project, Box, Resource, Voice, AI):
 
 **Imprime esto. Úsalo todos los días. Te ahorrará horas de debugging. ✓**
 
-**Última actualización:** Febrero 2026  
-**Versión:** 1.0 Flowly
+**Última actualización:** Marzo 2026
+**Versión:** 1.5 Flowly

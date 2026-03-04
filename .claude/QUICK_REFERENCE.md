@@ -13,8 +13,8 @@
 | **Tipo** | Plataforma web freemium |
 | **Modelos** | 10 entidades principales |
 | **Roles** | 3 (admin, premium_user, free_user) |
-| **Tests** | 143 tests Pest (todos pasando ✅) |
-| **Rutas** | 50+ rutas protegidas |
+| **Tests** | 180 tests Pest / 692 assertions (todos pasando ✅) |
+| **Rutas** | 60+ rutas protegidas |
 
 ---
 
@@ -79,13 +79,15 @@ GET  /checkout      Comprar premium
 POST /checkout      Procesar pago
 ```
 
-### Premium (premium_user + admin)
+### Premium (solo premium_user — admin NO tiene acceso)
 ```
 GET  /projects      Proyectos
 GET  /boxes         Cajas
 GET  /resources     Recursos
-POST /voice/transcribe  Grabar voz
+POST /voice/transcribe  Grabar voz (Whisper)
 GET  /ai-chats      Chat IA
+POST /ai-chats      Enviar mensaje IA
+DELETE /ai-chats    Limpiar historial
 ```
 
 ### Admin
@@ -184,8 +186,9 @@ $this->authorize('update', $task); // En Form Request authorize()
 
 ### Acceso por Rol
 ```php
-middleware('role:premium_user|admin')  // En rutas
-hasRole('premium_user')                 // En controladores
+middleware('role:premium_user')  // En rutas premium (admin NO incluido)
+middleware('role:admin')         // En rutas admin
+hasRole('premium_user')          // En controladores
 ```
 
 ---
@@ -270,8 +273,7 @@ $user->hasRole('admin')
 - [ ] authorize() en cada acción
 - [ ] Route Model Binding (no string $id)
 - [ ] Eager loading (with())
-- [ ] Soft deletes para datos recuperables
-- [ ] Cascade delete para relaciones
+- [ ] Cascade delete para relaciones (Task/Idea usan hard delete físico)
 - [ ] Encrypting sensible data
 - [ ] CSRF protection (Laravel automático)
 
@@ -411,7 +413,7 @@ Claude tendrá todo el contexto listo.
 |--------|-------|-----------------|
 | Task | status | `pending` \| `completed` — SIN 'in_progress' |
 | Task | priority | `low` \| `medium` \| `high` |
-| Project | status | `active` \| `created` \| `completed` — SIN 'archived' |
+| Project | status | `active` \| `inactive` \| `completed` — SIN 'archived', SIN 'created' |
 | Idea | status | `active` \| `resolved` — SIN 'archived' |
 | Idea | source | `manual` \| `voice` \| `ai_suggestion` |
 | Subscription | plan | `free` \| `premium_monthly` \| `premium_yearly` |
@@ -435,10 +437,10 @@ import type { PaginatedData } from '@/types';     // paginación genérica
 
 | Subcarpeta | Tipos exportados |
 |-----------|-----------------|
-| `models/` | `Task`, `Idea`, `Subscription`, `Payment`, `RecentPayment`, `Role` |
+| `models/` | `Task`, `Idea`, `Project`, `Box`, `Resource`, `Subscription`, `Payment`, `RecentPayment`, `Role`, `VoiceRecording`, `AiMessage` |
 | `shared/` | `PaginatedData<T>` |
-| `pages/`  | `DashboardProps`, `TasksProps` |
-| `admin/`  | `AdminStats`, `AdminUser`, `AdminDashboardProps`, `AdminUsersIndexProps`, `AdminUserShowProps`, `AdminUserDashboardData`, `AdminPaymentsProps`, `AdminSubscriptionsProps` |
+| `pages/`  | `DashboardProps`, `TasksProps`, `IdeasProps`, `SubscriptionProps`, `CheckoutProps`, `AiChatsProps` |
+| `admin/`  | `AdminStats`, `AdminUser`, `AdminDashboardProps`, `AdminUsersIndexProps`, `AdminUserShowProps`, `AdminPaymentsProps`, `AdminSubscriptionsProps` |
 
 > Todos re-exportados desde `@/types` (barrel en `types/index.ts`)
 
@@ -453,7 +455,7 @@ Definido en `HandleInertiaRequests::share()`.
 
 ---
 
-**Última actualización:** Febrero 2026
-**Versión:** 1.2 Flowly (143 tests + admin UI + dashboard)
+**Última actualización:** Marzo 2026
+**Versión:** 1.5 Flowly (180 tests / 692 assertions — proyecto completo y entregable)
 
 Imprime esto o mantenlo en una pestaña. Te ahorrará tiempo. 📌
