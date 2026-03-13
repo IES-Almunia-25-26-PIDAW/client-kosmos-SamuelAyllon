@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { Pencil, Trash2, Table2, LayoutGrid, Lightbulb, Plus, CheckCircle2, Sparkles, CalendarDays, Clock } from 'lucide-react';
+import { Pencil, Trash2, Table2, LayoutGrid, Lightbulb, Plus, CheckCircle2, Sparkles, CalendarDays } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import VoiceRecorder from '@/components/voice-recorder';

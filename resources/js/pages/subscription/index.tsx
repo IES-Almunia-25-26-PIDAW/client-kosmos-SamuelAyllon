@@ -171,7 +171,7 @@ export default function SubscriptionIndex({ subscription, plans }: SubscriptionP
                         <h2 className="text-xl font-bold">Planes disponibles</h2>
                     </div>
                     <div className="grid gap-5 sm:grid-cols-3">
-                        {plans.map((plan, index) => {
+                        {plans.map((plan) => {
                             const isCurrentPlan = isPremium && subscription?.plan === plan.key;
                             const isBestValue = plan.key === 'premium_yearly';
                             const PlanIcon = planIcons[plan.key] || Zap;

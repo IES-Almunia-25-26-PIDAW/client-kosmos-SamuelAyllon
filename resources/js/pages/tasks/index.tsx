@@ -187,8 +187,6 @@ function CalendarView({ tasks }: { tasks: Task[] }) {
                     const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                     const dayTasks = tasksByDate[dateKey] ?? [];
                     const isToday = dateKey === todayStr;
-                    const hasHighPriority = dayTasks.some(t => t.priority === 'high' && t.status === 'pending');
-
                     return (
                         <div key={day} className={`min-h-[100px] border-b border-r p-2 transition-colors hover:bg-primary/5 ${isToday ? 'bg-primary/10' : ''}`}>
                             <div className={`mb-2 flex h-7 w-7 items-center justify-center rounded-lg text-sm font-bold

@@ -71,12 +71,8 @@ function useCountUp(end: number, duration: number = 2000, startOnView: boolean =
 
 export default function Welcome({ canRegister = true }: { canRegister?: boolean }) {
     const { auth } = usePage().props as { auth: { user: unknown } };
-    const [isLoaded, setIsLoaded] = useState(false);
+    const isLoaded = true;
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-    useEffect(() => {
-        setIsLoaded(true);
-    }, []);
 
     return (
         <>
@@ -944,31 +940,6 @@ function BentoCard({
     );
 }
 
-function AnimatedStatItem({ 
-    value, 
-    suffix = '',
-    label, 
-    icon 
-}: { 
-    value: number; 
-    suffix?: string;
-    label: string; 
-    icon: React.ReactNode;
-}) {
-    const { count, ref } = useCountUp(value, 2000);
-    
-    return (
-        <div ref={ref} className="flex flex-col items-center text-center group">
-            <div className="mb-3 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 p-3 text-primary transition-all duration-500 group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-primary/20">
-                {icon}
-            </div>
-            <p className="text-3xl font-bold tracking-tight sm:text-4xl gradient-text-animated">
-                {count.toLocaleString()}{suffix}
-            </p>
-            <p className="text-sm text-muted-foreground mt-1">{label}</p>
-        </div>
-    );
-}
 
 function TestimonialCard({
     quote,

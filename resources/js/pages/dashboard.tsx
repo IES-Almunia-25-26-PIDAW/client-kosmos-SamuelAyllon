@@ -10,7 +10,6 @@ import {
     ArrowRight, 
     Sparkles,
     Target,
-    Clock,
     TrendingUp,
     Zap,
     Crown,

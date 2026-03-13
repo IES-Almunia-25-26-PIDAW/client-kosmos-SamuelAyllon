@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { Pencil, Trash2, Table2, Calendar, LayoutGrid, ChevronLeft, ChevronRight, FolderOpen, Plus, CheckCircle2, FolderKanban, CalendarDays, ListTodo, Clock } from 'lucide-react';
+import { Pencil, Trash2, Table2, Calendar, LayoutGrid, ChevronLeft, ChevronRight, Plus, CheckCircle2, FolderKanban, CalendarDays, ListTodo, Clock } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';

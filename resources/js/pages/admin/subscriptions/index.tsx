@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem, AdminSubscriptionsProps } from '@/types';
-import { Crown, Users, Calendar, XCircle, CheckCircle2 } from 'lucide-react';
+import { Crown, Users, Calendar, XCircle } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Admin', href: '/admin/dashboard' },
