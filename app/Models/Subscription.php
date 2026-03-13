@@ -45,8 +45,8 @@ class Subscription extends Model
     {
         return match($this->plan) {
             'free' => 0.00,
-            'premium_monthly' => 9.99,
-            'premium_yearly' => 99.99,
+            'premium_monthly' => 11.99,
+            'premium_yearly' => 119.00,
             default => 0.00,
         };
     }

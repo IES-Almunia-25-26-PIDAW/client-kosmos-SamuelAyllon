@@ -23,7 +23,14 @@ return new class extends Migration
             
             // Color para identificar visualmente el proyecto (hex)
             $table->string('color', 7)->default('#3B82F6');
-            
+
+            // Campos de ficha de cliente (premium)
+            $table->text('brand_tone')->nullable();
+            $table->text('service_scope')->nullable();
+            $table->json('key_links')->nullable();
+            $table->date('next_deadline')->nullable();
+            $table->text('client_notes')->nullable();
+
             // Timestamp de última modificación por usuario
             $table->timestamp('user_modified_at')->nullable();
             

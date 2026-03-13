@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreResourceRequest;
 use App\Http\Requests\UpdateResourceRequest;
-use App\Models\Box;
+use App\Models\Project;
 use App\Models\Resource;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
@@ -13,33 +13,33 @@ use Inertia\Response;
 
 class ResourceController extends Controller
 {
-    public function create(Box $box): Response
+    public function create(Project $project): Response
     {
-        $this->authorize('view', $box);
+        $this->authorize('view', $project);
 
         return Inertia::render('resources/create', [
-            'box' => $box,
+            'project' => $project,
         ]);
     }
 
-    public function store(StoreResourceRequest $request, Box $box): RedirectResponse
+    public function store(StoreResourceRequest $request, Project $project): RedirectResponse
     {
-        $this->authorize('view', $box);
+        $this->authorize('view', $project);
 
-        $box->resources()->create([
+        $project->resources()->create([
             ...$request->validated(),
             'user_id' => Auth::id(),
             'user_modified_at' => now(),
         ]);
 
-        return redirect()->route('boxes.show', $box)->with('success', 'Recurso añadido correctamente.');
+        return redirect()->route('clients.show', $project)->with('success', 'Recurso añadido correctamente.');
     }
 
     public function edit(Resource $resource): Response
     {
         $this->authorize('update', $resource);
 
-        $resource->load('box');
+        $resource->load('project');
 
         return Inertia::render('resources/edit', [
             'resource' => $resource,
@@ -55,16 +55,16 @@ class ResourceController extends Controller
             'user_modified_at' => now(),
         ]);
 
-        return redirect()->route('boxes.show', $resource->box_id)->with('success', 'Recurso actualizado correctamente.');
+        return redirect()->route('clients.show', $resource->project_id)->with('success', 'Recurso actualizado correctamente.');
     }
 
     public function destroy(Resource $resource): RedirectResponse
     {
         $this->authorize('delete', $resource);
 
-        $boxId = $resource->box_id;
+        $projectId = $resource->project_id;
         $resource->delete();
 
-        return redirect()->route('boxes.show', $boxId)->with('success', 'Recurso eliminado correctamente.');
+        return redirect()->route('clients.show', $projectId)->with('success', 'Recurso eliminado correctamente.');
     }
 }

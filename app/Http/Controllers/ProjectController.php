@@ -33,13 +33,20 @@ class ProjectController extends Controller
 
     public function store(StoreProjectRequest $request): RedirectResponse
     {
-        $project = Auth::user()->projects()->create([
+        $user = Auth::user();
+
+        if (!$user->canAddProject()) {
+            return redirect()->route('clients.index')
+                ->with('error', 'Has alcanzado el límite de clientes de tu plan. Mejora a Solo para añadir más.');
+        }
+
+        $project = $user->projects()->create([
             ...$request->validated(),
             'status' => 'inactive',
             'user_modified_at' => now(),
         ]);
 
-        return redirect()->route('projects.show', $project)->with('success', 'Proyecto creado correctamente.');
+        return redirect()->route('clients.show', $project)->with('success', 'Cliente creado correctamente.');
     }
 
     public function show(Project $project): Response
@@ -48,6 +55,8 @@ class ProjectController extends Controller
 
         $project->load([
             'tasks' => fn ($q) => $q->byPriority()->orderByRaw("CASE status WHEN 'pending' THEN 0 ELSE 1 END"),
+            'ideas' => fn ($q) => $q->where('status', 'active')->orderBy('created_at', 'desc'),
+            'resources' => fn ($q) => $q->orderBy('created_at', 'desc'),
         ]);
 
         return Inertia::render('projects/show', [
@@ -75,7 +84,7 @@ class ProjectController extends Controller
             'user_modified_at' => now(),
         ]);
 
-        return redirect()->route('projects.show', $project)->with('success', 'Proyecto actualizado correctamente.');
+        return redirect()->route('clients.show', $project)->with('success', 'Cliente actualizado correctamente.');
     }
 
     public function complete(Project $project): RedirectResponse
@@ -88,7 +97,7 @@ class ProjectController extends Controller
             'user_modified_at' => now(),
         ]);
 
-        return redirect()->route('projects.index');
+        return redirect()->route('clients.index');
     }
 
     public function destroy(Project $project): RedirectResponse
@@ -97,6 +106,6 @@ class ProjectController extends Controller
 
         $project->delete();
 
-        return redirect()->route('projects.index')->with('success', 'Proyecto eliminado correctamente.');
+        return redirect()->route('clients.index')->with('success', 'Cliente eliminado correctamente.');
     }
 }

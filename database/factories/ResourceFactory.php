@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\Models\Box;
+use App\Models\Project;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -12,7 +12,7 @@ class ResourceFactory extends Factory
     {
         return [
             'user_id' => User::factory(),
-            'box_id' => Box::factory(),
+            'project_id' => Project::factory(),
             'name' => fake()->words(3, true),
             'description' => fake()->optional()->sentence(),
             'url' => fake()->optional()->url(),

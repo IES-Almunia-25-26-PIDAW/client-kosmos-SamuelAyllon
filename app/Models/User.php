@@ -93,14 +93,6 @@ class User extends Authenticatable
     }
 
     /**
-     * Obtener las cajas del usuario
-     */
-    public function boxes()
-    {
-        return $this->hasMany(Box::class);
-    }
-
-    /**
      * Obtener los recursos del usuario
      */
     public function resources()
@@ -109,19 +101,11 @@ class User extends Authenticatable
     }
 
     /**
-     * Obtener las conversaciones de IA del usuario
+     * Obtener los logs de IA del usuario
      */
-    public function aiConversations()
+    public function aiLogs()
     {
-        return $this->hasMany(AiConversation::class);
-    }
-
-    /**
-     * Obtener las grabaciones de voz del usuario
-     */
-    public function voiceRecordings()
-    {
-        return $this->hasMany(VoiceRecording::class);
+        return $this->hasMany(AiLog::class);
     }
 
     // ==================== MÉTODOS HELPER ====================
@@ -148,6 +132,18 @@ class User extends Authenticatable
     public function isAdmin(): bool
     {
         return $this->hasRole('admin');
+    }
+
+    /**
+     * Verificar si el usuario puede agregar más clientes
+     */
+    public function canAddProject(): bool
+    {
+        if ($this->isAdmin() || $this->isPremiumUser()) {
+            return true;
+        }
+
+        return $this->projects()->count() < 1;
     }
 
     /**

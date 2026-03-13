@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\Box;
+use App\Models\Project;
 use App\Models\Resource;
 use App\Models\User;
 
@@ -8,78 +8,78 @@ use App\Models\User;
 
 it('free user cannot access resource create form', function () {
     $user = createFreeUser();
-    $box = Box::factory()->create(['user_id' => $user->id]);
+    $project = Project::factory()->create(['user_id' => $user->id]);
 
     $this->actingAs($user)
-        ->get(route('resources.create', $box))
+        ->get(route('resources.create', $project))
         ->assertForbidden();
 });
 
-it('premium user can view resource create form for own box', function () {
+it('premium user can view resource create form for own client', function () {
     $user = createPremiumUser();
-    $box = Box::factory()->create(['user_id' => $user->id]);
+    $project = Project::factory()->create(['user_id' => $user->id]);
 
     $this->actingAs($user)
-        ->get(route('resources.create', $box))
+        ->get(route('resources.create', $project))
         ->assertOk()
         ->assertInertia(fn ($page) => $page->component('resources/create'));
 });
 
-it('premium user cannot view resource create form for another user box', function () {
+it('premium user cannot view resource create form for another user client', function () {
     $user = createPremiumUser();
-    $box = Box::factory()->create(['user_id' => User::factory()->create()->id]);
+    $project = Project::factory()->create(['user_id' => User::factory()->create()->id]);
 
     $this->actingAs($user)
-        ->get(route('resources.create', $box))
+        ->get(route('resources.create', $project))
         ->assertForbidden();
 });
 
 // ── Creación ─────────────────────────────────────────────────────────────────
 
-it('premium user can create a resource in own box', function () {
+it('premium user can create a resource in own client', function () {
     $user = createPremiumUser();
-    $box = Box::factory()->create(['user_id' => $user->id]);
+    $project = Project::factory()->create(['user_id' => $user->id]);
 
     $this->actingAs($user)
-        ->post(route('resources.store', $box), [
+        ->post(route('resources.store', $project), [
             'name' => 'Nuevo recurso',
             'type' => 'link',
             'url' => 'https://example.com',
         ])
-        ->assertRedirect(route('boxes.show', $box));
+        ->assertRedirect(route('clients.show', $project));
 
     $this->assertDatabaseHas('resources', [
         'user_id' => $user->id,
-        'box_id' => $box->id,
+        'project_id' => $project->id,
         'name' => 'Nuevo recurso',
         'type' => 'link',
     ]);
 });
 
-it('premium user cannot create a resource in another user box', function () {
+it('premium user cannot create a resource in another user client', function () {
     $user = createPremiumUser();
-    $box = Box::factory()->create(['user_id' => User::factory()->create()->id]);
+    $project = Project::factory()->create(['user_id' => User::factory()->create()->id]);
 
     $this->actingAs($user)
-        ->post(route('resources.store', $box), ['name' => 'Hack', 'type' => 'link'])
+        ->post(route('resources.store', $project), ['name' => 'Hack', 'type' => 'link'])
         ->assertForbidden();
 });
 
 it('resource store fails with invalid type', function () {
     $user = createPremiumUser();
-    $box = Box::factory()->create(['user_id' => $user->id]);
+    $project = Project::factory()->create(['user_id' => $user->id]);
 
     $this->actingAs($user)
-        ->post(route('resources.store', $box), ['name' => 'Recurso', 'type' => 'invalid'])
+        ->post(route('resources.store', $project), ['name' => 'Recurso', 'type' => 'invalid'])
         ->assertSessionHasErrors('type');
 });
 
 it('resource store fails with invalid url', function () {
     $user = createPremiumUser();
-    $box = Box::factory()->create(['user_id' => $user->id]);
+    $project = Project::factory()->create(['user_id' => $user->id]);
 
     $this->actingAs($user)
-        ->post(route('resources.store', $box), [
+        ->post(route('resources.store', $project), [
             'name' => 'Recurso',
             'type' => 'link',
             'url' => 'no-es-una-url',
@@ -91,23 +91,23 @@ it('resource store fails with invalid url', function () {
 
 it('premium user can update own resource', function () {
     $user = createPremiumUser();
-    $box = Box::factory()->create(['user_id' => $user->id]);
-    $resource = Resource::factory()->create(['user_id' => $user->id, 'box_id' => $box->id]);
+    $project = Project::factory()->create(['user_id' => $user->id]);
+    $resource = Resource::factory()->create(['user_id' => $user->id, 'project_id' => $project->id]);
 
     $this->actingAs($user)
         ->put(route('resources.update', $resource), [
             'name' => 'Recurso actualizado',
             'type' => 'document',
         ])
-        ->assertRedirect(route('boxes.show', $box));
+        ->assertRedirect(route('clients.show', $project));
 
     $this->assertDatabaseHas('resources', ['id' => $resource->id, 'name' => 'Recurso actualizado']);
 });
 
 it('premium user cannot update another user resource', function () {
     $user = createPremiumUser();
-    $otherBox = Box::factory()->create(['user_id' => User::factory()->create()->id]);
-    $resource = Resource::factory()->create(['user_id' => $otherBox->user_id, 'box_id' => $otherBox->id]);
+    $otherProject = Project::factory()->create(['user_id' => User::factory()->create()->id]);
+    $resource = Resource::factory()->create(['user_id' => $otherProject->user_id, 'project_id' => $otherProject->id]);
 
     $this->actingAs($user)
         ->put(route('resources.update', $resource), ['name' => 'Hack', 'type' => 'link'])
@@ -118,20 +118,20 @@ it('premium user cannot update another user resource', function () {
 
 it('premium user can delete own resource', function () {
     $user = createPremiumUser();
-    $box = Box::factory()->create(['user_id' => $user->id]);
-    $resource = Resource::factory()->create(['user_id' => $user->id, 'box_id' => $box->id]);
+    $project = Project::factory()->create(['user_id' => $user->id]);
+    $resource = Resource::factory()->create(['user_id' => $user->id, 'project_id' => $project->id]);
 
     $this->actingAs($user)
         ->delete(route('resources.destroy', $resource))
-        ->assertRedirect(route('boxes.show', $box));
+        ->assertRedirect(route('clients.show', $project));
 
     $this->assertDatabaseMissing('resources', ['id' => $resource->id]);
 });
 
 it('premium user cannot delete another user resource', function () {
     $user = createPremiumUser();
-    $otherBox = Box::factory()->create(['user_id' => User::factory()->create()->id]);
-    $resource = Resource::factory()->create(['user_id' => $otherBox->user_id, 'box_id' => $otherBox->id]);
+    $otherProject = Project::factory()->create(['user_id' => User::factory()->create()->id]);
+    $resource = Resource::factory()->create(['user_id' => $otherProject->user_id, 'project_id' => $otherProject->id]);
 
     $this->actingAs($user)
         ->delete(route('resources.destroy', $resource))

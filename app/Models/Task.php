@@ -49,14 +49,6 @@ class Task extends Model
         return $this->belongsTo(Project::class);
     }
 
-    /**
-     * Obtener grabaciones de voz relacionadas
-     */
-    public function voiceRecordings()
-    {
-        return $this->hasMany(VoiceRecording::class);
-    }
-
     // ==================== SCOPES ====================
 
     /**

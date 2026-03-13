@@ -11,7 +11,7 @@ class Resource extends Model
 
     protected $fillable = [
         'user_id',
-        'box_id',
+        'project_id',
         'name',
         'description',
         'url',
@@ -37,11 +37,11 @@ class Resource extends Model
     }
 
     /**
-     * Obtener la caja del recurso
+     * Obtener el proyecto/cliente del recurso
      */
-    public function box()
+    public function project()
     {
-        return $this->belongsTo(Box::class);
+        return $this->belongsTo(Project::class);
     }
 
     // ==================== SCOPES ====================
@@ -55,11 +55,11 @@ class Resource extends Model
     }
 
     /**
-     * Filtrar por caja
+     * Filtrar por proyecto/cliente
      */
-    public function scopeInBox($query, Box $box)
+    public function scopeInProject($query, Project $project)
     {
-        return $query->where('box_id', $box->id);
+        return $query->where('project_id', $project->id);
     }
 
     /**

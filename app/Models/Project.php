@@ -15,12 +15,19 @@ class Project extends Model
         'description',
         'status',
         'color',
+        'brand_tone',
+        'service_scope',
+        'key_links',
+        'next_deadline',
+        'client_notes',
         'user_modified_at',
     ];
 
     protected function casts(): array
     {
         return [
+            'key_links' => 'array',
+            'next_deadline' => 'date',
             'user_modified_at' => 'datetime',
         ];
     }
@@ -41,6 +48,22 @@ class Project extends Model
     public function tasks()
     {
         return $this->hasMany(Task::class);
+    }
+
+    /**
+     * Obtener las ideas del proyecto
+     */
+    public function ideas()
+    {
+        return $this->hasMany(Idea::class);
+    }
+
+    /**
+     * Obtener los recursos del proyecto
+     */
+    public function resources()
+    {
+        return $this->hasMany(Resource::class);
     }
 
     // ==================== SCOPES ====================

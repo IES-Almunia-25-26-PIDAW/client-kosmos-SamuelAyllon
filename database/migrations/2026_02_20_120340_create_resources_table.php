@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('resources', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('box_id')->constrained()->onDelete('cascade');
+            $table->foreignId('project_id')->constrained()->onDelete('cascade');
             
             $table->string('name');
             $table->text('description')->nullable();
@@ -32,7 +32,7 @@ return new class extends Migration
             
             // Índices
             $table->index('user_id');
-            $table->index('box_id');
+            $table->index('project_id');
             $table->index('type');
         });
     }

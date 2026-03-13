@@ -11,6 +11,7 @@ class Idea extends Model
 
     protected $fillable = [
         'user_id',
+        'project_id',
         'name',
         'description',
         'priority',
@@ -37,11 +38,11 @@ class Idea extends Model
     }
 
     /**
-     * Obtener grabaciones de voz relacionadas
+     * Obtener el cliente/proyecto de la idea (nullable)
      */
-    public function voiceRecordings()
+    public function project()
     {
-        return $this->hasMany(VoiceRecording::class);
+        return $this->belongsTo(Project::class);
     }
 
     // ==================== SCOPES ====================
