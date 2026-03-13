@@ -23,22 +23,22 @@ RUN npm run build
 # ============================================================
 FROM php:8.2-cli-alpine
 
-# Dependencias del sistema
+# Dependencias del sistema (incluye librerías para pdo_mysql)
 RUN apk add --no-cache \
     bash \
     curl \
     unzip \
-    sqlite \
     libpng-dev \
     oniguruma-dev \
     libxml2-dev \
     libzip-dev \
-    icu-dev
+    icu-dev \
+    openssl-dev
 
-# Extensiones PHP necesarias para Laravel
+# Extensiones PHP necesarias para Laravel + MySQL/TiDB
 RUN docker-php-ext-install \
     pdo \
-    pdo_sqlite \
+    pdo_mysql \
     mbstring \
     xml \
     bcmath \
@@ -68,14 +68,12 @@ COPY --from=frontend /app/public/build public/build/
 
 # Preparar directorios de runtime con permisos correctos
 RUN mkdir -p \
-        database \
         storage/framework/sessions \
         storage/framework/views \
         storage/framework/cache/data \
         storage/logs \
         bootstrap/cache \
-    && touch database/database.sqlite \
-    && chmod -R 775 storage database bootstrap/cache
+    && chmod -R 775 storage bootstrap/cache
 
 # Copiar y dar permisos al entrypoint
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh

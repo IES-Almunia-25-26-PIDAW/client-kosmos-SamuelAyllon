@@ -19,10 +19,7 @@ fi
 echo "==> Descubriendo paquetes Laravel..."
 php /app/artisan package:discover --ansi
 
-# 4. Asegurar que el archivo SQLite existe (puede haberse montado vacío)
-touch /app/database/database.sqlite
-
-# 5. Ejecutar migraciones y seeders
+# 4. Ejecutar migraciones y seeders
 echo "==> Ejecutando migraciones y seeders..."
 php /app/artisan migrate --seed --force
 
@@ -34,5 +31,5 @@ echo "    premium@flowly.test  / password  (premium)"
 echo "    free@flowly.test     / password  (free)"
 echo ""
 
-# 6. Ejecutar el comando pasado al contenedor (CMD)
+# 5. Ejecutar el comando pasado al contenedor (CMD)
 exec "$@"

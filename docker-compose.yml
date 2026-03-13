@@ -7,24 +7,30 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      # Persistir la base de datos SQLite entre reinicios del contenedor
-      - flowly_database:/app/database
+      # Certificado SSL de TiDB (no se commitea, debe existir en el host)
+      - ./storage/app/tidb-ca.pem:/app/storage/app/tidb-ca.pem:ro
       # Persistir archivos subidos por el usuario
-      - flowly_storage:/app/storage/app
+      - flowly_storage:/app/storage/app/public
     environment:
       APP_NAME: Flowly
       APP_ENV: production
       APP_DEBUG: "false"
       APP_URL: http://localhost:8000
-      DB_CONNECTION: sqlite
+      DB_CONNECTION: mysql
+      DB_HOST: gateway01.eu-central-1.prod.aws.tidbcloud.com
+      DB_PORT: "4000"
+      DB_DATABASE: test
+      DB_USERNAME: 1MQSm4PzEfnqpbW.root
+      DB_PASSWORD: "${DB_PASSWORD}"
+      MYSQL_ATTR_SSL_CA: /app/storage/app/tidb-ca.pem
       SESSION_DRIVER: database
       CACHE_STORE: database
       QUEUE_CONNECTION: database
       LOG_CHANNEL: stderr
+      OPENAI_API_KEY: "${OPENAI_API_KEY}"
+      OPENAI_BASE_URL: "${OPENAI_BASE_URL}"
+      OPENAI_MODEL: "${OPENAI_MODEL}"
     restart: unless-stopped
 
 volumes:
-  # Volumen para la base de datos (separada de la lógica de la app)
-  flowly_database:
-  # Volumen para archivos de usuario
   flowly_storage:
