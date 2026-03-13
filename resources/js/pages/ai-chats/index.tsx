@@ -79,8 +79,30 @@ export default function AiChatsIndex({ messages: initialMessages }: AiChatsProps
         } catch (err: unknown) {
             // Quitar mensaje temporal en caso de error
             setMessages(prev => prev.slice(0, -1));
-            const e = err as { response?: { data?: { error?: string; message?: string } }; message?: string };
-            const errorMessage = e.response?.data?.error || e.response?.data?.message || e.message || 'Error desconocido';
+            const e = err as {
+                response?: {
+                    data?: {
+                        error?: string;
+                        message?: string;
+                        details?: string;
+                        errors?: {
+                            message?: string[];
+                        };
+                    };
+                };
+                message?: string;
+            };
+
+            const validationMessage = e.response?.data?.errors?.message?.[0];
+            const providerDetails = e.response?.data?.details;
+            const baseError =
+                validationMessage ||
+                e.response?.data?.error ||
+                e.response?.data?.message ||
+                e.message ||
+                'Error desconocido';
+
+            const errorMessage = providerDetails ? `${baseError} (${providerDetails})` : baseError;
             setError(errorMessage);
         } finally {
             setIsLoading(false);

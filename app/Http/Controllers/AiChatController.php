@@ -9,6 +9,7 @@ use App\Models\Project;
 use App\Models\Task;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
 use OpenAI;
@@ -44,6 +45,12 @@ class AiChatController extends Controller
     {
         $user = Auth::user();
         $userMessage = $request->validated('message');
+
+        if (blank(config('services.openai.key'))) {
+            return response()->json([
+                'error' => 'La integración de IA no está configurada. Revisa OPENAI_API_KEY.',
+            ], 503);
+        }
 
         // Guardar mensaje del usuario
         $userMsg = AiConversation::addUserMessage($user, $userMessage);
@@ -107,9 +114,18 @@ class AiChatController extends Controller
             // Eliminar el mensaje del usuario si falla la API
             $userMsg->delete();
 
+            Log::error('AiChat provider request failed', [
+                'user_id' => $user->id,
+                'provider_base_url' => config('services.openai.base_url'),
+                'model' => env('OPENAI_MODEL', 'gpt-3.5-turbo'),
+                'exception_class' => $e::class,
+                'exception_message' => $e->getMessage(),
+            ]);
+
             return response()->json([
                 'error' => 'Error al comunicarse con el asistente. Inténtalo de nuevo.',
-            ], 422);
+                'details' => app()->isLocal() ? $e->getMessage() : null,
+            ], 503);
         }
     }
 
