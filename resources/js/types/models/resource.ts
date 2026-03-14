@@ -1,11 +1,11 @@
 export interface Resource {
     id: number;
-    box_id: number;
+    project_id: number;
     name: string;
     description: string | null;
     url: string | null;
     type: 'link' | 'document' | 'video' | 'image' | 'other';
-    box?: { id: number; name: string };
+    project?: { id: number; name: string; color: string | null };
     created_at: string;
     updated_at: string;
 }

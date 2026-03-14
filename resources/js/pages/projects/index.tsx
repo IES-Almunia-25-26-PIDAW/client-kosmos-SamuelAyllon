@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { Pencil, Trash2, Table2, Calendar, LayoutGrid, ChevronLeft, ChevronRight, Plus, CheckCircle2, FolderKanban, CalendarDays, ListTodo, Clock } from 'lucide-react';
+import { Pencil, Trash2, Table2, Calendar, LayoutGrid, ChevronLeft, ChevronRight, Plus, CheckCircle2, FolderKanban, CalendarDays, ListTodo, Clock, Crown } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import AppLayout from '@/layouts/app-layout';
-import type { BreadcrumbItem, Project, ViewType } from '@/types';
+import type { Auth, BreadcrumbItem, Project, ViewType } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Proyectos', href: '/projects' },
+    { title: 'Clientes', href: '/clients' },
 ];
 
 const statusColors: Record<string, string> = {
@@ -23,12 +23,12 @@ const statusLabels: Record<string, string> = {
 
 function deleteProject(project: Project) {
     if (confirm(`¿Eliminar "${project.name}"? Se eliminarán también sus tareas.`)) {
-        router.delete(`/projects/${project.id}`);
+        router.delete(`/clients/${project.id}`);
     }
 }
 
 function toggleComplete(project: Project) {
-    router.patch(`/projects/${project.id}/complete`);
+    router.patch(`/clients/${project.id}/complete`);
 }
 
 // ── Vista tabla ─────────────────────────────────────────────────────────────
@@ -40,7 +40,7 @@ function TableView({ projects }: { projects: Project[] }) {
                 <div className="mx-auto h-12 w-12 rounded-full bg-muted/50 flex items-center justify-center mb-3">
                     <FolderKanban className="h-6 w-6 text-muted-foreground" />
                 </div>
-                <p className="text-sm text-muted-foreground">No hay proyectos con el filtro actual.</p>
+                <p className="text-sm text-muted-foreground">No hay clientes con el filtro actual.</p>
             </div>
         );
     }
@@ -108,10 +108,10 @@ function TableView({ projects }: { projects: Project[] }) {
                             </td>
                             <td className="p-4">
                                 <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <Link href={`/projects/${project.id}`}>
+                                    <Link href={`/clients/${project.id}`}>
                                         <Button size="sm" variant="outline" className="h-8 px-3 rounded-lg border-2">Ver</Button>
                                     </Link>
-                                    <Link href={`/projects/${project.id}/edit`}>
+                                    <Link href={`/clients/${project.id}/edit`}>
                                         <Button size="sm" variant="ghost" title="Editar" className="h-8 w-8 p-0 rounded-lg hover:bg-primary/10 hover:text-primary">
                                             <Pencil className="h-4 w-4" />
                                         </Button>
@@ -218,7 +218,7 @@ function GalleryView({ projects }: { projects: Project[] }) {
                 <div className="mx-auto h-12 w-12 rounded-full bg-muted/50 flex items-center justify-center mb-3">
                     <FolderKanban className="h-6 w-6 text-muted-foreground" />
                 </div>
-                <p className="text-sm text-muted-foreground">No hay proyectos con el filtro actual.</p>
+                <p className="text-sm text-muted-foreground">No hay clientes con el filtro actual.</p>
             </div>
         );
     }
@@ -264,10 +264,10 @@ function GalleryView({ projects }: { projects: Project[] }) {
                             </span>
                         </div>
                         <div className="mt-auto flex gap-2 pt-2">
-                            <Link href={`/projects/${project.id}`} className="flex-1">
+                            <Link href={`/clients/${project.id}`} className="flex-1">
                                 <Button size="sm" variant="outline" className="w-full border-2 rounded-lg">Ver</Button>
                             </Link>
-                            <Link href={`/projects/${project.id}/edit`}>
+                            <Link href={`/clients/${project.id}/edit`}>
                                 <Button size="sm" variant="ghost" title="Editar" className="h-8 w-8 p-0 rounded-lg hover:bg-primary/10 hover:text-primary opacity-0 group-hover:opacity-100 transition-opacity">
                                     <Pencil className="h-4 w-4" />
                                 </Button>
@@ -286,8 +286,10 @@ function GalleryView({ projects }: { projects: Project[] }) {
 // ── Página principal ────────────────────────────────────────────────────────
 
 export default function ProjectsIndex({ projects }: { projects: Project[] }) {
-    const { props } = usePage<{ flash?: { success?: string } }>();
+    const { props } = usePage<{ flash?: { success?: string }; auth: Auth }>();
     const flash = props.flash;
+    const isPremium = props.auth.is_premium;
+    const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
     const [view, setView] = useState<ViewType>('gallery');
     const [statusFilter, setStatusFilter] = useState<'all' | 'inactive' | 'active' | 'completed'>('all');
@@ -322,8 +324,8 @@ export default function ProjectsIndex({ projects }: { projects: Project[] }) {
                                 <FolderKanban className="h-6 w-6 text-white" />
                             </div>
                             <div>
-                                <h1 className="text-2xl font-bold">Mis proyectos</h1>
-                                <p className="text-sm text-muted-foreground">{projects.length} proyecto{projects.length !== 1 ? 's' : ''}</p>
+                                <h1 className="text-2xl font-bold">Mis clientes</h1>
+                                <p className="text-sm text-muted-foreground">{projects.length} cliente{projects.length !== 1 ? 's' : ''}</p>
                             </div>
                         </div>
                         <div className="flex items-center gap-2">
@@ -335,12 +337,16 @@ export default function ProjectsIndex({ projects }: { projects: Project[] }) {
                                     </Button>
                                 ))}
                             </div>
-                            <Link href="/projects/create">
-                                <Button className="gap-2 shadow-lg shadow-primary/25">
-                                    <Plus className="h-4 w-4" />
-                                    Nuevo proyecto
-                                </Button>
-                            </Link>
+                            <Button className="gap-2 shadow-lg shadow-primary/25" onClick={() => {
+                                if (!isPremium && projects.length >= 1) {
+                                    setShowUpgradeModal(true);
+                                } else {
+                                    router.visit('/clients/create');
+                                }
+                            }}>
+                                <Plus className="h-4 w-4" />
+                                Nuevo cliente
+                            </Button>
                         </div>
                     </div>
                 </div>
@@ -373,13 +379,13 @@ export default function ProjectsIndex({ projects }: { projects: Project[] }) {
                                 <FolderKanban className="h-8 w-8 text-purple-500" />
                             </div>
                             <div className="text-center">
-                                <p className="font-semibold">No tienes proyectos todavía</p>
-                                <p className="text-sm text-muted-foreground">Organiza tus tareas creando tu primer proyecto</p>
+                                <p className="font-semibold">No tienes clientes todavía</p>
+                                <p className="text-sm text-muted-foreground">Crea tu primer cliente para empezar</p>
                             </div>
-                            <Link href="/projects/create">
+                            <Link href="/clients/create">
                                 <Button className="gap-2 shadow-lg shadow-primary/25">
                                     <Plus className="h-4 w-4" />
-                                    Crear primer proyecto
+                                    Crear primer cliente
                                 </Button>
                             </Link>
                         </CardContent>
@@ -392,7 +398,7 @@ export default function ProjectsIndex({ projects }: { projects: Project[] }) {
                             <div className="h-12 w-12 rounded-xl bg-muted flex items-center justify-center">
                                 <FolderKanban className="h-6 w-6 text-muted-foreground" />
                             </div>
-                            <p className="text-muted-foreground text-center">No hay proyectos con estado "{statusLabels[statusFilter]}".</p>
+                            <p className="text-muted-foreground text-center">No hay clientes con estado "{statusLabels[statusFilter]}".</p>
                         </CardContent>
                     </Card>
                 )}
@@ -401,6 +407,32 @@ export default function ProjectsIndex({ projects }: { projects: Project[] }) {
                 {filtered.length > 0 && view === 'table'    && <TableView    projects={filtered} />}
                 {filtered.length > 0 && view === 'calendar' && <CalendarView projects={filtered} />}
                 {filtered.length > 0 && view === 'gallery'  && <GalleryView  projects={filtered} />}
+
+                {/* Modal de upgrade */}
+                {showUpgradeModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShowUpgradeModal(false)}>
+                        <Card className="max-w-md w-full mx-4 shadow-2xl" onClick={e => e.stopPropagation()}>
+                            <CardContent className="flex flex-col items-center gap-4 p-8">
+                                <div className="h-16 w-16 rounded-2xl bg-purple-500/10 flex items-center justify-center">
+                                    <Crown className="h-8 w-8 text-purple-500" />
+                                </div>
+                                <div className="text-center">
+                                    <p className="text-lg font-semibold">Límite alcanzado</p>
+                                    <p className="text-sm text-muted-foreground mt-1">Para gestionar varios clientes, pasa a Solo.</p>
+                                </div>
+                                <div className="flex gap-3 w-full">
+                                    <Button variant="outline" className="flex-1" onClick={() => setShowUpgradeModal(false)}>Cancelar</Button>
+                                    <Button asChild className="flex-1 gap-2">
+                                        <Link href="/subscription">
+                                            <Crown className="h-4 w-4" />
+                                            Ver planes
+                                        </Link>
+                                    </Button>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
+                )}
             </div>
         </AppLayout>
     );

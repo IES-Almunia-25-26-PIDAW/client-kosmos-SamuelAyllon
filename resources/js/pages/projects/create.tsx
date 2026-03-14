@@ -9,8 +9,8 @@ import type { BreadcrumbItem } from '@/types';
 import { ArrowLeft, FolderKanban, FileText, Palette, Sparkles } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Proyectos', href: '/projects' },
-    { title: 'Nuevo proyecto', href: '#' },
+    { title: 'Clientes', href: '/clients' },
+    { title: 'Nuevo cliente', href: '#' },
 ];
 
 const colorOptions = [
@@ -33,12 +33,12 @@ export default function ProjectCreate() {
 
     function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
-        post('/projects');
+        post('/clients');
     }
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Nuevo proyecto" />
+            <Head title="Nuevo cliente" />
 
             <div className="flex flex-col gap-6 p-4 md:p-6">
                 {/* Header */}
@@ -48,11 +48,11 @@ export default function ProjectCreate() {
                             <FolderKanban className="h-5 w-5 text-blue-600" />
                         </div>
                         <div>
-                            <h1 className="text-2xl font-bold tracking-tight">Nuevo proyecto</h1>
-                            <p className="text-sm text-muted-foreground">Agrupa tus tareas en un proyecto</p>
+                            <h1 className="text-2xl font-bold tracking-tight">Nuevo cliente</h1>
+                            <p className="text-sm text-muted-foreground">Crea un perfil para tu cliente</p>
                         </div>
                     </div>
-                    <Link href="/projects">
+                    <Link href="/clients">
                         <Button variant="outline" size="sm" className="gap-2">
                             <ArrowLeft className="h-4 w-4" />
                             Volver
@@ -65,10 +65,10 @@ export default function ProjectCreate() {
                     <CardHeader className="border-b bg-muted/30 pb-4">
                         <div className="flex items-center gap-2">
                             <Sparkles className="h-4 w-4 text-blue-600" />
-                            <CardTitle className="text-base font-semibold">Datos del proyecto</CardTitle>
+                            <CardTitle className="text-base font-semibold">Datos del cliente</CardTitle>
                         </div>
                         <CardDescription>
-                            Define los detalles de tu nuevo proyecto
+                            Define los detalles de tu nuevo cliente
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="pt-6">
@@ -83,7 +83,7 @@ export default function ProjectCreate() {
                                     id="name"
                                     value={data.name}
                                     onChange={e => setData('name', e.target.value)}
-                                    placeholder="Nombre del proyecto"
+                                    placeholder="Nombre del cliente"
                                     autoFocus
                                 />
                                 {errors.name && (
@@ -105,7 +105,7 @@ export default function ProjectCreate() {
                                     value={data.description}
                                     onChange={e => setData('description', e.target.value)}
                                     rows={4}
-                                    placeholder="Describe los objetivos del proyecto..."
+                                    placeholder="Describe el tipo de servicio que ofreces..."
                                     className="resize-none"
                                 />
                                 {errors.description && (
@@ -156,7 +156,7 @@ export default function ProjectCreate() {
                                     </div>
                                 </div>
                                 <p className="text-xs text-muted-foreground">
-                                    Elige un color para identificar fácilmente tu proyecto
+                                    Elige un color para identificar fácilmente tu cliente
                                 </p>
                                 {errors.color && (
                                     <p className="text-sm text-destructive flex items-center gap-1">
@@ -177,7 +177,7 @@ export default function ProjectCreate() {
                                         <FolderKanban className="h-4 w-4 text-white" />
                                     </div>
                                     <span className="font-medium">
-                                        {data.name || 'Nombre del proyecto'}
+                                        {data.name || 'Nombre del cliente'}
                                     </span>
                                 </div>
                             </div>
@@ -191,10 +191,10 @@ export default function ProjectCreate() {
                                             Creando...
                                         </span>
                                     ) : (
-                                        'Crear proyecto'
-                                    )}
+                                    'Crear cliente'
+                                )}
                                 </Button>
-                                <Link href="/projects">
+                                <Link href="/clients">
                                     <Button type="button" variant="ghost">
                                         Cancelar
                                     </Button>

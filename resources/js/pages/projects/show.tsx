@@ -2,7 +2,21 @@ import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
-import type { BreadcrumbItem, Project, Task } from '@/types';
+import type { BreadcrumbItem, Project, Task, Idea, Resource } from '@/types';
+import {
+    ArrowLeft,
+    CheckCircle2,
+    Clock,
+    ExternalLink,
+    FileText,
+    Lightbulb,
+    Link2,
+    Pencil,
+    Plus,
+    Sparkles,
+    AlertCircle,
+    FolderKanban,
+} from 'lucide-react';
 
 interface TasksSummary {
     total: number;
@@ -12,41 +26,47 @@ interface TasksSummary {
 
 interface Props {
     project: Project;
+    recentCompleted: Task[];
+    upcomingPending: Task[];
+    ideas: Idea[];
+    resources: Resource[];
     tasksSummary: TasksSummary;
     progressPercentage: number;
+    isPremium: boolean;
 }
 
-const statusColors: Record<string, string> = {
-    inactive:  'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300',
-    active:    'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-    completed: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-};
-
-const statusLabels: Record<string, string> = {
-    inactive: 'Inactivo', active: 'Activo', completed: 'Completado',
-};
-
 const priorityColors: Record<string, string> = {
-    high:   'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
-    medium: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
-    low:    'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300',
+    high:   'bg-red-500/10 text-red-600 border border-red-500/20 dark:bg-red-900/30 dark:text-red-400',
+    medium: 'bg-yellow-500/10 text-yellow-600 border border-yellow-500/20 dark:bg-yellow-900/30 dark:text-yellow-400',
+    low:    'bg-blue-500/10 text-blue-600 border border-blue-500/20 dark:bg-blue-900/30 dark:text-blue-400',
 };
 
 const priorityLabels: Record<string, string> = {
     high: 'Alta', medium: 'Media', low: 'Baja',
 };
 
-export default function ProjectShow({ project, tasksSummary, progressPercentage }: Props) {
+const statusColors: Record<string, string> = {
+    inactive:  'bg-muted text-muted-foreground',
+    active:    'bg-blue-500/10 text-blue-600 border border-blue-500/20 dark:bg-blue-900/30 dark:text-blue-400',
+    completed: 'bg-green-500/10 text-green-600 border border-green-500/20 dark:bg-green-900/30 dark:text-green-400',
+};
+
+const statusLabels: Record<string, string> = {
+    inactive: 'Inactivo', active: 'Activo', completed: 'Completado',
+};
+
+const resourceTypeIcons: Record<string, string> = {
+    link: '🔗', document: '📄', video: '🎬', image: '🖼️', other: '📎',
+};
+
+export default function ProjectShow({ project, recentCompleted, upcomingPending, ideas, resources, tasksSummary, progressPercentage, isPremium }: Props) {
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Proyectos', href: '/projects' },
-        { title: project.name, href: `/projects/${project.id}` },
+        { title: 'Clientes', href: '/clients' },
+        { title: project.name, href: `/clients/${project.id}` },
     ];
 
     const { props } = usePage<{ flash?: { success?: string } }>();
     const flash = props.flash;
-
-    const pending = project.tasks?.filter((t: Task) => t.status === 'pending') ?? [];
-    const completed = project.tasks?.filter((t: Task) => t.status === 'completed') ?? [];
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -54,149 +74,311 @@ export default function ProjectShow({ project, tasksSummary, progressPercentage 
 
             <div className="flex flex-col gap-6 p-6">
 
-                {/* Cabecera */}
-                <div className="flex flex-wrap items-center justify-between gap-4">
-                    <div className="flex items-center gap-3 min-w-0">
-                        {project.color && (
-                            <span className="shrink-0 h-4 w-4 rounded-full" style={{ backgroundColor: project.color }} />
-                        )}
-                        <div className="min-w-0">
-                            <h1 className="truncate text-2xl font-bold">{project.name}</h1>
-                            {project.description && (
-                                <p className="text-sm text-muted-foreground">{project.description}</p>
-                            )}
+                {/* Cabecera del cliente */}
+                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-background to-primary/5 border-2 p-6">
+                    <div className="absolute top-0 right-0 w-48 h-48 bg-primary/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+                    <div className="relative flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                        <div className="flex items-start gap-4 min-w-0">
+                            <div
+                                className="h-12 w-12 shrink-0 rounded-2xl flex items-center justify-center shadow-lg"
+                                style={{ backgroundColor: project.color || '#3B82F6' }}
+                            >
+                                <FolderKanban className="h-6 w-6 text-white" />
+                            </div>
+                            <div className="min-w-0">
+                                <div className="flex items-center gap-3 mb-1">
+                                    <h1 className="text-2xl font-bold truncate">{project.name}</h1>
+                                    <span className={`shrink-0 rounded-lg px-2.5 py-1 text-xs font-semibold ${statusColors[project.status]}`}>
+                                        {statusLabels[project.status]}
+                                    </span>
+                                </div>
+                                {project.description && (
+                                    <p className="text-sm text-muted-foreground">{project.description}</p>
+                                )}
+                            </div>
                         </div>
-                    </div>
-                    <div className="flex shrink-0 gap-2">
-                        <Link href={`/projects/${project.id}/edit`}>
-                            <Button variant="outline">Editar</Button>
-                        </Link>
-                        <Link href="/projects">
-                            <Button variant="outline">← Volver</Button>
-                        </Link>
+                        <div className="flex shrink-0 gap-2">
+                            {isPremium && (
+                                <>
+                                    <Button variant="outline" size="sm" className="gap-2 border-2" disabled>
+                                        <Sparkles className="h-4 w-4" />
+                                        Resume cliente
+                                    </Button>
+                                    <Button variant="outline" size="sm" className="gap-2 border-2" disabled>
+                                        <FileText className="h-4 w-4" />
+                                        Genera update
+                                    </Button>
+                                </>
+                            )}
+                            <Link href={`/clients/${project.id}/edit`}>
+                                <Button variant="outline" size="sm" className="gap-2 border-2">
+                                    <Pencil className="h-4 w-4" />
+                                    Editar
+                                </Button>
+                            </Link>
+                            <Link href="/clients">
+                                <Button variant="outline" size="sm" className="gap-2 border-2">
+                                    <ArrowLeft className="h-4 w-4" />
+                                    Volver
+                                </Button>
+                            </Link>
+                        </div>
                     </div>
                 </div>
 
                 {/* Flash */}
                 {flash?.success && (
-                    <div className="rounded-lg bg-green-100 px-4 py-3 text-sm text-green-700 dark:bg-green-900/30 dark:text-green-400">
-                        {flash.success}
+                    <div className="flex items-center gap-3 rounded-xl bg-green-500/10 border-2 border-green-500/20 px-4 py-3">
+                        <div className="h-8 w-8 rounded-lg bg-green-500/20 flex items-center justify-center">
+                            <CheckCircle2 className="h-4 w-4 text-green-600" />
+                        </div>
+                        <span className="text-sm font-medium text-green-700 dark:text-green-400">{flash.success}</span>
                     </div>
                 )}
 
-                {/* Estadísticas */}
+                {/* Estadísticas rápidas */}
                 <div className="grid gap-4 sm:grid-cols-4">
-                    <Card>
-                        <CardContent className="pt-4">
-                            <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${statusColors[project.status]}`}>
-                                {statusLabels[project.status]}
-                            </span>
-                            <p className="mt-1 text-xs text-muted-foreground">Estado</p>
-                        </CardContent>
-                    </Card>
-                    <Card>
+                    <Card className="border-2">
                         <CardContent className="pt-4">
                             <p className="text-2xl font-bold">{tasksSummary.total}</p>
                             <p className="text-xs text-muted-foreground">Total tareas</p>
                         </CardContent>
                     </Card>
-                    <Card>
+                    <Card className="border-2">
                         <CardContent className="pt-4">
                             <p className="text-2xl font-bold text-orange-600">{tasksSummary.pending}</p>
                             <p className="text-xs text-muted-foreground">Pendientes</p>
                         </CardContent>
                     </Card>
-                    <Card>
+                    <Card className="border-2">
                         <CardContent className="pt-4">
                             <p className="text-2xl font-bold text-green-600">{tasksSummary.completed}</p>
                             <p className="text-xs text-muted-foreground">Completadas</p>
                         </CardContent>
                     </Card>
-                </div>
-
-                {/* Barra de progreso */}
-                {tasksSummary.total > 0 && (
-                    <Card>
+                    <Card className="border-2">
                         <CardContent className="pt-4">
-                            <div className="mb-2 flex items-center justify-between">
-                                <p className="text-sm font-medium">Progreso</p>
-                                <p className="text-sm font-semibold">{progressPercentage}%</p>
+                            <div className="flex items-center justify-between mb-1">
+                                <p className="text-2xl font-bold">{progressPercentage}%</p>
                             </div>
-                            <div className="h-2 w-full rounded-full bg-muted">
-                                <div
-                                    className="h-2 rounded-full bg-green-500 transition-all"
-                                    style={{ width: `${progressPercentage}%` }}
-                                />
+                            <div className="h-1.5 w-full rounded-full bg-muted">
+                                <div className="h-1.5 rounded-full bg-green-500 transition-all" style={{ width: `${progressPercentage}%` }} />
                             </div>
+                            <p className="text-xs text-muted-foreground mt-1">Progreso</p>
                         </CardContent>
                     </Card>
-                )}
-
-                {/* Tareas */}
-                <div className="flex items-center justify-between">
-                    <h2 className="text-lg font-semibold">Tareas</h2>
-                    <Link href={`/tasks/create?project_id=${project.id}`}>
-                        <Button size="sm">+ Añadir tarea</Button>
-                    </Link>
                 </div>
 
-                {tasksSummary.total === 0 && (
-                    <Card>
-                        <CardContent className="flex items-center justify-center py-10">
-                            <p className="text-muted-foreground">Este proyecto no tiene tareas todavía.</p>
-                        </CardContent>
-                    </Card>
-                )}
+                <div className="grid gap-6 lg:grid-cols-2">
 
-                {/* Pendientes */}
-                {pending.length > 0 && (
-                    <Card>
-                        <CardHeader className="pb-2">
-                            <CardTitle className="text-base">Pendientes ({pending.length})</CardTitle>
-                        </CardHeader>
-                        <CardContent className="flex flex-col gap-2">
-                            {pending.map((task: Task) => (
-                                <div key={task.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-3">
-                                    <div className="min-w-0 flex-1 flex items-center gap-2">
-                                        <p className="truncate text-sm font-medium">{task.name}</p>
-                                        <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${priorityColors[task.priority]}`}>
-                                            {priorityLabels[task.priority]}
-                                        </span>
+                    {/* BLOQUE 1: Contexto estático */}
+                    {isPremium && (project.brand_tone || project.service_scope || project.client_notes || (project.key_links && project.key_links.length > 0)) && (
+                        <Card className="overflow-hidden border-2">
+                            <CardHeader className="pb-3 bg-gradient-to-r from-primary/5 to-transparent">
+                                <div className="flex items-center gap-2">
+                                    <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                                        <FileText className="h-4 w-4 text-primary" />
                                     </div>
-                                    <div className="flex shrink-0 gap-2">
-                                        <Button size="sm" variant="outline" onClick={() => router.patch(`/tasks/${task.id}/complete`)}>
-                                            Completar
-                                        </Button>
-                                        <Button size="sm" variant="destructive" onClick={() => {
-                                            if (confirm(`¿Eliminar "${task.name}"?`)) router.delete(`/tasks/${task.id}`);
-                                        }}>
-                                            Eliminar
-                                        </Button>
+                                    <CardTitle className="text-base">Contexto del cliente</CardTitle>
+                                </div>
+                            </CardHeader>
+                            <CardContent className="flex flex-col gap-3 pt-4">
+                                {project.service_scope && (
+                                    <div>
+                                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Servicio</p>
+                                        <p className="text-sm">{project.service_scope}</p>
+                                    </div>
+                                )}
+                                {project.brand_tone && (
+                                    <div>
+                                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Tono de marca</p>
+                                        <p className="text-sm">{project.brand_tone}</p>
+                                    </div>
+                                )}
+                                {project.client_notes && (
+                                    <div>
+                                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Notas</p>
+                                        <p className="text-sm whitespace-pre-line">{project.client_notes}</p>
+                                    </div>
+                                )}
+                                {project.key_links && project.key_links.length > 0 && (
+                                    <div>
+                                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Enlaces clave</p>
+                                        <div className="flex flex-col gap-1.5">
+                                            {project.key_links.map((link, i) => (
+                                                <a
+                                                    key={i}
+                                                    href={link.url}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="inline-flex items-center gap-2 text-sm text-primary hover:underline"
+                                                >
+                                                    <Link2 className="h-3.5 w-3.5 shrink-0" />
+                                                    {link.label}
+                                                    <ExternalLink className="h-3 w-3 shrink-0 opacity-50" />
+                                                </a>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
+                    )}
+
+                    {/* BLOQUE 2: Timeline */}
+                    <Card className="overflow-hidden border-2">
+                        <CardHeader className="flex flex-row items-center justify-between pb-3 bg-gradient-to-r from-blue-500/5 to-transparent">
+                            <div className="flex items-center gap-2">
+                                <div className="h-8 w-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                                    <Clock className="h-4 w-4 text-blue-600" />
+                                </div>
+                                <CardTitle className="text-base">Timeline</CardTitle>
+                            </div>
+                            <Link href={`/tasks/create?project_id=${project.id}`}>
+                                <Button size="sm" variant="outline" className="gap-1.5 h-8 border-2">
+                                    <Plus className="h-3.5 w-3.5" />
+                                    Tarea
+                                </Button>
+                            </Link>
+                        </CardHeader>
+                        <CardContent className="flex flex-col gap-4 pt-4">
+                            {/* Próximas pendientes */}
+                            {upcomingPending.length > 0 && (
+                                <div>
+                                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Próximas</p>
+                                    <div className="flex flex-col gap-1.5">
+                                        {upcomingPending.map(task => {
+                                            const isOverdue = task.due_date && new Date(task.due_date) < new Date(new Date().toDateString());
+                                            return (
+                                                <div key={task.id} className="flex items-center justify-between rounded-xl bg-muted/30 p-3 transition-all hover:bg-muted/50">
+                                                    <div className="flex min-w-0 items-center gap-2">
+                                                        <span className={`shrink-0 rounded-lg px-2 py-0.5 text-xs font-semibold ${priorityColors[task.priority]}`}>
+                                                            {priorityLabels[task.priority]}
+                                                        </span>
+                                                        <span className="truncate text-sm font-medium">{task.name}</span>
+                                                        {isOverdue && <AlertCircle className="h-3.5 w-3.5 text-red-500 shrink-0" />}
+                                                    </div>
+                                                    <div className="flex items-center gap-2 shrink-0">
+                                                        {task.due_date && (
+                                                            <span className={`text-xs ${isOverdue ? 'text-red-600 font-semibold' : 'text-muted-foreground'}`}>
+                                                                {new Date(task.due_date).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
+                                                            </span>
+                                                        )}
+                                                        <Button
+                                                            size="sm"
+                                                            variant="ghost"
+                                                            onClick={() => router.patch(`/tasks/${task.id}/complete`)}
+                                                            className="h-7 w-7 p-0 text-green-600 hover:bg-green-500/10 rounded-lg"
+                                                        >
+                                                            <CheckCircle2 className="h-3.5 w-3.5" />
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                 </div>
-                            ))}
+                            )}
+                            {/* Últimas completadas */}
+                            {recentCompleted.length > 0 && (
+                                <div>
+                                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Completadas recientemente</p>
+                                    <div className="flex flex-col gap-1.5">
+                                        {recentCompleted.map(task => (
+                                            <div key={task.id} className="flex items-center justify-between rounded-xl bg-muted/20 p-3 opacity-60">
+                                                <span className="text-sm line-through text-muted-foreground truncate">{task.name}</span>
+                                                {task.completed_at && (
+                                                    <span className="text-xs text-muted-foreground shrink-0">
+                                                        {new Date(task.completed_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                            {upcomingPending.length === 0 && recentCompleted.length === 0 && (
+                                <div className="flex flex-col items-center justify-center py-6 text-center">
+                                    <p className="text-sm text-muted-foreground">Sin tareas todavía</p>
+                                </div>
+                            )}
                         </CardContent>
                     </Card>
-                )}
 
-                {/* Completadas */}
-                {completed.length > 0 && (
-                    <Card>
-                        <CardHeader className="pb-2">
-                            <CardTitle className="text-base">Completadas ({completed.length})</CardTitle>
+                    {/* BLOQUE 3: Notas/Ideas vinculadas */}
+                    <Card className="overflow-hidden border-2">
+                        <CardHeader className="flex flex-row items-center justify-between pb-3 bg-gradient-to-r from-yellow-500/5 to-transparent">
+                            <div className="flex items-center gap-2">
+                                <div className="h-8 w-8 rounded-lg bg-yellow-500/10 flex items-center justify-center">
+                                    <Lightbulb className="h-4 w-4 text-yellow-600" />
+                                </div>
+                                <CardTitle className="text-base">Notas</CardTitle>
+                            </div>
                         </CardHeader>
-                        <CardContent className="flex flex-col gap-2">
-                            {completed.map((task: Task) => (
-                                <div key={task.id} className="flex items-center justify-between gap-3 rounded-lg border p-3 opacity-60">
-                                    <p className="text-sm line-through text-muted-foreground">{task.name}</p>
-                                    <Button size="sm" variant="outline" onClick={() => router.patch(`/tasks/${task.id}/reopen`)}>
-                                        Reabrir
+                        <CardContent className="flex flex-col gap-2 pt-4">
+                            {ideas.length === 0 ? (
+                                <div className="flex flex-col items-center justify-center py-6 text-center">
+                                    <p className="text-sm text-muted-foreground">Sin notas vinculadas</p>
+                                </div>
+                            ) : (
+                                ideas.map(idea => (
+                                    <div key={idea.id} className="rounded-xl bg-muted/30 p-3 transition-all hover:bg-muted/50">
+                                        <div className="flex items-center gap-2">
+                                            <span className={`shrink-0 rounded-lg px-2 py-0.5 text-xs font-semibold ${priorityColors[idea.priority]}`}>
+                                                {priorityLabels[idea.priority]}
+                                            </span>
+                                            <p className="text-sm font-medium truncate">{idea.name}</p>
+                                        </div>
+                                        {idea.description && (
+                                            <p className="mt-1 text-xs text-muted-foreground line-clamp-2">{idea.description}</p>
+                                        )}
+                                    </div>
+                                ))
+                            )}
+                        </CardContent>
+                    </Card>
+
+                    {/* BLOQUE 4: Recursos (solo premium) */}
+                    {isPremium && (
+                        <Card className="overflow-hidden border-2">
+                            <CardHeader className="flex flex-row items-center justify-between pb-3 bg-gradient-to-r from-green-500/5 to-transparent">
+                                <div className="flex items-center gap-2">
+                                    <div className="h-8 w-8 rounded-lg bg-green-500/10 flex items-center justify-center">
+                                        <Link2 className="h-4 w-4 text-green-600" />
+                                    </div>
+                                    <CardTitle className="text-base">Recursos</CardTitle>
+                                </div>
+                                <Link href={`/clients/${project.id}/resources/create`}>
+                                    <Button size="sm" variant="outline" className="gap-1.5 h-8 border-2">
+                                        <Plus className="h-3.5 w-3.5" />
+                                        Recurso
                                     </Button>
-                                </div>
-                            ))}
-                        </CardContent>
-                    </Card>
-                )}
+                                </Link>
+                            </CardHeader>
+                            <CardContent className="flex flex-col gap-2 pt-4">
+                                {resources.length === 0 ? (
+                                    <div className="flex flex-col items-center justify-center py-6 text-center">
+                                        <p className="text-sm text-muted-foreground">Sin recursos todavía</p>
+                                    </div>
+                                ) : (
+                                    resources.map(resource => (
+                                        <div key={resource.id} className="flex items-center justify-between rounded-xl bg-muted/30 p-3 transition-all hover:bg-muted/50">
+                                            <div className="flex items-center gap-2 min-w-0">
+                                                <span className="text-base shrink-0">{resourceTypeIcons[resource.type] || '📎'}</span>
+                                                <span className="text-sm font-medium truncate">{resource.name}</span>
+                                            </div>
+                                            {resource.url && (
+                                                <a href={resource.url} target="_blank" rel="noopener noreferrer" className="shrink-0 text-primary hover:text-primary/80">
+                                                    <ExternalLink className="h-4 w-4" />
+                                                </a>
+                                            )}
+                                        </div>
+                                    ))
+                                )}
+                            </CardContent>
+                        </Card>
+                    )}
+                </div>
             </div>
         </AppLayout>
     );

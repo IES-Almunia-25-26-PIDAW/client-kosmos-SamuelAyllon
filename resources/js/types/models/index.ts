@@ -4,7 +4,5 @@ export type * from './subscription';
 export type * from './payment';
 export type * from './role';
 export type * from './resource';
-export type * from './box';
 export type * from './project';
-export type * from './voice-recording';
-export type * from './ai-message';
+export type * from './ai-log';

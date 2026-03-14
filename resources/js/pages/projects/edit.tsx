@@ -17,8 +17,8 @@ const colorOptions = [
 
 export default function ProjectEdit({ project }: Props) {
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Proyectos', href: '/projects' },
-        { title: project.name, href: `/projects/${project.id}` },
+        { title: 'Clientes', href: '/clients' },
+        { title: project.name, href: `/clients/${project.id}` },
         { title: 'Editar', href: '#' },
     ];
 
@@ -31,7 +31,7 @@ export default function ProjectEdit({ project }: Props) {
 
     function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
-        put(`/projects/${project.id}`);
+        put(`/clients/${project.id}`);
     }
 
     return (
@@ -41,15 +41,15 @@ export default function ProjectEdit({ project }: Props) {
             <div className="flex flex-col gap-6 p-6">
 
                 <div className="flex items-center justify-between">
-                    <h1 className="text-2xl font-bold">Editar proyecto</h1>
-                    <Link href={`/projects/${project.id}`}>
+                    <h1 className="text-2xl font-bold">Editar cliente</h1>
+                    <Link href={`/clients/${project.id}`}>
                         <Button variant="outline">← Volver</Button>
                     </Link>
                 </div>
 
                 <Card className="max-w-xl">
                     <CardHeader className="pb-2">
-                        <CardTitle className="text-base">Datos del proyecto</CardTitle>
+                        <CardTitle className="text-base">Datos del cliente</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -61,7 +61,7 @@ export default function ProjectEdit({ project }: Props) {
                                     id="name"
                                     value={data.name}
                                     onChange={e => setData('name', e.target.value)}
-                                    placeholder="Nombre del proyecto"
+                                    placeholder="Nombre del cliente"
                                 />
                                 {errors.name && <p className="text-xs text-red-600">{errors.name}</p>}
                             </div>
@@ -124,7 +124,7 @@ export default function ProjectEdit({ project }: Props) {
                                 <Button type="submit" disabled={processing}>
                                     {processing ? 'Guardando...' : 'Guardar cambios'}
                                 </Button>
-                                <Link href={`/projects/${project.id}`}>
+                                <Link href={`/clients/${project.id}`}>
                                     <Button type="button" variant="outline">Cancelar</Button>
                                 </Link>
                             </div>

@@ -3,7 +3,6 @@ import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Pencil, Trash2, Table2, Calendar, LayoutGrid, ChevronLeft, ChevronRight, ClipboardList, CheckCircle2, Plus, Sparkles, AlertCircle, Clock } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import VoiceRecorder from '@/components/voice-recorder';
 import { Checkbox } from '@/components/ui/checkbox';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem, TasksProps, Task, ViewType } from '@/types';
@@ -33,6 +32,22 @@ function deleteTask(task: Task) {
     if (confirm(`¿Eliminar "${task.name}"?`)) router.delete(`/tasks/${task.id}`);
 }
 
+function groupByClient(tasks: Task[]) {
+    const map = new Map<number | 'none', { name: string | null; color: string; tasks: Task[] }>();
+    for (const t of tasks) {
+        const key = t.project?.id ?? 'none';
+        if (!map.has(key)) map.set(key, { name: t.project?.name ?? null, color: t.project?.color ?? '#94a3b8', tasks: [] });
+        map.get(key)!.tasks.push(t);
+    }
+    return Array.from(map.entries())
+        .map(([id, g]) => ({ clientId: id, ...g }))
+        .sort((a, b) => {
+            if (a.name === null) return 1;
+            if (b.name === null) return -1;
+            return a.name.localeCompare(b.name);
+        });
+}
+
 // ── Vista tabla ─────────────────────────────────────────────────────────────
 
 function TableView({ tasks, canAddTask }: { tasks: Task[]; canAddTask: boolean }) {
@@ -55,7 +70,7 @@ function TableView({ tasks, canAddTask }: { tasks: Task[]; canAddTask: boolean }
                         <th className="w-10 p-4" />
                         <th className="p-4 text-left font-semibold text-xs uppercase tracking-wider text-muted-foreground">Nombre</th>
                         <th className="p-4 text-left font-semibold text-xs uppercase tracking-wider text-muted-foreground">Prioridad</th>
-                        <th className="hidden p-4 text-left font-semibold text-xs uppercase tracking-wider text-muted-foreground sm:table-cell">Proyecto</th>
+                        <th className="hidden p-4 text-left font-semibold text-xs uppercase tracking-wider text-muted-foreground sm:table-cell">Cliente</th>
                         <th className="hidden p-4 text-left font-semibold text-xs uppercase tracking-wider text-muted-foreground md:table-cell">Vencimiento</th>
                         <th className="p-4 text-right font-semibold text-xs uppercase tracking-wider text-muted-foreground">Acciones</th>
                     </tr>
@@ -295,10 +310,9 @@ function GalleryView({ tasks, canAddTask }: { tasks: Task[]; canAddTask: boolean
 // ── Página principal ────────────────────────────────────────────────────────
 
 export default function TasksIndex({ tasks, canAddTask, isFreeUser }: TasksProps) {
-    const { props } = usePage<{ flash?: { success?: string }; errors?: { limit?: string }; auth: { is_premium: boolean } }>();
+    const { props } = usePage<{ flash?: { success?: string }; errors?: { limit?: string } }>();
     const flash = props.flash;
     const errors = props.errors;
-    const isPremium = props.auth.is_premium;
 
     const today = new Date().toISOString().split('T')[0];
     const [view, setView] = useState<ViewType>('table');
@@ -357,11 +371,6 @@ export default function TasksIndex({ tasks, canAddTask, isFreeUser }: TasksProps
                                     </Button>
                                 ))}
                             </div>
-                            {isPremium && canAddTask && (
-                                <VoiceRecorder
-                                    onTranscription={(text) => router.post('/tasks', { name: text, priority: 'medium' })}
-                                />
-                            )}
                             {canAddTask ? (
                                 <Link href="/tasks/create">
                                     <Button className="gap-2 shadow-lg shadow-primary/25">
@@ -459,30 +468,27 @@ export default function TasksIndex({ tasks, canAddTask, isFreeUser }: TasksProps
 
                 {/* Vistas */}
                 {filtered.length > 0 && view === 'table' && (
-                    <>
-                        {pending.length > 0 && (
-                            <div>
-                                <div className="flex items-center gap-2 mb-3">
-                                    <div className="h-6 w-6 rounded-md bg-blue-500/10 flex items-center justify-center">
-                                        <Clock className="h-3.5 w-3.5 text-blue-600" />
+                    <div className="flex flex-col gap-6">
+                        {groupByClient(filtered).map(group => {
+                            const gPending = group.tasks.filter(t => t.status === 'pending');
+                            const gCompleted = group.tasks.filter(t => t.status === 'completed');
+                            return (
+                                <div key={group.clientId}>
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <div className="h-3 w-3 rounded-full" style={{ backgroundColor: group.color }} />
+                                        <p className="text-sm font-semibold">{group.name ?? 'Sin cliente'}</p>
+                                        <span className="text-xs text-muted-foreground">({gPending.length} pendiente{gPending.length !== 1 ? 's' : ''})</span>
                                     </div>
-                                    <p className="text-sm font-semibold">Pendientes ({pending.length})</p>
+                                    {gPending.length > 0 && <TableView tasks={gPending} canAddTask={canAddTask} />}
+                                    {gCompleted.length > 0 && (
+                                        <div className="mt-3 opacity-60">
+                                            <TableView tasks={gCompleted} canAddTask={canAddTask} />
+                                        </div>
+                                    )}
                                 </div>
-                                <TableView tasks={pending} canAddTask={canAddTask} />
-                            </div>
-                        )}
-                        {completed.length > 0 && (
-                            <div>
-                                <div className="flex items-center gap-2 mb-3">
-                                    <div className="h-6 w-6 rounded-md bg-green-500/10 flex items-center justify-center">
-                                        <CheckCircle2 className="h-3.5 w-3.5 text-green-600" />
-                                    </div>
-                                    <p className="text-sm font-semibold">Completadas ({completed.length})</p>
-                                </div>
-                                <TableView tasks={completed} canAddTask={canAddTask} />
-                            </div>
-                        )}
-                    </>
+                            );
+                        })}
+                    </div>
                 )}
 
                 {filtered.length > 0 && view === 'calendar' && (
@@ -490,30 +496,27 @@ export default function TasksIndex({ tasks, canAddTask, isFreeUser }: TasksProps
                 )}
 
                 {filtered.length > 0 && view === 'gallery' && (
-                    <>
-                        {pending.length > 0 && (
-                            <div>
-                                <div className="flex items-center gap-2 mb-3">
-                                    <div className="h-6 w-6 rounded-md bg-blue-500/10 flex items-center justify-center">
-                                        <Clock className="h-3.5 w-3.5 text-blue-600" />
+                    <div className="flex flex-col gap-6">
+                        {groupByClient(filtered).map(group => {
+                            const gPending = group.tasks.filter(t => t.status === 'pending');
+                            const gCompleted = group.tasks.filter(t => t.status === 'completed');
+                            return (
+                                <div key={group.clientId}>
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <div className="h-3 w-3 rounded-full" style={{ backgroundColor: group.color }} />
+                                        <p className="text-sm font-semibold">{group.name ?? 'Sin cliente'}</p>
+                                        <span className="text-xs text-muted-foreground">({gPending.length} pendiente{gPending.length !== 1 ? 's' : ''})</span>
                                     </div>
-                                    <p className="text-sm font-semibold">Pendientes ({pending.length})</p>
+                                    {gPending.length > 0 && <GalleryView tasks={gPending} canAddTask={canAddTask} />}
+                                    {gCompleted.length > 0 && (
+                                        <div className="mt-3 opacity-60">
+                                            <GalleryView tasks={gCompleted} canAddTask={canAddTask} />
+                                        </div>
+                                    )}
                                 </div>
-                                <GalleryView tasks={pending} canAddTask={canAddTask} />
-                            </div>
-                        )}
-                        {completed.length > 0 && (
-                            <div>
-                                <div className="flex items-center gap-2 mb-3">
-                                    <div className="h-6 w-6 rounded-md bg-green-500/10 flex items-center justify-center">
-                                        <CheckCircle2 className="h-3.5 w-3.5 text-green-600" />
-                                    </div>
-                                    <p className="text-sm font-semibold">Completadas ({completed.length})</p>
-                                </div>
-                                <GalleryView tasks={completed} canAddTask={canAddTask} />
-                            </div>
-                        )}
-                    </>
+                            );
+                        })}
+                    </div>
                 )}
             </div>
         </AppLayout>

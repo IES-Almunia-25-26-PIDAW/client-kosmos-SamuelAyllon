@@ -53,16 +53,43 @@ class ProjectController extends Controller
     {
         $this->authorize('view', $project);
 
-        $project->load([
-            'tasks' => fn ($q) => $q->byPriority()->orderByRaw("CASE status WHEN 'pending' THEN 0 ELSE 1 END"),
-            'ideas' => fn ($q) => $q->where('status', 'active')->orderBy('created_at', 'desc'),
-            'resources' => fn ($q) => $q->orderBy('created_at', 'desc'),
-        ]);
+        $user = Auth::user();
+        $isPremium = $user->isPremiumUser() || $user->isAdmin();
+
+        // Timeline: últimas 5 completadas + próximas 3 pendientes
+        $recentCompleted = $project->tasks()
+            ->where('status', 'completed')
+            ->orderBy('completed_at', 'desc')
+            ->limit(5)
+            ->get();
+
+        $upcomingPending = $project->tasks()
+            ->where('status', 'pending')
+            ->orderBy('due_date', 'asc')
+            ->orderByRaw("CASE priority WHEN 'high' THEN 0 WHEN 'medium' THEN 1 WHEN 'low' THEN 2 END")
+            ->limit(3)
+            ->get();
+
+        // Notas/ideas vinculadas
+        $ideas = $project->ideas()
+            ->where('status', 'active')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        // Recursos (solo premium)
+        $resources = $isPremium
+            ? $project->resources()->orderBy('created_at', 'desc')->get()
+            : collect();
 
         return Inertia::render('projects/show', [
-            'project' => $project,
-            'tasksSummary' => $project->getTasksSummary(),
+            'project'          => $project,
+            'recentCompleted'  => $recentCompleted,
+            'upcomingPending'  => $upcomingPending,
+            'ideas'            => $ideas,
+            'resources'        => $resources,
+            'tasksSummary'     => $project->getTasksSummary(),
             'progressPercentage' => $project->getProgressPercentage(),
+            'isPremium'        => $isPremium,
         ]);
     }
 
