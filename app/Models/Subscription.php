@@ -93,11 +93,14 @@ class Subscription extends Model
             default           => null,
         };
 
+        // Si la suscripción aún no ha expirado, extender desde expires_at
+        $baseDate = ($this->expires_at && $this->expires_at->isFuture()) ? $this->expires_at : now();
+
         $this->update([
             'plan'       => $plan,
             'status'     => 'active',
             'started_at' => now(),
-            'expires_at' => $days ? now()->addDays($days) : null,
+            'expires_at' => $days ? $baseDate->copy()->addDays($days) : null,
         ]);
 
         // Actualizar rol del usuario

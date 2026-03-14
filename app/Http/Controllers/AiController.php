@@ -7,6 +7,7 @@ use App\Models\Project;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class AiController extends Controller
 {
@@ -205,8 +206,6 @@ class AiController extends Controller
         $httpOptions = [];
         if (!empty($config['ca_bundle'])) {
             $httpOptions['verify'] = $config['ca_bundle'];
-        } elseif (!empty($config['disable_ssl_verification']) && $config['disable_ssl_verification'] !== 'false') {
-            $httpOptions['verify'] = false;
         }
 
         $response = Http::withOptions($httpOptions)
@@ -223,6 +222,10 @@ class AiController extends Controller
             ]);
 
         if ($response->failed()) {
+            Log::error('OpenAI API call failed', [
+                'status' => $response->status(),
+                'body' => $response->body(),
+            ]);
             return 'Lo siento, no he podido generar la respuesta en este momento. Inténtalo de nuevo más tarde.';
         }
 

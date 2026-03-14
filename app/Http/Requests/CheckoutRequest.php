@@ -23,6 +23,19 @@ class CheckoutRequest extends FormRequest
         ];
     }
 
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator) {
+            $month = (int) $this->input('expiry_month');
+            $year = (int) $this->input('expiry_year');
+            $now = now();
+
+            if ($year === (int) $now->format('Y') && $month < (int) $now->format('m')) {
+                $validator->errors()->add('expiry_month', 'La tarjeta está expirada.');
+            }
+        });
+    }
+
     public function messages(): array
     {
         return [

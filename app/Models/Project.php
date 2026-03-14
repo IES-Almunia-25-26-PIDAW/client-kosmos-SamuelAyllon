@@ -107,10 +107,16 @@ class Project extends Model
      */
     public function getTasksSummary(): array
     {
+        $counts = $this->tasks()
+            ->selectRaw("COUNT(*) as total")
+            ->selectRaw("SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending")
+            ->selectRaw("SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed")
+            ->first();
+
         return [
-            'total' => $this->tasks()->count(),
-            'pending' => $this->tasks()->where('status', 'pending')->count(),
-            'completed' => $this->tasks()->where('status', 'completed')->count(),
+            'total' => (int) $counts->total,
+            'pending' => (int) $counts->pending,
+            'completed' => (int) $counts->completed,
         ];
     }
 
@@ -119,15 +125,13 @@ class Project extends Model
      */
     public function getProgressPercentage(): int
     {
-        $total = $this->tasks()->count();
-        
-        if ($total === 0) {
+        $summary = $this->getTasksSummary();
+
+        if ($summary['total'] === 0) {
             return 0;
         }
 
-        $completed = $this->tasks()->where('status', 'completed')->count();
-        
-        return (int) round(($completed / $total) * 100);
+        return (int) round(($summary['completed'] / $summary['total']) * 100);
     }
 
     /**

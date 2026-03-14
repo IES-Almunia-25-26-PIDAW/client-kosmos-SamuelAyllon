@@ -20,8 +20,8 @@ class StoreProjectRequest extends FormRequest
             'brand_tone' => ['nullable', 'string', 'max:2000'],
             'service_scope' => ['nullable', 'string', 'max:2000'],
             'key_links' => ['nullable', 'array'],
-            'key_links.*.label' => ['required_with:key_links', 'string', 'max:255'],
-            'key_links.*.url' => ['required_with:key_links', 'url', 'max:2048'],
+            'key_links.*.label' => ['required', 'string', 'max:255'],
+            'key_links.*.url' => ['required', 'url', 'max:2048'],
             'next_deadline' => ['nullable', 'date'],
             'client_notes' => ['nullable', 'string', 'max:5000'],
         ];

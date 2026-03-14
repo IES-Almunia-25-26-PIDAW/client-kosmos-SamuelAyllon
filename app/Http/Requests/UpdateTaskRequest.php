@@ -17,8 +17,12 @@ class UpdateTaskRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:2000'],
             'priority' => ['required', 'in:low,medium,high'],
-            'due_date' => ['nullable', 'date'],
-            'project_id' => ['nullable', 'integer', 'exists:projects,id'],
+            'due_date' => ['required', 'date'],
+            'project_id' => ['nullable', 'integer', 'exists:projects,id', function ($attribute, $value, $fail) {
+                if ($value && \App\Models\Project::where('id', $value)->where('user_id', $this->user()->id)->doesntExist()) {
+                    $fail('El proyecto seleccionado no te pertenece.');
+                }
+            }],
         ];
     }
 

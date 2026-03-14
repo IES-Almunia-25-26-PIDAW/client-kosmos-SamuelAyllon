@@ -17,6 +17,7 @@ class IdeaController extends Controller
         $user = Auth::user();
 
         $ideas = $user->ideas()
+            ->with('project:id,name')
             ->orderByRaw("CASE status WHEN 'active' THEN 0 ELSE 1 END")
             ->byPriority()
             ->get();

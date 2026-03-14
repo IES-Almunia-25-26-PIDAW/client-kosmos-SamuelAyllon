@@ -119,11 +119,11 @@ class User extends Authenticatable
     }
 
     /**
-     * Verificar si el usuario es premium
+     * Verificar si el usuario es premium (rol + suscripción activa)
      */
     public function isPremiumUser(): bool
     {
-        return $this->hasRole('premium_user');
+        return $this->hasRole('premium_user') && $this->subscription?->isActive();
     }
 
     /**

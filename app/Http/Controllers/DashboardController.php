@@ -29,7 +29,7 @@ class DashboardController extends Controller
                 CASE
                     WHEN due_date < CURRENT_DATE THEN 0
                     WHEN due_date = CURRENT_DATE THEN 1
-                    WHEN due_date <= DATE(CURRENT_DATE, '+3 days') THEN 2
+                    WHEN due_date <= CURRENT_DATE + INTERVAL 3 DAY THEN 2
                     ELSE 3
                 END
             ")
