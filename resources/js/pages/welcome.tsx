@@ -239,7 +239,7 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
                                 Con <span className="text-primary font-semibold">IA contextual</span> y un <span className="text-primary font-semibold">panel diario</span>, nada se queda atrás.
                             </p>
                             
-                            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 animate-fade-in-up-delay-4">
+                            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 animate-fade-in-up-delay-3">
                                 {canRegister && (
                                     <Button size="lg" asChild className="w-full sm:w-auto group glow-primary-lg hover:scale-105 transition-all duration-300 text-base px-8 py-6">
                                         <Link href={register()} className="flex items-center gap-3">

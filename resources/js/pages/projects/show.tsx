@@ -52,7 +52,7 @@ const priorityLabels: Record<string, string> = {
 
 const statusColors: Record<string, string> = {
     inactive:  'bg-muted text-muted-foreground',
-    active:    'bg-blue-500/10 text-blue-600 border border-blue-500/20 dark:bg-blue-900/30 dark:text-blue-400',
+    active:    'bg-primary/10 text-primary border border-primary/20 dark:bg-primary/20 dark:text-primary',
     completed: 'bg-green-500/10 text-green-600 border border-green-500/20 dark:bg-green-900/30 dark:text-green-400',
 };
 
@@ -211,11 +211,11 @@ export default function ProjectShow({ project, recentCompleted, upcomingPending,
 
                 {/* Resultado de Resume cliente */}
                 {summaryResult && (
-                    <Card className="overflow-hidden border-2 border-purple-500/20 bg-gradient-to-br from-purple-500/5 to-transparent">
+                    <Card className="overflow-hidden border-l-4 border-l-primary bg-ai-surface glass">
                         <CardHeader className="flex flex-row items-center justify-between pb-3">
                             <div className="flex items-center gap-2">
-                                <div className="h-8 w-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
-                                    <Sparkles className="h-4 w-4 text-purple-600" />
+                                <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                                    <Sparkles className="h-4 w-4 text-primary" />
                                 </div>
                                 <CardTitle className="text-base">Resumen del cliente</CardTitle>
                             </div>
@@ -236,11 +236,11 @@ export default function ProjectShow({ project, recentCompleted, upcomingPending,
 
                 {/* Resultado de Genera update */}
                 {updateResult && (
-                    <Card className="overflow-hidden border-2 border-blue-500/20 bg-gradient-to-br from-blue-500/5 to-transparent">
+                    <Card className="overflow-hidden border-l-4 border-l-primary bg-ai-surface glass">
                         <CardHeader className="flex flex-row items-center justify-between pb-3">
                             <div className="flex items-center gap-2">
-                                <div className="h-8 w-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                                    <FileText className="h-4 w-4 text-blue-600" />
+                                <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                                    <FileText className="h-4 w-4 text-primary" />
                                 </div>
                                 <CardTitle className="text-base">Update para el cliente</CardTitle>
                             </div>
@@ -350,10 +350,10 @@ export default function ProjectShow({ project, recentCompleted, upcomingPending,
 
                     {/* BLOQUE 2: Timeline */}
                     <Card className="overflow-hidden border-2">
-                        <CardHeader className="flex flex-row items-center justify-between pb-3 bg-gradient-to-r from-blue-500/5 to-transparent">
+                        <CardHeader className="flex flex-row items-center justify-between pb-3 bg-gradient-to-r from-primary/5 to-transparent">
                             <div className="flex items-center gap-2">
-                                <div className="h-8 w-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                                    <Clock className="h-4 w-4 text-blue-600" />
+                                <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                                    <Clock className="h-4 w-4 text-primary" />
                                 </div>
                                 <CardTitle className="text-base">Timeline</CardTitle>
                             </div>
@@ -422,7 +422,7 @@ export default function ProjectShow({ project, recentCompleted, upcomingPending,
                             )}
                             {upcomingPending.length === 0 && recentCompleted.length === 0 && (
                                 <div className="flex flex-col items-center justify-center py-6 text-center">
-                                    <p className="text-sm text-muted-foreground">Sin tareas todavía</p>
+                                    <p className="text-sm text-muted-foreground">Crea la primera tarea para iniciar el timeline.</p>
                                 </div>
                             )}
                         </CardContent>
@@ -430,10 +430,10 @@ export default function ProjectShow({ project, recentCompleted, upcomingPending,
 
                     {/* BLOQUE 3: Notas/Ideas vinculadas */}
                     <Card className="overflow-hidden border-2">
-                        <CardHeader className="flex flex-row items-center justify-between pb-3 bg-gradient-to-r from-yellow-500/5 to-transparent">
+                        <CardHeader className="flex flex-row items-center justify-between pb-3 bg-gradient-to-r from-primary/5 to-transparent">
                             <div className="flex items-center gap-2">
-                                <div className="h-8 w-8 rounded-lg bg-yellow-500/10 flex items-center justify-center">
-                                    <Lightbulb className="h-4 w-4 text-yellow-600" />
+                                <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                                    <Lightbulb className="h-4 w-4 text-primary" />
                                 </div>
                                 <CardTitle className="text-base">Notas</CardTitle>
                             </div>
@@ -441,7 +441,7 @@ export default function ProjectShow({ project, recentCompleted, upcomingPending,
                         <CardContent className="flex flex-col gap-2 pt-4">
                             {ideas.length === 0 ? (
                                 <div className="flex flex-col items-center justify-center py-6 text-center">
-                                    <p className="text-sm text-muted-foreground">Sin notas vinculadas</p>
+                                    <p className="text-sm text-muted-foreground">Las notas rápidas van aquí. Vincula cada una a un cliente para no perder contexto.</p>
                                 </div>
                             ) : (
                                 ideas.map(idea => (
@@ -464,10 +464,10 @@ export default function ProjectShow({ project, recentCompleted, upcomingPending,
                     {/* BLOQUE 4: Recursos (solo premium) */}
                     {isPremium && (
                         <Card className="overflow-hidden border-2">
-                            <CardHeader className="flex flex-row items-center justify-between pb-3 bg-gradient-to-r from-green-500/5 to-transparent">
+                            <CardHeader className="flex flex-row items-center justify-between pb-3 bg-gradient-to-r from-primary/5 to-transparent">
                                 <div className="flex items-center gap-2">
-                                    <div className="h-8 w-8 rounded-lg bg-green-500/10 flex items-center justify-center">
-                                        <Link2 className="h-4 w-4 text-green-600" />
+                                    <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                                        <Link2 className="h-4 w-4 text-primary" />
                                     </div>
                                     <CardTitle className="text-base">Recursos</CardTitle>
                                 </div>
@@ -481,7 +481,7 @@ export default function ProjectShow({ project, recentCompleted, upcomingPending,
                             <CardContent className="flex flex-col gap-2 pt-4">
                                 {resources.length === 0 ? (
                                     <div className="flex flex-col items-center justify-center py-6 text-center">
-                                        <p className="text-sm text-muted-foreground">Sin recursos todavía</p>
+                                        <p className="text-sm text-muted-foreground">Añade enlaces, briefs y archivos útiles para este cliente.</p>
                                     </div>
                                 ) : (
                                     resources.map(resource => (

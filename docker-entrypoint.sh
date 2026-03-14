@@ -9,9 +9,13 @@ if [ ! -f /app/.env ]; then
     cp /app/.env.example /app/.env
 fi
 
-# 2. Generar APP_KEY si está vacío en el .env
-if grep -q "^APP_KEY=$" /app/.env; then
-    echo "==> Generando APP_KEY..."
+# 2. APP_KEY: usar la variable de entorno si existe, o generar una nueva
+if [ -n "$APP_KEY" ]; then
+    echo "==> Usando APP_KEY de variable de entorno"
+    sed -i "s|^APP_KEY=.*|APP_KEY=$APP_KEY|" /app/.env
+elif grep -q "^APP_KEY=$" /app/.env; then
+    echo "==> AVISO: No se definió APP_KEY. Generando una temporal..."
+    echo "==> Establece APP_KEY en docker-compose.yml para persistirla."
     php /app/artisan key:generate --force
 fi
 

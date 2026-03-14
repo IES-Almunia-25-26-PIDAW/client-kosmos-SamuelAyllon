@@ -346,12 +346,12 @@ export default function TasksIndex({ tasks, canAddTask, isFreeUser }: TasksProps
             <div className="flex flex-col gap-6 p-6">
 
                 {/* Cabecera mejorada */}
-                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500/10 via-background to-primary/5 border-2 p-6">
-                    <div className="absolute top-0 right-0 w-48 h-48 bg-blue-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-background to-primary/5 border-2 p-6">
+                    <div className="absolute top-0 right-0 w-48 h-48 bg-primary/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
                     <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                         <div className="flex items-center gap-3">
-                            <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/25">
-                                <CheckCircle2 className="h-6 w-6 text-white" />
+                            <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg shadow-primary/25">
+                                <CheckCircle2 className="h-6 w-6 text-primary-foreground" />
                             </div>
                             <div>
                                 <h1 className="text-2xl font-bold">Mis tareas</h1>
@@ -433,8 +433,8 @@ export default function TasksIndex({ tasks, canAddTask, isFreeUser }: TasksProps
                                 <ClipboardList className="h-8 w-8 text-primary" />
                             </div>
                             <div className="text-center">
-                                <p className="font-semibold">No tienes tareas todavía</p>
-                                <p className="text-sm text-muted-foreground">Crea tu primera tarea para comenzar</p>
+                                <p className="font-semibold">Ninguna tarea pendiente</p>
+                                <p className="text-sm text-muted-foreground">¿Buen momento para planificar la semana?</p>
                             </div>
                             {canAddTask && (
                                 <Link href="/tasks/create">

@@ -214,12 +214,12 @@ export default function IdeasIndex({ ideas }: IdeasProps) {
             <div className="flex flex-col gap-6 p-6">
 
                 {/* Cabecera mejorada */}
-                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-yellow-500/10 via-background to-primary/5 border-2 p-6">
-                    <div className="absolute top-0 right-0 w-48 h-48 bg-yellow-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-background to-primary/5 border-2 p-6">
+                    <div className="absolute top-0 right-0 w-48 h-48 bg-primary/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
                     <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                         <div className="flex items-center gap-3">
-                            <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-yellow-400 to-yellow-500 flex items-center justify-center shadow-lg shadow-yellow-500/25">
-                                <Lightbulb className="h-6 w-6 text-white" />
+                            <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg shadow-primary/25">
+                                <Lightbulb className="h-6 w-6 text-primary-foreground" />
                             </div>
                             <div>
                                 <h1 className="text-2xl font-bold">Mis ideas</h1>
@@ -271,12 +271,12 @@ export default function IdeasIndex({ ideas }: IdeasProps) {
                 {ideas.length === 0 && (
                     <Card className="border-2 border-dashed">
                         <CardContent className="flex flex-col items-center justify-center gap-4 py-16">
-                            <div className="h-16 w-16 rounded-2xl bg-yellow-500/10 flex items-center justify-center">
-                                <Lightbulb className="h-8 w-8 text-yellow-500" />
+                            <div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center">
+                                <Lightbulb className="h-8 w-8 text-primary" />
                             </div>
                             <div className="text-center">
-                                <p className="font-semibold">No tienes ideas todavía</p>
-                                <p className="text-sm text-muted-foreground">Captura tu primera idea brillante</p>
+                                <p className="font-semibold">Las notas rápidas van aquí</p>
+                                <p className="text-sm text-muted-foreground">Vincula cada una a un cliente para no perder contexto.</p>
                             </div>
                             <Link href="/ideas/create">
                                 <Button className="gap-2 shadow-lg shadow-primary/25">

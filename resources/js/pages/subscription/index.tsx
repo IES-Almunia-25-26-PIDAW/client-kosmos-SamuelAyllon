@@ -17,22 +17,22 @@ const planIcons: Record<string, typeof Crown> = {
 
 const planColors: Record<string, { bg: string; text: string; border: string; gradient: string }> = {
     free: {
-        bg: 'bg-slate-500/10',
-        text: 'text-slate-700 dark:text-slate-300',
-        border: 'border-slate-500/20',
-        gradient: 'from-slate-500 to-slate-600',
+        bg: 'bg-muted',
+        text: 'text-muted-foreground',
+        border: 'border-border',
+        gradient: 'from-muted-foreground to-muted-foreground/80',
     },
     premium_monthly: {
-        bg: 'bg-violet-500/10',
-        text: 'text-violet-700 dark:text-violet-300',
-        border: 'border-violet-500/20',
-        gradient: 'from-violet-500 to-purple-600',
+        bg: 'bg-primary/10',
+        text: 'text-primary',
+        border: 'border-primary/20',
+        gradient: 'from-primary to-primary/80',
     },
     premium_yearly: {
-        bg: 'bg-amber-500/10',
-        text: 'text-amber-700 dark:text-amber-300',
-        border: 'border-amber-500/20',
-        gradient: 'from-amber-500 to-orange-600',
+        bg: 'bg-warning/10',
+        text: 'text-warning dark:text-warning',
+        border: 'border-warning/20',
+        gradient: 'from-warning to-warning/80',
     },
 };
 
@@ -62,10 +62,10 @@ export default function SubscriptionIndex({ subscription, plans }: SubscriptionP
 
             <div className="flex flex-col gap-6 p-6">
                 {/* Header con gradiente */}
-                <div className="rounded-2xl bg-gradient-to-r from-violet-500/10 via-purple-500/10 to-fuchsia-500/10 border-2 border-violet-500/20 p-6">
+                <div className="rounded-2xl bg-gradient-to-r from-primary/10 via-primary/5 to-background border-2 border-primary/20 p-6">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                         <div className="flex items-center gap-4">
-                            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 text-white shadow-lg shadow-violet-500/30">
+                            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary/70 text-primary-foreground shadow-lg shadow-primary/25">
                                 <Crown className="h-7 w-7" />
                             </div>
                             <div>
@@ -74,7 +74,7 @@ export default function SubscriptionIndex({ subscription, plans }: SubscriptionP
                             </div>
                         </div>
                         {isPremium && (
-                            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-lg shadow-violet-500/30">
+                            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-lg shadow-primary/25">
                                 <Sparkles className="h-4 w-4" />
                                 <span className="font-semibold">Solo Activo</span>
                             </div>
@@ -150,7 +150,7 @@ export default function SubscriptionIndex({ subscription, plans }: SubscriptionP
                             {!isPremium && (
                                 <div className="mt-6 pt-4 border-t-2 border-dashed">
                                     <Link href="/checkout">
-                                        <Button className="w-full h-12 text-base font-semibold rounded-xl bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 shadow-lg shadow-violet-500/30 transition-all hover:shadow-xl hover:shadow-violet-500/40">
+                                        <Button className="w-full h-12 text-base font-semibold rounded-xl bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg shadow-primary/25 transition-all hover:shadow-xl hover:shadow-primary/30">
                                             <Sparkles className="h-5 w-5 mr-2" />
                                             Actualizar a Solo
                                             <ArrowRight className="h-5 w-5 ml-2" />
@@ -165,8 +165,8 @@ export default function SubscriptionIndex({ subscription, plans }: SubscriptionP
                 {/* Planes disponibles */}
                 <div>
                     <div className="flex items-center gap-3 mb-4">
-                        <div className="h-10 w-10 rounded-xl bg-violet-500/10 flex items-center justify-center">
-                            <Shield className="h-5 w-5 text-violet-600" />
+                        <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                            <Shield className="h-5 w-5 text-primary" />
                         </div>
                         <h2 className="text-xl font-bold">Planes disponibles</h2>
                     </div>
@@ -182,19 +182,19 @@ export default function SubscriptionIndex({ subscription, plans }: SubscriptionP
                                     key={plan.key} 
                                     className={`relative border-2 rounded-2xl transition-all hover:shadow-lg ${
                                         isCurrentPlan 
-                                            ? 'ring-2 ring-violet-500 shadow-lg shadow-violet-500/20' 
+                                            ? 'ring-2 ring-primary shadow-lg shadow-primary/20' 
                                             : isBestValue 
-                                                ? 'ring-2 ring-amber-500 shadow-lg shadow-amber-500/20'
+                                                ? 'ring-2 ring-warning shadow-lg shadow-warning/20'
                                                 : 'hover:-translate-y-1'
                                     }`}
                                 >
                                     {isBestValue && (
-                                        <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-gradient-to-r from-amber-500 to-orange-600 text-white text-xs font-bold shadow-lg">
+                                        <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-gradient-to-r from-warning to-warning/80 text-warning-foreground text-xs font-bold shadow-lg">
                                             Mejor valor
                                         </div>
                                     )}
                                     {isCurrentPlan && (
-                                        <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-gradient-to-r from-violet-500 to-purple-600 text-white text-xs font-bold shadow-lg">
+                                        <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-gradient-to-r from-primary to-primary/80 text-primary-foreground text-xs font-bold shadow-lg">
                                             Plan actual
                                         </div>
                                     )}
@@ -237,8 +237,8 @@ export default function SubscriptionIndex({ subscription, plans }: SubscriptionP
                                                 <Button 
                                                     className={`w-full h-11 font-semibold rounded-xl transition-all ${
                                                         isBestValue 
-                                                            ? 'bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 shadow-lg shadow-amber-500/30'
-                                                            : 'bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 shadow-lg shadow-violet-500/30'
+                                                        ? 'bg-gradient-to-r from-warning to-warning/80 hover:from-warning/90 hover:to-warning/70 shadow-lg shadow-warning/25'
+                                                        : 'bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg shadow-primary/25'
                                                     }`}
                                                 >
                                                     Seleccionar

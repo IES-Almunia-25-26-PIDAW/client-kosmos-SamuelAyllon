@@ -7,7 +7,9 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      # Certificado SSL de TiDB (no se commitea, debe existir en el host)
+      # Certificado SSL de TiDB — descárgalo de TiDB Cloud Console
+      # y colócalo en storage/app/tidb-ca.pem antes de levantar el contenedor.
+      # Ver: https://docs.pingcap.com/tidbcloud/tidb-cloud-tls-connect-to-dedicated
       - ./storage/app/tidb-ca.pem:/app/storage/app/tidb-ca.pem:ro
       # Persistir archivos subidos por el usuario
       - flowly_storage:/app/storage/app/public
@@ -15,6 +17,7 @@ services:
       APP_NAME: Flowly
       APP_ENV: production
       APP_DEBUG: "false"
+      APP_KEY: "${APP_KEY}"
       APP_URL: http://localhost:8000
       DB_CONNECTION: mysql
       DB_HOST: gateway01.eu-central-1.prod.aws.tidbcloud.com

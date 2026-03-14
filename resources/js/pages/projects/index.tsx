@@ -13,7 +13,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 const statusColors: Record<string, string> = {
     inactive:  'bg-muted text-muted-foreground',
-    active:    'bg-blue-500/10 text-blue-600 border border-blue-500/20 dark:bg-blue-900/30 dark:text-blue-400',
+    active:    'bg-primary/10 text-primary border border-primary/20 dark:bg-primary/20 dark:text-primary',
     completed: 'bg-green-500/10 text-green-600 border border-green-500/20 dark:bg-green-900/30 dark:text-green-400',
 };
 
@@ -154,7 +154,7 @@ function CalendarView({ projects }: { projects: Project[] }) {
 
     return (
         <div className="rounded-xl border-2 overflow-hidden bg-card/50">
-            <div className="flex items-center justify-between bg-gradient-to-r from-purple-500/10 to-transparent px-6 py-4">
+            <div className="flex items-center justify-between bg-gradient-to-r from-primary/10 to-transparent px-6 py-4">
                 <Button variant="ghost" size="sm" onClick={() => setViewDate(new Date(year, month - 1, 1))} className="h-9 w-9 p-0 rounded-lg hover:bg-primary/10">
                     <ChevronLeft className="h-5 w-5" />
                 </Button>
@@ -188,7 +188,7 @@ function CalendarView({ projects }: { projects: Project[] }) {
                             </div>
                             <div className="flex flex-col gap-1">
                                 {dayProjects.slice(0, 3).map(project => (
-                                    <div key={project.id} className="flex items-center gap-1.5 truncate rounded-lg px-1.5 py-1 text-xs font-medium bg-purple-500/15 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300 transition-all hover:scale-[1.02]">
+                                    <div key={project.id} className="flex items-center gap-1.5 truncate rounded-lg px-1.5 py-1 text-xs font-medium bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary transition-all hover:scale-[1.02]">
                                         {project.color && (
                                             <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: project.color }} />
                                         )}
@@ -316,12 +316,12 @@ export default function ProjectsIndex({ projects }: { projects: Project[] }) {
             <div className="flex flex-col gap-6 p-6">
 
                 {/* Cabecera mejorada */}
-                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-purple-500/10 via-background to-primary/5 border-2 p-6">
-                    <div className="absolute top-0 right-0 w-48 h-48 bg-purple-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-background to-primary/5 border-2 p-6">
+                    <div className="absolute top-0 right-0 w-48 h-48 bg-primary/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
                     <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                         <div className="flex items-center gap-3">
-                            <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center shadow-lg shadow-purple-500/25">
-                                <FolderKanban className="h-6 w-6 text-white" />
+                            <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg shadow-primary/25">
+                                <FolderKanban className="h-6 w-6 text-primary-foreground" />
                             </div>
                             <div>
                                 <h1 className="text-2xl font-bold">Mis clientes</h1>
@@ -375,12 +375,12 @@ export default function ProjectsIndex({ projects }: { projects: Project[] }) {
                 {projects.length === 0 && (
                     <Card className="border-2 border-dashed">
                         <CardContent className="flex flex-col items-center justify-center gap-4 py-16">
-                            <div className="h-16 w-16 rounded-2xl bg-purple-500/10 flex items-center justify-center">
-                                <FolderKanban className="h-8 w-8 text-purple-500" />
+                            <div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center">
+                                <FolderKanban className="h-8 w-8 text-primary" />
                             </div>
                             <div className="text-center">
-                                <p className="font-semibold">No tienes clientes todavía</p>
-                                <p className="text-sm text-muted-foreground">Crea tu primer cliente para empezar</p>
+                                <p className="font-semibold">Aquí vivirán tus clientes</p>
+                                <p className="text-sm text-muted-foreground">Añade el primero y Flowly recordará todo por ti.</p>
                             </div>
                             <Link href="/clients/create">
                                 <Button className="gap-2 shadow-lg shadow-primary/25">
@@ -413,12 +413,12 @@ export default function ProjectsIndex({ projects }: { projects: Project[] }) {
                     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShowUpgradeModal(false)}>
                         <Card className="max-w-md w-full mx-4 shadow-2xl" onClick={e => e.stopPropagation()}>
                             <CardContent className="flex flex-col items-center gap-4 p-8">
-                                <div className="h-16 w-16 rounded-2xl bg-purple-500/10 flex items-center justify-center">
-                                    <Crown className="h-8 w-8 text-purple-500" />
+                                <div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center">
+                                    <Crown className="h-8 w-8 text-primary" />
                                 </div>
                                 <div className="text-center">
                                     <p className="text-lg font-semibold">Límite alcanzado</p>
-                                    <p className="text-sm text-muted-foreground mt-1">Para gestionar varios clientes, pasa a Solo.</p>
+                                    <p className="text-sm text-muted-foreground mt-1">Para gestionar varios clientes a la vez, pasa a Solo.</p>
                                 </div>
                                 <div className="flex gap-3 w-full">
                                     <Button variant="outline" className="flex-1" onClick={() => setShowUpgradeModal(false)}>Cancelar</Button>

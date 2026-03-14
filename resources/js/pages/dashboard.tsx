@@ -19,7 +19,6 @@ import {
     Check,
 } from 'lucide-react';
 import AppLayout from '@/layouts/app-layout';
-import TutorialChatbot from '@/components/tutorial-chatbot';
 import type { Auth, BreadcrumbItem } from '@/types';
 import { DashboardProps } from '@/types';
 import { dashboard } from '@/routes';
@@ -48,7 +47,6 @@ export default function Dashboard({ todayTasks, activeProjects, atRiskProjects, 
     const isPremium = subscription?.plan === 'premium_monthly'
                    || subscription?.plan === 'premium_yearly';
 
-    const [showTutorial, setShowTutorial] = useState(!auth.user.tutorial_completed_at);
     const [planLoading, setPlanLoading] = useState(false);
     const [planResult, setPlanResult] = useState<string | null>(null);
     const [planCopied, setPlanCopied] = useState(false);
@@ -84,13 +82,6 @@ export default function Dashboard({ todayTasks, activeProjects, atRiskProjects, 
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Hoy" />
 
-            <TutorialChatbot 
-                show={showTutorial} 
-                onComplete={() => setShowTutorial(false)}
-                isPremium={isPremium}
-                userName={auth.user.name}
-            />
-
             <div className="flex flex-col gap-8 p-6">
 
                 {/* Cabecera */}
@@ -124,7 +115,7 @@ export default function Dashboard({ todayTasks, activeProjects, atRiskProjects, 
                                 </Button>
                             )}
                             <Badge className={`gap-1.5 px-3 py-1.5 text-sm ${isPremium
-                                ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white border-0 shadow-lg shadow-purple-500/25'
+                                ? 'bg-gradient-to-r from-primary to-primary/80 text-primary-foreground border-0 shadow-lg shadow-primary/25'
                                 : 'bg-muted text-muted-foreground'
                             }`}>
                                 {isPremium && <Crown className="h-3.5 w-3.5" />}
@@ -136,11 +127,11 @@ export default function Dashboard({ todayTasks, activeProjects, atRiskProjects, 
 
                 {/* Resultado de Planifica mi día */}
                 {planResult && (
-                    <Card className="overflow-hidden border-2 border-purple-500/20 bg-gradient-to-br from-purple-500/5 to-transparent">
-                        <CardHeader className="flex flex-row items-center justify-between pb-3 bg-gradient-to-r from-purple-500/5 to-transparent">
+                    <Card className="overflow-hidden border-l-4 border-l-primary bg-ai-surface glass">
+                        <CardHeader className="flex flex-row items-center justify-between pb-3">
                             <div className="flex items-center gap-2">
-                                <div className="h-8 w-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
-                                    <Sparkles className="h-4 w-4 text-purple-600" />
+                                <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                                    <Sparkles className="h-4 w-4 text-primary" />
                                 </div>
                                 <CardTitle className="text-base">Tu plan para hoy</CardTitle>
                             </div>
@@ -163,10 +154,10 @@ export default function Dashboard({ todayTasks, activeProjects, atRiskProjects, 
 
                 {/* Tareas críticas del día, agrupadas por cliente */}
                 <Card className="group overflow-hidden transition-all duration-300 hover:shadow-lg">
-                    <CardHeader className="flex flex-row items-center justify-between pb-3 bg-gradient-to-r from-blue-500/5 to-transparent">
+                    <CardHeader className="flex flex-row items-center justify-between pb-3 bg-gradient-to-r from-primary/5 to-transparent">
                         <div className="flex items-center gap-2">
-                            <div className="h-8 w-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                                <CheckCircle2 className="h-4 w-4 text-blue-600" />
+                            <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                                <CheckCircle2 className="h-4 w-4 text-primary" />
                             </div>
                             <CardTitle className="text-base">Tareas prioritarias</CardTitle>
                         </div>
@@ -181,8 +172,8 @@ export default function Dashboard({ todayTasks, activeProjects, atRiskProjects, 
                                 <div className="h-12 w-12 rounded-full bg-green-500/10 flex items-center justify-center mb-3">
                                     <Sparkles className="h-6 w-6 text-green-600" />
                                 </div>
-                                <p className="text-sm font-medium">¡Todo listo!</p>
-                                <p className="text-xs text-muted-foreground">No tienes tareas pendientes</p>
+                                <p className="text-sm font-medium">Día limpio</p>
+                                <p className="text-xs text-muted-foreground">Buen momento para revisar notas o descansar.</p>
                             </div>
                         ) : (
                             (() => {
@@ -283,10 +274,10 @@ export default function Dashboard({ todayTasks, activeProjects, atRiskProjects, 
 
                 {/* Mis clientes activos */}
                 <Card className="group overflow-hidden transition-all duration-300 hover:shadow-lg">
-                    <CardHeader className="flex flex-row items-center justify-between pb-3 bg-gradient-to-r from-purple-500/5 to-transparent">
+                    <CardHeader className="flex flex-row items-center justify-between pb-3 bg-gradient-to-r from-primary/5 to-transparent">
                         <div className="flex items-center gap-2">
-                            <div className="h-8 w-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
-                                <FolderKanban className="h-4 w-4 text-purple-600" />
+                            <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                                <FolderKanban className="h-4 w-4 text-primary" />
                             </div>
                             <CardTitle className="text-base">Mis clientes</CardTitle>
                         </div>
@@ -298,11 +289,11 @@ export default function Dashboard({ todayTasks, activeProjects, atRiskProjects, 
                     <CardContent className="flex flex-col gap-2 pt-4">
                         {activeProjects.length === 0 ? (
                             <div className="flex flex-col items-center justify-center py-8 text-center">
-                                <div className="h-12 w-12 rounded-full bg-purple-500/10 flex items-center justify-center mb-3">
-                                    <FolderKanban className="h-6 w-6 text-purple-600" />
+                                <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-3">
+                                    <FolderKanban className="h-6 w-6 text-primary" />
                                 </div>
-                                <p className="text-sm font-medium">Sin clientes</p>
-                                <p className="text-xs text-muted-foreground">Crea tu primer cliente para empezar</p>
+                                <p className="text-sm font-medium">Aquí vivirán tus clientes</p>
+                                <p className="text-xs text-muted-foreground">Añade el primero y Flowly recordará todo por ti.</p>
                                 <Link href="/clients/create" className="mt-3">
                                     <Button size="sm" className="gap-2">Nuevo cliente</Button>
                                 </Link>

@@ -38,8 +38,8 @@
         <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 
         <link rel="preconnect" href="https://fonts.bunny.net">
-        {{-- Flowly Design System fonts: Nunito (títulos), Open Sans (cuerpo), Inter (UI/botones) --}}
-        <link href="https://fonts.bunny.net/css?family=nunito:400,600,700,800|open-sans:400,600|inter:400,500,600" rel="stylesheet" />
+        {{-- Flowly Design System fonts: Nunito (títulos 600-800), Inter (cuerpo & UI 400-600) --}}
+        <link href="https://fonts.bunny.net/css?family=nunito:600,700,800|inter:400,500,600" rel="stylesheet" />
 
         @viteReactRefresh
         @vite(['resources/js/app.tsx'])
