@@ -1,10 +1,18 @@
 import { Task } from '../models/task';
-import { Idea } from '../models/idea';
 import { Subscription } from '../models/subscription';
 
+export interface DashboardProject {
+    id: number;
+    name: string;
+    color: string | null;
+    next_deadline: string | null;
+    pending_tasks_count: number;
+    overdue_tasks_count: number;
+}
+
 export interface DashboardProps {
-    pendingTasks: Task[];
-    activeIdeas: Idea[];
-    activeProjects: { id: number; name: string; color: string }[];
+    todayTasks: Task[];
+    activeProjects: DashboardProject[];
+    atRiskProjects: DashboardProject[];
     subscription: Subscription | null;
 }

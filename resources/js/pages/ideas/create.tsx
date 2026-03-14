@@ -1,4 +1,4 @@
-import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,7 +6,6 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
-import VoiceRecorder from '@/components/voice-recorder';
 import type { BreadcrumbItem } from '@/types';
 import { ArrowLeft, Lightbulb, FileText, Flag, Sparkles } from 'lucide-react';
 
@@ -16,8 +15,6 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function IdeaCreate() {
-    const { props } = usePage<{ auth: { is_premium: boolean } }>();
-    const isPremium = props.auth.is_premium;
     const { data, setData, post, processing, errors } = useForm({
         name: '',
         description: '',
@@ -81,12 +78,6 @@ export default function IdeaCreate() {
                                         className="flex-1"
                                         autoFocus
                                     />
-                                    {isPremium && (
-                                        <VoiceRecorder
-                                            onTranscription={(text) => setData('name', text)}
-                                            disabled={processing}
-                                        />
-                                    )}
                                 </div>
                                 {errors.name && (
                                     <p className="text-sm text-destructive flex items-center gap-1">

@@ -177,3 +177,39 @@ it('user cannot delete another user client', function () {
         ->delete(route('clients.destroy', $project))
         ->assertForbidden();
 });
+
+// ── Ficha de cliente (show) ──────────────────────────────────────────────────
+
+it('client show returns ficha props', function () {
+    $user = createPremiumUser();
+    $project = Project::factory()->create(['user_id' => $user->id, 'status' => 'active']);
+
+    // Create tasks for timeline
+    \App\Models\Task::factory()->create([
+        'user_id' => $user->id,
+        'project_id' => $project->id,
+        'status' => 'pending',
+        'priority' => 'high',
+        'due_date' => now()->addDays(2)->toDateString(),
+    ]);
+
+    \App\Models\Task::factory()->create([
+        'user_id' => $user->id,
+        'project_id' => $project->id,
+        'status' => 'completed',
+        'priority' => 'medium',
+    ]);
+
+    $this->actingAs($user)
+        ->get(route('clients.show', $project))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('projects/show')
+            ->has('project')
+            ->has('recentCompleted', 1)
+            ->has('upcomingPending', 1)
+            ->has('tasksSummary')
+            ->has('progressPercentage')
+            ->has('isPremium')
+        );
+});

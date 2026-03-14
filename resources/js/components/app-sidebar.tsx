@@ -1,15 +1,13 @@
 import { Link, usePage } from '@inertiajs/react';
 import {
-    Archive,
     CheckSquare,
     CreditCard,
-    FolderOpen,
     LayoutGrid,
     Lightbulb,
     Shield,
-    Sparkles,
     Star,
-    Users,
+    Users as UsersIcon,
+    FolderKanban,
 } from 'lucide-react';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -39,32 +37,20 @@ export function AppSidebar() {
             icon: LayoutGrid,
         },
         {
+            title: 'Clientes',
+            href: '/clients',
+            icon: FolderKanban,
+        },
+        {
             title: 'Tareas',
             href: '/tasks',
             icon: CheckSquare,
         },
         {
-            title: 'Ideas',
-            href: '/ideas',
+            title: 'Notas',
+            href: '/notes',
             icon: Lightbulb,
         },
-        ...(auth.is_premium ? [
-            {
-                title: 'Proyectos',
-                href: '/projects',
-                icon: FolderOpen,
-            },
-            {
-                title: 'Cajas',
-                href: '/boxes',
-                icon: Archive,
-            },
-            {
-                title: 'Asistente IA',
-                href: '/ai-chats',
-                icon: Sparkles,
-            },
-        ] : []),
         {
             title: 'Suscripción',
             href: '/subscription',
@@ -81,7 +67,7 @@ export function AppSidebar() {
         {
             title: 'Usuarios',
             href: '/admin/users',
-            icon: Users,
+            icon: UsersIcon,
         },
         {
             title: 'Pagos',

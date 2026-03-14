@@ -21,26 +21,48 @@ class DashboardController extends Controller
             return redirect()->route('admin.dashboard');
         }
 
-        $pendingTasks = $user->tasks()
+        // Tareas críticas del día: overdue > dueToday > dueSoon > byPriority
+        $todayTasks = $user->tasks()
+            ->with('project:id,name,color')
             ->where('status', 'pending')
+            ->orderByRaw("
+                CASE
+                    WHEN due_date < CURRENT_DATE THEN 0
+                    WHEN due_date = CURRENT_DATE THEN 1
+                    WHEN due_date <= DATE(CURRENT_DATE, '+3 days') THEN 2
+                    ELSE 3
+                END
+            ")
+            ->orderByRaw("
+                CASE priority
+                    WHEN 'high' THEN 0
+                    WHEN 'medium' THEN 1
+                    WHEN 'low' THEN 2
+                END
+            ")
             ->limit(5)
             ->get();
 
-        $activeIdeas = $user->ideas()
-            ->where('status', 'active')
-            ->get();
+        // Clientes activos con datos de riesgo
+        $activeProjects = $user->projects()
+            ->active()
+            ->withCount(['tasks as pending_tasks_count' => fn ($q) => $q->where('status', 'pending')])
+            ->withCount(['tasks as overdue_tasks_count' => fn ($q) => $q->where('status', 'pending')->whereDate('due_date', '<', now())])
+            ->get(['id', 'name', 'color', 'next_deadline']);
+
+        // Clientes en riesgo: con tareas atrasadas o deadline próximo
+        $atRiskProjects = $activeProjects->filter(function ($project) {
+            return $project->overdue_tasks_count > 0
+                || ($project->next_deadline && $project->next_deadline->lte(now()->addDays(7)));
+        })->values();
 
         $subscription = $user->subscription;
 
-        $activeProjects = $user->isPremiumUser()
-            ? $user->projects()->active()->get(['id', 'name', 'color'])
-            : collect();
-
         return Inertia::render('dashboard', [
-            'pendingTasks'   => $pendingTasks,
-            'activeIdeas'    => $activeIdeas,
-            'subscription'   => $subscription,
+            'todayTasks'     => $todayTasks,
             'activeProjects' => $activeProjects,
+            'atRiskProjects' => $atRiskProjects,
+            'subscription'   => $subscription,
         ]);
     }
 

@@ -1,5 +1,6 @@
 export interface Idea {
     id: number;
+    project_id: number | null;
     name: string;
     description: string | null;
     priority: 'low' | 'medium' | 'high';

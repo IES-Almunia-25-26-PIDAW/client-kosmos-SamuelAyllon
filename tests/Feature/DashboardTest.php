@@ -1,27 +1,49 @@
 <?php
 
-namespace Tests\Feature;
+use App\Models\Project;
+use App\Models\Task;
 
-use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
+it('redirects guests to login', function () {
+    $this->get(route('dashboard'))->assertRedirect(route('login'));
+});
 
-class DashboardTest extends TestCase
-{
-    use RefreshDatabase;
+it('authenticated user can visit dashboard', function () {
+    $user = createFreeUser();
 
-    public function test_guests_are_redirected_to_the_login_page()
-    {
-        $response = $this->get(route('dashboard'));
-        $response->assertRedirect(route('login'));
-    }
+    $this->actingAs($user)
+        ->get(route('dashboard'))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page->component('dashboard'));
+});
 
-    public function test_authenticated_users_can_visit_the_dashboard()
-    {
-        $user = User::factory()->create();
-        $this->actingAs($user);
+it('dashboard returns todayTasks, activeProjects, atRiskProjects and subscription', function () {
+    $user = createFreeUser();
+    $project = Project::factory()->create(['user_id' => $user->id, 'status' => 'active']);
 
-        $response = $this->get(route('dashboard'));
-        $response->assertOk();
-    }
-}
+    Task::factory()->create([
+        'user_id' => $user->id,
+        'project_id' => $project->id,
+        'status' => 'pending',
+        'priority' => 'high',
+        'due_date' => now()->toDateString(),
+    ]);
+
+    $this->actingAs($user)
+        ->get(route('dashboard'))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('dashboard')
+            ->has('todayTasks', 1)
+            ->has('activeProjects', 1)
+            ->has('subscription')
+        );
+});
+
+it('free user sees active projects on dashboard', function () {
+    $user = createFreeUser();
+    Project::factory()->create(['user_id' => $user->id, 'status' => 'active']);
+
+    $this->actingAs($user)
+        ->get(route('dashboard'))
+        ->assertInertia(fn ($page) => $page->has('activeProjects', 1));
+});
