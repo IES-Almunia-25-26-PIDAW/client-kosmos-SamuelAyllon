@@ -22,12 +22,35 @@
 
         {{-- Inline style to set the HTML background color based on our theme in app.css --}}
         <style>
-            html {
+            html, body {
                 background-color: #E9EDC9;
             }
 
-            html.dark {
+            html.dark, html.dark body {
                 background-color: #1a1e1b;
+            }
+
+            /* Loading spinner visible mientras React monta la app */
+            .app-loading {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                min-height: 100vh;
+            }
+            .app-loading-spinner {
+                width: 36px;
+                height: 36px;
+                border: 3px solid rgba(58, 90, 64, 0.2);
+                border-top-color: #3A5A40;
+                border-radius: 50%;
+                animation: app-spin 0.7s linear infinite;
+            }
+            html.dark .app-loading-spinner {
+                border-color: rgba(107, 155, 115, 0.2);
+                border-top-color: #6b9b73;
+            }
+            @keyframes app-spin {
+                to { transform: rotate(360deg); }
             }
         </style>
 
@@ -47,5 +70,15 @@
     </head>
     <body class="font-sans antialiased">
         @inertia
+
+        {{-- Loading spinner visible mientras React hidrata la app --}}
+        <script>
+            (function() {
+                var el = document.getElementById('app');
+                if (el && !el.hasChildNodes()) {
+                    el.innerHTML = '<div class="app-loading"><div class="app-loading-spinner"></div></div>';
+                }
+            })();
+        </script>
     </body>
 </html>

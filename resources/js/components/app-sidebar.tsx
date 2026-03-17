@@ -47,7 +47,7 @@ export function AppSidebar() {
             icon: CheckSquare,
         },
         {
-            title: 'Notas',
+            title: 'Ideas',
             href: '/notes',
             icon: Lightbulb,
         },

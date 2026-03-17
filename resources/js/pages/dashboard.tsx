@@ -64,9 +64,17 @@ export default function Dashboard({ todayTasks, activeProjects, atRiskProjects, 
                 ),
             },
         })
-            .then(res => res.json())
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error(`HTTP ${res.status}`);
+                }
+                return res.json();
+            })
             .then(data => setPlanResult(data.output ?? 'Sin respuesta.'))
-            .catch(() => setPlanResult('Error al conectar con la IA. Inténtalo más tarde.'))
+            .catch((err) => {
+                console.error('AI plan-day error:', err);
+                setPlanResult('Error al conectar con la IA. Verifica que la API key esté configurada o inténtalo más tarde.');
+            })
             .finally(() => setPlanLoading(false));
     };
 

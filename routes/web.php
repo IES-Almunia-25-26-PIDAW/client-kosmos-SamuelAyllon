@@ -17,6 +17,9 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn() => inertia('welcome'))->name('home');
 
+// GET /logout redirige amigablemente en lugar de lanzar 405
+Route::get('logout', fn() => redirect('/login'));
+
 // ==================== RUTAS AUTENTICADAS (todos los roles) ====================
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');

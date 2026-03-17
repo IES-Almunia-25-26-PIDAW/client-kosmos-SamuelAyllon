@@ -83,6 +83,7 @@ export default function TaskCreate({ projects, defaultProjectId }: Props) {
                                         onChange={e => setData('name', e.target.value)}
                                         placeholder="¿Qué necesitas hacer?"
                                         className="flex-1"
+                                        required
                                         autoFocus
                                     />
                                 </div>

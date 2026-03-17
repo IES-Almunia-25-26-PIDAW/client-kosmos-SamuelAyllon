@@ -98,7 +98,7 @@ function TableView({ ideas }: { ideas: Idea[] }) {
                                 </span>
                             </td>
                             <td className="p-4">
-                                <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <div className="flex justify-end gap-1">
                                     <Link href={`/ideas/${idea.id}/edit`}>
                                         <Button size="sm" variant="ghost" title="Editar" className="h-8 w-8 p-0 rounded-lg hover:bg-primary/10 hover:text-primary">
                                             <Pencil className="h-4 w-4" />

@@ -203,33 +203,61 @@ class AiController extends Controller
     {
         $config = config('services.openai');
 
+        // Validar que la API key esté configurada
+        if (empty($config['key'])) {
+            Log::warning('AI: OPENAI_API_KEY no está configurada en .env');
+            return 'La IA no está disponible: falta configurar la API key. Contacta al administrador.';
+        }
+
+        if (empty($config['base_url'])) {
+            Log::warning('AI: OPENAI_BASE_URL no está configurada en .env');
+            return 'La IA no está disponible: falta configurar el endpoint. Contacta al administrador.';
+        }
+
         $httpOptions = [];
         if (!empty($config['ca_bundle'])) {
             $httpOptions['verify'] = $config['ca_bundle'];
         }
 
-        $response = Http::withOptions($httpOptions)
-            ->withToken($config['key'])
-            ->timeout(30)
-            ->post(rtrim($config['base_url'], '/') . '/chat/completions', [
-                'model'    => config('services.openai.model', 'gpt-3.5-turbo'),
-                'messages' => [
-                    ['role' => 'system', 'content' => 'Eres un asistente conciso y profesional para freelancers que gestionan clientes. Respondes siempre en español.'],
-                    ['role' => 'user', 'content' => $prompt],
-                ],
-                'max_tokens'  => 500,
-                'temperature' => 0.7,
-            ]);
+        try {
+            $response = Http::withOptions($httpOptions)
+                ->withToken($config['key'])
+                ->timeout(30)
+                ->post(rtrim($config['base_url'], '/') . '/chat/completions', [
+                    'model'    => config('services.openai.model', 'gpt-3.5-turbo'),
+                    'messages' => [
+                        ['role' => 'system', 'content' => 'Eres un asistente conciso y profesional para freelancers que gestionan clientes. Respondes siempre en español.'],
+                        ['role' => 'user', 'content' => $prompt],
+                    ],
+                    'max_tokens'  => 500,
+                    'temperature' => 0.7,
+                ]);
 
-        if ($response->failed()) {
-            Log::error('OpenAI API call failed', [
-                'status' => $response->status(),
-                'body' => $response->body(),
+            if ($response->failed()) {
+                Log::error('AI API call failed', [
+                    'status' => $response->status(),
+                    'body'   => $response->body(),
+                    'url'    => rtrim($config['base_url'], '/') . '/chat/completions',
+                ]);
+
+                $status = $response->status();
+                if ($status === 401) {
+                    return 'Error de autenticación con la IA: verifica que la API key sea válida.';
+                }
+                if ($status === 429) {
+                    return 'Se ha superado el límite de peticiones a la IA. Inténtalo en unos minutos.';
+                }
+
+                return 'Lo siento, no he podido generar la respuesta en este momento. Inténtalo de nuevo más tarde.';
+            }
+
+            return $response->json('choices.0.message.content', 'No se ha podido generar una respuesta.');
+        } catch (\Exception $e) {
+            Log::error('AI API exception: ' . $e->getMessage(), [
+                'url' => rtrim($config['base_url'], '/') . '/chat/completions',
             ]);
-            return 'Lo siento, no he podido generar la respuesta en este momento. Inténtalo de nuevo más tarde.';
+            return 'Error de conexión con la IA: ' . (app()->isLocal() ? $e->getMessage() : 'inténtalo de nuevo más tarde.');
         }
-
-        return $response->json('choices.0.message.content', 'No se ha podido generar una respuesta.');
     }
 
     /**

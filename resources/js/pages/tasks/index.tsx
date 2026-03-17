@@ -123,7 +123,7 @@ function TableView({ tasks, canAddTask }: { tasks: Task[]; canAddTask: boolean }
                                     )}
                                 </td>
                                 <td className="p-4">
-                                    <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <div className="flex justify-end gap-1">
                                         <Link href={`/tasks/${task.id}/edit`}>
                                             <Button size="sm" variant="ghost" title="Editar" className="h-8 w-8 p-0 rounded-lg hover:bg-primary/10 hover:text-primary">
                                                 <Pencil className="h-4 w-4" />
@@ -320,7 +320,15 @@ export default function TasksIndex({ tasks, canAddTask, isFreeUser }: TasksProps
     const [priorityFilter, setPriorityFilter] = useState<'all' | 'high' | 'medium' | 'low'>('all');
 
     const filtered = tasks
-        .filter(t => showAll || t.due_date?.startsWith(today))
+        .filter(t => {
+            if (showAll) return true;
+            if (!t.due_date) return false;
+            const dueDate = t.due_date.substring(0, 10);
+            // "Hoy" muestra tareas de hoy + tareas atrasadas pendientes
+            if (dueDate === today) return true;
+            if (dueDate < today && t.status === 'pending') return true;
+            return false;
+        })
         .filter(t => priorityFilter === 'all' || t.priority === priorityFilter);
 
     const pending = filtered.filter(t => t.status === 'pending');
@@ -455,7 +463,7 @@ export default function TasksIndex({ tasks, canAddTask, isFreeUser }: TasksProps
                                 <ClipboardList className="h-6 w-6 text-muted-foreground" />
                             </div>
                             <p className="text-muted-foreground text-center">
-                                {!showAll ? 'No tienes tareas programadas para hoy.' : 'No hay tareas con ese filtro.'}
+                                {!showAll ? 'No tienes tareas para hoy ni atrasadas.' : 'No hay tareas con ese filtro.'}
                             </p>
                             {!showAll && (
                                 <Button variant="outline" size="sm" onClick={() => setShowAll(true)} className="gap-2 border-2">
