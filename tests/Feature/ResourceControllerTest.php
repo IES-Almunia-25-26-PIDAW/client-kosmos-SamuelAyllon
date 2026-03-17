@@ -61,7 +61,7 @@ it('premium user cannot create a resource in another user client', function () {
     $project = Project::factory()->create(['user_id' => User::factory()->create()->id]);
 
     $this->actingAs($user)
-        ->post(route('resources.store', $project), ['name' => 'Hack', 'type' => 'link'])
+        ->post(route('resources.store', $project), ['name' => 'Hack', 'type' => 'link', 'url' => 'https://example.com'])
         ->assertForbidden();
 });
 

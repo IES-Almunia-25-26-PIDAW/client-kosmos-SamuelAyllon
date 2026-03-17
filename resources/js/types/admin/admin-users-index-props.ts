@@ -1,5 +1,5 @@
-import { AdminUser } from './admin-user';
-import { PaginatedData } from '../shared/pagination';
+import type { PaginatedData } from '../shared/pagination';
+import type { AdminUser } from './admin-user';
 
 export interface AdminUsersIndexProps {
     users: PaginatedData<AdminUser>;

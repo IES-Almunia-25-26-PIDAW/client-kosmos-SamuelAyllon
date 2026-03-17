@@ -120,6 +120,7 @@ it('user can update own task', function () {
         ->put(route('tasks.update', $task), [
             'name' => 'Nombre actualizado',
             'priority' => 'high',
+            'due_date' => now()->addDays(7)->format('Y-m-d'),
         ])
         ->assertRedirect(route('tasks.index'));
 
@@ -132,7 +133,7 @@ it('user cannot update another user task', function () {
     $task = Task::factory()->create(['user_id' => $other->id]);
 
     $this->actingAs($user)
-        ->put(route('tasks.update', $task), ['name' => 'Hack', 'priority' => 'low'])
+        ->put(route('tasks.update', $task), ['name' => 'Hack', 'priority' => 'low', 'due_date' => now()->addDays(7)->format('Y-m-d')])
         ->assertForbidden();
 });
 

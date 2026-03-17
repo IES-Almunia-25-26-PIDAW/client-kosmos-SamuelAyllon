@@ -27,12 +27,12 @@ class DashboardController extends Controller
             ->where('status', 'pending')
             ->orderByRaw("
                 CASE
-                    WHEN due_date < CURRENT_DATE THEN 0
-                    WHEN due_date = CURRENT_DATE THEN 1
-                    WHEN due_date <= CURRENT_DATE + INTERVAL 3 DAY THEN 2
+                    WHEN due_date < ? THEN 0
+                    WHEN due_date = ? THEN 1
+                    WHEN due_date <= ? THEN 2
                     ELSE 3
                 END
-            ")
+            ", [now()->toDateString(), now()->toDateString(), now()->addDays(3)->toDateString()])
             ->orderByRaw("
                 CASE priority
                     WHEN 'high' THEN 0

@@ -1,5 +1,5 @@
-import { Subscription } from '../models/subscription';
-import { PaginatedData } from '../shared/pagination';
+import type { Subscription } from '../models/subscription';
+import type { PaginatedData } from '../shared/pagination';
 
 export interface SubscriptionWithUser extends Subscription {
     user: { id: number; name: string; email: string };

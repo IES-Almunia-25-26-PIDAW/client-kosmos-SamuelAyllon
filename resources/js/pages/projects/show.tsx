@@ -1,9 +1,4 @@
-import { useState } from 'react';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import AppLayout from '@/layouts/app-layout';
-import type { BreadcrumbItem, Project, Task, Idea, Resource } from '@/types';
 import {
     ArrowLeft,
     CheckCircle2,
@@ -22,6 +17,11 @@ import {
     Copy,
     Check,
 } from 'lucide-react';
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import AppLayout from '@/layouts/app-layout';
+import type { BreadcrumbItem, Project, Task, Idea, Resource } from '@/types';
 
 interface TasksSummary {
     total: number;

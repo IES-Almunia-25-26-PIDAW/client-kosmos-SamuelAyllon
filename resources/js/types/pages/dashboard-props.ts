@@ -1,5 +1,5 @@
-import { Task } from '../models/task';
-import { Subscription } from '../models/subscription';
+import type { Subscription } from '../models/subscription';
+import type { Task } from '../models/task';
 
 export interface DashboardProject {
     id: number;

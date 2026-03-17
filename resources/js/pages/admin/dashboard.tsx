@@ -1,9 +1,9 @@
 import { Head, Link } from '@inertiajs/react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { LayoutDashboard, Users, Crown, CreditCard, TrendingUp, DollarSign, Activity, ArrowRight, UserPlus } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem, AdminDashboardProps } from '@/types';
-import { LayoutDashboard, Users, Crown, CreditCard, TrendingUp, DollarSign, Activity, ArrowRight, UserPlus } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Admin', href: '/admin/dashboard' },

@@ -1,5 +1,5 @@
-import { RecentPayment } from '../models/payment';
-import { PaginatedData } from '../shared/pagination';
+import type { RecentPayment } from '../models/payment';
+import type { PaginatedData } from '../shared/pagination';
 
 export interface PaymentSummary {
     total_completed: number;

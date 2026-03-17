@@ -1,6 +1,6 @@
-import type { Task } from './task';
 import type { Idea } from './idea';
 import type { Resource } from './resource';
+import type { Task } from './task';
 
 export interface KeyLink {
     label: string;

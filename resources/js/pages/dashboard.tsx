@@ -1,8 +1,4 @@
-import { useState } from 'react';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { 
     CheckCircle2, 
     ArrowRight, 
@@ -18,10 +14,14 @@ import {
     Copy,
     Check,
 } from 'lucide-react';
+import { useState } from 'react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
-import type { Auth, BreadcrumbItem } from '@/types';
-import { DashboardProps } from '@/types';
 import { dashboard } from '@/routes';
+import type { Auth, BreadcrumbItem } from '@/types';
+import type { DashboardProps } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: dashboard().url },
@@ -265,7 +265,7 @@ export default function Dashboard({ todayTasks, activeProjects, atRiskProjects, 
                                                     {project.overdue_tasks_count} atrasada{project.overdue_tasks_count !== 1 ? 's' : ''}
                                                 </Badge>
                                             )}
-                                            {project.next_deadline && new Date(project.next_deadline) <= new Date(Date.now() + 7 * 86400000) && (
+                                            {project.next_deadline && (
                                                 <Badge className="text-xs bg-orange-500/10 text-orange-600 border border-orange-500/20">
                                                     <CalendarClock className="h-3 w-3 mr-1" />
                                                     {new Date(project.next_deadline).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}

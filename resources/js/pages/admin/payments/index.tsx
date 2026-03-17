@@ -1,9 +1,9 @@
 import { Head, router } from '@inertiajs/react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CreditCard, DollarSign, Clock, AlertCircle, Calendar } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem, AdminPaymentsProps } from '@/types';
-import { CreditCard, DollarSign, Clock, AlertCircle, Calendar } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Admin', href: '/admin/dashboard' },

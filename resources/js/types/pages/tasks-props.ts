@@ -1,4 +1,4 @@
-import { Task } from '../models/task';
+import type { Task } from '../models/task';
 
 export interface TasksProps {
     tasks: Task[];

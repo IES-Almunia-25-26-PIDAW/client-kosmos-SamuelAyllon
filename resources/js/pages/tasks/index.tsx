@@ -1,8 +1,8 @@
-import { useState } from 'react';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Pencil, Trash2, Table2, Calendar, LayoutGrid, ChevronLeft, ChevronRight, ClipboardList, CheckCircle2, Plus, Sparkles, AlertCircle, Clock } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem, TasksProps, Task, ViewType } from '@/types';
@@ -332,7 +332,6 @@ export default function TasksIndex({ tasks, canAddTask, isFreeUser }: TasksProps
         .filter(t => priorityFilter === 'all' || t.priority === priorityFilter);
 
     const pending = filtered.filter(t => t.status === 'pending');
-    const completed = filtered.filter(t => t.status === 'completed');
 
     const priorities: Array<{ value: 'all' | 'high' | 'medium' | 'low'; label: string }> = [
         { value: 'all', label: 'Todas' },

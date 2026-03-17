@@ -1,9 +1,9 @@
 import { Head, Link, usePage } from '@inertiajs/react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Crown, Check, Sparkles, Zap, Star, Calendar, Shield, CheckCircle2, Clock, XCircle, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem, SubscriptionProps } from '@/types';
-import { Crown, Check, Sparkles, Zap, Star, Calendar, Shield, CheckCircle2, Clock, XCircle, ArrowRight } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Suscripción', href: '/subscription' },

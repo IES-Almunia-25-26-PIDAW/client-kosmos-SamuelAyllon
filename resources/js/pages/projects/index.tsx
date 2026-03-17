@@ -1,8 +1,8 @@
-import { useState } from 'react';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Pencil, Trash2, Table2, Calendar, LayoutGrid, ChevronLeft, ChevronRight, Plus, CheckCircle2, FolderKanban, CalendarDays, ListTodo, Clock, Crown } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import AppLayout from '@/layouts/app-layout';
 import type { Auth, BreadcrumbItem, Project, ViewType } from '@/types';

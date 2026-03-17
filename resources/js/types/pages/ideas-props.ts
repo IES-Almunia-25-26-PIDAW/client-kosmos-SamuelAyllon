@@ -1,4 +1,4 @@
-import { Idea } from '../models/idea';
+import type { Idea } from '../models/idea';
 
 export interface IdeasProps {
     ideas: Idea[];

@@ -1,6 +1,6 @@
-import { AdminStats } from './admin-stats';
-import { RecentPayment } from '../models/payment';
-import { User } from '../models/user';
+import type { RecentPayment } from '../models/payment';
+import type { User } from '../models/user';
+import type { AdminStats } from './admin-stats';
 
 export interface AdminDashboardProps {
     stats: AdminStats;

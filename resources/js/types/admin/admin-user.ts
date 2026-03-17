@@ -1,6 +1,6 @@
-import { Subscription } from '../models/subscription';
-import { Role } from '../models/role';
-import { Payment } from '../models/payment';
+import type { Payment } from '../models/payment';
+import type { Role } from '../models/role';
+import type { Subscription } from '../models/subscription';
 
 export interface AdminUser {
     id: number;

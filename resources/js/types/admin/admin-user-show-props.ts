@@ -1,4 +1,4 @@
-import { AdminUser } from './admin-user';
+import type { AdminUser } from './admin-user';
 
 export interface AdminUserDashboardData {
     active_tasks: number;
