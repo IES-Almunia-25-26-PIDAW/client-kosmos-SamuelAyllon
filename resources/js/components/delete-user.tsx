@@ -39,7 +39,7 @@ export default function DeleteUser() {
                         <div className="space-y-1">
                             <p className="font-medium text-red-800 dark:text-red-200">Advertencia</p>
                             <p className="text-sm text-red-700 dark:text-red-300">
-                                Esta acción es irreversible. Una vez eliminada tu cuenta, todos los datos asociados (tareas, ideas, proyectos, cajas y recursos) serán eliminados permanentemente.
+                                Esta acción es irreversible. Una vez eliminada tu cuenta, todos los datos asociados (tareas, ideas, clientes y recursos) serán eliminados permanentemente.
                             </p>
                         </div>
                     </div>

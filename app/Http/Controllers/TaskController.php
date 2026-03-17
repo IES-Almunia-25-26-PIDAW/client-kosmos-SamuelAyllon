@@ -58,7 +58,7 @@ class TaskController extends Controller
 
         if (! $user->canAddTask()) {
             return redirect()->back()->withErrors([
-                'limit' => 'Has alcanzado el límite de 5 tareas activas. Completa alguna tarea o actualiza a Premium.',
+                'limit' => '5 tareas es el máximo en Free. Con Solo, añade todas las que necesites.',
             ]);
         }
 
@@ -126,7 +126,7 @@ class TaskController extends Controller
         // hay que respetar el límite de 5 activas para usuarios free
         if (! Auth::user()->canAddTask()) {
             return redirect()->back()->withErrors([
-                'limit' => 'Has alcanzado el límite de 5 tareas activas. Actualiza a Premium para reabrir esta tarea.',
+                'limit' => '5 tareas activas es el máximo en Free. Completa alguna o pasa a Solo para reabrir esta.',
             ]);
         }
 

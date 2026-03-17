@@ -1,5 +1,5 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { Pencil, Trash2, Table2, Calendar, LayoutGrid, ChevronLeft, ChevronRight, Plus, CheckCircle2, FolderKanban, CalendarDays, ListTodo, Clock, Crown } from 'lucide-react';
+import { Pencil, Trash2, Table2, Calendar, LayoutGrid, ChevronLeft, ChevronRight, Plus, CheckCircle2, FolderKanban, CalendarDays, ListTodo, Clock, Crown, AlertTriangle, CalendarClock } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -81,6 +81,22 @@ function TableView({ projects }: { projects: Project[] }) {
                                 </div>
                                 {project.description && (
                                     <p className="mt-0.5 text-xs text-muted-foreground line-clamp-1">{project.description}</p>
+                                )}
+                                {((project.overdue_tasks_count ?? 0) > 0 || (project.upcoming_tasks_count ?? 0) > 0) && (
+                                    <div className="mt-1 flex gap-1.5">
+                                        {(project.overdue_tasks_count ?? 0) > 0 && (
+                                            <span className="inline-flex items-center gap-1 rounded-md bg-red-500/10 px-1.5 py-0.5 text-[10px] font-semibold text-red-600 dark:text-red-400">
+                                                <AlertTriangle className="h-2.5 w-2.5" />
+                                                {project.overdue_tasks_count} vencida{(project.overdue_tasks_count ?? 0) !== 1 ? 's' : ''}
+                                            </span>
+                                        )}
+                                        {(project.upcoming_tasks_count ?? 0) > 0 && (
+                                            <span className="inline-flex items-center gap-1 rounded-md bg-orange-500/10 px-1.5 py-0.5 text-[10px] font-semibold text-orange-600">
+                                                <CalendarClock className="h-2.5 w-2.5" />
+                                                {project.upcoming_tasks_count} próxima{(project.upcoming_tasks_count ?? 0) !== 1 ? 's' : ''}
+                                            </span>
+                                        )}
+                                    </div>
                                 )}
                             </td>
                             <td className="p-4">
@@ -235,7 +251,7 @@ function GalleryView({ projects }: { projects: Project[] }) {
                                     className="shrink-0 data-[state=checked]:bg-green-500 data-[state=checked]:border-green-500"
                                     checked={project.status === 'completed'}
                                     onCheckedChange={() => toggleComplete(project)}
-                                    title={project.status === 'completed' ? 'Reabrir proyecto' : 'Marcar como completado'}
+                                    title={project.status === 'completed' ? 'Reabrir cliente' : 'Marcar como completado'}
                                 />
                                 {project.color && (
                                     <span className="shrink-0 h-4 w-4 rounded-full shadow-sm" style={{ backgroundColor: project.color }} />
@@ -253,7 +269,7 @@ function GalleryView({ projects }: { projects: Project[] }) {
                         {project.description && (
                             <p className="text-sm text-muted-foreground line-clamp-2">{project.description}</p>
                         )}
-                        <div className="flex gap-4 text-sm">
+                        <div className="flex flex-wrap gap-2 text-sm">
                             <span className="inline-flex items-center gap-1.5 text-muted-foreground">
                                 <ListTodo className="h-3.5 w-3.5" />
                                 <span className="font-medium text-foreground">{project.tasks_count ?? 0}</span> tareas
@@ -263,6 +279,23 @@ function GalleryView({ projects }: { projects: Project[] }) {
                                 <span className={`font-semibold ${(project.pending_tasks_count ?? 0) > 0 ? 'text-orange-600' : ''}`}>{project.pending_tasks_count ?? 0}</span> pendientes
                             </span>
                         </div>
+                        {/* Badges de riesgo */}
+                        {((project.overdue_tasks_count ?? 0) > 0 || (project.upcoming_tasks_count ?? 0) > 0) && (
+                            <div className="flex flex-wrap gap-1.5">
+                                {(project.overdue_tasks_count ?? 0) > 0 && (
+                                    <span className="inline-flex items-center gap-1 rounded-md bg-red-500/10 px-2 py-0.5 text-xs font-semibold text-red-600 border border-red-500/20 dark:text-red-400">
+                                        <AlertTriangle className="h-3 w-3" />
+                                        {project.overdue_tasks_count} vencida{(project.overdue_tasks_count ?? 0) !== 1 ? 's' : ''}
+                                    </span>
+                                )}
+                                {(project.upcoming_tasks_count ?? 0) > 0 && (
+                                    <span className="inline-flex items-center gap-1 rounded-md bg-orange-500/10 px-2 py-0.5 text-xs font-semibold text-orange-600 border border-orange-500/20">
+                                        <CalendarClock className="h-3 w-3" />
+                                        {project.upcoming_tasks_count} próxima{(project.upcoming_tasks_count ?? 0) !== 1 ? 's' : ''}
+                                    </span>
+                                )}
+                            </div>
+                        )}
                         <div className="mt-auto flex gap-2 pt-2">
                             <Link href={`/clients/${project.id}`} className="flex-1">
                                 <Button size="sm" variant="outline" className="w-full border-2 rounded-lg">Ver</Button>
@@ -311,7 +344,7 @@ export default function ProjectsIndex({ projects }: { projects: Project[] }) {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Proyectos" />
+            <Head title="Clientes" />
 
             <div className="flex flex-col gap-6 p-6">
 
@@ -379,8 +412,8 @@ export default function ProjectsIndex({ projects }: { projects: Project[] }) {
                                 <FolderKanban className="h-8 w-8 text-primary" />
                             </div>
                             <div className="text-center">
-                                <p className="font-semibold">Aquí vivirán tus clientes</p>
-                                <p className="text-sm text-muted-foreground">Añade el primero y Flowly recordará todo por ti.</p>
+                                <p className="font-semibold">Cada cliente tiene su espacio</p>
+                                <p className="text-sm text-muted-foreground">Tareas, ideas, recursos y contexto: todo en un solo lugar. Nada se pierde entre apps.</p>
                             </div>
                             <Link href="/clients/create">
                                 <Button className="gap-2 shadow-lg shadow-primary/25">
@@ -417,15 +450,15 @@ export default function ProjectsIndex({ projects }: { projects: Project[] }) {
                                     <Crown className="h-8 w-8 text-primary" />
                                 </div>
                                 <div className="text-center">
-                                    <p className="text-lg font-semibold">Límite alcanzado</p>
-                                    <p className="text-sm text-muted-foreground mt-1">Para gestionar varios clientes a la vez, pasa a Solo.</p>
+                                    <p className="text-lg font-semibold">Un solo cliente en Free</p>
+                                    <p className="text-sm text-muted-foreground mt-1">Con Solo puedes gestionar todos tus clientes desde un solo lugar. Sin límites.</p>
                                 </div>
                                 <div className="flex gap-3 w-full">
                                     <Button variant="outline" className="flex-1" onClick={() => setShowUpgradeModal(false)}>Cancelar</Button>
                                     <Button asChild className="flex-1 gap-2">
                                         <Link href="/subscription">
                                             <Crown className="h-4 w-4" />
-                                            Ver planes
+                                            Ver Solo
                                         </Link>
                                     </Button>
                                 </div>

@@ -18,6 +18,11 @@ class ProjectController extends Controller
 
         $projects = $user->projects()
             ->withCount(['tasks', 'tasks as pending_tasks_count' => fn ($q) => $q->where('status', 'pending')])
+            ->withCount(['tasks as overdue_tasks_count' => fn ($q) => $q->where('status', 'pending')->whereDate('due_date', '<', now())])
+            ->withCount(['tasks as upcoming_tasks_count' => fn ($q) => $q->where('status', 'pending')->whereDate('due_date', '>=', now())->whereDate('due_date', '<=', now()->addDays(2))])
+            ->orderByRaw('
+                (SELECT COUNT(*) FROM tasks WHERE tasks.project_id = projects.id AND tasks.status = ? AND tasks.due_date < ?) DESC
+            ', ['pending', now()->toDateString()])
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -37,7 +42,7 @@ class ProjectController extends Controller
 
         if (!$user->canAddProject()) {
             return redirect()->route('clients.index')
-                ->with('error', 'Has alcanzado el límite de clientes de tu plan. Mejora a Solo para añadir más.');
+                ->with('error', 'Con Solo puedes gestionar todos tus clientes desde un solo lugar. Sin límites.');
         }
 
         $project = $user->projects()->create([
@@ -81,15 +86,26 @@ class ProjectController extends Controller
             ? $project->resources()->orderBy('created_at', 'desc')->get()
             : collect();
 
+        // Datos para el header de contexto rápido
+        $contextHeader = [
+            'pending_tasks_count' => $project->tasks()->where('status', 'pending')->count(),
+            'high_priority_count' => $project->tasks()->where('status', 'pending')->where('priority', 'high')->count(),
+            'overdue_tasks_count' => $project->tasks()->where('status', 'pending')->whereDate('due_date', '<', now())->count(),
+            'next_due_date'       => $project->tasks()->where('status', 'pending')->whereNotNull('due_date')->min('due_date'),
+            'active_ideas_count'  => $project->ideas()->where('status', 'active')->count(),
+            'last_activity'       => $project->tasks()->max('updated_at'),
+        ];
+
         return Inertia::render('projects/show', [
-            'project'          => $project,
-            'recentCompleted'  => $recentCompleted,
-            'upcomingPending'  => $upcomingPending,
-            'ideas'            => $ideas,
-            'resources'        => $resources,
-            'tasksSummary'     => $project->getTasksSummary(),
+            'project'            => $project,
+            'recentCompleted'    => $recentCompleted,
+            'upcomingPending'    => $upcomingPending,
+            'ideas'              => $ideas,
+            'resources'          => $resources,
+            'tasksSummary'       => $project->getTasksSummary(),
             'progressPercentage' => $project->getProgressPercentage(),
-            'isPremium'        => $isPremium,
+            'isPremium'          => $isPremium,
+            'contextHeader'      => $contextHeader,
         ]);
     }
 

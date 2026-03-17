@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-echo "==> Iniciando Flowly..."
+echo "==> Iniciando ClientKosmos..."
 
 # 1. Crear .env si no existe (necesario para que artisan funcione)
 if [ ! -f /app/.env ]; then
@@ -71,12 +71,12 @@ if [ "$APP_ENV" = "production" ]; then
     php /app/artisan view:cache
 fi
 
-echo "==> Flowly listo en http://localhost:8000"
+echo "==> ClientKosmos listo en http://localhost:8000"
 echo ""
 echo "    Credenciales de prueba:"
-echo "    admin@flowly.test    / password  (admin)"
-echo "    premium@flowly.test  / password  (premium)"
-echo "    free@flowly.test     / password  (free)"
+echo "    admin@clientkosmos.test    / password  (admin)"
+echo "    premium@clientkosmos.test  / password  (premium)"
+echo "    free@clientkosmos.test     / password  (free)"
 echo ""
 
 # 8. Ejecutar el comando pasado al contenedor (CMD)

@@ -275,8 +275,8 @@ export default function IdeasIndex({ ideas }: IdeasProps) {
                                 <Lightbulb className="h-8 w-8 text-primary" />
                             </div>
                             <div className="text-center">
-                                <p className="font-semibold">Las notas rápidas van aquí</p>
-                                <p className="text-sm text-muted-foreground">Vincula cada una a un cliente para no perder contexto.</p>
+                                <p className="font-semibold">Captura ideas antes de que se escapen</p>
+                                <p className="text-sm text-muted-foreground">Vincula cada una a un cliente para tener todo el contexto junto.</p>
                             </div>
                             <Link href="/ideas/create">
                                 <Button className="gap-2 shadow-lg shadow-primary/25">

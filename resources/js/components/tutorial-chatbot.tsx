@@ -16,40 +16,40 @@ type TutorialStep = {
 const freeUserSteps: TutorialStep[] = [
     {
         id: 1,
-        botMessage: '¡Hola! Soy Flowy, tu asistente personal. Te voy a enseñar cómo usar Flowly para gestionar tus clientes. ¿Empezamos?',
+        botMessage: '¡Hola! Soy Kosmo, tu compañero en ClientKosmos. Aquí cada cliente tiene su espacio: tareas, ideas, recursos y contexto, todo junto. Vamos a verlo.',
         icon: '👋',
     },
     {
         id: 2,
-        botMessage: 'Este es el Panel «Hoy», tu centro de control. Aquí ves las tareas prioritarias del día y el estado de tus clientes.',
+        botMessage: 'Este es el Panel «Hoy», tu centro de mando diario. Cada mañana verás qué toca para cada cliente, de un vistazo.',
         target: 'dashboard',
         icon: '📊',
         position: 'right',
     },
     {
         id: 3,
-        botMessage: 'En Clientes gestionas cada cuenta. Con el plan gratuito puedes tener 1 cliente y hasta 5 tareas pendientes.',
+        botMessage: 'En Clientes creas fichas individuales. Cada ficha reúne tareas, ideas y recursos de ese cliente. Con el plan gratuito puedes tener 1 cliente y hasta 5 tareas.',
         target: 'clients',
         icon: '👤',
         position: 'right',
     },
     {
         id: 4,
-        botMessage: 'En Tareas organizas todo lo que necesitas hacer para tus clientes, con prioridades y fechas de entrega.',
+        botMessage: 'En Tareas organizas lo que necesitas hacer, siempre vinculado a un cliente. Prioridades, fechas y seguimiento.',
         target: 'tasks',
         icon: '✅',
         position: 'right',
     },
     {
         id: 5,
-        botMessage: '¿Quieres más? Con el plan Solo tendrás: clientes ilimitados, IA contextual, recursos y notas sin límites.',
+        botMessage: '¿Quieres más? Con el plan Solo tendrás: clientes ilimitados, IA contextual con Kosmo y recursos sin límites.',
         target: 'subscription',
         icon: '⭐',
         position: 'right',
     },
     {
         id: 6,
-        botMessage: '¡Eso es todo! Explora Flowly y cuando estés listo, prueba el plan Solo para desbloquear todo el potencial. ¡Buena suerte!',
+        botMessage: '¡Eso es todo! Empieza creando tu primer cliente. Cuando tengas varias tareas, prueba el plan Solo para que Kosmo te ayude a organizarte.',
         icon: '🎉',
     },
 ];
@@ -58,40 +58,40 @@ const freeUserSteps: TutorialStep[] = [
 const premiumUserSteps: TutorialStep[] = [
     {
         id: 1,
-        botMessage: '¡Hola! Soy Flowy, tu asistente personal. Como usuario Solo, tienes acceso a todas las funciones. ¡Te las muestro!',
+        botMessage: '¡Hola! Soy Kosmo, tu compañero en ClientKosmos. Como usuario Solo, tienes acceso completo. Cada cliente tiene su espacio con tareas, ideas y recursos.',
         icon: '👋',
     },
     {
         id: 2,
-        botMessage: 'Este es el Panel «Hoy», tu centro de control. Aquí ves las tareas prioritarias y clientes en riesgo. Prueba «Planifica mi día» con IA.',
+        botMessage: 'Este es el Panel «Hoy», tu centro de mando diario. Ves tareas prioritarias, clientes en riesgo y puedes pedirme que planifique tu día con IA.',
         target: 'dashboard',
         icon: '📊',
         position: 'right',
     },
     {
         id: 3,
-        botMessage: 'En Clientes gestionas cada cuenta con ficha completa. Usa los botones de IA para resumir estado o generar updates profesionales.',
+        botMessage: 'En Clientes gestionas cada cuenta con ficha completa. Usa los botones de IA para que Kosmo resuma el estado o genere updates profesionales.',
         target: 'clients',
         icon: '👤',
         position: 'right',
     },
     {
         id: 4,
-        botMessage: 'En Tareas organizas todo lo que necesitas hacer. ¡Sin límites! Asigna prioridades, fechas y vincúlalas a clientes.',
+        botMessage: 'En Tareas organizas todo lo que necesitas hacer, siempre vinculado a un cliente. Sin límites, con prioridades y fechas.',
         target: 'tasks',
         icon: '✅',
         position: 'right',
     },
     {
         id: 5,
-        botMessage: 'Las Ideas son perfectas para capturar ideas y recordatorios sobre tus clientes. Vincúlalas para tener todo a mano.',
+        botMessage: 'Las Ideas son perfectas para capturar pensamientos sobre tus clientes. Vincúlalas para tener todo el contexto junto.',
         target: 'ideas',
         icon: '💡',
         position: 'right',
     },
     {
         id: 6,
-        botMessage: '¡Eso es todo! Tienes acceso completo a Flowly. Explora la IA contextual y mantén todos tus clientes bajo control. ¡Buena productividad!',
+        botMessage: '¡Eso es todo! Empieza creando clientes y cuando tengas varias tareas entre ellos, Kosmo te ayudará a organizar el día.',
         icon: '🎉',
     },
 ];
@@ -287,7 +287,7 @@ export default function TutorialChatbot({ show, onComplete, isPremium, userName 
                     <div className="flex items-center justify-between px-4 pt-4 pb-2">
                         <div className="flex items-center gap-2">
                             <span className="text-2xl">{step.icon}</span>
-                            <span className="font-semibold text-sm">Flowy</span>
+                            <span className="font-semibold text-sm">Kosmo</span>
                         </div>
                         <span className="text-xs text-muted-foreground">
                             {currentStep + 1} / {tutorialSteps.length}

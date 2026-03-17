@@ -1,6 +1,6 @@
-# Flowly Reducido — Guía de Estilos y Design System
+# ClientKosmos — Guía de Estilos y Design System
 
-> Referencia completa y prescriptiva del sistema de diseño de Flowly Reducido.
+> Referencia completa y prescriptiva del sistema de diseño de ClientKosmos.
 > Este documento define **qué usar, cuándo usarlo y cuándo NO**.
 > Cada token, componente y patrón está verificado contra WCAG 2.2 AA.
 
@@ -10,11 +10,11 @@
 
 ### Concepto: Calma Productiva
 
-Flowly transmite **calma productiva**: una estética natural y orgánica (tonos verdes y crema) que evita la agresividad visual de las apps de productividad típicas. La paleta evoca tranquilidad y enfoque.
+ClientKosmos transmite **calma productiva**: una estética natural y orgánica (tonos verdes y crema) que evita la agresividad visual de las apps de productividad típicas. La paleta evoca tranquilidad y enfoque.
 
 ### Principios de Diseño
 
-Estos 5 principios guían TODA decisión visual en Flowly. Ante cualquier duda de diseño, vuelve a ellos:
+Estos 5 principios guían TODA decisión visual en ClientKosmos. Ante cualquier duda de diseño, vuelve a ellos:
 
 1. **Una acción por pantalla** — cada vista tiene un propósito principal claro; el resto es secundario o está oculto.
 2. **El espacio vacío es intencional** — el whitespace dirige la atención, no es espacio desperdiciado.
@@ -24,16 +24,16 @@ Estos 5 principios guían TODA decisión visual en Flowly. Ante cualquier duda d
 
 ### Voz del Producto
 
-Flowly habla como un **compañero competente y tranquilo**: no es un coach motivacional, no es un robot. Sabe qué necesitas y te lo dice sin rodeos.
+ClientKosmos habla como un **compañero competente y tranquilo**: no es un coach motivacional, no es un robot. Sabe qué necesitas y te lo dice sin rodeos.
 
-| Contexto | ❌ Genérico | ✅ Flowly |
+| Contexto | ❌ Genérico | ✅ ClientKosmos |
 |----------|------------|----------|
-| Empty state (sin clientes) | "No hay datos" | "Aquí vivirán tus clientes. Añade el primero y Flowly recordará todo por ti." |
+| Empty state (sin clientes) | "No hay datos" | "Aquí vivirán tus clientes. Añade el primero y ClientKosmos recordará todo por ti." |
 | Botón de IA | "Generar" | "Preparar update" |
 | Tarea completada | "Completada" | "Hecho ✓" |
 | Panel Hoy vacío | "Sin tareas para hoy" | "Día limpio. Buen momento para revisar ideas o descansar." |
 | Error de formulario | "Campo requerido" | "¿Cómo se llama tu cliente?" |
-| Upgrade modal (2º cliente) | "Mejora tu plan" | "Para gestionar varios clientes a la vez, pasa a Solo." |
+| Upgrade modal (2º cliente) | "Mejora tu plan" | "Con Solo puedes gestionar todos tus clientes desde un solo lugar. Sin límites." |
 | Upgrade modal (IA) | "Feature premium" | "La IA freelancer está en el plan Solo." |
 
 ### Logo
@@ -222,7 +222,7 @@ En el dashboard, el contenido (tarjetas + resúmenes) no debe ocupar más del **
 
 ### Base: shadcn/ui
 
-Flowly Reducido utiliza un subconjunto de shadcn/ui (basados en Radix UI + Tailwind CSS):
+ClientKosmos utiliza un subconjunto de shadcn/ui (basados en Radix UI + Tailwind CSS):
 
 **Layout:** Card, Sidebar, Sheet, Breadcrumb
 **Entrada:** Input, Label, Textarea, Checkbox, Select
@@ -230,7 +230,7 @@ Flowly Reducido utiliza un subconjunto de shadcn/ui (basados en Radix UI + Tailw
 **Navegación:** DropdownMenu, Tooltip, Collapsible
 **Overlay:** Dialog, ScrollArea, Separator
 
-> **⚠️ Componentes eliminados de la versión anterior:** InputOTP, Toggle, ToggleGroup, NavigationMenu, Avatar. No se usan en el Flowly reducido.
+> **⚠️ Componentes eliminados de la versión anterior:** InputOTP, Toggle, ToggleGroup, NavigationMenu, Avatar. No se usan en el ClientKosmos reducido.
 
 ### Componentes Custom — Mantenidos
 
@@ -251,13 +251,14 @@ Flowly Reducido utiliza un subconjunto de shadcn/ui (basados en Radix UI + Tailw
 | AiOutputCard | `components/ai-output-card.tsx` | Tarjeta con fondo AI Surface, borde izquierdo Primary, botón "Copiar" |
 | ClientTimeline | `components/client-timeline.tsx` | Timeline de últimas tareas + próximos hitos dentro de ficha |
 | RiskBadge | `components/risk-badge.tsx` | Badge con color Warning para clientes con deadline cercano |
+| KosmoNudge | inline in pages | Nudge contextual de Kosmo con dismiss (localStorage daily reset) |
 
 ### Componentes Custom — Eliminados
 
 | Componente | Razón |
 |-----------|-------|
 | VoiceRecorder | Voz deja de ser feature estrella; si se implementa, se integra en formulario de tarea |
-| TutorialChatbot | Se simplifica a un onboarding más básico (empty states bien diseñados + 3 tooltips) |
+| ~~TutorialChatbot~~ | **Mantenido y mejorado** — chatbot de onboarding interactivo con pasos guiados, funcional en producción |
 
 ---
 
@@ -282,7 +283,7 @@ Flowly Reducido utiliza un subconjunto de shadcn/ui (basados en Radix UI + Tailw
 
 ```
 +--+-------------------------------------------+
-|  | Resumen generado por Flowly               |
+|  | Resumen generado por ClientKosmos               |
 |  |                                           |
 |  | "Para Acme: estás en el rediseño web,     |
 |  | se entregó el home, falta landing..."     |
@@ -345,7 +346,7 @@ Cada empty state responde 3 preguntas:
 
 | Pantalla | Mensaje | CTA |
 |----------|---------|-----|
-| Sin clientes | "Aquí vivirán tus clientes. Añade el primero y Flowly recordará todo por ti." | "+ Añadir cliente" |
+| Sin clientes | "Aquí vivirán tus clientes. Añade el primero y ClientKosmos recordará todo por ti." | "+ Añadir cliente" |
 | Sin tareas | "Ninguna tarea pendiente. ¿Buen momento para planificar la semana?" | "+ Nueva tarea" |
 | Sin ideas | "Las ideas rápidas van aquí. Vincula cada una a un cliente para no perder contexto." | "+ Nueva idea" |
 | Dashboard sin datos | "Tu día empieza cuando añadas tu primer cliente y sus tareas." | "Ir a Clientes →" |
@@ -444,7 +445,7 @@ Al generar un update/resumen:
 .glass-strong  /* backdrop-blur-xl + bg white/15 + border white/30 */
 ```
 
-> **⚠️ Restricción:** Glassmorphism se usa ÚNICAMENTE en la tarjeta de output IA (`AiOutputCard`) como parte del signature visual de Flowly. No usar en tarjetas normales, modales ni sidebar.
+> **⚠️ Restricción:** Glassmorphism se usa ÚNICAMENTE en la tarjeta de output IA (`AiOutputCard`) como parte del signature visual de ClientKosmos. No usar en tarjetas normales, modales ni sidebar.
 
 ### Glow — SOLO para CTA principal
 
@@ -661,7 +662,7 @@ transition-all duration-400 ease-out     /* --transition-slow: modales */
 
 ## 17. Signature Detail: La Tarjeta de Output IA
 
-El **elemento visual firma** de Flowly es la tarjeta que muestra los outputs de IA (resúmenes, updates, planificación). Este diseño no se consigue instalando una librería — es propio de Flowly:
+El **elemento visual firma** de ClientKosmos es la tarjeta que muestra los outputs de IA (resúmenes, updates, planificación). Este diseño no se consigue instalando una librería — es propio de ClientKosmos:
 
 - Fondo: `--ai-surface` (verde crema sutil, diferente de Card)
 - Borde izquierdo: **4px sólido** en `--primary`
@@ -669,7 +670,7 @@ El **elemento visual firma** de Flowly es la tarjeta que muestra los outputs de 
 - Texto: aparece con efecto typewriter
 - Botón "Copiar": prominente, con icono 📋, feedback visual al copiar (checkmark 2s)
 
-Cada vez que un freelancer vea esta tarjeta, debe asociarla con Flowly.
+Cada vez que un freelancer vea esta tarjeta, debe asociarla con ClientKosmos.
 
 ---
 
@@ -679,7 +680,7 @@ Antes de implementar o modificar cualquier pantalla, verificar:
 
 - [ ] ¿Hay **una acción principal** clara? Si hay 2 botones compitiendo, uno sobra
 - [ ] ¿El whitespace es **intencional**? Cada área vacía tiene propósito
-- [ ] ¿El microcopy tiene **voz Flowly**? Si suena genérico, reescribirlo
+- [ ] ¿El microcopy tiene **voz ClientKosmos**? Si suena genérico, reescribirlo
 - [ ] ¿El contraste cumple WCAG AA? (4.5:1 texto, 3:1 UI components, 3:1 focus)
 - [ ] ¿Las animaciones son ≤300ms (elementos) o ≤500ms (modales)?
 - [ ] ¿Se puede usar **sin tocar la navegación**? El dashboard es autocontenido

@@ -104,17 +104,17 @@ export default function TaskEdit({ task, projects }: Props) {
                                 {errors.due_date && <p className="text-xs text-red-600">{errors.due_date}</p>}
                             </div>
 
-                            {/* Proyecto (solo si hay proyectos) */}
+                            {/* Cliente (solo si hay clientes) */}
                             {projects.length > 0 && (
                                 <div className="flex flex-col gap-1.5">
-                                    <Label htmlFor="project_id">Proyecto</Label>
+                                    <Label htmlFor="project_id">Cliente</Label>
                                     <select
                                         id="project_id"
                                         value={data.project_id}
                                         onChange={e => setData('project_id', e.target.value)}
                                         className="border-input bg-background ring-offset-background focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
                                     >
-                                        <option value="">Sin proyecto</option>
+                                        <option value="">Sin cliente</option>
                                         {projects.map(p => (
                                             <option key={p.id} value={p.id}>{p.name}</option>
                                         ))}

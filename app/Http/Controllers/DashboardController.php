@@ -21,10 +21,14 @@ class DashboardController extends Controller
             return redirect()->route('admin.dashboard');
         }
 
-        // Tareas críticas del día: overdue > dueToday > dueSoon > byPriority
+        // Tareas del día: vencidas + hoy + próximas 3 días, agrupadas por cliente
         $todayTasks = $user->tasks()
             ->with('project:id,name,color')
             ->where('status', 'pending')
+            ->where(function ($q) {
+                $q->whereDate('due_date', '<=', now()->addDays(3)->toDateString())
+                  ->orWhereDate('due_date', '<', now()->toDateString());
+            })
             ->orderByRaw("
                 CASE
                     WHEN due_date < ? THEN 0
@@ -40,7 +44,6 @@ class DashboardController extends Controller
                     WHEN 'low' THEN 2
                 END
             ")
-            ->limit(5)
             ->get();
 
         // Clientes activos con datos de riesgo
@@ -48,6 +51,7 @@ class DashboardController extends Controller
             ->active()
             ->withCount(['tasks as pending_tasks_count' => fn ($q) => $q->where('status', 'pending')])
             ->withCount(['tasks as overdue_tasks_count' => fn ($q) => $q->where('status', 'pending')->whereDate('due_date', '<', now())])
+            ->withCount(['tasks as upcoming_tasks_count' => fn ($q) => $q->where('status', 'pending')->whereDate('due_date', '>=', now())->whereDate('due_date', '<=', now()->addDays(2))])
             ->get(['id', 'name', 'color', 'next_deadline']);
 
         // Clientes en riesgo: con tareas atrasadas o deadline próximo

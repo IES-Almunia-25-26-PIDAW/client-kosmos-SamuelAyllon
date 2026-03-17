@@ -2,18 +2,18 @@ services:
   # ── Base de datos MySQL local ──────────────────────────────
   db:
     image: mysql:8.0
-    container_name: flowly_db
+    container_name: clientkosmos_db
     ports:
       - "3306:3306"
     environment:
-      MYSQL_ROOT_PASSWORD: flowly_root
-      MYSQL_DATABASE: flowly
-      MYSQL_USER: flowly
-      MYSQL_PASSWORD: flowly_secret
+      MYSQL_ROOT_PASSWORD: clientkosmos_root
+      MYSQL_DATABASE: clientkosmos
+      MYSQL_USER: clientkosmos
+      MYSQL_PASSWORD: clientkosmos_secret
     volumes:
-      - flowly_dbdata:/var/lib/mysql
+      - clientkosmos_dbdata:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uflowly", "-pflowly_secret"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uclientkosmos", "-pclientkosmos_secret"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -24,7 +24,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: flowly_app
+    container_name: clientkosmos_app
     ports:
       - "8000:8000"
     depends_on:
@@ -32,9 +32,9 @@ services:
         condition: service_healthy
     volumes:
       # Persistir archivos subidos por el usuario
-      - flowly_storage:/app/storage/app/public
+      - clientkosmos_storage:/app/storage/app/public
     environment:
-      APP_NAME: Flowly
+      APP_NAME: ClientKosmos
       APP_ENV: production
       APP_DEBUG: "false"
       APP_KEY: "${APP_KEY:-}"
@@ -44,9 +44,9 @@ services:
       DB_CONNECTION: mysql
       DB_HOST: db
       DB_PORT: "3306"
-      DB_DATABASE: flowly
-      DB_USERNAME: flowly
-      DB_PASSWORD: flowly_secret
+      DB_DATABASE: clientkosmos
+      DB_USERNAME: clientkosmos
+      DB_PASSWORD: clientkosmos_secret
 
       # Drivers
       SESSION_DRIVER: database
@@ -61,5 +61,5 @@ services:
     restart: unless-stopped
 
 volumes:
-  flowly_dbdata:
-  flowly_storage:
+  clientkosmos_dbdata:
+  clientkosmos_storage:

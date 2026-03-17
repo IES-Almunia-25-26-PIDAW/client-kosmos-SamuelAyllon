@@ -35,7 +35,7 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
 
     return (
         <>
-            <Head title="Flowly — Tu productividad, organizada" />
+            <Head title="ClientKosmos — Tu memoria operativa por cliente" />
 
             <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
 
@@ -45,11 +45,11 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
                         <div className="flex items-center gap-2 group cursor-pointer">
                             <img 
                                 src={logo} 
-                                alt="Flowly" 
-                                className="h-8 w-auto object-contain transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6" 
+                                alt="ClientKosmos"
+                                className="h-8 w-auto object-contain transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6"
                             />
                             <span className="text-xl font-bold tracking-tight gradient-text-animated">
-                                Flowly
+                                ClientKosmos
                             </span>
                         </div>
 
@@ -197,7 +197,7 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
                             </h1>
                             
                             <p className="mb-10 max-w-xl text-lg text-muted-foreground lg:text-xl animate-fade-in-up-delay-3 leading-relaxed">
-                                Flowly organiza tareas, notas y recursos de cada cliente en un solo lugar. 
+                                ClientKosmos organiza tareas, ideas y recursos de cada cliente en un solo lugar. 
                                 Con <span className="text-primary font-semibold">IA contextual</span> y un <span className="text-primary font-semibold">panel diario</span>, nada se queda atrás.
                             </p>
                             
@@ -468,7 +468,7 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
                                 </span>
                             </h2>
                             <p className="mx-auto max-w-2xl text-lg text-muted-foreground leading-relaxed">
-                                Empezar con Flowly es tan sencillo como respirar.
+                                Empezar con ClientKosmos es tan sencillo como respirar.
                             </p>
                         </div>
 
@@ -523,7 +523,7 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
 
                         <div className="grid gap-6 md:grid-cols-3">
                             <TestimonialCard
-                                quote="Antes perdía el contexto al saltar de un cliente a otro. Con Flowly cada ficha tiene todo lo que necesito: tareas, notas y recursos."
+                                quote="Antes perdía el contexto al saltar de un cliente a otro. Con ClientKosmos cada ficha tiene todo lo que necesito: tareas, notas y recursos."
                                 author="María García"
                                 role="Diseñadora freelance"
                                 avatar="M"
@@ -757,11 +757,11 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
                                 <div className="flex items-center gap-3 mb-4">
                                     <img
                                         src={logo}
-                                        alt="Flowly"
+                                        alt="ClientKosmos"
                                         className="h-10 w-auto object-contain"
                                     />
                                     <span className="text-2xl font-bold gradient-text-animated">
-                                        Flowly
+                                        ClientKosmos
                                     </span>
                                 </div>
                                 <p className="text-sm text-muted-foreground max-w-xs leading-relaxed">
@@ -794,7 +794,7 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
                         <Separator className="mb-8" />
                         
                         <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-between text-sm text-muted-foreground">
-                            <p>© {new Date().getFullYear()} Flowly · Proyecto Intermodular 2º DAM</p>
+                            <p>© {new Date().getFullYear()} ClientKosmos · Proyecto Intermodular 2º DAM</p>
                             <p className="flex items-center gap-1.5">
                                 Hecho con <span className="text-red-500 animate-pulse">❤</span> para freelancers organizados
                             </p>

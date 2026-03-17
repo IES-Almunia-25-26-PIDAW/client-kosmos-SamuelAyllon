@@ -1,14 +1,14 @@
-# Manual de Usuario — Flowly
+# Manual de Usuario — ClientKosmos
 
 > Proyecto Intermodular — 2º DAM
 > Autor: Samuel Ayllón
-> Fecha: 2026-03-04
+> Fecha: 2026-03-17
 
 ---
 
-## ¿Qué es Flowly?
+## ¿Qué es ClientKosmos?
 
-Flowly es una plataforma de gestión multi-cliente para freelancers que te ayuda a:
+ClientKosmos es una plataforma de gestión multi-cliente para freelancers que te ayuda a:
 - Organizar tus **clientes** en fichas con color y estado *(1 gratis, ilimitados con Solo)*
 - Gestionar **tareas** por cliente con fechas y prioridades
 - Capturar **ideas** rápidas
@@ -38,7 +38,7 @@ Flowly es una plataforma de gestión multi-cliente para freelancers que te ayuda
 
 ### Crear una cuenta
 
-1. Accede a la página principal de Flowly.
+1. Accede a la página principal de ClientKosmos.
 2. Haz clic en **"Registrarse"** en la esquina superior derecha.
 3. Rellena el formulario:
    - **Nombre**: tu nombre completo
@@ -76,20 +76,20 @@ Una vez activado, cada inicio de sesión te pedirá el código de tu aplicación
 
 ## 2. Tutorial inicial
 
-La primera vez que accedas a Flowly después de registrarte, aparecerá un **tour guiado interactivo** que te mostrará las funciones principales de la aplicación señalándolas directamente en la interfaz.
+La primera vez que accedas a ClientKosmos después de registrarte, aparecerá un **tour guiado interactivo** que te mostrará las funciones principales de la aplicación señalándolas directamente en la interfaz.
 
-### El asistente Flowy
+### El asistente Kosmo
 
-Flowy es el asistente virtual de Flowly. Te guiará por la aplicación resaltando cada sección mientras te explica su función. El contenido del tutorial varía según tu tipo de cuenta:
+Kosmo es el asistente virtual de ClientKosmos. Te guiará por la aplicación resaltando cada sección mientras te explica su función. El contenido del tutorial varía según tu tipo de cuenta:
 
-**Si tienes plan gratuito**, Flowy te mostrará:
+**Si tienes plan gratuito**, Kosmo te mostrará:
 1. **Dashboard** — Tu centro de control con tareas e ideas
 2. **Clientes** — Cómo crear fichas de clientes (máx. 1 en plan gratuito)
 3. **Tareas** — Cómo crear y gestionar (máx. 5 pendientes)
 4. **Ideas** — Cómo capturar anotaciones rápidas sin límites
 5. **Suscripción** — Qué incluye Solo: clientes ilimitados, tareas ilimitadas, IA contextual y recursos
 
-**Si tienes plan Solo**, Flowy te mostrará:
+**Si tienes plan Solo**, Kosmo te mostrará:
 1. **Dashboard** — Tu centro de control completo (Panel Hoy)
 2. **Clientes** — Crear fichas de cliente sin límites
 3. **Tareas** — Crear tareas sin límites, asociadas a clientes
@@ -99,7 +99,7 @@ Flowy es el asistente virtual de Flowly. Te guiará por la aplicación resaltand
 
 ### Cómo funciona el tour
 
-- La pantalla se oscurece y se resalta el elemento del que Flowy está hablando
+- La pantalla se oscurece y se resalta el elemento del que Kosmo está hablando
 - El cuadro de diálogo se posiciona junto al elemento resaltado
 - Una flecha y un borde brillante indican el elemento activo
 
@@ -120,14 +120,25 @@ El tutorial solo aparece una vez, la primera vez que inicias sesión. Una vez co
 
 ## 3. Dashboard (Panel Hoy)
 
-El dashboard es tu página principal al iniciar sesión. Muestra un resumen de tu actividad:
+El dashboard es tu página principal al iniciar sesión. Está organizado en las siguientes secciones:
 
-| Elemento | Descripción |
-|----------|-------------|
-| **Tareas activas** | Número de tareas en estado "pendiente" |
-| **Completadas este mes** | Tareas que has terminado en el mes actual |
-| **Ideas activas** | Ideas que aún no has resuelto |
-| **Clientes activos** | Clientes en marcha |
+### Tu día
+
+Muestra tus tareas pendientes agrupadas por cliente. Cada tarea tiene un **checkbox inline** para completarla directamente sin salir del dashboard.
+
+### Clientes que necesitan atención
+
+Lista de clientes con **badges de riesgo** que indican situaciones que requieren tu atención (tareas vencidas, alta carga de trabajo, etc.).
+
+### Nudge contextual de Kosmo
+
+Si tienes tareas vencidas u otras condiciones que requieren atención, Kosmo mostrará un **nudge contextual** con sugerencias personalizadas. Esta funcionalidad está disponible para usuarios Solo.
+
+> **Preview para usuarios Free:** los usuarios del plan gratuito verán un bloque de preview bloqueado con el mensaje: *"Con Solo, Kosmo puede planificarte el día"*.
+
+### Mis clientes
+
+Sección compacta que muestra tus clientes activos con su estado y color identificativo de un vistazo.
 
 El sidebar izquierdo te da acceso a todas las secciones de la aplicación. Las secciones Solo aparecen bloqueadas si tienes el plan gratuito.
 
@@ -159,7 +170,15 @@ Accede desde el sidebar a **"Clientes"**. Verás una cuadrícula con todos tus c
 
 ### Ver el detalle de un cliente
 
-Haz clic sobre el nombre del cliente para ver:
+Haz clic sobre el nombre del cliente para ver su ficha completa. En la parte superior se muestra un **header de contexto rápido** con:
+- Tareas pendientes
+- Tareas de alta prioridad
+- Tareas vencidas
+- Próxima fecha de vencimiento
+- Ideas activas
+- Última actividad
+
+Debajo del header encontrarás:
 - Estadísticas de progreso (% de tareas completadas)
 - Barra de progreso visual
 - Lista de tareas separadas por estado
@@ -197,7 +216,7 @@ Cada tarea muestra su nombre, prioridad (🔴 Alta / 🟡 Media / 🟢 Baja), fe
    - **Cliente**: asigna la tarea a un cliente
 3. Haz clic en **"Crear tarea"**.
 
-> **Límite en plan gratuito:** puedes tener un máximo de **5 tareas pendientes** al mismo tiempo. Para crear más, debes completar alguna existente o actualizar a Premium.
+> **Límite en plan gratuito:** 5 tareas es el máximo en Free. Con Solo, añade todas las que necesites.
 
 ---
 
@@ -288,7 +307,13 @@ Los recursos de tipo **Enlace** son clicables directamente desde la lista.
 
 ## 8. IA contextual *(Solo)*
 
-La IA contextual de Flowly te ayuda a gestionar tus clientes de forma más eficiente con 3 acciones específicas.
+La IA contextual de ClientKosmos te ayuda a gestionar tus clientes de forma más eficiente con 3 acciones específicas.
+
+### Nudges de Kosmo
+
+Kosmo genera **nudges contextuales** que aparecen automáticamente cuando se detectan condiciones relevantes, como tareas vencidas o un número elevado de tareas pendientes. Estos nudges son **descartables**: puedes cerrarlos si no necesitas actuar en ese momento.
+
+---
 
 ### Planificar mi día
 
@@ -433,7 +458,7 @@ En esta versión los pagos son simulados. Solo se almacenan los últimos 4 dígi
 
 ---
 
-**¿Puedo usar Flowly en móvil?**
+**¿Puedo usar ClientKosmos en móvil?**
 Sí. La interfaz es completamente responsive y funciona en cualquier dispositivo con navegador web moderno.
 
 ---
@@ -448,4 +473,4 @@ No. La eliminación de tareas es permanente. Las tareas completadas, en cambio, 
 
 ---
 
-*Manual generado para la versión actual de Flowly — 2026-03-04*
+*Manual generado para la versión actual de ClientKosmos — 2026-03-17*

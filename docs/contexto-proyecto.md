@@ -1,12 +1,12 @@
-# Flowly — Contexto Completo y Estado del Proyecto
+# ClientKosmos — Contexto Completo y Estado del Proyecto
 
-> Documento de referencia con todo el contexto necesario para entender Flowly, su estado actual y las decisiones tomadas durante el desarrollo.
+> Documento de referencia con todo el contexto necesario para entender ClientKosmos, su estado actual y las decisiones tomadas durante el desarrollo.
 
 ---
 
-## 1. Que es Flowly
+## 1. Que es ClientKosmos
 
-Flowly es una **plataforma web freemium de gestion multi-cliente para freelancers** desarrollada como **Proyecto Intermodular de 2o DAM** por Samuel Ayllon. Actua como la memoria operativa del freelancer: cada cliente tiene su ficha con tareas, ideas y recursos, y la IA contextual ayuda a priorizar y resumir el estado de cada proyecto.
+ClientKosmos es una **plataforma web freemium de gestion multi-cliente para freelancers** desarrollada como **Proyecto Intermodular de 2o DAM** por Samuel Ayllon. Actua como la memoria operativa del freelancer: cada cliente tiene su ficha con tareas, ideas y recursos, y la IA contextual ayuda a priorizar y resumir el estado de cada proyecto.
 
 ### Publico objetivo
 - Freelancers y autonomos que gestionan varios clientes simultaneamente
@@ -34,7 +34,11 @@ Una plataforma que organiza toda la gestion del freelancer por cliente: fichas d
 | Fichas de cliente (CRUD + completar) | Completo | Todos (1 max free) |
 | Gestion de tareas por cliente (CRUD + completar/reabrir) | Completo | Todos (5 max free) |
 | Gestion de ideas (CRUD + resolver/reactivar) | Completo | Todos |
-| Dashboard personal condicional (Panel Hoy) | Completo | Todos |
+| Panel Hoy con tareas agrupadas por cliente y badges de riesgo | Completo | Todos |
+| Header de contexto en ficha de cliente | Completo | Todos |
+| Badges de riesgo en lista de clientes | Completo | Todos |
+| Nudges contextuales de Kosmo (dismissable) | Completo | Solo |
+| Upgrade prompts contextuales | Completo | Todos |
 | Tutorial interactivo (spotlight + chatbot) | Completo | Todos |
 | Landing page | Completo | Publico |
 | Checkout simulado (80/20) | Completo | Todos |
@@ -58,7 +62,7 @@ Una plataforma que organiza toda la gestion del freelancer por cliente: fichas d
 - **BD**: SQLite (dev) / TiDB Cloud Serverless (prod)
 
 ### Patron SPA monolitica
-Flowly usa **Inertia.js** como puente entre Laravel y React. No hay API REST: Laravel renderiza paginas React directamente. Esto simplifica:
+ClientKosmos usa **Inertia.js** como puente entre Laravel y React. No hay API REST: Laravel renderiza paginas React directamente. Esto simplifica:
 - Autenticacion (sesiones nativas de Laravel)
 - Validacion (Form Requests con errores automaticos en el frontend)
 - Navegacion (sin router de cliente, Inertia maneja las transiciones)
@@ -111,6 +115,9 @@ El system prompt se genera dinamicamente con datos reales del usuario/cliente.
 
 ### Groq como alternativa gratuita
 La integracion IA soporta tanto OpenAI como Groq (14.400 req/dia gratis). El cambio es transparente: solo se cambian las variables `OPENAI_BASE_URL` y `OPENAI_API_KEY` en `.env`.
+
+### Nudges de Kosmo dismissable (Sprint 4)
+Los nudges contextuales de Kosmo se guardan en localStorage con reset diario. Cada nudge tiene una clave unica por fecha (dashboard) o por cliente+fecha (ficha de cliente), permitiendo que reaparezcan al dia siguiente si las condiciones se mantienen.
 
 ---
 
@@ -213,7 +220,7 @@ Multi-stage build:
 |---------|-----------|
 | `resources/css/app.css` | Design system completo (tokens, animaciones, dark mode) |
 | `resources/views/app.blade.php` | Entry point HTML, carga fuentes desde bunny.net |
-| `resources/js/assets/logo.png` | Logo oficial de Flowly |
+| `resources/js/assets/logo.png` | Logo oficial de ClientKosmos |
 | `routes/web.php` | Todas las rutas con middleware |
 | `config/services.php` | Configuracion OpenAI/Groq |
 | `app/Models/User.php` | Logica central de roles, limites y dashboard |
@@ -238,3 +245,6 @@ Reescritura completa de los tests para reflejar la nueva arquitectura. 156 test 
 
 ### Fase 4 — Pulido y landing
 Landing page reescrita para freelancers multi-cliente. Precios actualizados: 0€/11.99€/119€. Planes renombrados a "Gratuito"/"Solo Mensual"/"Solo Anual". UserSeeder con datos demo realistas (3 clientes con tareas, ideas y recursos). README y documentacion actualizados.
+
+### Fase 5 — UX y conversion (ClientKosmos rebrand)
+Rebrand completo: Flowly → ClientKosmos, Flowy → Kosmo. Panel Hoy reestructurado con tareas agrupadas por cliente. Header de contexto en fichas de cliente. Badges de riesgo en lista de clientes. Nudges contextuales de Kosmo (dismissable, reset diario). Upgrade prompts contextuales (copy refinado en limites de clientes, tareas e IA). Documentacion y Docker actualizados.

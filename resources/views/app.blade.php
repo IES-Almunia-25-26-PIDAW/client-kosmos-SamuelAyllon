@@ -61,7 +61,7 @@
         <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 
         <link rel="preconnect" href="https://fonts.bunny.net">
-        {{-- Flowly Design System fonts: Nunito (títulos 600-800), Inter (cuerpo & UI 400-600) --}}
+        {{-- ClientKosmos Design System fonts: Nunito (títulos 600-800), Inter (cuerpo & UI 400-600) --}}
         <link href="https://fonts.bunny.net/css?family=nunito:600,700,800|inter:400,500,600" rel="stylesheet" />
 
         @viteReactRefresh

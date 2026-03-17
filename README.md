@@ -1,4 +1,4 @@
-# Flowly
+# ClientKosmos
 
 > **Tu memoria operativa por cliente — Gestiona freelance sin perder contexto**
 
@@ -37,7 +37,7 @@
 
 ## Acerca de
 
-**Flowly** es una plataforma web freemium pensada para **freelancers que gestionan varios clientes a la vez**. Cada cliente tiene su propia ficha con tareas, ideas, recursos y contexto, de modo que al cambiar de cliente retomas justo donde lo dejaste.
+**ClientKosmos** es una plataforma web freemium pensada para **freelancers que gestionan varios clientes a la vez**. Cada cliente tiene su propia ficha con tareas, ideas, recursos y contexto, de modo que al cambiar de cliente retomas justo donde lo dejaste.
 
 ### Que problema resuelve
 
@@ -46,14 +46,16 @@ La fragmentacion de herramientas (una app para tareas, otra para ideas, otra par
 - **Informacion dispersa**: ideas sueltas, enlaces en marcadores, tareas sin vincular a quien pertenecen.
 - **Falta de vision diaria**: no hay un lugar que muestre "que tengo que hacer hoy y para quien".
 
-Flowly unifica estas necesidades en fichas de cliente con:
+ClientKosmos unifica estas necesidades en fichas de cliente con:
 
 - **Clientes** como unidad central: cada cliente agrupa tareas, ideas y recursos
 - **Tareas** con prioridades, fechas de vencimiento y vinculacion a cliente
 - **Ideas** para captura rapida, ligadas a un cliente
 - **Recursos** (enlaces, documentos, videos) organizados dentro de cada ficha *(Solo Premium)*
-- **IA contextual** con 3 acciones inteligentes: resumen de cliente, sugerencia de siguientes pasos y redaccion de emails *(Solo Premium)*
-- **Panel Hoy** que muestra todas las tareas del dia agrupadas por cliente
+- **IA contextual con Kosmo** (asistente IA): planificar el dia, resumen de cliente y parte semanal *(Solo)*
+- **Panel Hoy** que muestra tareas del dia agrupadas por cliente con badges de riesgo
+- **Nudges contextuales de Kosmo** que sugieren acciones cuando hay tareas vencidas *(Solo)*
+- **Upgrade prompts contextuales** que explican el valor de Solo donde el usuario siente el limite
 
 ---
 
@@ -74,10 +76,12 @@ Flowly unifica estas necesidades en fichas de cliente con:
 - Fichas de cliente con nombre, descripcion, color y estado (activo/inactivo/completado)
 - Gestor de tareas vinculadas a cliente con limite free (5 pendientes max) — CRUD + completar/reabrir
 - Gestor de ideas sin limite — CRUD + resolver/reactivar
-- Panel Hoy con tareas del dia agrupadas por cliente
+- Panel Hoy con tareas del dia agrupadas por cliente + badges de riesgo (vencidas/proximas)
+- Header de contexto en ficha de cliente: tareas pendientes, urgentes, vencidas, proxima entrega, ideas activas
+- Badges de riesgo en lista de clientes (vencidas en rojo, proximas en ambar)
+- Upgrade prompts contextuales (copy refinado en limites de clientes, tareas e IA)
 - Checkout y suscripcion simulada (80% exito / 20% fallo)
-- Dashboard personal con datos reales condicional por plan
-- Tutorial interactivo con tour guiado (spotlight + chatbot) para nuevos usuarios
+- Tutorial interactivo con tour guiado (spotlight + Kosmo chatbot) para nuevos usuarios
 - Landing page completa (hero, features, pricing, footer)
 - Modo oscuro/claro con persistencia
 
@@ -85,10 +89,11 @@ Flowly unifica estas necesidades en fichas de cliente con:
 - Clientes ilimitados
 - Tareas ilimitadas
 - Recursos por cliente (enlaces, documentos, videos, imagenes)
-- IA contextual — 3 acciones por cliente:
+- Nudges contextuales de Kosmo (dismissable, reset diario) en Panel Hoy y ficha de cliente
+- IA contextual con Kosmo — 3 acciones:
   - `planDay`: planifica tu dia con la informacion de todos tus clientes
   - `clientSummary`: resume el estado actual de un cliente
-  - `clientUpdate`: redacta un email de seguimiento para un cliente
+  - `clientUpdate`: genera un parte semanal detallado para un cliente
 
 ### Admin
 - Dashboard con estadisticas globales
@@ -100,7 +105,7 @@ Flowly unifica estas necesidades en fichas de cliente con:
 
 ## Fases del Desarrollo
 
-El proyecto se desarrollo en 4 fases incrementales:
+El proyecto se desarrollo en 5 fases incrementales:
 
 | Fase | Descripcion | Estado |
 |------|-------------|--------|
@@ -108,6 +113,7 @@ El proyecto se desarrollo en 4 fases incrementales:
 | **Fase 2** | Ficha de cliente completa (tareas + ideas + recursos en una sola vista) y dashboard "Panel Hoy" | Completada |
 | **Fase 3** | IA contextual con 3 endpoints: plan-day, client-summary, client-update (Groq) | Completada |
 | **Fase 4** | Pulido, landing page, precios actualizados (11,99/119 €), datos demo en seeders, README | Completada |
+| **Fase 5** | Rebrand ClientKosmos/Kosmo, Panel Hoy reestructurado, header de contexto por cliente, badges de riesgo, nudges de Kosmo (dismissable), upgrade prompts contextuales, documentación actualizada | Completada |
 
 ---
 
@@ -139,7 +145,7 @@ Certificado CA bundle de Mozilla (para Windows)
 ### 1. Clonar el repositorio
 ```bash
 git clone <repo-url>
-cd flowly-samuel-ayllon
+cd clientkosmos-samuel-ayllon
 ```
 
 ### 2. Instalar dependencias
@@ -227,9 +233,9 @@ Despues de `php artisan migrate:fresh --seed`:
 
 | Rol | Email | Password | Datos demo |
 |-----|-------|----------|------------|
-| Admin | admin@flowly.test | password | — |
-| Premium (Solo) | premium@flowly.test | password | 3 clientes, tareas, ideas, recursos |
-| Free | free@flowly.test | password | 1 cliente, 3 tareas, 1 idea |
+| Admin | admin@clientkosmos.test | password | — |
+| Premium (Solo) | premium@clientkosmos.test | password | 3 clientes, tareas, ideas, recursos |
+| Free | free@clientkosmos.test | password | 1 cliente, 3 tareas, 1 idea |
 
 ---
 
@@ -278,7 +284,7 @@ Despues de `php artisan migrate:fresh --seed`:
 ## Arquitectura
 
 ### Patron general
-Flowly sigue el patron **SPA monolitica** con Inertia.js: el backend Laravel renderiza paginas React directamente sin necesidad de una API REST separada. Esto simplifica autenticacion, validacion y navegacion.
+ClientKosmos sigue el patron **SPA monolitica** con Inertia.js: el backend Laravel renderiza paginas React directamente sin necesidad de una API REST separada. Esto simplifica autenticacion, validacion y navegacion.
 
 ### Capas de la aplicacion
 
@@ -323,7 +329,7 @@ El `AiController` lo recibe por inyeccion de dependencias y lo usa para las 3 ac
 ## Estructura del Proyecto
 
 ```
-flowly/
+clientkosmos/
 ├── app/
 │   ├── Http/
 │   │   ├── Controllers/
@@ -360,7 +366,7 @@ flowly/
 │   ├── migrations/
 │   └── seeders/               ← RoleSeeder + UserSeeder (3 usuarios con datos demo)
 ├── resources/
-│   ├── css/app.css            ← Design system Flowly (tokens, animaciones)
+│   ├── css/app.css            ← Design system ClientKosmos (tokens, animaciones)
 │   └── js/
 │       ├── pages/
 │       │   ├── welcome.tsx         ← Landing page
@@ -535,9 +541,13 @@ docker compose up
 # Acceder en http://localhost:8000
 ```
 
-- **Multi-stage build**: Node 20 (frontend) + PHP 8.2 (backend)
+- **Multi-stage build**: Node 20 (frontend) + PHP 8.4 (backend)
 - `docker-entrypoint.sh` ejecuta migraciones y seeders automaticamente
-- Produccion conecta a TiDB Cloud Serverless via SSL
+- Contenedores: `clientkosmos_app` (puerto 8000) + `clientkosmos_db` (MySQL 8.0, puerto 3306)
+- Credenciales Docker por defecto: `clientkosmos` / `clientkosmos_secret`
+- Usuarios de prueba: `admin@clientkosmos.test`, `premium@clientkosmos.test`, `free@clientkosmos.test` (password: `password`)
+- Variable `APP_KEY` se genera automaticamente si no se proporciona
+- Para produccion con TiDB Cloud, sobreescribir las variables `DB_*` en el entorno
 
 ---
 
@@ -546,7 +556,7 @@ docker compose up
 ### Variables de entorno principales (.env)
 
 ```env
-APP_NAME=Flowly
+APP_NAME=ClientKosmos
 APP_ENV=local
 APP_DEBUG=true
 APP_URL=http://localhost:8000

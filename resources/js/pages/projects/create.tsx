@@ -120,7 +120,7 @@ export default function ProjectCreate() {
                             <div className="space-y-3">
                                 <Label className="flex items-center gap-2 text-sm font-medium">
                                     <Palette className="h-4 w-4 text-muted-foreground" />
-                                    Color del proyecto
+                                    Color del cliente
                                 </Label>
                                 <div className="flex flex-wrap gap-3">
                                     {colorOptions.map(({ color, name }) => (

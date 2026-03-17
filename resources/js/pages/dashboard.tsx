@@ -14,7 +14,7 @@ import {
     Copy,
     Check,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -50,6 +50,16 @@ export default function Dashboard({ todayTasks, activeProjects, atRiskProjects, 
     const [planLoading, setPlanLoading] = useState(false);
     const [planResult, setPlanResult] = useState<string | null>(null);
     const [planCopied, setPlanCopied] = useState(false);
+
+    // Dismissable nudge (resets daily)
+    const nudgeDismissKey = `kosmo-nudge-dashboard-${new Date().toISOString().slice(0, 10)}`;
+    const [nudgeDismissed, setNudgeDismissed] = useState(() => {
+        try { return localStorage.getItem(nudgeDismissKey) === '1'; } catch { return false; }
+    });
+    const dismissNudge = useCallback(() => {
+        setNudgeDismissed(true);
+        try { localStorage.setItem(nudgeDismissKey, '1'); } catch {}
+    }, [nudgeDismissKey]);
 
     const handlePlanDay = () => {
         setPlanLoading(true);
@@ -160,17 +170,17 @@ export default function Dashboard({ todayTasks, activeProjects, atRiskProjects, 
                     </Card>
                 )}
 
-                {/* Tareas críticas del día, agrupadas por cliente */}
+                {/* ── HERO: Tu día — tareas agrupadas por cliente ── */}
                 <Card className="group overflow-hidden transition-all duration-300 hover:shadow-lg">
                     <CardHeader className="flex flex-row items-center justify-between pb-3 bg-gradient-to-r from-primary/5 to-transparent">
                         <div className="flex items-center gap-2">
                             <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
                                 <CheckCircle2 className="h-4 w-4 text-primary" />
                             </div>
-                            <CardTitle className="text-base">Tareas prioritarias</CardTitle>
+                            <CardTitle className="text-base">Tu día</CardTitle>
                         </div>
                         <Link href="/tasks" className="text-sm text-primary font-medium hover:underline flex items-center gap-1 group/link">
-                            Ver todas 
+                            Ver todas
                             <ArrowRight className="h-3 w-3 transition-transform group-hover/link:translate-x-0.5" />
                         </Link>
                     </CardHeader>
@@ -180,8 +190,8 @@ export default function Dashboard({ todayTasks, activeProjects, atRiskProjects, 
                                 <div className="h-12 w-12 rounded-full bg-green-500/10 flex items-center justify-center mb-3">
                                     <Sparkles className="h-6 w-6 text-green-600" />
                                 </div>
-                                <p className="text-sm font-medium">Día limpio</p>
-                                <p className="text-xs text-muted-foreground">Buen momento para revisar notas o descansar.</p>
+                                <p className="text-sm font-medium">No tienes nada urgente hoy</p>
+                                <p className="text-xs text-muted-foreground">Buen día para avanzar con tus clientes o descansar.</p>
                             </div>
                         ) : (
                             (() => {
@@ -240,7 +250,68 @@ export default function Dashboard({ todayTasks, activeProjects, atRiskProjects, 
                     </CardContent>
                 </Card>
 
-                {/* Clientes en riesgo */}
+                {/* ── Nudge Kosmo para premium con tareas vencidas (dismissable, reset diario) ── */}
+                {isPremium && !planResult && !nudgeDismissed && (() => {
+                    const overdueTasks = todayTasks.filter(t => t.due_date && new Date(t.due_date) < new Date(new Date().toDateString()));
+                    if (overdueTasks.length === 0) return false;
+                    const clientsWithOverdue = new Set(overdueTasks.map(t => t.project?.id).filter(Boolean));
+                    return (
+                        <Card className="overflow-hidden border-l-4 border-l-primary/60 bg-ai-surface/50">
+                            <CardContent className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4">
+                                <div className="flex items-center gap-3 flex-1 min-w-0">
+                                    <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                                        <Sparkles className="h-4 w-4 text-primary" />
+                                    </div>
+                                    <p className="text-sm">
+                                        {clientsWithOverdue.size > 1
+                                            ? `Tienes ${overdueTasks.length} tarea${overdueTasks.length !== 1 ? 's' : ''} vencida${overdueTasks.length !== 1 ? 's' : ''} en ${clientsWithOverdue.size} clientes. ¿Kosmo te echa una mano con el plan?`
+                                            : `Tienes ${overdueTasks.length} tarea${overdueTasks.length !== 1 ? 's' : ''} vencida${overdueTasks.length !== 1 ? 's' : ''}. ¿Kosmo te ayuda a reorganizar el día?`
+                                        }
+                                    </p>
+                                </div>
+                                <div className="flex items-center gap-2 shrink-0">
+                                    <Button
+                                        size="sm"
+                                        variant="outline"
+                                        className="gap-2 border-primary/30"
+                                        disabled={planLoading}
+                                        onClick={handlePlanDay}
+                                    >
+                                        {planLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                                        Planificar mi día
+                                    </Button>
+                                    <Button size="sm" variant="ghost" onClick={dismissNudge} className="h-8 w-8 p-0" title="Descartar">
+                                        <X className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    );
+                })()}
+
+                {/* ── Preview bloqueado para free ── */}
+                {!isPremium && todayTasks.length > 0 && (
+                    <Card className="overflow-hidden border-l-4 border-l-muted bg-muted/20">
+                        <CardContent className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4">
+                            <div className="flex items-center gap-3">
+                                <div className="h-8 w-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                                    <Sparkles className="h-4 w-4 text-muted-foreground" />
+                                </div>
+                                <p className="text-sm text-muted-foreground">
+                                    Con Solo, Kosmo puede planificarte el día analizando las tareas de todos tus clientes.
+                                </p>
+                            </div>
+                            <Button size="sm" variant="outline" className="gap-2 shrink-0" asChild>
+                                <Link href="/subscription">
+                                    <Crown className="h-3.5 w-3.5" />
+                                    Ver Solo
+                                </Link>
+                            </Button>
+                        </CardContent>
+                    </Card>
+                )}
+
+                {/* ── SECUNDARIO: Clientes que necesitan atención (progressive disclosure) ── */}
                 {atRiskProjects.length > 0 && (
                     <Card className="group overflow-hidden transition-all duration-300 hover:shadow-lg border-orange-500/20">
                         <CardHeader className="flex flex-row items-center justify-between pb-3 bg-gradient-to-r from-orange-500/5 to-transparent">
@@ -248,7 +319,7 @@ export default function Dashboard({ todayTasks, activeProjects, atRiskProjects, 
                                 <div className="h-8 w-8 rounded-lg bg-orange-500/10 flex items-center justify-center">
                                     <AlertTriangle className="h-4 w-4 text-orange-600" />
                                 </div>
-                                <CardTitle className="text-base">Clientes en riesgo</CardTitle>
+                                <CardTitle className="text-base">Clientes que necesitan atención</CardTitle>
                             </div>
                         </CardHeader>
                         <CardContent className="flex flex-col gap-2 pt-4">
@@ -259,10 +330,15 @@ export default function Dashboard({ todayTasks, activeProjects, atRiskProjects, 
                                             <div className="h-3 w-3 rounded-full shrink-0" style={{ backgroundColor: project.color || '#3B82F6' }} />
                                             <span className="text-sm font-medium truncate">{project.name}</span>
                                         </div>
-                                        <div className="flex items-center gap-3 shrink-0">
+                                        <div className="flex items-center gap-2 shrink-0">
                                             {project.overdue_tasks_count > 0 && (
                                                 <Badge variant="destructive" className="text-xs">
-                                                    {project.overdue_tasks_count} atrasada{project.overdue_tasks_count !== 1 ? 's' : ''}
+                                                    {project.overdue_tasks_count} vencida{project.overdue_tasks_count !== 1 ? 's' : ''}
+                                                </Badge>
+                                            )}
+                                            {project.upcoming_tasks_count > 0 && (
+                                                <Badge className="text-xs bg-orange-500/10 text-orange-600 border border-orange-500/20">
+                                                    {project.upcoming_tasks_count} próxima{project.upcoming_tasks_count !== 1 ? 's' : ''}
                                                 </Badge>
                                             )}
                                             {project.next_deadline && (
@@ -280,7 +356,7 @@ export default function Dashboard({ todayTasks, activeProjects, atRiskProjects, 
                     </Card>
                 )}
 
-                {/* Mis clientes activos */}
+                {/* ── TERCIARIO: Mis clientes (compacto) ── */}
                 <Card className="group overflow-hidden transition-all duration-300 hover:shadow-lg">
                     <CardHeader className="flex flex-row items-center justify-between pb-3 bg-gradient-to-r from-primary/5 to-transparent">
                         <div className="flex items-center gap-2">
@@ -300,34 +376,41 @@ export default function Dashboard({ todayTasks, activeProjects, atRiskProjects, 
                                 <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-3">
                                     <FolderKanban className="h-6 w-6 text-primary" />
                                 </div>
-                                <p className="text-sm font-medium">Aquí vivirán tus clientes</p>
-                                <p className="text-xs text-muted-foreground">Añade el primero y Flowly recordará todo por ti.</p>
+                                <p className="text-sm font-medium">Aquí verás tus clientes activos</p>
+                                <p className="text-xs text-muted-foreground">Cada cliente tiene su espacio con tareas, ideas y recursos.</p>
                                 <Link href="/clients/create" className="mt-3">
-                                    <Button size="sm" className="gap-2">Nuevo cliente</Button>
+                                    <Button size="sm" className="gap-2">Crear tu primer cliente</Button>
                                 </Link>
                             </div>
                         ) : (
-                            activeProjects.map(project => (
-                                <Link key={project.id} href={`/clients/${project.id}`} className="block">
-                                    <div className="flex items-center justify-between rounded-xl border-2 border-transparent bg-muted/30 p-3 transition-all hover:border-primary/20 hover:bg-muted/50">
-                                        <div className="flex items-center gap-3 min-w-0">
-                                            <div className="h-3 w-3 rounded-full shrink-0" style={{ backgroundColor: project.color || '#3B82F6' }} />
-                                            <span className="text-sm font-medium truncate">{project.name}</span>
+                            <div className="grid gap-2 sm:grid-cols-2">
+                                {activeProjects.map(project => (
+                                    <Link key={project.id} href={`/clients/${project.id}`} className="block">
+                                        <div className="flex items-center justify-between rounded-xl border-2 border-transparent bg-muted/30 p-3 transition-all hover:border-primary/20 hover:bg-muted/50">
+                                            <div className="flex items-center gap-3 min-w-0">
+                                                <div className="h-3 w-3 rounded-full shrink-0" style={{ backgroundColor: project.color || '#3B82F6' }} />
+                                                <span className="text-sm font-medium truncate">{project.name}</span>
+                                            </div>
+                                            <div className="flex items-center gap-2 shrink-0">
+                                                {project.overdue_tasks_count > 0 && (
+                                                    <Badge variant="destructive" className="text-[10px] px-1.5 py-0">
+                                                        {project.overdue_tasks_count}
+                                                    </Badge>
+                                                )}
+                                                {project.pending_tasks_count > 0 && (
+                                                    <span className="text-xs text-muted-foreground">{project.pending_tasks_count}</span>
+                                                )}
+                                                <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" />
+                                            </div>
                                         </div>
-                                        <div className="flex items-center gap-3 shrink-0">
-                                            {project.pending_tasks_count > 0 && (
-                                                <span className="text-xs text-muted-foreground">{project.pending_tasks_count} pendiente{project.pending_tasks_count !== 1 ? 's' : ''}</span>
-                                            )}
-                                            <ArrowRight className="h-4 w-4 text-muted-foreground" />
-                                        </div>
-                                    </div>
-                                </Link>
-                            ))
+                                    </Link>
+                                ))}
+                            </div>
                         )}
                     </CardContent>
                 </Card>
 
-                {/* CTA para usuarios free */}
+                {/* ── CTA para usuarios free ── */}
                 {!isPremium && (
                     <Card className="relative overflow-hidden border-2 border-primary/20 bg-gradient-to-br from-primary/5 via-background to-primary/10">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-2xl" />
@@ -337,14 +420,14 @@ export default function Dashboard({ todayTasks, activeProjects, atRiskProjects, 
                                     <Zap className="h-6 w-6 text-primary-foreground" />
                                 </div>
                                 <div>
-                                    <h3 className="font-semibold">Desbloquea todo el potencial</h3>
-                                    <p className="text-sm text-muted-foreground">Clientes ilimitados, IA contextual y recursos con Solo</p>
+                                    <h3 className="font-semibold">Gestiona todos tus clientes con Solo</h3>
+                                    <p className="text-sm text-muted-foreground">Clientes ilimitados, tareas sin límite, IA contextual con Kosmo y recursos por cliente</p>
                                 </div>
                             </div>
                             <Button asChild className="gap-2 shadow-lg shadow-primary/25">
                                 <Link href="/subscription">
                                     <Crown className="h-4 w-4" />
-                                    Ver planes
+                                    Ver Solo
                                 </Link>
                             </Button>
                         </CardContent>

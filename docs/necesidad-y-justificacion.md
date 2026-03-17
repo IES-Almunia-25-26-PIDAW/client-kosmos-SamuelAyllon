@@ -1,6 +1,6 @@
-# Flowly — Necesidad que Cubre y Justificacion
+# ClientKosmos — Necesidad que Cubre y Justificacion
 
-> Analisis del problema que Flowly resuelve, a quien va dirigido y por que existe este proyecto.
+> Analisis del problema que ClientKosmos resuelve, a quien va dirigido y por que existe este proyecto.
 
 ---
 
@@ -37,12 +37,12 @@ Principalmente **freelancers y autonomos** (disenadores, desarrolladores, consul
 
 ## 2. La Solucion: Tu Memoria Operativa por Cliente
 
-### Propuesta de Flowly
-Flowly organiza toda la gestion del freelancer **por cliente**, con IA contextual que entiende tu cartera:
+### Propuesta de ClientKosmos
+ClientKosmos organiza toda la gestion del freelancer **por cliente**, con IA contextual que entiende tu cartera:
 
 ```
 +-------------------+
-|     FLOWLY        |
+|     CLIENTKOSMOS        |
 |                   |
 |  Clientes ------+ |
 |  Tareas --------+ |    Un solo login
@@ -54,7 +54,7 @@ Flowly organiza toda la gestion del freelancer **por cliente**, con IA contextua
 
 ### Mapeo problema-solucion
 
-| Necesidad | Herramientas actuales | Solucion Flowly |
+| Necesidad | Herramientas actuales | Solucion ClientKosmos |
 |-----------|----------------------|-----------------|
 | Gestionar clientes con sus entregables | Hojas de calculo, Notion | Fichas de cliente con tareas, ideas y recursos asociados |
 | Tareas con fechas y prioridades por cliente | Todoist, To Do | Gestor de tareas con due_date, prioridad y asignacion a cliente |
@@ -69,7 +69,7 @@ Flowly organiza toda la gestion del freelancer **por cliente**, con IA contextua
 Cada cliente tiene su ficha con color, estado, tareas asociadas, ideas y recursos. No hay informacion suelta: todo esta vinculado a un cliente.
 
 **2. IA con contexto real de tus clientes**
-A diferencia de ChatGPT generico, la IA de Flowly recibe automaticamente los datos de tus clientes y tareas. Esto permite 3 acciones concretas:
+A diferencia de ChatGPT generico, la IA de ClientKosmos recibe automaticamente los datos de tus clientes y tareas. Esto permite 3 acciones concretas:
 - **Planificar el dia**: analiza todas tus tareas pendientes y genera un plan priorizado
 - **Resumen del cliente**: genera un resumen instantaneo del estado
 - **Parte semanal**: genera un informe detallado para enviar al cliente o para tu referencia
@@ -80,7 +80,7 @@ A diferencia de ChatGPT generico, la IA de Flowly recibe automaticamente los dat
 - Sin limites artificiales frustrantes (ideas ilimitadas en free)
 
 **4. Simplicidad deliberada**
-Flowly no intenta ser Notion (demasiado flexible) ni un CRM complejo. Es un gestor personal de clientes con exactamente las funcionalidades necesarias para un freelancer, sin mas.
+ClientKosmos no intenta ser Notion (demasiado flexible) ni un CRM complejo. Es un gestor personal de clientes con exactamente las funcionalidades necesarias para un freelancer, sin mas.
 
 ---
 
@@ -110,16 +110,16 @@ El limite de 1 cliente es deliberado: suficiente para validar la herramienta, pe
 | Notion Plus | 10 EUR |
 | ChatGPT Plus | 20 EUR |
 | **Total separado** | **38 EUR/mes** |
-| **Flowly Solo** | **11,99 EUR/mes** |
+| **ClientKosmos Solo** | **11,99 EUR/mes** |
 
-Flowly no reemplaza al 100% cada herramienta individual, pero cubre el 80% de las necesidades de un freelancer por una fraccion del precio.
+ClientKosmos no reemplaza al 100% cada herramienta individual, pero cubre el 80% de las necesidades de un freelancer por una fraccion del precio.
 
 ---
 
 ## 4. Contexto Academico
 
 ### Proyecto Intermodular 2o DAM
-Flowly es el proyecto intermodular del ciclo de Desarrollo de Aplicaciones Multiplataforma. Cubre competencias de:
+ClientKosmos es el proyecto intermodular del ciclo de Desarrollo de Aplicaciones Multiplataforma. Cubre competencias de:
 
 | Modulo | Competencia demostrada |
 |--------|----------------------|
@@ -141,7 +141,7 @@ Flowly es el proyecto intermodular del ciclo de Desarrollo de Aplicaciones Multi
 ## 5. Publico y Casos de Uso
 
 ### Caso 1: Disenador freelance
-Laura gestiona 4 clientes de diseno grafico. Usa Flowly para:
+Laura gestiona 4 clientes de diseno grafico. Usa ClientKosmos para:
 - Una ficha por cliente con su color y estado
 - Tareas con fecha de entrega por cada entregable
 - Guardar recursos de inspiracion y briefs en cada cliente
@@ -149,14 +149,14 @@ Laura gestiona 4 clientes de diseno grafico. Usa Flowly para:
 - Planificar su dia con la IA para priorizar entre clientes
 
 ### Caso 2: Desarrollador web autonomo
-Carlos tiene 3 clientes activos de desarrollo. Usa Flowly para:
+Carlos tiene 3 clientes activos de desarrollo. Usa ClientKosmos para:
 - Agrupar tareas tecnicas por cliente
 - Guardar enlaces a repos, documentacion y APIs en los recursos del cliente
 - Generar partes semanales con la IA para enviar a los clientes
 - Ver su dashboard para saber que tiene pendiente hoy
 
 ### Caso 3: Consultora que empieza
-Maria acaba de empezar como consultora y tiene su primer cliente. Usa Flowly free para:
+Maria acaba de empezar como consultora y tiene su primer cliente. Usa ClientKosmos free para:
 - 1 cliente con sus tareas asociadas (maximo 5 pendientes)
 - Ideas ilimitadas para anotar ideas de cada sesion
 - Cuando consiga mas clientes, actualizara a Solo
@@ -181,6 +181,6 @@ Maria acaba de empezar como consultora y tiene su primer cliente. Usa Flowly fre
 
 ## 7. Conclusion
 
-Flowly existe porque **un freelancer no deberia necesitar 5 apps para gestionar sus clientes**. Al organizar toda la gestion por cliente — tareas, ideas, recursos e IA contextual — en una unica plataforma con un modelo freemium accesible, Flowly reduce la friccion y permite al freelancer centrarse en lo que importa: entregar buen trabajo a sus clientes.
+ClientKosmos existe porque **un freelancer no deberia necesitar 5 apps para gestionar sus clientes**. Al organizar toda la gestion por cliente — tareas, ideas, recursos e IA contextual — en una unica plataforma con un modelo freemium accesible, ClientKosmos reduce la friccion y permite al freelancer centrarse en lo que importa: entregar buen trabajo a sus clientes.
 
 El proyecto demuestra que es viable construir una plataforma de gestion multi-cliente completa con tecnologias modernas (Laravel 12 + React 19 + IA) en el marco de un proyecto academico, manteniendo estandares profesionales de testing, seguridad y diseno.

@@ -147,7 +147,7 @@ export default function AdminUserShow({ user, dashboardData }: AdminUserShowProp
                                 </div>
                                 <div>
                                     <p className="text-2xl font-bold">{dashboardData.total_projects}</p>
-                                    <p className="text-xs text-muted-foreground">Proyectos activos</p>
+                                    <p className="text-xs text-muted-foreground">Clientes activos</p>
                                 </div>
                             </div>
                         </CardContent>

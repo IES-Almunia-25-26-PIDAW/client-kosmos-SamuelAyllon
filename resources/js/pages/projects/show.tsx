@@ -3,6 +3,7 @@ import {
     ArrowLeft,
     CheckCircle2,
     Clock,
+    Crown,
     ExternalLink,
     FileText,
     Lightbulb,
@@ -11,13 +12,15 @@ import {
     Plus,
     Sparkles,
     AlertCircle,
+    AlertTriangle,
+    CalendarClock,
     FolderKanban,
     Loader2,
     X,
     Copy,
     Check,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
@@ -29,6 +32,15 @@ interface TasksSummary {
     completed: number;
 }
 
+interface ContextHeader {
+    pending_tasks_count: number;
+    high_priority_count: number;
+    overdue_tasks_count: number;
+    next_due_date: string | null;
+    active_ideas_count: number;
+    last_activity: string | null;
+}
+
 interface Props {
     project: Project;
     recentCompleted: Task[];
@@ -38,6 +50,7 @@ interface Props {
     tasksSummary: TasksSummary;
     progressPercentage: number;
     isPremium: boolean;
+    contextHeader: ContextHeader;
 }
 
 const priorityColors: Record<string, string> = {
@@ -64,7 +77,7 @@ const resourceTypeIcons: Record<string, string> = {
     link: '🔗', document: '📄', video: '🎬', image: '🖼️', other: '📎',
 };
 
-export default function ProjectShow({ project, recentCompleted, upcomingPending, ideas, resources, tasksSummary, progressPercentage, isPremium }: Props) {
+export default function ProjectShow({ project, recentCompleted, upcomingPending, ideas, resources, tasksSummary, progressPercentage, isPremium, contextHeader }: Props) {
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Clientes', href: '/clients' },
         { title: project.name, href: `/clients/${project.id}` },
@@ -79,6 +92,16 @@ export default function ProjectShow({ project, recentCompleted, upcomingPending,
     const [updateLoading, setUpdateLoading] = useState(false);
     const [updateResult, setUpdateResult] = useState<string | null>(null);
     const [updateCopied, setUpdateCopied] = useState(false);
+
+    // Dismissable nudge (resets daily)
+    const nudgeDismissKey = `kosmo-nudge-client-${project.id}-${new Date().toISOString().slice(0, 10)}`;
+    const [nudgeDismissed, setNudgeDismissed] = useState(() => {
+        try { return localStorage.getItem(nudgeDismissKey) === '1'; } catch { return false; }
+    });
+    const dismissNudge = useCallback(() => {
+        setNudgeDismissed(true);
+        try { localStorage.setItem(nudgeDismissKey, '1'); } catch {}
+    }, [nudgeDismissKey]);
 
     const csrfToken = () =>
         decodeURIComponent(document.cookie.match(/XSRF-TOKEN=([^;]+)/)?.[1] ?? '');
@@ -198,6 +221,103 @@ export default function ProjectShow({ project, recentCompleted, upcomingPending,
                         </div>
                     </div>
                 </div>
+
+                {/* Header de contexto rápido */}
+                {(contextHeader.pending_tasks_count > 0 || contextHeader.active_ideas_count > 0) && (
+                    <div className="flex flex-wrap items-center gap-2 rounded-xl border bg-muted/30 px-4 py-3">
+                        {contextHeader.pending_tasks_count > 0 && (
+                            <span className="inline-flex items-center gap-1.5 rounded-lg bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">
+                                <CheckCircle2 className="h-3 w-3" />
+                                {contextHeader.pending_tasks_count} tarea{contextHeader.pending_tasks_count !== 1 ? 's' : ''} pendiente{contextHeader.pending_tasks_count !== 1 ? 's' : ''}
+                            </span>
+                        )}
+                        {contextHeader.high_priority_count > 0 && (
+                            <span className="inline-flex items-center gap-1.5 rounded-lg bg-red-500/10 px-2.5 py-1 text-xs font-medium text-red-600 dark:text-red-400">
+                                <AlertTriangle className="h-3 w-3" />
+                                {contextHeader.high_priority_count} urgente{contextHeader.high_priority_count !== 1 ? 's' : ''}
+                            </span>
+                        )}
+                        {contextHeader.overdue_tasks_count > 0 && (
+                            <span className="inline-flex items-center gap-1.5 rounded-lg bg-red-500/10 px-2.5 py-1 text-xs font-medium text-red-600 dark:text-red-400 border border-red-500/20">
+                                <AlertCircle className="h-3 w-3" />
+                                {contextHeader.overdue_tasks_count} vencida{contextHeader.overdue_tasks_count !== 1 ? 's' : ''}
+                            </span>
+                        )}
+                        {contextHeader.next_due_date && (
+                            <span className="inline-flex items-center gap-1.5 rounded-lg bg-orange-500/10 px-2.5 py-1 text-xs font-medium text-orange-600">
+                                <CalendarClock className="h-3 w-3" />
+                                Entrega: {new Date(contextHeader.next_due_date).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
+                            </span>
+                        )}
+                        {contextHeader.active_ideas_count > 0 && (
+                            <span className="inline-flex items-center gap-1.5 rounded-lg bg-yellow-500/10 px-2.5 py-1 text-xs font-medium text-yellow-600 dark:text-yellow-400">
+                                <Lightbulb className="h-3 w-3" />
+                                {contextHeader.active_ideas_count} idea{contextHeader.active_ideas_count !== 1 ? 's' : ''} activa{contextHeader.active_ideas_count !== 1 ? 's' : ''}
+                            </span>
+                        )}
+                        {contextHeader.last_activity && (
+                            <span className="ml-auto text-xs text-muted-foreground">
+                                Último cambio: {new Date(contextHeader.last_activity).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
+                            </span>
+                        )}
+                    </div>
+                )}
+
+                {/* Nudge de Kosmo para premium (dismissable, reset diario) */}
+                {isPremium && !summaryResult && !nudgeDismissed && (contextHeader.pending_tasks_count > 5 || contextHeader.overdue_tasks_count > 0) && (
+                    <Card className="overflow-hidden border-l-4 border-l-primary/60 bg-ai-surface/50">
+                        <CardContent className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4">
+                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                                <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                                    <Sparkles className="h-4 w-4 text-primary" />
+                                </div>
+                                <p className="text-sm">
+                                    {contextHeader.overdue_tasks_count > 0
+                                        ? `${project.name} tiene ${contextHeader.overdue_tasks_count} tarea${contextHeader.overdue_tasks_count !== 1 ? 's' : ''} vencida${contextHeader.overdue_tasks_count !== 1 ? 's' : ''}. ¿Resumen rápido de Kosmo?`
+                                        : `Hay movimiento en ${project.name}. ¿Resumen rápido de Kosmo?`
+                                    }
+                                </p>
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0">
+                                <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="gap-2 border-primary/30"
+                                    disabled={summaryLoading}
+                                    onClick={handleSummary}
+                                >
+                                    {summaryLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                                    Resumen Kosmo
+                                </Button>
+                                <Button size="sm" variant="ghost" onClick={dismissNudge} className="h-8 w-8 p-0" title="Descartar">
+                                    <X className="h-4 w-4" />
+                                </Button>
+                            </div>
+                        </CardContent>
+                    </Card>
+                )}
+
+                {/* Upgrade prompt IA para free */}
+                {!isPremium && contextHeader.pending_tasks_count > 0 && (
+                    <Card className="overflow-hidden border-l-4 border-l-muted bg-muted/20">
+                        <CardContent className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4">
+                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                                <div className="h-8 w-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                                    <Sparkles className="h-4 w-4 text-muted-foreground" />
+                                </div>
+                                <p className="text-sm text-muted-foreground">
+                                    Con Solo, puedes pedir a Kosmo un resumen del estado de {project.name} en segundos.
+                                </p>
+                            </div>
+                            <Button size="sm" variant="outline" className="gap-2 shrink-0" asChild>
+                                <Link href="/subscription">
+                                    <Crown className="h-3.5 w-3.5" />
+                                    Ver Solo
+                                </Link>
+                            </Button>
+                        </CardContent>
+                    </Card>
+                )}
 
                 {/* Flash */}
                 {flash?.success && (
@@ -422,7 +542,7 @@ export default function ProjectShow({ project, recentCompleted, upcomingPending,
                             )}
                             {upcomingPending.length === 0 && recentCompleted.length === 0 && (
                                 <div className="flex flex-col items-center justify-center py-6 text-center">
-                                    <p className="text-sm text-muted-foreground">Crea la primera tarea para iniciar el timeline.</p>
+                                    <p className="text-sm text-muted-foreground">Las tareas de {project.name} aparecerán aquí. Añade la primera para empezar.</p>
                                 </div>
                             )}
                         </CardContent>
@@ -441,7 +561,7 @@ export default function ProjectShow({ project, recentCompleted, upcomingPending,
                         <CardContent className="flex flex-col gap-2 pt-4">
                             {ideas.length === 0 ? (
                                 <div className="flex flex-col items-center justify-center py-6 text-center">
-                                    <p className="text-sm text-muted-foreground">Las notas rápidas van aquí. Vincula cada una a un cliente para no perder contexto.</p>
+                                    <p className="text-sm text-muted-foreground">¿Algo que quieras explorar para {project.name}? Captúralo aquí antes de que se escape.</p>
                                 </div>
                             ) : (
                                 ideas.map(idea => (
@@ -461,7 +581,26 @@ export default function ProjectShow({ project, recentCompleted, upcomingPending,
                         </CardContent>
                     </Card>
 
-                    {/* BLOQUE 4: Recursos (solo premium) */}
+                    {/* BLOQUE 4: Recursos */}
+                    {!isPremium && (
+                        <Card className="overflow-hidden border-2 border-dashed">
+                            <CardContent className="flex flex-col items-center justify-center gap-3 py-8">
+                                <div className="h-10 w-10 rounded-xl bg-muted flex items-center justify-center">
+                                    <Link2 className="h-5 w-5 text-muted-foreground" />
+                                </div>
+                                <div className="text-center">
+                                    <p className="text-sm font-medium">Recursos</p>
+                                    <p className="text-xs text-muted-foreground mt-1">Con Solo, cada cliente puede tener sus recursos (enlaces, docs, notas) asociados.</p>
+                                </div>
+                                <Button size="sm" variant="outline" className="gap-2" asChild>
+                                    <Link href="/subscription">
+                                        <Crown className="h-3.5 w-3.5" />
+                                        Ver Solo
+                                    </Link>
+                                </Button>
+                            </CardContent>
+                        </Card>
+                    )}
                     {isPremium && (
                         <Card className="overflow-hidden border-2">
                             <CardHeader className="flex flex-row items-center justify-between pb-3 bg-gradient-to-r from-primary/5 to-transparent">

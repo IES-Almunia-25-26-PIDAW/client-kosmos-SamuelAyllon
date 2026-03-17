@@ -184,22 +184,22 @@ export default function TaskCreate({ projects, defaultProjectId }: Props) {
                                 </div>
                             </div>
 
-                            {/* Proyecto (solo si hay proyectos) */}
+                            {/* Cliente (solo si hay clientes) */}
                             {projects.length > 0 && (
                                 <div className="space-y-2">
                                     <Label htmlFor="project_id" className="flex items-center gap-2 text-sm font-medium">
                                         <FolderKanban className="h-4 w-4 text-muted-foreground" />
-                                        Proyecto
+                                        Cliente
                                     </Label>
                                     <Select
                                         value={data.project_id || 'none'}
                                         onValueChange={(value) => setData('project_id', value === 'none' ? '' : value)}
                                     >
                                         <SelectTrigger id="project_id" className="w-full">
-                                            <SelectValue placeholder="Sin proyecto" />
+                                            <SelectValue placeholder="Sin cliente" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="none">Sin proyecto</SelectItem>
+                                            <SelectItem value="none">Sin cliente</SelectItem>
                                             {projects.map(p => (
                                                 <SelectItem key={p.id} value={String(p.id)}>
                                                     {p.name}

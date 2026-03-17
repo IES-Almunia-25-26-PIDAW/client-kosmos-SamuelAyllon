@@ -20,6 +20,8 @@ export interface Project {
     client_notes: string | null;
     tasks_count?: number;
     pending_tasks_count?: number;
+    overdue_tasks_count?: number;
+    upcoming_tasks_count?: number;
     tasks?: Task[];
     ideas?: Idea[];
     resources?: Resource[];

@@ -34,7 +34,7 @@ export default function AdminDashboard({ stats, recentPayments, recentUsers }: A
                     </div>
                     <div>
                         <h1 className="text-2xl font-bold tracking-tight">Panel de administración</h1>
-                        <p className="text-sm text-muted-foreground">Estadísticas globales de Flowly</p>
+                        <p className="text-sm text-muted-foreground">Estadísticas globales de ClientKosmos</p>
                     </div>
                 </div>
 

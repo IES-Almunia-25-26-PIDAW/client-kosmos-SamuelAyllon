@@ -1,8 +1,8 @@
-# Justificación Técnica de Decisiones — Flowly
+# Justificación Técnica de Decisiones — ClientKosmos
 
 > Proyecto Intermodular — 2º DAM
 > Autor: Samuel Ayllón
-> Fecha: 2026-03-04
+> Fecha: 2026-03-17
 
 ---
 
@@ -240,7 +240,7 @@ GROQ_CA_BUNDLE=C:/certs/cacert.pem                 # CA bundle para SSL (Windows
 **Justificación:**
 - Los usuarios nuevos en aplicaciones de productividad pueden sentirse abrumados por las múltiples funcionalidades disponibles.
 - Un tour guiado que resalta visualmente cada elemento reduce la curva de aprendizaje y mejora la retención de usuarios (onboarding efectivo).
-- El formato de chat con un asistente virtual ("Flowy") es más amigable e interactivo que un manual de texto estático.
+- El formato de chat con un asistente virtual ("Kosmo") es más amigable e interactivo que un manual de texto estático.
 - El **spotlight** (oscurecimiento del fondo con "agujero" en el elemento activo) enfoca la atención del usuario exactamente donde debe mirar.
 - El tooltip posicionado junto al elemento evita que el usuario pierda contexto mientras lee las instrucciones.
 - El efecto de escritura progresiva simula una conversación real, haciendo la experiencia más personal.

@@ -8,6 +8,7 @@ export interface DashboardProject {
     next_deadline: string | null;
     pending_tasks_count: number;
     overdue_tasks_count: number;
+    upcoming_tasks_count: number;
 }
 
 export interface DashboardProps {
