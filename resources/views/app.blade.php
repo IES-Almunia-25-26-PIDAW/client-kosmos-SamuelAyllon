@@ -23,11 +23,11 @@
         {{-- Inline style to set the HTML background color based on our theme in app.css --}}
         <style>
             html, body {
-                background-color: #E9EDC9;
+                background-color: #F7F6F2;
             }
 
             html.dark, html.dark body {
-                background-color: #1a1e1b;
+                background-color: #141311;
             }
 
             /* Loading spinner visible mientras React monta la app */
@@ -40,14 +40,14 @@
             .app-loading-spinner {
                 width: 36px;
                 height: 36px;
-                border: 3px solid rgba(58, 90, 64, 0.2);
-                border-top-color: #3A5A40;
+                border: 3px solid rgba(14, 124, 131, 0.2);
+                border-top-color: #0E7C83;
                 border-radius: 50%;
                 animation: app-spin 0.7s linear infinite;
             }
             html.dark .app-loading-spinner {
-                border-color: rgba(107, 155, 115, 0.2);
-                border-top-color: #6b9b73;
+                border-color: rgba(61, 168, 176, 0.2);
+                border-top-color: #3DA8B0;
             }
             @keyframes app-spin {
                 to { transform: rotate(360deg); }
@@ -60,9 +60,12 @@
         <link rel="icon" href="/favicon.svg" type="image/svg+xml">
         <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        {{-- ClientKosmos Design System fonts: Nunito (títulos 600-800), Inter (cuerpo & UI 400-600) --}}
-        <link href="https://fonts.bunny.net/css?family=nunito:600,700,800|inter:400,500,600" rel="stylesheet" />
+        {{-- ClientKosmos Design System fonts: General Sans (títulos), Inter (cuerpo & UI), JetBrains Mono (código) --}}
+        <link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+        <link href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap" rel="stylesheet" />
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
 
         @viteReactRefresh
         @vite(['resources/js/app.tsx'])

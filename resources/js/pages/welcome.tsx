@@ -161,7 +161,7 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
                         <div className="absolute bottom-20 left-1/4 h-80 w-80 rounded-full bg-gradient-to-tr from-primary/20 to-transparent blur-3xl animate-orb-2" />
                         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[600px] w-[600px] rounded-full bg-primary/5 blur-3xl animate-glow-pulse" />
                         {/* Grid pattern */}
-                        <div className="absolute inset-0 bg-[linear-gradient(rgba(58,90,64,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(58,90,64,0.03)_1px,transparent_1px)] bg-[size:60px_60px]" />
+                        <div className="absolute inset-0 bg-[linear-gradient(rgba(14,124,131,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(14,124,131,0.03)_1px,transparent_1px)] bg-[size:60px_60px]" />
                     </div>
 
                     <div className="grid gap-12 lg:grid-cols-2 lg:gap-16 items-center">
@@ -316,7 +316,7 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
                     {/* Section background */}
                     <div className="absolute inset-0 -z-10">
                         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/[0.03] to-transparent" />
-                        <div className="absolute inset-0 bg-[linear-gradient(rgba(58,90,64,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(58,90,64,0.04)_1px,transparent_1px)] bg-[size:48px_48px]" />
+                        <div className="absolute inset-0 bg-[linear-gradient(rgba(14,124,131,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(14,124,131,0.04)_1px,transparent_1px)] bg-[size:48px_48px]" />
                     </div>
 
                     <div className="mx-auto max-w-6xl px-6">
@@ -453,7 +453,7 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
                 {/* ── How it works ── */}
                 <section id="how-it-works" className="relative border-y overflow-hidden">
                     <div className="absolute inset-0 bg-gradient-to-b from-muted/30 via-background to-muted/20" />
-                    <div className="absolute inset-0 bg-[linear-gradient(rgba(58,90,64,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(58,90,64,0.03)_1px,transparent_1px)] bg-[size:50px_50px]" />
+                    <div className="absolute inset-0 bg-[linear-gradient(rgba(14,124,131,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(14,124,131,0.03)_1px,transparent_1px)] bg-[size:50px_50px]" />
 
                     <div className="relative mx-auto max-w-6xl px-6 py-28">
                         <div className="mb-20 text-center">
@@ -550,7 +550,7 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
 
                 {/* ── Pricing ── */}
                 <section id="pricing" className="relative border-y bg-gradient-to-b from-background via-muted/20 to-background">
-                    <div className="absolute inset-0 bg-[linear-gradient(rgba(58,90,64,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(58,90,64,0.02)_1px,transparent_1px)] bg-[size:40px_40px]" />
+                    <div className="absolute inset-0 bg-[linear-gradient(rgba(14,124,131,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(14,124,131,0.02)_1px,transparent_1px)] bg-[size:40px_40px]" />
 
                     <div className="relative mx-auto max-w-6xl px-6 py-28">
                         <div className="mb-20 text-center">

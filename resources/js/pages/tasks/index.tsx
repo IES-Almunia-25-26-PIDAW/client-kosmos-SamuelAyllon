@@ -104,7 +104,7 @@ function TableView({ tasks, canAddTask }: { tasks: Task[]; canAddTask: boolean }
                                 <td className="hidden p-4 sm:table-cell">
                                     {task.project ? (
                                         <span className="inline-flex items-center gap-1.5 rounded-lg bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">
-                                            <div className="h-2 w-2 rounded-full" style={{ backgroundColor: task.project.color || '#3A5A40' }} />
+                                            <div className="h-2 w-2 rounded-full" style={{ backgroundColor: task.project.color || '#0E7C83' }} />
                                             {task.project.name}
                                         </span>
                                     ) : (
@@ -274,7 +274,7 @@ function GalleryView({ tasks, canAddTask }: { tasks: Task[]; canAddTask: boolean
                                 </span>
                                 {task.project && (
                                     <span className="inline-flex items-center gap-1.5 rounded-lg bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
-                                        <div className="h-2 w-2 rounded-full" style={{ backgroundColor: task.project.color || '#3A5A40' }} />
+                                        <div className="h-2 w-2 rounded-full" style={{ backgroundColor: task.project.color || '#0E7C83' }} />
                                         {task.project.name}
                                     </span>
                                 )}

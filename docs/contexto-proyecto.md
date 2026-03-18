@@ -6,7 +6,7 @@
 
 ## 1. Que es ClientKosmos
 
-ClientKosmos es una **plataforma web freemium de gestion multi-cliente para freelancers** desarrollada como **Proyecto Intermodular de 2o DAM** por Samuel Ayllon. Actua como la memoria operativa del freelancer: cada cliente tiene su ficha con tareas, ideas y recursos, y la IA contextual ayuda a priorizar y resumir el estado de cada proyecto.
+ClientKosmos es una **plataforma web freemium de gestion multi-cliente para freelancers** desarrollada como **Proyecto Intermodular de 2º DAM** por Samuel Ayllon. Actua como la memoria operativa del freelancer: cada cliente tiene su ficha con tareas, ideas y recursos, y la IA contextual ayuda a priorizar y resumir el estado de cada proyecto.
 
 ### Publico objetivo
 - Freelancers y autonomos que gestionan varios clientes simultaneamente

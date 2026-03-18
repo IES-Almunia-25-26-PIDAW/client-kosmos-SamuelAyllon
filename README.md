@@ -632,4 +632,4 @@ MIT — Ver [LICENSE](LICENSE) para mas detalles.
 
 ---
 
-**Samuel Ayllon** — Proyecto Intermodular 2o DAM
+**Samuel Ayllon** — Proyecto Intermodular 2º DAM
