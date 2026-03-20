@@ -1,24 +1,27 @@
 <?php
 
-use App\Http\Controllers\Settings\PasswordController;
-use App\Http\Controllers\Settings\ProfileController;
-use App\Http\Controllers\Settings\TwoFactorAuthenticationController;
+use App\Http\Controllers\Settings\Password\EditAction as PasswordEditAction;
+use App\Http\Controllers\Settings\Password\UpdateAction as PasswordUpdateAction;
+use App\Http\Controllers\Settings\Profile\DestroyAction as ProfileDestroyAction;
+use App\Http\Controllers\Settings\Profile\EditAction as ProfileEditAction;
+use App\Http\Controllers\Settings\Profile\UpdateAction as ProfileUpdateAction;
+use App\Http\Controllers\Settings\TwoFactorAuthentication\ShowAction as TwoFactorShowAction;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', '/settings/profile');
 
-    Route::get('settings/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('settings/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::get('settings/profile', ProfileEditAction::class)->name('profile.edit');
+    Route::patch('settings/profile', ProfileUpdateAction::class)->name('profile.update');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::delete('settings/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::delete('settings/profile', ProfileDestroyAction::class)->name('profile.destroy');
 
-    Route::get('settings/password', [PasswordController::class, 'edit'])->name('user-password.edit');
+    Route::get('settings/password', PasswordEditAction::class)->name('user-password.edit');
 
-    Route::put('settings/password', [PasswordController::class, 'update'])
+    Route::put('settings/password', PasswordUpdateAction::class)
         ->middleware('throttle:6,1')
         ->name('user-password.update');
 
@@ -26,6 +29,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('settings/appearance');
     })->name('appearance.edit');
 
-    Route::get('settings/two-factor', [TwoFactorAuthenticationController::class, 'show'])
+    Route::get('settings/two-factor', TwoFactorShowAction::class)
         ->name('two-factor.show');
 });

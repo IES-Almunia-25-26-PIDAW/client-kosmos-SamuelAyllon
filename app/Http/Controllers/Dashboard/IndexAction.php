@@ -1,19 +1,16 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Dashboard;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
 
-
-class DashboardController extends Controller
+class IndexAction extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index(): Response|RedirectResponse
+    public function __invoke(): Response|RedirectResponse
     {
         $user = Auth::user();
 
@@ -69,5 +66,4 @@ class DashboardController extends Controller
             'subscription'   => $subscription,
         ]);
     }
-
 }

@@ -1,14 +1,15 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Subscription;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
 
-class SubscriptionController extends Controller
+class IndexAction extends Controller
 {
-    public function index(): Response
+    public function __invoke(): Response
     {
         $user = Auth::user();
         $subscription = $user->subscription;

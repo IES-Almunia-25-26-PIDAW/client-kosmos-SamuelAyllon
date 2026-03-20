@@ -4,7 +4,7 @@ namespace App\Providers;
 
 use App\Actions\Fortify\CreateNewUser;
 use App\Actions\Fortify\ResetUserPassword;
-use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Auth\Authenticate\AuthenticateAction;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -44,7 +44,7 @@ class FortifyServiceProvider extends ServiceProvider
 
         // Delegar la autenticación al AuthController, que comprueba
         // credenciales y que el usuario tiene un rol válido asignado
-        Fortify::authenticateUsing([app(AuthController::class), 'authenticate']);
+        Fortify::authenticateUsing(app(AuthenticateAction::class));
     }
 
     /**
