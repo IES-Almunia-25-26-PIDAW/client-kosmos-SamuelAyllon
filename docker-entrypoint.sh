@@ -50,17 +50,24 @@ env_vars=(
     APP_NAME APP_ENV APP_DEBUG APP_KEY APP_URL
     DB_CONNECTION DB_HOST DB_PORT DB_DATABASE DB_USERNAME DB_PASSWORD DB_SSL_CA
     SESSION_DRIVER CACHE_STORE QUEUE_CONNECTION LOG_CHANNEL
+    MAIL_MAILER MAIL_HOST MAIL_PORT MAIL_USERNAME MAIL_PASSWORD MAIL_FROM_ADDRESS MAIL_FROM_NAME
     GROQ_API_KEY GROQ_BASE_URL GROQ_MODEL
 )
 for var in "${env_vars[@]}"; do
     # "${!var+set}" comprueba si la variable está definida (incluso si está vacía)
     if [ -n "${!var+set}" ]; then
+        val="${!var}"
+        # APP_KEY vacía significa "no configurada": no sobreescribir el .env,
+        # el Paso 3 generará una nueva clave si es necesario.
+        if [ "$var" = "APP_KEY" ] && [ -z "$val" ]; then
+            continue
+        fi
         if grep -q "^${var}=" /app/.env; then
             # La variable ya existe en .env: reemplazamos su valor
-            sed -i "s|^${var}=.*|${var}=${!var}|" /app/.env
+            sed -i "s|^${var}=.*|${var}=${val}|" /app/.env
         else
             # La variable no existe en .env: la añadimos al final
-            echo "${var}=${!var}" >> /app/.env
+            echo "${var}=${val}" >> /app/.env
         fi
     fi
 done
@@ -126,15 +133,28 @@ php /app/artisan config:clear    # Borra caché de configuración
 php /app/artisan cache:clear 2>/dev/null || true  # Borra caché de aplicación (puede fallar si la tabla no existe aún)
 php /app/artisan route:clear     # Borra caché de rutas
 
+# Crea el symlink public/storage → storage/app/public para que los archivos
+# subidos por usuarios sean accesibles vía URL (/storage/...).
+# --force: sobreescribe si el symlink ya existía (seguro de re-ejecutar).
+php /app/artisan storage:link --force 2>/dev/null || true
+
 # Ejecuta las migraciones de la base de datos:
 #   migrate: crea/actualiza las tablas según los archivos en database/migrations/
-#   --seed: ejecuta los seeders (crea datos de prueba: usuarios admin, etc.)
 #   --force: necesario en producción (Laravel pide confirmación sin este flag)
-#
-# NOTA: Los seeders de este proyecto son idempotentes (usan firstOrCreate),
-# por lo que es seguro ejecutarlos en cada arranque.
-echo "==> Ejecutando migraciones y seeders..."
-php /app/artisan migrate --seed --force
+echo "==> Ejecutando migraciones..."
+php /app/artisan migrate --force
+
+# Ejecutar seeders SOLO en la primera instalación (tabla users vacía).
+# Los seeders usan factory()->create() sin comprobación de duplicados, por lo
+# que ejecutarlos en un arranque posterior causaría errores de UNIQUE constraint.
+USER_COUNT=$(mysql -h"$DB_HOST" -P"$DB_PORT" -u"$DB_USERNAME" -p"$DB_PASSWORD" \
+    "$DB_DATABASE" -se "SELECT COUNT(*) FROM users;" 2>/dev/null || echo "1")
+if [ "${USER_COUNT}" = "0" ]; then
+    echo "==> Primera instalación detectada. Ejecutando seeders..."
+    php /app/artisan db:seed --force
+else
+    echo "==> Base de datos ya inicializada (${USER_COUNT} usuarios). Omitiendo seeders."
+fi
 
 # ──────────────────────────────────────────────────────────────────────────────
 # PASO 7: Cachear configuración para producción

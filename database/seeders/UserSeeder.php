@@ -16,8 +16,8 @@ class UserSeeder extends Seeder
     {
         // ── Admin ──────────────────────────────────────────────
         $admin = User::factory()->create([
-            'name'  => 'Admin Flowly',
-            'email' => 'admin@flowly.test',
+            'name'  => 'Admin ClientKosmos',
+            'email' => 'admin@clientkosmos.test',
         ]);
 
         $admin->assignRole('admin');
@@ -33,7 +33,7 @@ class UserSeeder extends Seeder
         // ── Premium user ───────────────────────────────────────
         $premium = User::factory()->create([
             'name'  => 'Premium User',
-            'email' => 'premium@flowly.test',
+            'email' => 'premium@clientkosmos.test',
         ]);
 
         $premium->assignRole('premium_user');
@@ -176,7 +176,7 @@ class UserSeeder extends Seeder
         // ── Free user ──────────────────────────────────────────
         $free = User::factory()->create([
             'name'  => 'Free User',
-            'email' => 'free@flowly.test',
+            'email' => 'free@clientkosmos.test',
         ]);
 
         $free->assignRole('free_user');
@@ -193,7 +193,7 @@ class UserSeeder extends Seeder
         $freeClient = Project::factory()->active()->create([
             'user_id'     => $free->id,
             'name'        => 'Mi primer cliente',
-            'description' => 'Proyecto de prueba para explorar Flowly.',
+            'description' => 'Proyecto de prueba para explorar ClientKosmos.',
             'color'       => '#6366F1',
         ]);
 

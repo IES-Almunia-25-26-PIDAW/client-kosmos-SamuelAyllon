@@ -2,15 +2,17 @@
 # Docker Compose — ClientKosmos (despliegue local)
 # ==============================================================================
 #
-# Este archivo orquesta dos servicios (contenedores) que trabajan juntos:
-#   1. db  — Base de datos MySQL 8.0
-#   2. app — Aplicación Laravel + React
+# Este archivo orquesta tres servicios (contenedores) que trabajan juntos:
+#   1. db       — Base de datos MySQL 8.0
+#   2. mailpit  — Servidor SMTP de desarrollo con bandeja web (captura emails sin enviarlos)
+#   3. app      — Aplicación Laravel + React
 #
 # CÓMO USAR:
 #   1. Clona el repositorio
 #   2. (Opcional) Crea un archivo .env en la raíz con tu GROQ_API_KEY si quieres IA
 #   3. Ejecuta:  docker compose up --build
-#   4. Abre:     http://localhost:8000
+#   4. Abre:     http://localhost:8000         ← Aplicación
+#                http://localhost:8025         ← Bandeja de email (Mailpit)
 #
 # Credenciales de prueba (creadas por los seeders):
 #   admin@clientkosmos.test    / password  (admin)
@@ -56,18 +58,6 @@ services:
     # Para borrarlos: "docker compose down -v"
     volumes:
       - clientkosmos_dbdata:/var/lib/mysql
-    # Health check: Docker comprueba periódicamente si MySQL está operativa.
-    # El servicio "app" espera a que este check pase antes de arrancar
-    # (ver depends_on → condition: service_healthy más abajo).
-    #   - test: ejecuta mysqladmin ping para verificar que MySQL responde
-    #   - interval: cada 5 segundos comprueba
-    #   - timeout: si no responde en 5 segundos, se considera fallido
-    #   - retries: tras 10 fallos seguidos, se marca como "unhealthy"
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uclientkosmos", "-pclientkosmos_secret"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
     # Política de reinicio: si el contenedor se cae, Docker lo reinicia
     # automáticamente, EXCEPTO si fue parado manualmente (docker compose stop).
     restart: unless-stopped
@@ -94,6 +84,9 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      # mailpit arranca instantáneamente; no necesita health check.
+      mailpit:
+        condition: service_started
     # Volúmenes para persistir archivos subidos por los usuarios.
     # Sin este volumen, los archivos se perderían al recrear el contenedor.
     volumes:
@@ -124,6 +117,17 @@ services:
       CACHE_STORE: database          # Caché de la aplicación almacenada en MySQL
       QUEUE_CONNECTION: database     # Trabajos en cola almacenados en MySQL
       LOG_CHANNEL: stderr            # Logs van a stderr (visibles con docker compose logs)
+
+      # ── Correo electrónico (Mailpit — SMTP de desarrollo) ──
+      # Mailpit captura todos los emails sin enviarlos. Ver bandeja en http://localhost:8025
+      # "mailpit" es el nombre del servicio; Docker resuelve su IP internamente.
+      MAIL_MAILER: smtp
+      MAIL_HOST: mailpit             # Nombre del servicio Mailpit en la red Docker
+      MAIL_PORT: "1025"              # Puerto SMTP de Mailpit (sin cifrado, sin auth)
+      MAIL_USERNAME: null
+      MAIL_PASSWORD: null
+      MAIL_FROM_ADDRESS: "noreply@clientkosmos.test"
+      MAIL_FROM_NAME: ClientKosmos
 
       # ── IA (Groq — compatible con OpenAI SDK) ──
       # Estas variables son opcionales. Sin GROQ_API_KEY la app funciona,
