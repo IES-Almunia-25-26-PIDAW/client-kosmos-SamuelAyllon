@@ -1,148 +1,123 @@
 # ==============================================================================
-# Docker Compose — ClientKosmos (despliegue local)
+# docker-compose.yml — ClientKosmos
 # ==============================================================================
+# Docker Compose levanta varios contenedores a la vez y los conecta entre sí.
+# Este archivo define 3 contenedores (servicios):
+#   1. db       → base de datos MySQL
+#   2. mailpit  → servidor de correo para pruebas
+#   3. app      → la aplicación Laravel
 #
-# Este archivo orquesta tres servicios (contenedores) que trabajan juntos:
-#   1. db       — Base de datos MySQL 8.0
-#   2. mailpit  — Servidor SMTP de desarrollo con bandeja web (captura emails sin enviarlos)
-#   3. app      — Aplicación Laravel + React
+# COMANDOS BÁSICOS:
+#   docker compose up --build     → construir y arrancar (primera vez)
+#   docker compose up -d          → arrancar en segundo plano
+#   docker compose down           → parar y eliminar contenedores
+#   docker compose down -v        → parar y borrar también los datos
+#   docker compose logs -f app    → ver logs de la app en tiempo real
+#   docker compose exec app bash  → abrir una terminal dentro del contenedor
 #
-# CÓMO USAR:
-#   1. Clona el repositorio
-#   2. (Opcional) Crea un archivo .env en la raíz con tu GROQ_API_KEY si quieres IA
-#   3. Ejecuta:  docker compose up --build
-#   4. Abre:     http://localhost:8000         ← Aplicación
-#                http://localhost:8025         ← Bandeja de email (Mailpit)
+# Accesos:
+#   http://localhost:8000   → aplicación
+#   http://localhost:8025   → bandeja de correo (Mailpit)
 #
-# Credenciales de prueba (creadas por los seeders):
-#   admin@clientkosmos.test    / password  (admin)
-#   premium@clientkosmos.test  / password  (premium)
-#   free@clientkosmos.test     / password  (free)
-#
-# COMANDOS ÚTILES:
-#   docker compose up --build     → Construir y arrancar (primera vez o tras cambios)
-#   docker compose up -d          → Arrancar en segundo plano (detached)
-#   docker compose down           → Parar y eliminar contenedores
-#   docker compose down -v        → Parar y BORRAR también los datos (volúmenes)
-#   docker compose logs -f app    → Ver logs de la aplicación en tiempo real
-#   docker compose exec app bash  → Abrir terminal dentro del contenedor
+# Usuarios de prueba (los crea el seeder):
+#   admin@clientkosmos.test   / password
+#   premium@clientkosmos.test / password
+#   free@clientkosmos.test    / password
 # ==============================================================================
 
 services:
 
-  # ────────────────────────────────────────────────────────────────────────────
+  # ──────────────────────────────────────────────────────────────────────────
   # SERVICIO: db — Base de datos MySQL 8.0
-  # ────────────────────────────────────────────────────────────────────────────
-  # MySQL almacena todos los datos de la aplicación: usuarios, proyectos,
-  # tareas, sesiones, caché, y trabajos de cola (queue).
+  # ──────────────────────────────────────────────────────────────────────────
   db:
-    # Imagen oficial de MySQL versión 8.0 desde Docker Hub
-    image: mysql:8.0
-    # Nombre fijo del contenedor (facilita identificarlo con docker ps)
+    image: mysql:8.0                  # Imagen oficial de MySQL
     container_name: clientkosmos_db
-    # Mapeo de puertos: puerto_host:puerto_contenedor
-    # Permite conectarse desde el host (ej: MySQL Workbench) en localhost:3306
     ports:
-      - "3306:3306"
-    # Variables de entorno que MySQL usa para inicializarse la PRIMERA vez:
-    #   - Crea el usuario root con la contraseña indicada
-    #   - Crea automáticamente la base de datos "clientkosmos"
-    #   - Crea un usuario no-root "clientkosmos" con su contraseña
+      - "3306:3306"                   # Puerto del host : puerto del contenedor
     environment:
-      MYSQL_ROOT_PASSWORD: clientkosmos_root
-      MYSQL_DATABASE: clientkosmos
-      MYSQL_USER: clientkosmos
-      MYSQL_PASSWORD: clientkosmos_secret
-    # Volumen persistente: los datos de MySQL se guardan fuera del contenedor.
-    # Si haces "docker compose down" los datos se mantienen.
-    # Para borrarlos: "docker compose down -v"
+      MYSQL_ROOT_PASSWORD: clientkosmos_root    # Contraseña del usuario root
+      MYSQL_DATABASE: clientkosmos              # Base de datos que se crea automáticamente
+      MYSQL_USER: clientkosmos                  # Usuario de la app
+      MYSQL_PASSWORD: clientkosmos_secret       # Contraseña del usuario de la app
     volumes:
+      # Los datos de MySQL se guardan aquí para que no se pierdan al parar el contenedor
       - clientkosmos_dbdata:/var/lib/mysql
-    # Política de reinicio: si el contenedor se cae, Docker lo reinicia
-    # automáticamente, EXCEPTO si fue parado manualmente (docker compose stop).
-    restart: unless-stopped
 
-  # ────────────────────────────────────────────────────────────────────────────
-  # SERVICIO: app — Aplicación Laravel + React (ClientKosmos)
-  # ────────────────────────────────────────────────────────────────────────────
-  # Construye la imagen usando el Dockerfile del proyecto y ejecuta
-  # el servidor de Laravel en el puerto 8000.
+  # ──────────────────────────────────────────────────────────────────────────
+  # SERVICIO: mailpit — Servidor de correo para desarrollo
+  # ──────────────────────────────────────────────────────────────────────────
+  # Captura los emails que envía Laravel para que puedas verlos en el navegador.
+  # Los emails NO se envían de verdad. Útil para probar sin cuenta de correo real.
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: clientkosmos_mailpit
+    ports:
+      - "1025:1025"   # Puerto SMTP (Laravel envía aquí)
+      - "8025:8025"   # Interfaz web para ver los correos
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # SERVICIO: app — Aplicación Laravel
+  # ──────────────────────────────────────────────────────────────────────────
   app:
-    # Configuración del build:
-    #   - context: directorio base para el build (raíz del proyecto)
-    #   - dockerfile: archivo Dockerfile a usar
     build:
-      context: .
+      context: .           # El Dockerfile está en la raíz del proyecto
       dockerfile: Dockerfile
     container_name: clientkosmos_app
-    # Mapeo de puertos: accede a la app en http://localhost:8000
     ports:
       - "8000:8000"
-    # depends_on con condition: el contenedor "app" NO arrancará hasta que
-    # el health check de "db" pase exitosamente.
-    # Esto evita errores de conexión a la BD al iniciar.
     depends_on:
-      db:
-        condition: service_healthy
-      # mailpit arranca instantáneamente; no necesita health check.
-      mailpit:
-        condition: service_started
-    # Volúmenes para persistir archivos subidos por los usuarios.
-    # Sin este volumen, los archivos se perderían al recrear el contenedor.
+      - db
+      - mailpit
     volumes:
+      # Los archivos subidos por usuarios se guardan aquí para que no se pierdan
       - clientkosmos_storage:/app/storage/app/public
-    # Variables de entorno que sobreescriben la configuración de Laravel.
-    # El script docker-entrypoint.sh las inyecta en el .env del contenedor.
     environment:
-      # ── Configuración general de Laravel ──
+      # ── Configuración general ──
       APP_NAME: ClientKosmos
-      APP_ENV: production            # Modo producción (oculta errores detallados)
-      APP_DEBUG: "false"             # No mostrar stack traces al usuario
-      APP_KEY: "${APP_KEY:-}"        # Clave de cifrado. Si no se define, el entrypoint genera una automáticamente
-      APP_URL: http://localhost:8000 # URL base de la aplicación
+      APP_ENV: production
+      APP_DEBUG: "false"
+      APP_KEY: "${APP_KEY:-}"        # Si está vacía, el entrypoint genera una automáticamente
+      APP_URL: http://localhost:8000
 
-      # ── Conexión a la base de datos ──
-      # "db" es el nombre del servicio MySQL definido arriba.
-      # Docker Compose crea una red interna donde los servicios se descubren por nombre.
+      # ── Base de datos ──
+      # "db" es el nombre del servicio de arriba. Docker lo resuelve como una IP interna.
       DB_CONNECTION: mysql
-      DB_HOST: db                    # Nombre del servicio (Docker resuelve la IP internamente)
+      DB_HOST: db
       DB_PORT: "3306"
-      DB_DATABASE: clientkosmos      # Debe coincidir con MYSQL_DATABASE del servicio db
-      DB_USERNAME: clientkosmos      # Debe coincidir con MYSQL_USER del servicio db
-      DB_PASSWORD: clientkosmos_secret # Debe coincidir con MYSQL_PASSWORD del servicio db
+      DB_DATABASE: clientkosmos
+      DB_USERNAME: clientkosmos
+      DB_PASSWORD: clientkosmos_secret
 
       # ── Drivers de Laravel ──
-      # Todos usan "database" para que funcionen sin servicios adicionales (Redis, Memcached, etc.)
-      SESSION_DRIVER: database       # Sesiones de usuario almacenadas en MySQL
-      CACHE_STORE: database          # Caché de la aplicación almacenada en MySQL
-      QUEUE_CONNECTION: database     # Trabajos en cola almacenados en MySQL
-      LOG_CHANNEL: stderr            # Logs van a stderr (visibles con docker compose logs)
+      # Usamos la base de datos para todo: sesiones, caché y cola de trabajos
+      SESSION_DRIVER: database
+      CACHE_STORE: database
+      QUEUE_CONNECTION: database
+      LOG_CHANNEL: stderr            # Los logs aparecen en docker compose logs
 
-      # ── Correo electrónico (Mailpit — SMTP de desarrollo) ──
-      # Mailpit captura todos los emails sin enviarlos. Ver bandeja en http://localhost:8025
-      # "mailpit" es el nombre del servicio; Docker resuelve su IP internamente.
+      # ── Correo (apunta a Mailpit) ──
       MAIL_MAILER: smtp
-      MAIL_HOST: mailpit             # Nombre del servicio Mailpit en la red Docker
-      MAIL_PORT: "1025"              # Puerto SMTP de Mailpit (sin cifrado, sin auth)
+      MAIL_HOST: mailpit             # Nombre del servicio Mailpit
+      MAIL_PORT: "1025"
       MAIL_USERNAME: null
       MAIL_PASSWORD: null
       MAIL_FROM_ADDRESS: "noreply@clientkosmos.test"
       MAIL_FROM_NAME: ClientKosmos
 
-      # ── IA (Groq — compatible con OpenAI SDK) ──
-      # Estas variables son opcionales. Sin GROQ_API_KEY la app funciona,
-      # pero las funcionalidades de IA estarán deshabilitadas.
-      # Para obtener una clave: https://console.groq.com/keys
+      # ── IA con Groq (opcional) ──
+      # Si no defines GROQ_API_KEY la app funciona, pero sin funciones de IA.
+      # Consigue una clave gratis en: https://console.groq.com/keys
       GROQ_API_KEY: "${GROQ_API_KEY:-}"
       GROQ_BASE_URL: "${GROQ_BASE_URL:-https://api.groq.com/openai/v1}"
       GROQ_MODEL: "${GROQ_MODEL:-llama-3.3-70b-versatile}"
-    restart: unless-stopped
+    
 
 # ──────────────────────────────────────────────────────────────────────────────
-# VOLÚMENES PERSISTENTES
+# VOLÚMENES
 # ──────────────────────────────────────────────────────────────────────────────
-# Docker gestiona estos volúmenes de forma independiente a los contenedores.
-# Persisten aunque hagas "docker compose down" (para borrarlos: -v).
+# Docker guarda estos datos fuera de los contenedores.
+# Sobreviven a "docker compose down". Para borrarlos: docker compose down -v
 volumes:
-  clientkosmos_dbdata:    # Datos de MySQL (tablas, índices, etc.)
-  clientkosmos_storage:   # Archivos subidos por usuarios
+  clientkosmos_dbdata:    # Tablas y datos de MySQL
+  clientkosmos_storage:   # Archivos subidos por los usuarios

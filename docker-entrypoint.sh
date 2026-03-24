@@ -1,51 +1,42 @@
 #!/bin/bash
 # ==============================================================================
-# docker-entrypoint.sh — Script de inicialización de ClientKosmos
+# docker-entrypoint.sh — Script de arranque de ClientKosmos
 # ==============================================================================
+# Este script se ejecuta cada vez que el contenedor arranca, ANTES de levantar
+# el servidor Laravel. Prepara todo lo necesario para que la app funcione.
 #
-# Este script se ejecuta CADA VEZ que el contenedor arranca, ANTES del
-# comando principal (CMD: php artisan serve).
-#
-# Flujo de ejecución:
-#   1. Crea .env si no existe
-#   2. Inyecta las variables de entorno del docker-compose en .env
-#   3. Genera APP_KEY si no se proporcionó una
-#   4. Descubre paquetes Laravel
+# Pasos:
+#   1. Crea el archivo .env si no existe
+#   2. Mete las variables del docker-compose en el .env
+#   3. Genera APP_KEY si no se pasó ninguna
+#   4. Registra los paquetes de Laravel
 #   5. Espera a que MySQL esté lista
-#   6. Ejecuta migraciones y seeders
-#   7. Cachea configuración (solo en producción)
-#   8. Arranca el servidor (ejecuta CMD)
+#   6. Ejecuta las migraciones (y seeders si es la primera vez)
+#   7. Cachea la configuración (solo en producción)
+#   8. Arranca el servidor
 # ==============================================================================
 
-# "set -e" hace que el script se detenga inmediatamente si cualquier comando
-# falla (retorna código distinto de 0). Esto previene que la app arranque
-# en un estado inconsistente.
+# Si cualquier comando falla, el script se para.
+# Así la app no arranca si algo va mal.
 set -e
 
 echo "==> Iniciando ClientKosmos..."
 
 # ──────────────────────────────────────────────────────────────────────────────
-# PASO 1: Crear archivo .env
+# PASO 1: Crear el .env
 # ──────────────────────────────────────────────────────────────────────────────
-# Laravel necesita un archivo .env para funcionar. Si no existe (primer
-# arranque), copiamos .env.example como plantilla base.
-# Las variables reales se inyectan en el paso 2.
+# Laravel necesita un archivo .env con su configuración.
+# Si no existe, copiamos el .env.example como base.
 if [ ! -f /app/.env ]; then
     echo "==> Copiando .env.example -> .env"
     cp /app/.env.example /app/.env
 fi
 
 # ──────────────────────────────────────────────────────────────────────────────
-# PASO 2: Inyectar variables de entorno en .env
+# PASO 2: Volcar las variables del docker-compose al .env
 # ──────────────────────────────────────────────────────────────────────────────
-# Las variables definidas en docker-compose.yml (environment:) se pasan al
-# contenedor como variables de entorno del sistema. Aquí las escribimos
-# en el archivo .env para que Laravel las lea correctamente.
-#
-# Para cada variable:
-#   - Si ya existe en .env → la sobreescribe con el valor del contenedor
-#   - Si no existe en .env → la añade al final
-#   - Si no está definida en el contenedor → la ignora (no la toca)
+# Las variables que pusiste en docker-compose.yml llegan aquí como variables
+# del sistema. Las escribimos en el .env para que Laravel las lea.
 env_vars=(
     APP_NAME APP_ENV APP_DEBUG APP_KEY APP_URL
     DB_CONNECTION DB_HOST DB_PORT DB_DATABASE DB_USERNAME DB_PASSWORD DB_SSL_CA
@@ -54,139 +45,116 @@ env_vars=(
     GROQ_API_KEY GROQ_BASE_URL GROQ_MODEL
 )
 for var in "${env_vars[@]}"; do
-    # "${!var+set}" comprueba si la variable está definida (incluso si está vacía)
     if [ -n "${!var+set}" ]; then
         val="${!var}"
-        # APP_KEY vacía significa "no configurada": no sobreescribir el .env,
-        # el Paso 3 generará una nueva clave si es necesario.
+        # Si APP_KEY está vacía, la dejamos para que el paso 3 genere una nueva
         if [ "$var" = "APP_KEY" ] && [ -z "$val" ]; then
             continue
         fi
         if grep -q "^${var}=" /app/.env; then
-            # La variable ya existe en .env: reemplazamos su valor
+            # La variable ya existe en el .env → la sobreescribimos
             sed -i "s|^${var}=.*|${var}=${val}|" /app/.env
         else
-            # La variable no existe en .env: la añadimos al final
+            # No existe → la añadimos al final
             echo "${var}=${val}" >> /app/.env
         fi
     fi
 done
 
 # ──────────────────────────────────────────────────────────────────────────────
-# PASO 3: Generar APP_KEY si no se proporcionó
+# PASO 3: Generar APP_KEY si no hay ninguna
 # ──────────────────────────────────────────────────────────────────────────────
-# APP_KEY es la clave maestra de cifrado de Laravel. Se usa para:
-#   - Cifrar cookies y sesiones
-#   - Cifrar datos con encrypt()/decrypt()
-#   - Firmar URLs temporales
-#
-# Si no se definió en docker-compose.yml, generamos una automáticamente.
-# NOTA: Esta clave se pierde al recrear el contenedor. Para persistirla,
-# pásala como variable de entorno: APP_KEY=base64:tu_clave_aqui
+# APP_KEY es la clave que usa Laravel para cifrar sesiones y cookies.
+# Si no la pasaste en docker-compose.yml, la generamos automáticamente.
+# OJO: al recrear el contenedor se genera una nueva, lo que invalida las sesiones.
+# Para evitarlo, copia la clave generada a tu docker-compose.yml como APP_KEY.
 if [ -z "$APP_KEY" ] || [ "$APP_KEY" = "" ]; then
     if grep -q "^APP_KEY=$" /app/.env; then
-        echo "==> No se definió APP_KEY. Generando una nueva..."
-        echo "==> Para persistirla, copia la clave generada a tu docker-compose.yml"
+        echo "==> No hay APP_KEY. Generando una nueva..."
         php /app/artisan key:generate --force
     fi
 fi
 
 # ──────────────────────────────────────────────────────────────────────────────
-# PASO 4: Descubrir paquetes Laravel
+# PASO 4: Registrar paquetes de Laravel
 # ──────────────────────────────────────────────────────────────────────────────
-# Durante el build usamos "composer install --no-scripts", lo que omitió
-# el auto-discovery de paquetes. Ahora lo ejecutamos manualmente para que
-# Laravel registre los ServiceProviders de paquetes como Inertia, Fortify, etc.
+# Al instalar con composer usamos --no-scripts, así que ahora registramos
+# manualmente los paquetes (Inertia, Fortify, etc.) para que Laravel los reconozca.
 echo "==> Descubriendo paquetes Laravel..."
 php /app/artisan package:discover --ansi
 
 # ──────────────────────────────────────────────────────────────────────────────
-# PASO 5: Esperar a que la base de datos esté lista
+# PASO 5: Esperar a que MySQL esté lista
 # ──────────────────────────────────────────────────────────────────────────────
-# Aunque docker-compose tiene healthcheck en el servicio "db", puede haber
-# un breve lapso entre que MySQL acepta conexiones y que está lista para
-# consultas. Este bucle actúa como red de seguridad adicional.
-#
-# Intentamos conectar hasta 30 veces (cada 2 segundos = ~60s máximo).
-# Usamos mysqladmin ping porque es la forma más fiable de verificar
-# que MySQL acepta conexiones.
+# Aunque docker-compose espera a que MySQL pase el healthcheck, a veces
+# necesita unos segundos más. Este bucle intenta conectar hasta 30 veces.
 echo "==> Esperando a que la base de datos esté disponible..."
 max_retries=30
 retry=0
-until mysqladmin ping -h"$DB_HOST" -P"$DB_PORT" -u"$DB_USERNAME" -p"$DB_PASSWORD" --silent 2>/dev/null || [ $retry -ge $max_retries ]; do
+until mysqladmin ping -h"$DB_HOST" -P"$DB_PORT" -u"$DB_USERNAME" -p"$DB_PASSWORD" --ssl=0 --silent 2>/dev/null || [ $retry -ge $max_retries ]; do
     retry=$((retry + 1))
-    echo "    Intento $retry/$max_retries — esperando base de datos..."
+    echo "    Intento $retry/$max_retries — esperando..."
     sleep 2
 done
 
 if [ $retry -ge $max_retries ]; then
-    echo "==> AVISO: No se pudo verificar la conexión a la DB. Intentando migrar de todos modos..."
+    echo "==> AVISO: No se pudo verificar la DB. Intentando migrar de todos modos..."
 fi
 
 # ──────────────────────────────────────────────────────────────────────────────
-# PASO 6: Limpiar cachés y ejecutar migraciones + seeders
+# PASO 6: Migraciones y seeders
 # ──────────────────────────────────────────────────────────────────────────────
-# Limpiamos cachés previos para evitar inconsistencias con la nueva
-# configuración inyectada en el paso 2.
+# Limpiamos cachés viejas para evitar problemas con la nueva configuración
 echo "==> Limpiando cachés..."
-php /app/artisan config:clear    # Borra caché de configuración
-php /app/artisan cache:clear 2>/dev/null || true  # Borra caché de aplicación (puede fallar si la tabla no existe aún)
-php /app/artisan route:clear     # Borra caché de rutas
+php /app/artisan config:clear
+php /app/artisan cache:clear 2>/dev/null || true  # Puede fallar si la tabla aún no existe
+php /app/artisan route:clear
 
-# Crea el symlink public/storage → storage/app/public para que los archivos
-# subidos por usuarios sean accesibles vía URL (/storage/...).
-# --force: sobreescribe si el symlink ya existía (seguro de re-ejecutar).
+# Crea el enlace simbólico public/storage → storage/app/public
+# para que los archivos subidos sean accesibles por URL
 php /app/artisan storage:link --force 2>/dev/null || true
 
-# Ejecuta las migraciones de la base de datos:
-#   migrate: crea/actualiza las tablas según los archivos en database/migrations/
-#   --force: necesario en producción (Laravel pide confirmación sin este flag)
+# Ejecuta las migraciones: crea o actualiza las tablas de la base de datos
 echo "==> Ejecutando migraciones..."
 php /app/artisan migrate --force
 
-# Ejecutar seeders SOLO en la primera instalación (tabla users vacía).
-# Los seeders usan factory()->create() sin comprobación de duplicados, por lo
-# que ejecutarlos en un arranque posterior causaría errores de UNIQUE constraint.
+# Ejecutamos los seeders (datos de prueba) solo si la base de datos está vacía.
+# Si ya hay usuarios, los seeders fallarían por duplicados.
 USER_COUNT=$(mysql -h"$DB_HOST" -P"$DB_PORT" -u"$DB_USERNAME" -p"$DB_PASSWORD" \
-    "$DB_DATABASE" -se "SELECT COUNT(*) FROM users;" 2>/dev/null || echo "1")
+    --ssl=0 "$DB_DATABASE" -se "SELECT COUNT(*) FROM users;" 2>/dev/null || echo "0")
 if [ "${USER_COUNT}" = "0" ]; then
-    echo "==> Primera instalación detectada. Ejecutando seeders..."
+    echo "==> Primera instalación. Ejecutando seeders..."
     php /app/artisan db:seed --force
 else
-    echo "==> Base de datos ya inicializada (${USER_COUNT} usuarios). Omitiendo seeders."
+    echo "==> Ya hay datos (${USER_COUNT} usuarios). Saltando seeders."
 fi
 
 # ──────────────────────────────────────────────────────────────────────────────
-# PASO 7: Cachear configuración para producción
+# PASO 7: Cachear en producción
 # ──────────────────────────────────────────────────────────────────────────────
-# En producción, cacheamos configuración, rutas y vistas compiladas.
-# Esto mejora el rendimiento al evitar leer archivos .env y parsear
-# rutas/vistas en cada petición HTTP.
+# En producción guardamos en caché la configuración, rutas y vistas compiladas
+# para que la app responda más rápido.
 if [ "$APP_ENV" = "production" ]; then
-    echo "==> Cacheando configuración y rutas para producción..."
-    php /app/artisan config:cache  # Combina todos los config/*.php en un solo archivo cacheado
-    php /app/artisan route:cache   # Serializa las rutas para carga más rápida
-    php /app/artisan view:cache    # Pre-compila las plantillas Blade
+    echo "==> Cacheando configuración para producción..."
+    php /app/artisan config:cache
+    php /app/artisan route:cache
+    php /app/artisan view:cache
 fi
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Listo — Muestra información útil
+# Todo listo
 # ──────────────────────────────────────────────────────────────────────────────
 echo "==> ClientKosmos listo en http://localhost:8000"
 echo ""
-echo "    Credenciales de prueba:"
-echo "    admin@clientkosmos.test    / password  (admin)"
-echo "    premium@clientkosmos.test  / password  (premium)"
-echo "    free@clientkosmos.test     / password  (free)"
+echo "    Usuarios de prueba:"
+echo "    admin@clientkosmos.test    / password"
+echo "    premium@clientkosmos.test  / password"
+echo "    free@clientkosmos.test     / password"
 echo ""
 
 # ──────────────────────────────────────────────────────────────────────────────
-# PASO 8: Ejecutar el comando principal (CMD del Dockerfile)
+# PASO 8: Arrancar el servidor (CMD del Dockerfile)
 # ──────────────────────────────────────────────────────────────────────────────
-# "exec" reemplaza el proceso actual del shell por el CMD.
-# "$@" se expande a todos los argumentos pasados al entrypoint, que por
-# defecto son: php artisan serve --host=0.0.0.0 --port=8000
-# Usar "exec" es importante porque:
-#   - El proceso PHP se convierte en PID 1 (recibe señales de Docker)
-#   - Docker puede hacer graceful shutdown correctamente (SIGTERM)
+# "exec" reemplaza este script por el proceso PHP.
+# Así PHP recibe las señales de Docker (por ejemplo, para parar limpiamente).
 exec "$@"

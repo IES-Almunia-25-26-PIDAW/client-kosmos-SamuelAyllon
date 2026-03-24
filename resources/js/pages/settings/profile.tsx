@@ -1,7 +1,7 @@
 import { Transition } from '@headlessui/react';
 import { Form, Head, Link, usePage } from '@inertiajs/react';
 import { User, Mail, CheckCircle2 } from 'lucide-react';
-import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
+import ProfileActions from '@/actions/App/Http/Controllers/Settings/Profile';
 import DeleteUser from '@/components/delete-user';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
@@ -49,7 +49,7 @@ export default function Profile({
                     </CardHeader>
                     <CardContent className="pt-6">
                         <Form
-                            {...ProfileController.update.form()}
+                            {...ProfileActions.UpdateAction.form()}
                             options={{
                                 preserveScroll: true,
                             }}

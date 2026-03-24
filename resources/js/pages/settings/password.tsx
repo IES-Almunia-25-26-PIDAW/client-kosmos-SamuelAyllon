@@ -2,7 +2,7 @@ import { Transition } from '@headlessui/react';
 import { Form, Head } from '@inertiajs/react';
 import { Lock, KeyRound, CheckCircle2 } from 'lucide-react';
 import { useRef } from 'react';
-import PasswordController from '@/actions/App/Http/Controllers/Settings/PasswordController';
+import PasswordActions from '@/actions/App/Http/Controllers/Settings/Password';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -43,7 +43,7 @@ export default function Password() {
                     </CardHeader>
                     <CardContent className="pt-6">
                         <Form
-                            {...PasswordController.update.form()}
+                            {...PasswordActions.UpdateAction.form()}
                             options={{
                                 preserveScroll: true,
                             }}

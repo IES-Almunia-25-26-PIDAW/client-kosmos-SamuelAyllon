@@ -1,82 +1,99 @@
 # ==============================================================================
-# Dockerfile multi-stage para ClientKosmos (Laravel 12 + React/Inertia + Vite)
+# Dockerfile de ClientKosmos (Laravel + React)
 # ==============================================================================
+# Un Dockerfile "multi-stage" divide la construcción en varias etapas.
+# Cada etapa hace una cosa, y la imagen final solo coge lo que necesita.
+# Resultado: imagen más pequeña y limpia.
 #
-# Este Dockerfile usa dos etapas (multi-stage build):
-#   1. "frontend" — compila los assets de React/TypeScript con Vite (Node.js)
-#   2. Imagen final — ejecuta la aplicación PHP/Laravel con los assets ya listos
+# Etapas:
+#   1. deps     → descarga las librerías PHP (Composer)
+#   2. frontend → compila el código React/TypeScript (Node + Vite)
+#   3. final    → imagen que se ejecuta en producción
 #
-# Para construir y ejecutar, usa docker-compose (ver docker-compose.yml):
-#   docker compose up --build
-#
+# Para arrancar el proyecto: docker compose up --build
 # ==============================================================================
 
 
 # ==============================================================================
-# STAGE 1: Compilar assets del frontend (React + Vite)
+# ETAPA 1: Descargar librerías PHP con Composer
 # ==============================================================================
-# Usamos node:20-alpine como imagen base porque:
-#   - Node 20 es LTS (soporte a largo plazo)
-#   - Alpine es una distribución Linux mínima (~5MB), reduce el tamaño de imagen
-FROM node:20-alpine AS frontend
+# Usamos PHP 8.4 en Alpine (Alpine = versión de Linux muy ligera)
+FROM php:8.4-cli-alpine AS deps
 
-# Directorio de trabajo dentro del contenedor temporal
+# unzip lo necesita Composer para descomprimir los paquetes
+RUN apk add --no-cache unzip
+
+# Copiamos el ejecutable de Composer desde su imagen oficial
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+# Directorio de trabajo dentro del contenedor (como hacer cd /app)
 WORKDIR /app
 
-# Copiamos SOLO los archivos de dependencias primero.
-# Docker cachea cada capa: si package.json no cambia, npm ci no se re-ejecuta,
-# ahorrando tiempo en builds sucesivos.
-COPY package.json package-lock.json ./
+# Copiamos solo los archivos de dependencias primero.
+# Así Docker usa la caché y no re-descarga todo si el código no cambia.
+COPY composer.json composer.lock ./
 
-# npm ci (clean install) instala las dependencias de forma determinista
-# usando exactamente las versiones del lockfile (más fiable que npm install)
+# Instalamos las dependencias PHP sin las de desarrollo
+RUN composer install \
+    --no-scripts \
+    --no-interaction \
+    --optimize-autoloader
+
+
+# ==============================================================================
+# ETAPA 2: Compilar el frontend (React + Vite)
+# ==============================================================================
+# Node 20 en Alpine para ejecutar Vite.
+# También necesitamos PHP porque Vite llama a "php artisan" durante el build.
+FROM node:20-alpine AS frontend
+
+# Instalamos PHP y algunos módulos que necesita artisan
+RUN apk add --no-cache php84 php84-tokenizer php84-mbstring php84-xml \
+    php84-phar php84-openssl php84-dom php84-xmlwriter php84-ctype \
+    php84-pdo php84-pdo_sqlite php84-fileinfo php84-session \
+    && ln -sf /usr/bin/php84 /usr/bin/php
+
+WORKDIR /app
+
+# Traemos las librerías PHP de la etapa anterior
+COPY --from=deps /app/vendor vendor/
+
+# Copiamos los archivos de dependencias Node y las instalamos
+COPY package.json package-lock.json ./
 RUN npm ci
 
-# Copiamos los archivos de configuración que Vite necesita para compilar
-#   - vite.config.ts: configuración del bundler (plugins, alias, etc.)
-#   - tsconfig.json: configuración de TypeScript
-#   - components.json: configuración de shadcn/ui (librería de componentes)
+# Copiamos la configuración de Vite y TypeScript
 COPY vite.config.ts tsconfig.json components.json ./
 
-# Copiamos el código fuente del frontend y los assets estáticos
-#   - resources/ contiene los archivos React/TypeScript (.tsx), CSS, etc.
-#   - public/ contiene imágenes, favicon, y otros archivos estáticos
+# Copiamos el código fuente del frontend y otros archivos que necesita artisan
 COPY resources/ resources/
 COPY public/ public/
+COPY artisan ./
+COPY bootstrap/ bootstrap/
+COPY config/ config/
+COPY routes/ routes/
+COPY app/ app/
+COPY database/ database/
 
-# Vite necesita un archivo .env para leer VITE_APP_NAME durante el build.
-# Usamos .env.example (sin secretos) porque solo necesita variables públicas (VITE_*).
+# Creamos carpetas que Laravel necesita para no dar error al arrancar
+RUN mkdir -p bootstrap/cache storage/framework/sessions storage/framework/views \
+    storage/framework/cache/data storage/logs \
+    && chmod -R 775 bootstrap/cache storage
+
+# Vite necesita el .env para leer algunas variables durante el build
 COPY .env.example .env
 
-# Ejecuta el build de producción de Vite:
-#   - Transpila TypeScript a JavaScript
-#   - Compila los componentes React
-#   - Procesa Tailwind CSS (purga clases no usadas)
-#   - Minifica y genera hashes en los nombres de archivo (cache busting)
-#   - Output: public/build/ con el manifest y los bundles optimizados
+# Compilamos el frontend: convierte React/TypeScript → JavaScript optimizado
+# El resultado queda en public/build/
 RUN npm run build
 
 
 # ==============================================================================
-# STAGE 2: Imagen final — Aplicación PHP/Laravel
+# ETAPA 3: Imagen final (la que se ejecuta)
 # ==============================================================================
-# Usamos php:8.4-cli-alpine porque:
-#   - PHP 8.4 es la versión requerida por composer.json (^8.4)
-#   - cli (sin Apache/Nginx) porque Laravel tiene su propio servidor (artisan serve)
-#   - Alpine para mantener la imagen ligera
 FROM php:8.4-cli-alpine
 
-# Instalamos dependencias del sistema operativo necesarias para PHP y Laravel:
-#   - bash: shell para el script de entrypoint
-#   - curl: necesario para descargas y health checks
-#   - unzip: requerido por Composer para descomprimir paquetes
-#   - libpng-dev: librería para procesamiento de imágenes PNG (extensión GD)
-#   - oniguruma-dev: librería de expresiones regulares (extensión mbstring)
-#   - libxml2-dev: parser XML (extensión xml)
-#   - libzip-dev: compresión ZIP (extensión zip)
-#   - icu-dev: soporte de internacionalización/Unicode (extensión intl)
-#   - openssl-dev: cifrado SSL/TLS para conexiones seguras
-#   - mysql-client: cliente MySQL para poder hacer health checks a la BD
+# Instalamos las herramientas del sistema que PHP y Laravel necesitan
 RUN apk add --no-cache \
     bash \
     curl \
@@ -89,14 +106,7 @@ RUN apk add --no-cache \
     openssl-dev \
     mysql-client
 
-# Instalamos las extensiones PHP que Laravel necesita:
-#   - pdo + pdo_mysql: conexión a bases de datos MySQL/MariaDB
-#   - mbstring: manejo de strings multibyte (UTF-8, emojis, etc.)
-#   - xml: parsing de XML (necesario para PHPUnit, feeds, etc.)
-#   - bcmath: operaciones matemáticas de precisión arbitraria
-#   - zip: manejo de archivos ZIP
-#   - intl: formateo de fechas, números y texto según locale
-#   - opcache: caché de bytecode PHP (mejora rendimiento en producción)
+# Instalamos las extensiones PHP que usa Laravel
 RUN docker-php-ext-install \
     pdo \
     pdo_mysql \
@@ -107,42 +117,21 @@ RUN docker-php-ext-install \
     intl \
     opcache
 
-# Copiamos el binario de Composer desde su imagen oficial.
-# Composer es el gestor de dependencias de PHP (equivalente a npm para Node).
+# Copiamos Composer por si necesitamos ejecutar comandos en el contenedor
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /app
 
-# Igual que con npm, copiamos primero solo los archivos de dependencias
-# para aprovechar la caché de capas de Docker.
-COPY composer.json composer.lock ./
+# Copiamos las librerías PHP de la etapa 1
+COPY --from=deps /app/vendor vendor/
 
-# Instalamos las dependencias PHP de producción:
-#   --no-dev: excluye paquetes de desarrollo (tests, debug tools, etc.)
-#   --no-scripts: evita ejecutar scripts post-install (artisan necesita .env)
-#   --no-interaction: no pide input por consola
-#   --optimize-autoloader: genera un classmap optimizado para producción
-RUN composer install \
-    --no-dev \
-    --no-scripts \
-    --no-interaction \
-    --optimize-autoloader
-
-# Copiamos TODO el código fuente de la aplicación al contenedor.
-# El archivo .dockerignore excluye node_modules/, vendor/, .env, etc.
+# Copiamos todo el código fuente de la aplicación
 COPY . .
 
-# Copiamos los assets compilados del Stage 1 (frontend) al directorio público.
-# Esto sobrescribe el directorio public/build/ con los bundles de producción.
+# Copiamos el frontend ya compilado de la etapa 2
 COPY --from=frontend /app/public/build public/build/
 
-# Creamos los directorios que Laravel necesita en runtime para:
-#   - sessions: almacenar sesiones de usuario (si se usa driver 'file')
-#   - views: cachear las vistas Blade compiladas
-#   - cache/data: caché de la aplicación
-#   - logs: archivos de log
-#   - bootstrap/cache: caché de configuración y rutas
-# chmod 775: permite lectura/escritura al propietario y grupo
+# Creamos las carpetas de almacenamiento que Laravel necesita al arrancar
 RUN mkdir -p \
         storage/framework/sessions \
         storage/framework/views \
@@ -151,20 +140,14 @@ RUN mkdir -p \
         bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
 
-# Copiamos el script de inicio (entrypoint) y le damos permisos de ejecución.
-# Este script se ejecuta ANTES del comando principal (CMD) cada vez que
-# arranca el contenedor, configurando la BD, migraciones, etc.
+# Copiamos el script de arranque y le damos permisos de ejecución
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
-# Exponemos el puerto 8000, que es el puerto por defecto de "artisan serve".
-# Nota: EXPOSE es informativo; el mapeo real se hace en docker-compose.yml (ports).
+# Indicamos que la app escucha en el puerto 8000
 EXPOSE 8000
 
-# ENTRYPOINT: script que se ejecuta siempre al arrancar el contenedor.
-# CMD: comando por defecto que se pasa al entrypoint como argumento.
-# Juntos ejecutan: docker-entrypoint.sh php artisan serve --host=0.0.0.0 --port=8000
-#   - --host=0.0.0.0: escucha en todas las interfaces (necesario dentro de Docker)
-#   - --port=8000: puerto del servidor web de desarrollo de Laravel
+# Script que se ejecuta al arrancar el contenedor (migraciones, etc.)
 ENTRYPOINT ["docker-entrypoint.sh"]
+# Comando principal: levanta el servidor de Laravel
 CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
