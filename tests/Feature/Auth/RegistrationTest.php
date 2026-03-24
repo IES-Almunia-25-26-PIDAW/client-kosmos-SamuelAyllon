@@ -2,7 +2,9 @@
 
 namespace Tests\Feature\Auth;
 
+use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
 class RegistrationTest extends TestCase
@@ -18,6 +20,9 @@ class RegistrationTest extends TestCase
 
     public function test_new_users_can_register()
     {
+        $this->seed(RoleSeeder::class);
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
+
         $response = $this->post(route('register.store'), [
             'name' => 'Test User',
             'email' => 'test@example.com',
