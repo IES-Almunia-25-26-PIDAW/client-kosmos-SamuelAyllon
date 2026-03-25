@@ -258,7 +258,8 @@ Después de `php artisan migrate:fresh --seed`:
 
 | Entorno | Motor | Conexión |
 |---------|-------|----------|
-| Desarrollo / Producción | TiDB Cloud Serverless (MySQL-compatible) | Puerto 4000, SSL obligatorio |
+| Desarrollo local | SQLite (archivo local) | Sin configuración — `DB_CONNECTION=sqlite` en `.env` |
+| Producción / Docker | TiDB Cloud Serverless (MySQL-compatible) | Puerto 4000, SSL obligatorio — configurado en `.env.prod` |
 | Tests | SQLite in-memory | Sin configuración |
 
 ### Integraciones IA
@@ -562,13 +563,42 @@ docker compose up           # Arranque normal
 
 ## Variables de Entorno
 
-### Referencia completa (`.env`)
+El proyecto usa **dos archivos de entorno** según el contexto:
+
+| Archivo | Uso | Base de datos |
+|---------|-----|---------------|
+| `.env` | Desarrollo local | SQLite (sin configuración) |
+| `.env.prod` | Producción / Docker | TiDB Cloud Serverless (MySQL, SSL) |
+
+### `.env` — Desarrollo local
 
 ```env
 APP_NAME=ClientKosmos
 APP_ENV=local
 APP_DEBUG=true
 APP_URL=http://localhost:8000
+
+# ── Base de datos (SQLite — sin configuración extra) ───────────
+DB_CONNECTION=sqlite
+# DB_DATABASE= (por defecto: database/database.sqlite)
+
+# ── Sesión ──────────────────────────────────────────────────────
+SESSION_DRIVER=database
+
+# ── IA contextual (Groq — gratuito, recomendado) ───────────────
+GROQ_API_KEY=gsk_xxxxxxxxxxxxxxxx
+GROQ_BASE_URL=https://api.groq.com/openai/v1
+GROQ_MODEL=llama-3.3-70b-versatile
+GROQ_CA_BUNDLE=C:/certs/cacert.pem    # Solo Windows (ver más abajo)
+```
+
+### `.env.prod` — Producción / TiDB Cloud
+
+```env
+APP_NAME=ClientKosmos
+APP_ENV=production
+APP_DEBUG=false
+APP_URL=https://tu-dominio.com
 
 # ── Base de datos (TiDB Cloud Serverless) ──────────────────────
 DB_CONNECTION=mysql
@@ -582,14 +612,16 @@ DB_SSL_CA=C:\certs\isrgrootx1.pem     # Solo Windows
 # ── Sesión ──────────────────────────────────────────────────────
 SESSION_DRIVER=database
 
-# ── IA contextual (Groq — gratuito, recomendado) ───────────────
+# ── IA contextual (Groq) ────────────────────────────────────────
 GROQ_API_KEY=gsk_xxxxxxxxxxxxxxxx
 GROQ_BASE_URL=https://api.groq.com/openai/v1
 GROQ_MODEL=llama-3.3-70b-versatile
 GROQ_CA_BUNDLE=C:/certs/cacert.pem    # Solo Windows
 ```
 
-### Certificados SSL por entorno
+### Certificados SSL (solo necesarios con TiDB Cloud)
+
+> En desarrollo local con SQLite **no se necesitan certificados**. Solo son necesarios al conectar con TiDB Cloud (`.env.prod`).
 
 | Sistema operativo | Certificados | Acción necesaria |
 |-------------------|--------------|------------------|
@@ -603,7 +635,7 @@ GROQ_CA_BUNDLE=C:/certs/cacert.pem    # Solo Windows
 | Síntoma | Causa probable | Solución |
 |---------|----------------|----------|
 | `cURL error 60` al usar la IA | PHP/cURL no encuentra certificados CA (habitual en Windows) | Descargar `cacert.pem` y configurar `GROQ_CA_BUNDLE` en `.env` |
-| `cURL error 60` al conectar a BD | Falta el certificado ISRG Root X1 | Descargar `isrgrootx1.pem` y configurar `DB_SSL_CA` en `.env` |
+| `cURL error 60` al conectar a BD | Falta el certificado ISRG Root X1 (solo con TiDB Cloud) | Descargar `isrgrootx1.pem` y configurar `DB_SSL_CA` en `.env.prod` |
 | Error 419 en formularios | Token CSRF expirado | `php artisan config:clear` + borrar cookies del navegador |
 | `RoleDoesNotExist` | Seeders no ejecutados | `php artisan migrate:fresh --seed` |
 | Frontend no actualiza | Caché de Vite | Reiniciar `npm run dev` o Ctrl+Shift+R en el navegador |
