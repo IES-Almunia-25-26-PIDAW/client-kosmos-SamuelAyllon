@@ -67,14 +67,24 @@ done
 # PASO 3: Generar APP_KEY si no hay ninguna
 # ──────────────────────────────────────────────────────────────────────────────
 # APP_KEY es la clave que usa Laravel para cifrar sesiones y cookies.
-# Si no la pasaste en docker-compose.yml, la generamos automáticamente.
-# OJO: al recrear el contenedor se genera una nueva, lo que invalida las sesiones.
-# Para evitarlo, copia la clave generada a tu docker-compose.yml como APP_KEY.
-if [ -z "$APP_KEY" ] || [ "$APP_KEY" = "" ]; then
-    if grep -q "^APP_KEY=$" /app/.env; then
-        echo "==> No hay APP_KEY. Generando una nueva..."
-        php /app/artisan key:generate --force
-    fi
+# Si no la pasaste en el .env del host, la generamos y la exportamos como
+# variable de entorno del sistema. Esto es necesario porque:
+#   - key:generate --force escribe en /app/.env
+#   - Pero config:cache (paso 7) lee de las env vars del sistema, que tienen
+#     prioridad sobre el archivo .env
+#   - Sin el export, la env var APP_KEY sigue vacía → 500 en cada petición
+#
+# IMPORTANTE: La clave generada se pierde al recrear el contenedor.
+# Para persistirla, cópiala al .env del host:
+#   docker compose exec app php artisan key:generate --show
+if [ -z "${APP_KEY:-}" ]; then
+    echo "==> No hay APP_KEY. Generando una nueva..."
+    php /app/artisan key:generate --force
+    # Leer la clave que key:generate acaba de escribir en .env y exportarla
+    APP_KEY=$(grep "^APP_KEY=" /app/.env | cut -d '=' -f2-)
+    export APP_KEY
+    echo "==> APP_KEY generada: $APP_KEY"
+    echo "    ⚠️  Copia este valor a tu .env del host para persistirla entre reinicios"
 fi
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -108,10 +118,12 @@ fi
 # ──────────────────────────────────────────────────────────────────────────────
 # PASO 6: Migraciones y seeders
 # ──────────────────────────────────────────────────────────────────────────────
-# Limpiamos cachés viejas para evitar problemas con la nueva configuración
+# Limpiamos cachés viejas para evitar problemas con la nueva configuración.
+# cache:clear puede fallar si la tabla 'cache' aún no existe (primer arranque),
+# por eso usamos || true para ignorar ese error.
 echo "==> Limpiando cachés..."
 php /app/artisan config:clear
-php /app/artisan cache:clear 2>/dev/null || true  # Puede fallar si la tabla aún no existe
+php /app/artisan cache:clear 2>/dev/null || true
 php /app/artisan route:clear
 
 # Crea el enlace simbólico public/storage → storage/app/public
