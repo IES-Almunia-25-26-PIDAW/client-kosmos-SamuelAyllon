@@ -1,13 +1,13 @@
 import { Link, usePage } from '@inertiajs/react';
 import {
-    CheckSquare,
+    CalendarDays,
     CreditCard,
-    LayoutGrid,
-    Lightbulb,
+    Receipt,
+    Sparkles,
+    Settings,
     Shield,
-    Star,
-    Users as UsersIcon,
-    FolderKanban,
+    Users,
+    CreditCardIcon,
 } from 'lucide-react';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -25,36 +25,37 @@ import { dashboard } from '@/routes';
 import type { NavItem } from '@/types';
 import AppLogo from './app-logo';
 
-const footerNavItems: NavItem[] = [];
+const footerNavItems: NavItem[] = [
+    {
+        title: 'Ajustes',
+        href: '/settings',
+        icon: Settings,
+    },
+];
 
 export function AppSidebar() {
     const { auth } = usePage<{ auth: { is_admin: boolean; is_premium: boolean } }>().props;
 
     const mainNavItems: NavItem[] = [
         {
-            title: 'Dashboard',
+            title: 'Hoy',
             href: '/dashboard',
-            icon: LayoutGrid,
+            icon: CalendarDays,
         },
         {
-            title: 'Clientes',
+            title: 'Pacientes',
             href: '/clients',
-            icon: FolderKanban,
+            icon: Users,
         },
         {
-            title: 'Tareas',
-            href: '/tasks',
-            icon: CheckSquare,
+            title: 'Kosmo',
+            href: '/kosmo',
+            icon: Sparkles,
         },
         {
-            title: 'Ideas',
-            href: '/ideas',
-            icon: Lightbulb,
-        },
-        {
-            title: 'Suscripción',
-            href: '/subscription',
-            icon: Star,
+            title: 'Cobros',
+            href: '/billing',
+            icon: Receipt,
         },
     ];
 

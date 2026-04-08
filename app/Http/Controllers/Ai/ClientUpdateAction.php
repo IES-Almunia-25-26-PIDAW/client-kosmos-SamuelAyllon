@@ -30,7 +30,12 @@ class ClientUpdateAction extends AiAction
             ->limit(3)
             ->get(['name', 'description']);
 
-        $prompt = "Eres un asistente para freelancers. Genera un update profesional para enviar al cliente \"{$project->name}\" por email o Slack.\n\n";
+        $serviceScope = $project->service_scope ?? 'No especificado';
+        $clientNotes  = $project->client_notes ?? 'Sin notas';
+
+        $prompt = "Eres un asistente para profesionales de servicios. Genera un parte semanal profesional sobre el caso \"{$project->name}\".\n\n";
+        $prompt .= "Caso o servicio: {$serviceScope}\n";
+        $prompt .= "Acuerdos y notas: {$clientNotes}\n\n";
 
         if ($recentCompleted->isNotEmpty()) {
             $completedList = $recentCompleted->map(fn($t) => "- {$t->name}")->implode("\n");
@@ -47,7 +52,7 @@ class ClientUpdateAction extends AiAction
             $prompt .= "Ideas recientes:\n{$ideasList}\n\n";
         }
 
-        $prompt .= "Genera un texto breve (máx. 150 palabras), profesional y cercano, en español. Incluye saludo y despedida. No pongas asunto de email.";
+        $prompt .= "Genera un parte breve (máx. 150 palabras) sobre la evolución del caso, profesional y cercano, en español. Incluye estado actual, avances y próximos pasos. No pongas asunto de email.";
 
         $inputContext = [
             'project_id'       => $project->id,

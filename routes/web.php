@@ -54,6 +54,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', DashboardIndexAction::class)->name('dashboard');
     Route::post('tutorial/complete', TutorialCompleteAction::class)->name('tutorial.complete');
 
+    // Kosmo — Inteligencia Artificial
+    Route::get('kosmo', fn() => inertia('kosmo/index'))->name('kosmo.index');
+
+    // Cobros — Billing
+    Route::get('billing', fn() => inertia('billing/index'))->name('billing.index');
+
+    // Ajustes — Settings
+    Route::get('settings', fn() => inertia('settings/index'))->name('settings.index');
+
     // Clientes — accesibles por TODOS (límite 1 para free en controlador)
     Route::get('clients', ProjectIndexAction::class)->name('clients.index');
     Route::get('clients/create', ProjectCreateAction::class)->name('clients.create');

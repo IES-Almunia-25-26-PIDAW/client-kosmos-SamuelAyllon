@@ -9,8 +9,8 @@ import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Clientes', href: '/clients' },
-    { title: 'Nuevo cliente', href: '#' },
+    { title: 'Pacientes', href: '/clients' },
+    { title: 'Nuevo paciente', href: '#' },
 ];
 
 const colorOptions = [
@@ -38,7 +38,7 @@ export default function ProjectCreate() {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Nuevo cliente" />
+            <Head title="Nuevo paciente" />
 
             <div className="flex flex-col gap-6 p-4 md:p-6">
                 {/* Header */}
@@ -48,8 +48,8 @@ export default function ProjectCreate() {
                             <FolderKanban className="h-5 w-5 text-primary" />
                         </div>
                         <div>
-                            <h1 className="text-2xl font-bold tracking-tight">Nuevo cliente</h1>
-                            <p className="text-sm text-muted-foreground">Crea un perfil para tu cliente</p>
+                            <h1 className="text-2xl font-bold tracking-tight">Nuevo paciente</h1>
+                            <p className="text-sm text-muted-foreground">Crea un perfil para tu paciente</p>
                         </div>
                     </div>
                     <Link href="/clients">
@@ -65,10 +65,10 @@ export default function ProjectCreate() {
                     <CardHeader className="border-b bg-muted/30 pb-4">
                         <div className="flex items-center gap-2">
                             <Sparkles className="h-4 w-4 text-blue-600" />
-                            <CardTitle className="text-base font-semibold">Datos del cliente</CardTitle>
+                            <CardTitle className="text-base font-semibold">Datos del paciente</CardTitle>
                         </div>
                         <CardDescription>
-                            Define los detalles de tu nuevo cliente
+                            Define los detalles de tu nuevo paciente
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="pt-6">
@@ -83,7 +83,7 @@ export default function ProjectCreate() {
                                     id="name"
                                     value={data.name}
                                     onChange={e => setData('name', e.target.value)}
-                                    placeholder="Nombre del cliente"
+                                    placeholder="Nombre del paciente"
                                     autoFocus
                                 />
                                 {errors.name && (
@@ -105,7 +105,7 @@ export default function ProjectCreate() {
                                     value={data.description}
                                     onChange={e => setData('description', e.target.value)}
                                     rows={4}
-                                    placeholder="Describe el tipo de servicio que ofreces..."
+                                    placeholder="Describe el motivo de consulta, contexto o antecedentes..."
                                     className="resize-none"
                                 />
                                 {errors.description && (
@@ -120,7 +120,7 @@ export default function ProjectCreate() {
                             <div className="space-y-3">
                                 <Label className="flex items-center gap-2 text-sm font-medium">
                                     <Palette className="h-4 w-4 text-muted-foreground" />
-                                    Color del cliente
+                                    Color del paciente
                                 </Label>
                                 <div className="flex flex-wrap gap-3">
                                     {colorOptions.map(({ color, name }) => (
@@ -156,7 +156,7 @@ export default function ProjectCreate() {
                                     </div>
                                 </div>
                                 <p className="text-xs text-muted-foreground">
-                                    Elige un color para identificar fácilmente tu cliente
+                                    Elige un color para identificar fácilmente tu paciente
                                 </p>
                                 {errors.color && (
                                     <p className="text-sm text-destructive flex items-center gap-1">
@@ -177,7 +177,7 @@ export default function ProjectCreate() {
                                         <FolderKanban className="h-4 w-4 text-white" />
                                     </div>
                                     <span className="font-medium">
-                                        {data.name || 'Nombre del cliente'}
+                                        {data.name || 'Nombre del paciente'}
                                     </span>
                                 </div>
                             </div>
@@ -191,7 +191,7 @@ export default function ProjectCreate() {
                                             Creando...
                                         </span>
                                     ) : (
-                                    'Crear cliente'
+                                    'Crear paciente'
                                 )}
                                 </Button>
                                 <Link href="/clients">

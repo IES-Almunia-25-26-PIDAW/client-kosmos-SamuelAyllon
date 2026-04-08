@@ -26,14 +26,23 @@ class ClientSummaryAction extends AiAction
             ->limit(5)
             ->get(['name', 'description']);
 
+        $brandTone    = $project->brand_tone ?? 'No especificado';
+        $serviceScope = $project->service_scope ?? 'No especificado';
+        $clientNotes  = $project->client_notes ?? 'Sin notas';
+
         $prompt = <<<PROMPT
-        Eres un asistente para freelancers. Resume el estado de este cliente en 3-4 líneas.
+        Eres un asistente para profesionales de servicios. Resume el estado de este cliente en 3-4 líneas.
 
         Cliente: {$project->name}
         Descripción: {$project->description}
         Estado: {$project->status}
+        Enfoque profesional: {$brandTone}
+        Caso o servicio: {$serviceScope}
+        Acuerdos y notas: {$clientNotes}
         Tareas completadas: {$completedCount}
         Tareas pendientes: {$pendingCount}
+
+        Interpreta "Enfoque profesional" como el método o estilo de trabajo del profesional con este cliente. Interpreta "Caso o servicio" como la descripción del problema o servicio prestado. Interpreta "Acuerdos y notas" como decisiones y compromisos clave.
         PROMPT;
 
         if ($pendingTasks->isNotEmpty()) {

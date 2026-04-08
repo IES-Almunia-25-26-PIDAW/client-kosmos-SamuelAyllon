@@ -35,7 +35,7 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
 
     return (
         <>
-            <Head title="ClientKosmos — Tu memoria operativa por cliente" />
+            <Head title="ClientKosmos — Entra en cada sesión con el contexto listo" />
 
             <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
 
@@ -525,7 +525,7 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
                             <TestimonialCard
                                 quote="Antes perdía el contexto al saltar de un cliente a otro. Con ClientKosmos cada ficha tiene todo lo que necesito: tareas, notas y recursos."
                                 author="María García"
-                                role="Diseñadora freelance"
+                                role="Psicóloga autónoma"
                                 avatar="M"
                                 rating={5}
                             />
@@ -713,7 +713,7 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
                             </span>
                         </h2>
                         <p className="mx-auto mb-12 max-w-xl text-lg text-muted-foreground leading-relaxed">
-                            Únete a freelancers que ya gestionan sus clientes sin perder contexto.
+                            Únete a profesionales que ya gestionan sus clientes sin perder contexto.
                             El plan gratuito es para siempre.
                         </p>
                         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -796,7 +796,7 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
                         <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-between text-sm text-muted-foreground">
                             <p>© {new Date().getFullYear()} ClientKosmos · Proyecto Intermodular 2º DAM</p>
                             <p className="flex items-center gap-1.5">
-                                Hecho con <span className="text-red-500 animate-pulse">❤</span> para freelancers organizados
+                                Hecho con <span className="text-red-500 animate-pulse">❤</span> para profesionales organizados
                             </p>
                         </div>
                     </div>

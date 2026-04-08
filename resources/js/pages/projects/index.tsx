@@ -8,7 +8,7 @@ import AppLayout from '@/layouts/app-layout';
 import type { Auth, BreadcrumbItem, Project, ViewType } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Clientes', href: '/clients' },
+    { title: 'Pacientes', href: '/clients' },
 ];
 
 const statusColors: Record<string, string> = {
@@ -344,7 +344,7 @@ export default function ProjectsIndex({ projects }: { projects: Project[] }) {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Clientes" />
+            <Head title="Pacientes" />
 
             <div className="flex flex-col gap-6 p-6">
 
@@ -357,8 +357,8 @@ export default function ProjectsIndex({ projects }: { projects: Project[] }) {
                                 <FolderKanban className="h-6 w-6 text-primary-foreground" />
                             </div>
                             <div>
-                                <h1 className="text-2xl font-bold">Mis clientes</h1>
-                                <p className="text-sm text-muted-foreground">{projects.length} cliente{projects.length !== 1 ? 's' : ''}</p>
+                                <h1 className="text-2xl font-bold">Mis pacientes</h1>
+                                <p className="text-sm text-muted-foreground">{projects.length} paciente{projects.length !== 1 ? 's' : ''}</p>
                             </div>
                         </div>
                         <div className="flex items-center gap-2">
@@ -378,7 +378,7 @@ export default function ProjectsIndex({ projects }: { projects: Project[] }) {
                                 }
                             }}>
                                 <Plus className="h-4 w-4" />
-                                Nuevo cliente
+                                Nuevo paciente
                             </Button>
                         </div>
                     </div>
@@ -413,7 +413,7 @@ export default function ProjectsIndex({ projects }: { projects: Project[] }) {
                             </div>
                             <div className="text-center">
                                 <p className="font-semibold">Cada cliente tiene su espacio</p>
-                                <p className="text-sm text-muted-foreground">Tareas, ideas, recursos y contexto: todo en un solo lugar. Nada se pierde entre apps.</p>
+                                <p className="text-sm text-muted-foreground">Tareas, notas, documentos y contexto de cada cliente en un solo lugar. Nada se pierde entre apps.</p>
                             </div>
                             <Link href="/clients/create">
                                 <Button className="gap-2 shadow-lg shadow-primary/25">

@@ -79,7 +79,7 @@ const resourceTypeIcons: Record<string, string> = {
 
 export default function ProjectShow({ project, recentCompleted, upcomingPending, ideas, resources, tasksSummary, progressPercentage, isPremium, contextHeader }: Props) {
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Clientes', href: '/clients' },
+        { title: 'Pacientes', href: '/clients' },
         { title: project.name, href: `/clients/${project.id}` },
     ];
 
@@ -152,7 +152,7 @@ export default function ProjectShow({ project, recentCompleted, upcomingPending,
 
             <div className="flex flex-col gap-6 p-6">
 
-                {/* Cabecera del cliente */}
+                {/* Cabecera del paciente */}
                 <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-background to-primary/5 border-2 p-6">
                     <div className="absolute top-0 right-0 w-48 h-48 bg-primary/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
                     <div className="relative flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
@@ -189,7 +189,7 @@ export default function ProjectShow({ project, recentCompleted, upcomingPending,
                                             ? <Loader2 className="h-4 w-4 animate-spin" />
                                             : <Sparkles className="h-4 w-4" />
                                         }
-                                        Resume cliente
+                                        Resumen del paciente
                                     </Button>
                                     <Button
                                         variant="outline"
@@ -202,7 +202,7 @@ export default function ProjectShow({ project, recentCompleted, upcomingPending,
                                             ? <Loader2 className="h-4 w-4 animate-spin" />
                                             : <FileText className="h-4 w-4" />
                                         }
-                                        Genera update
+                                        Parte semanal
                                     </Button>
                                 </>
                             )}
@@ -246,7 +246,7 @@ export default function ProjectShow({ project, recentCompleted, upcomingPending,
                         {contextHeader.next_due_date && (
                             <span className="inline-flex items-center gap-1.5 rounded-lg bg-orange-500/10 px-2.5 py-1 text-xs font-medium text-orange-600">
                                 <CalendarClock className="h-3 w-3" />
-                                Entrega: {new Date(contextHeader.next_due_date).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
+                                Próxima fecha: {new Date(contextHeader.next_due_date).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
                             </span>
                         )}
                         {contextHeader.active_ideas_count > 0 && (
@@ -329,7 +329,7 @@ export default function ProjectShow({ project, recentCompleted, upcomingPending,
                     </div>
                 )}
 
-                {/* Resultado de Resume cliente */}
+                {/* Resultado de Resumen del paciente */}
                 {summaryResult && (
                     <Card className="overflow-hidden border-l-4 border-l-primary bg-ai-surface glass">
                         <CardHeader className="flex flex-row items-center justify-between pb-3">
@@ -337,7 +337,7 @@ export default function ProjectShow({ project, recentCompleted, upcomingPending,
                                 <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
                                     <Sparkles className="h-4 w-4 text-primary" />
                                 </div>
-                                <CardTitle className="text-base">Resumen del cliente</CardTitle>
+                                <CardTitle className="text-base">Resumen del paciente</CardTitle>
                             </div>
                             <div className="flex items-center gap-1">
                                 <Button size="sm" variant="ghost" onClick={() => copyText(summaryResult, setSummaryCopied)} className="h-8 w-8 p-0">
@@ -362,7 +362,7 @@ export default function ProjectShow({ project, recentCompleted, upcomingPending,
                                 <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
                                     <FileText className="h-4 w-4 text-primary" />
                                 </div>
-                                <CardTitle className="text-base">Update para el cliente</CardTitle>
+                                <CardTitle className="text-base">Parte de evolución</CardTitle>
                             </div>
                             <div className="flex items-center gap-1">
                                 <Button size="sm" variant="ghost" onClick={() => copyText(updateResult, setUpdateCopied)} className="h-8 w-8 p-0">
@@ -422,25 +422,25 @@ export default function ProjectShow({ project, recentCompleted, upcomingPending,
                                     <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
                                         <FileText className="h-4 w-4 text-primary" />
                                     </div>
-                                    <CardTitle className="text-base">Contexto del cliente</CardTitle>
+                                    <CardTitle className="text-base">Contexto del paciente</CardTitle>
                                 </div>
                             </CardHeader>
                             <CardContent className="flex flex-col gap-3 pt-4">
                                 {project.service_scope && (
                                     <div>
-                                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Servicio</p>
+                                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Caso o servicio</p>
                                         <p className="text-sm">{project.service_scope}</p>
                                     </div>
                                 )}
                                 {project.brand_tone && (
                                     <div>
-                                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Tono de marca</p>
+                                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Enfoque profesional</p>
                                         <p className="text-sm">{project.brand_tone}</p>
                                     </div>
                                 )}
                                 {project.client_notes && (
                                     <div>
-                                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Notas</p>
+                                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Acuerdos y notas</p>
                                         <p className="text-sm whitespace-pre-line">{project.client_notes}</p>
                                     </div>
                                 )}
@@ -561,7 +561,7 @@ export default function ProjectShow({ project, recentCompleted, upcomingPending,
                         <CardContent className="flex flex-col gap-2 pt-4">
                             {ideas.length === 0 ? (
                                 <div className="flex flex-col items-center justify-center py-6 text-center">
-                                    <p className="text-sm text-muted-foreground">¿Algo que quieras explorar para {project.name}? Captúralo aquí antes de que se escape.</p>
+                                    <p className="text-sm text-muted-foreground">Aquí irán tus notas de sesión, observaciones y acuerdos clave sobre {project.name}.</p>
                                 </div>
                             ) : (
                                 ideas.map(idea => (
@@ -590,7 +590,7 @@ export default function ProjectShow({ project, recentCompleted, upcomingPending,
                                 </div>
                                 <div className="text-center">
                                     <p className="text-sm font-medium">Recursos</p>
-                                    <p className="text-xs text-muted-foreground mt-1">Con Solo, cada cliente puede tener sus recursos (enlaces, docs, notas) asociados.</p>
+                                    <p className="text-xs text-muted-foreground mt-1">Con Solo, cada paciente puede tener documentos, consentimientos y enlaces asociados.</p>
                                 </div>
                                 <Button size="sm" variant="outline" className="gap-2" asChild>
                                     <Link href="/subscription">
@@ -620,7 +620,7 @@ export default function ProjectShow({ project, recentCompleted, upcomingPending,
                             <CardContent className="flex flex-col gap-2 pt-4">
                                 {resources.length === 0 ? (
                                     <div className="flex flex-col items-center justify-center py-6 text-center">
-                                        <p className="text-sm text-muted-foreground">Añade enlaces, briefs y archivos útiles para este cliente.</p>
+                                        <p className="text-sm text-muted-foreground">Guarda aquí consentimientos, informes, enlaces y documentos del paciente.</p>
                                     </div>
                                 ) : (
                                     resources.map(resource => (

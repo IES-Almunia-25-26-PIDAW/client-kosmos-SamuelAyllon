@@ -28,7 +28,7 @@ const freeUserSteps: TutorialStep[] = [
     },
     {
         id: 3,
-        botMessage: 'En Clientes creas fichas individuales. Cada ficha reúne tareas, ideas y recursos de ese cliente. Con el plan gratuito puedes tener 1 cliente y hasta 5 tareas.',
+        botMessage: 'En Clientes creas fichas individuales. Cada ficha reúne tareas, notas, documentos y contexto de ese cliente. Con el plan gratuito puedes tener 1 cliente y hasta 5 tareas.',
         target: 'clients',
         icon: '👤',
         position: 'right',
@@ -49,7 +49,7 @@ const freeUserSteps: TutorialStep[] = [
     },
     {
         id: 6,
-        botMessage: '¡Eso es todo! Empieza creando tu primer cliente. Cuando tengas varias tareas, prueba el plan Solo para que Kosmo te ayude a organizarte.',
+        botMessage: '¡Eso es todo! Empieza registrando tu primer cliente. Cuando gestiones varios casos, prueba el plan Solo para que Kosmo te ayude a organizarte.',
         icon: '🎉',
     },
 ];
@@ -70,7 +70,7 @@ const premiumUserSteps: TutorialStep[] = [
     },
     {
         id: 3,
-        botMessage: 'En Clientes gestionas cada cuenta con ficha completa. Usa los botones de IA para que Kosmo resuma el estado o genere updates profesionales.',
+        botMessage: 'En Clientes gestionas cada caso con ficha completa. Usa los botones de IA para que Kosmo resuma el estado o genere un parte de evolución.',
         target: 'clients',
         icon: '👤',
         position: 'right',

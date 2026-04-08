@@ -14,7 +14,7 @@ class PlanDayAction extends AiAction
 
         $tasks = $user->tasks()
             ->where('status', 'pending')
-            ->with('project:id,name')
+            ->with('project:id,name,service_scope')
             ->orderByRaw("CASE priority WHEN 'high' THEN 1 WHEN 'medium' THEN 2 ELSE 3 END")
             ->orderBy('due_date')
             ->limit(20)
@@ -29,7 +29,11 @@ class PlanDayAction extends AiAction
         $taskLines = $tasks->map(function ($t) {
             $line = "- [{$t->priority}] {$t->name}";
             if ($t->project) {
-                $line .= " (cliente: {$t->project->name})";
+                $line .= " (cliente: {$t->project->name}";
+                if ($t->project->service_scope) {
+                    $line .= " | servicio: {$t->project->service_scope}";
+                }
+                $line .= ")";
             }
             if ($t->due_date) {
                 $line .= " — vence: {$t->due_date}";
@@ -40,16 +44,19 @@ class PlanDayAction extends AiAction
         $today = now()->format('Y-m-d');
 
         $prompt = <<<PROMPT
-        Eres un asistente de productividad para freelancers. Hoy es {$today}.
+        Eres un asistente de productividad para profesionales de servicios. Hoy es {$today}.
+
+        El usuario gestiona varios casos o clientes de forma simultánea. Tu objetivo principal es facilitar el cambio de contexto entre ellos: quién es el siguiente, qué se acordó, qué queda pendiente.
 
         Estas son las tareas pendientes del usuario:
         {$taskLines}
 
-        Genera un plan del día con 3 a 5 acciones concretas priorizadas. Para cada acción indica:
-        1. Qué hacer (nombre de la tarea)
-        2. Por qué es prioritaria (brevemente)
+        Genera un plan del día con 3 a 5 bloques priorizados. Para cada bloque indica:
+        1. Cliente/caso al que pertenece y contexto breve (enfoque, situación actual)
+        2. Qué hacer concretamente
+        3. Por qué es prioritario hoy
 
-        Responde en español, con formato limpio y conciso. Usa viñetas.
+        Agrupa las acciones por cliente cuando sea posible. Responde en español, con formato limpio y conciso. Usa viñetas.
         PROMPT;
 
         $inputContext = ['tasks_count' => $tasks->count(), 'date' => $today];

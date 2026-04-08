@@ -8,21 +8,67 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-    /* ClientKosmos typography — Inter for body & UI, General Sans for headings, JetBrains Mono for code */
+    /* ClientKosmos typography — Inter for body & UI, Satoshi for headings, JetBrains Mono for code */
     --font-sans:
         'Inter', system-ui, -apple-system, sans-serif,
         'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
         'Noto Color Emoji';
     --font-heading:
-        'General Sans', system-ui, -apple-system, sans-serif;
+        'Satoshi', system-ui, -apple-system, sans-serif;
     --font-mono:
         'JetBrains Mono', 'Courier New', monospace;
 
-    /* ClientKosmos radius tokens: sm=6px, md=10px, lg=16px, xl=24px */
-    --radius-lg: 1rem;
-    --radius-md: 0.625rem;
-    --radius-sm: 0.375rem;
-    --radius-xl: 1.5rem;
+    /* ClientKosmos radius tokens: sm=4px, md=8px, lg=12px, xl=20px */
+    --radius-lg: 0.75rem;
+    --radius-md: 0.5rem;
+    --radius-sm: 0.25rem;
+    --radius-xl: 1.25rem;
+    --radius-full: 9999px;
+
+    /* Spacing tokens: 4px base */
+    --space-1: 0.25rem;
+    --space-2: 0.5rem;
+    --space-3: 0.75rem;
+    --space-4: 1rem;
+    --space-5: 1.25rem;
+    --space-6: 1.5rem;
+    --space-8: 2rem;
+    --space-10: 2.5rem;
+    --space-12: 3rem;
+    --space-16: 4rem;
+    --space-20: 5rem;
+    --space-24: 6rem;
+
+    /* Z-index tokens */
+    --z-base: 0;
+    --z-dropdown: 100;
+    --z-sticky: 200;
+    --z-overlay: 300;
+    --z-modal: 400;
+    --z-toast: 500;
+
+    /* Animation durations */
+    --duration-fast: 100ms;
+    --duration-normal: 200ms;
+    --duration-slow: 350ms;
+
+    /* Easing functions */
+    --easing-standard: cubic-bezier(0.4, 0.0, 0.2, 1);
+    --easing-enter: cubic-bezier(0.0, 0.0, 0.2, 1);
+    --easing-exit: cubic-bezier(0.4, 0.0, 1, 1);
+
+    /* Semantic color tokens */
+    --color-indigo: var(--indigo);
+    --color-indigo-subtle: var(--indigo-subtle);
+    --color-indigo-fg: var(--indigo-fg);
+
+    --color-orange: var(--orange);
+    --color-orange-subtle: var(--orange-subtle);
+    --color-orange-fg: var(--orange-fg);
+
+    --color-kosmo: var(--kosmo);
+    --color-kosmo-surface: var(--kosmo-surface);
+    --color-kosmo-border: var(--kosmo-border);
 
     --color-background: var(--background);
     --color-foreground: var(--foreground);
@@ -78,162 +124,221 @@
 }
 
 :root {
-    /* ── ClientKosmos Design System — Light Mode ── */
-    /* Basado en la guía de estilos: "calma productiva" con paleta teal */
+    /* ── ClientKosmos Design System v1.0 — Light Mode ── */
+    /* Paleta más cálida con Satoshi para headings */
 
     /* Backgrounds */
-    --background: #F7F6F2;          /* bg.body: fondo general neutro y calmado */
-    --foreground: #1A1816;          /* text.default */
+    --background: #FAF8F5;          /* bg.body: fondo principal */
+    --foreground: #2C2825;          /* text.default */
 
     /* Cards / paneles elevados */
     --card: #FFFFFF;                /* bg.surface */
-    --card-foreground: #1A1816;
+    --card-foreground: #2C2825;
 
     /* Popovers / dropdowns */
     --popover: #FFFFFF;             /* bg.surface */
-    --popover-foreground: #1A1816;
+    --popover-foreground: #2C2825;
 
-    /* Primary — teal ClientKosmos */
-    --primary: #0E7C83;             /* primary.default */
+    /* Primary — teal verde azulado cálido */
+    --primary: #1A7B6E;             /* primary.default */
     --primary-foreground: #FFFFFF;   /* text.on-primary */
-    --primary-hover: #0A5E63;
-    --primary-active: #084A4E;
-    --primary-soft: #E6F5F6;
+    --primary-hover: #135E54;
+    --primary-active: #0F4A42;
+    --primary-subtle: #E6F5F2;
     --primary-muted: #B3DDE0;
 
-    /* Secondary — fondo suave para badges, hover */
-    --secondary: #F0EFEB;           /* bg.surfaceAlt */
-    --secondary-foreground: #0E7C83;
+    /* Secondary — superficies secundarias */
+    --secondary: #F5F2ED;           /* bg.surfaceAlt */
+    --secondary-foreground: #1A7B6E;
 
     /* Muted — secciones secundarias */
-    --muted: #F0EFEB;               /* bg.surfaceAlt */
-    --muted-foreground: #8A8882;    /* text.muted */
+    --muted: #F5F2ED;               /* bg.surfaceAlt */
+    --muted-foreground: #7A746C;    /* text.muted */
 
     /* Accent — hover en menús y dropdowns */
-    --accent: #F0EFEB;              /* bg.surfaceAlt */
-    --accent-foreground: #1A1816;
+    --accent: #F5F2ED;              /* bg.surfaceAlt */
+    --accent-foreground: #2C2825;
 
     /* Destructive / Danger */
-    --destructive: #C13B4A;         /* danger.main */
+    --destructive: #B83A3A;
     --destructive-foreground: #FFFFFF;
 
     /* Bordes e inputs */
-    --border: #E2E0DB;              /* border.subtle */
-    --border-strong: #C8C5BD;       /* border.strong */
-    --input: #E2E0DB;
-    --ring: #B3DDE0;                /* primary.muted para focus */
+    --border: #E0DBD3;              /* border estándar */
+    --border-strong: #C8C5BD;       /* border fuerte */
+    --input: #E0DBD3;
+    --ring: #1A7B6E;                /* primary para focus */
 
-    /* ClientKosmos: semantic tokens */
-    --warning: #C17A1A;             /* warning.main */
-    --warning-foreground: #7A4D0E;  /* warning.text */
-    --warning-soft: #FEF3E0;
+    /* Semantic tokens — Light Mode */
+    --success: #2D8044;
+    --success-foreground: #1B5E2E;
+    --success-subtle: #E8F5EC;
+    --success-fg: #1B5E2E;
 
-    --success: #2D8A4E;             /* success.main */
-    --success-foreground: #1B5E33;  /* success.text */
-    --success-soft: #E8F5EC;
+    --warning: #C48820;
+    --warning-foreground: #8A5E10;
+    --warning-subtle: #FEF5E0;
+    --warning-fg: #8A5E10;
 
-    --info: #2B7AB5;                /* info.main */
-    --info-foreground: #1A4F7A;     /* info.text */
-    --info-soft: #E8F1FA;
+    --error: #B83A3A;
+    --error-foreground: #8C2020;
+    --error-subtle: #FCEAEA;
+    --error-fg: #8C2020;
 
-    /* IA (Kosmo) */
-    --ai-surface: #C6E2DE;          /* teal-100 */
-    --ai-border: #2F8890;           /* teal-400 */
+    --info: #3578B2;
+    --info-foreground: #1E5280;
+    --info-subtle: #E6F0FA;
+    --info-fg: #1E5280;
 
-    /* Gráficas con paleta ClientKosmos */
-    --chart-1: #0E7C83;
-    --chart-2: #2D8A4E;
-    --chart-3: #2B7AB5;
-    --chart-4: #C17A1A;
-    --chart-5: #C13B4A;
+    /* Indigo — Sin consentimiento */
+    --indigo: #6246A8;
+    --indigo-subtle: #F0ECF8;
+    --indigo-fg: #4A3280;
 
-    --radius: 0.625rem;
+    /* Orange — Acuerdo sin cerrar */
+    --orange: #D47020;
+    --orange-subtle: #FEF0E0;
+    --orange-fg: #9A4E10;
 
-    /* Text secondary (custom token) */
-    --text-secondary: #5C5A55;
+    /* Kosmo — IA */
+    --kosmo: #1A7B6E;
+    --kosmo-surface: #ECF7F5;
+    --kosmo-border: #C2E4DE;
+
+    /* Text variations */
+    --text-secondary: #7A746C;
+    --text-muted: #B5AFA7;
+
+    /* Chart colors */
+    --chart-1: #1A7B6E;
+    --chart-2: #2D8044;
+    --chart-3: #3578B2;
+    --chart-4: #C48820;
+    --chart-5: #B83A3A;
 
     /* Sidebar */
-    --sidebar: #F0EFEB;             /* bg.surfaceAlt */
-    --sidebar-foreground: #1A1816;
-    --sidebar-primary: #0E7C83;
+    --sidebar: #F5F2ED;
+    --sidebar-foreground: #2C2825;
+    --sidebar-primary: #1A7B6E;
     --sidebar-primary-foreground: #FFFFFF;
-    --sidebar-accent: #E6F5F6;      /* primary.soft para hover */
-    --sidebar-accent-foreground: #1A1816;
-    --sidebar-border: #E2E0DB;
-    --sidebar-ring: #B3DDE0;
+    --sidebar-accent: #ECF7F5;
+    --sidebar-accent-foreground: #2C2825;
+    --sidebar-border: #E0DBD3;
+    --sidebar-ring: #1A7B6E;
+
+    /* Shadows — warm-toned */
+    --shadow-sm: 0 1px 2px 0 rgba(44, 40, 37, 0.06);
+    --shadow-md: 0 4px 12px -2px rgba(44, 40, 37, 0.10), 0 2px 4px -2px rgba(44, 40, 37, 0.06);
+    --shadow-lg: 0 12px 32px -4px rgba(44, 40, 37, 0.14), 0 4px 12px -4px rgba(44, 40, 37, 0.08);
+
+    /* IA (Kosmo) */
+    --ai-surface: #ECF7F5;
+    --ai-border: #C2E4DE;
 }
 
 .dark {
-    /* ── ClientKosmos Design System — Dark Mode ── */
-    /* Misma semántica que light, diferente intensidad */
+    /* ── ClientKosmos Design System v1.0 — Dark Mode ── */
+    /* Paleta oscura con contraste mejorado */
 
-    --background: #141311;
-    --foreground: #E5E4E2;
+    --background: #161412;
+    --foreground: #E5E0DA;
 
-    --card: #1C1B18;
-    --card-foreground: #E5E4E2;
+    --card: #1E1C19;
+    --card-foreground: #E5E0DA;
 
-    --popover: #1C1B18;
-    --popover-foreground: #E5E4E2;
+    --popover: #1E1C19;
+    --popover-foreground: #E5E0DA;
 
-    /* Primary más claro para contraste en modo oscuro */
-    --primary: #3DA8B0;
+    /* Primary para dark mode */
+    --primary: #4ABEAB;
     --primary-foreground: #FFFFFF;
-    --primary-hover: #2B8F97;
-    --primary-active: #1F7A82;
-    --primary-soft: rgba(61, 168, 176, 0.12);
-    --primary-muted: rgba(61, 168, 176, 0.25);
+    --primary-hover: #6DD0C0;
+    --primary-active: #3A9D92;
+    --primary-subtle: #1A2E2B;
+    --primary-muted: rgba(74, 190, 171, 0.25);
 
-    --secondary: #222120;
-    --secondary-foreground: #E5E4E2;
+    --secondary: #252320;
+    --secondary-foreground: #E5E0DA;
 
-    --muted: #222120;
-    --muted-foreground: #6B6A67;
+    --muted: #252320;
+    --muted-foreground: #9A958D;
 
-    --accent: #222120;
-    --accent-foreground: #E5E4E2;
+    --accent: #252320;
+    --accent-foreground: #E5E0DA;
 
-    --destructive: #E06070;
+    --destructive: #E06060;
     --destructive-foreground: #FFFFFF;
 
-    --border: #333230;
+    --border: #3A3733;
     --border-strong: #4A4946;
-    --input: #333230;
-    --ring: rgba(61, 168, 176, 0.25);
+    --input: #3A3733;
+    --ring: #4ABEAB;
 
     /* Semantic tokens — dark */
-    --warning: #E09A3A;
-    --warning-foreground: #F0B058;
-    --warning-soft: rgba(224, 154, 58, 0.12);
+    --success: #5CB86E;
+    --success-foreground: #7CD48A;
+    --success-subtle: #1A2E1E;
+    --success-fg: #7CD48A;
 
-    --success: #5CB87A;
-    --success-foreground: #7DD49A;
-    --success-soft: rgba(92, 184, 122, 0.12);
+    --warning: #E0A840;
+    --warning-foreground: #F0C060;
+    --warning-subtle: #2E2518;
+    --warning-fg: #F0C060;
 
-    --info: #5A9FD4;
-    --info-foreground: #7AB5E0;
-    --info-soft: rgba(90, 159, 212, 0.12);
+    --error: #E06060;
+    --error-foreground: #F08080;
+    --error-subtle: #2E1A1A;
+    --error-fg: #F08080;
 
-    /* IA (Kosmo) — dark */
-    --ai-surface: rgba(61, 168, 176, 0.08);
-    --ai-border: rgba(61, 168, 176, 0.3);
+    --info: #5A9ED6;
+    --info-foreground: #80B8E8;
+    --info-subtle: #1A2530;
+    --info-fg: #80B8E8;
 
-    --chart-1: #3DA8B0;
-    --chart-2: #5CB87A;
-    --chart-3: #5A9FD4;
-    --chart-4: #E09A3A;
-    --chart-5: #E06070;
+    /* Indigo — Sin consentimiento */
+    --indigo: #9A7ED6;
+    --indigo-subtle: #231E30;
+    --indigo-fg: #B8A0E8;
 
-    --text-secondary: #A3A29E;
+    /* Orange — Acuerdo sin cerrar */
+    --orange: #E89850;
+    --orange-subtle: #2E2018;
+    --orange-fg: #F0B070;
 
-    --sidebar: #1C1B18;
-    --sidebar-foreground: #E5E4E2;
-    --sidebar-primary: #3DA8B0;
+    /* Kosmo — IA */
+    --kosmo: #4ABEAB;
+    --kosmo-surface: #1A2825;
+    --kosmo-border: #2A4A42;
+
+    /* Text variations */
+    --text-secondary: #9A958D;
+    --text-muted: #5E5A54;
+
+    /* Chart colors */
+    --chart-1: #4ABEAB;
+    --chart-2: #5CB86E;
+    --chart-3: #5A9ED6;
+    --chart-4: #E0A840;
+    --chart-5: #E06060;
+
+    /* Sidebar */
+    --sidebar: #1E1C19;
+    --sidebar-foreground: #E5E0DA;
+    --sidebar-primary: #4ABEAB;
     --sidebar-primary-foreground: #FFFFFF;
-    --sidebar-accent: rgba(61, 168, 176, 0.12);
-    --sidebar-accent-foreground: #E5E4E2;
-    --sidebar-border: #333230;
-    --sidebar-ring: rgba(61, 168, 176, 0.25);
+    --sidebar-accent: #1A2E2B;
+    --sidebar-accent-foreground: #E5E0DA;
+    --sidebar-border: #3A3733;
+    --sidebar-ring: #4ABEAB;
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.16);
+    --shadow-md: 0 4px 12px -2px rgba(0, 0, 0, 0.20), 0 2px 4px -2px rgba(0, 0, 0, 0.16);
+    --shadow-lg: 0 12px 32px -4px rgba(0, 0, 0, 0.24), 0 4px 12px -4px rgba(0, 0, 0, 0.18);
+
+    /* IA (Kosmo) */
+    --ai-surface: #1A2825;
+    --ai-border: #2A4A42;
 }
 
 @layer base {
@@ -245,9 +350,9 @@
         @apply bg-background text-foreground;
     }
 
-    /* General Sans para títulos (guía de estilos §3) */
+    /* Satoshi para títulos (Design System v1.0) */
     h1, h2, h3 {
-        font-family: 'General Sans', system-ui, -apple-system, sans-serif;
+        font-family: 'Satoshi', system-ui, -apple-system, sans-serif;
     }
 
     /* Inter para botones y labels de UI */
