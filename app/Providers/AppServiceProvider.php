@@ -3,9 +3,16 @@
 namespace App\Providers;
 
 use App\Http\Responses\LoginResponse;
+use App\Models\Patient;
+use App\Models\Payment;
+use App\Models\User;
+use App\Observers\PatientObserver;
+use App\Observers\PaymentObserver;
+use App\Policies\AdminPolicy;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 use Laravel\Fortify\Contracts\LoginResponse as LoginResponseContract;
@@ -47,6 +54,11 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+
+        Patient::observe(PatientObserver::class);
+        Payment::observe(PaymentObserver::class);
+
+        Gate::policy(User::class, AdminPolicy::class);
     }
 
     /**

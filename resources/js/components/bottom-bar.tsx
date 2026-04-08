@@ -19,7 +19,7 @@ const BottomBar = React.forwardRef<HTMLDivElement, BottomBarProps>(
   ({ className = '', items, onItemClick, ...props }, ref) => (
     <div
       ref={ref}
-      className={`fixed bottom-0 left-0 right-0 z-[var(--z-sticky)] md:hidden border-t border-[var(--color-border)] bg-[var(--color-card)] shadow-[0_-2px_8px_rgba(0,0,0,0.08)] ${className}`}
+      className={`fixed bottom-0 left-0 right-0 z-[var(--z-sticky)] md:hidden border-t border-[var(--color-border)] bg-[var(--color-surface)] shadow-[0_-2px_8px_rgba(0,0,0,0.08)] ${className}`}
       {...props}
     >
       <nav className="flex items-center justify-around h-16">

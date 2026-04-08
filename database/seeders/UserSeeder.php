@@ -2,232 +2,314 @@
 
 namespace Database\Seeders;
 
-use App\Models\Idea;
-use App\Models\Project;
-use App\Models\Resource;
-use App\Models\Subscription;
-use App\Models\Task;
+use App\Models\Agreement;
+use App\Models\ConsentForm;
+use App\Models\ConsultingSession;
+use App\Models\Note;
+use App\Models\Patient;
+use App\Models\Payment;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        // Evitar duplicados si el seeder se ejecuta más de una vez
         if (User::where('email', 'admin@clientkosmos.test')->exists()) {
             $this->command->info('Users already seeded. Skipping.');
             return;
         }
 
-        // ── Admin ──────────────────────────────────────────────
-        $admin = User::factory()->create([
-            'name'  => 'Admin ClientKosmos',
-            'email' => 'admin@clientkosmos.test',
+        // ══════════════════════════════════════════════════
+        //  ADMIN
+        // ══════════════════════════════════════════════════
+        $admin = User::create([
+            'name'              => 'Admin ClientKosmos',
+            'email'             => 'admin@clientkosmos.test',
+            'password'          => Hash::make('password'),
+            'role'              => 'admin',
+            'email_verified_at' => now(),
+            'practice_name'     => 'ClientKosmos HQ',
+            'specialty'         => 'Administración',
+            'city'              => 'Madrid',
         ]);
 
         $admin->assignRole('admin');
 
-        Subscription::create([
-            'user_id'    => $admin->id,
-            'plan'       => 'premium_monthly',
-            'status'     => 'active',
-            'started_at' => now(),
-            'expires_at' => now()->addDays(30),
+        // ══════════════════════════════════════════════════
+        //  PROFESSIONAL — Natalia López
+        // ══════════════════════════════════════════════════
+        $pro = User::create([
+            'name'                      => 'Natalia Ayllón',
+            'email'                     => 'natalia@clientkosmos.test',
+            'password'                  => Hash::make('password'),
+            'role'                      => 'professional',
+            'email_verified_at'         => now(),
+            'tutorial_completed_at'     => now(),
+            'practice_name'             => 'Consulta Natalia Ayllón',
+            'specialty'                 => 'Psicología clínica',
+            'city'                      => 'Barcelona',
+            'default_rate'              => 70.00,
+            'default_session_duration'  => 50,
+            'nif'                       => '12345678Z',
+            'fiscal_address'            => 'Calle Mayor 10, 2ºA, 08001 Barcelona',
+            'invoice_prefix'            => 'FAC',
+            'invoice_counter'           => 1,
+            'rgpd_template'             => 'En cumplimiento del RGPD (UE) 2016/679, le informamos que sus datos serán tratados con la única finalidad de prestar el servicio de psicoterapia, y no serán cedidos a terceros sin su consentimiento expreso.',
+            'data_retention_months'     => 60,
         ]);
 
-        // ── Premium user ───────────────────────────────────────
-        $premium = User::factory()->create([
-            'name'  => 'Premium User',
-            'email' => 'premium@clientkosmos.test',
+        $pro->assignRole('professional');
+
+        // ── Paciente 1: Ana García — estado normalizado ──
+        $p1 = Patient::create([
+            'user_id'            => $pro->id,
+            'project_name'       => 'Ana García',
+            'email'              => 'ana.garcia@ejemplo.com',
+            'phone'              => '+34 612 345 678',
+            'brand_tone'         => 'TCC',
+            'service_scope'      => 'Trastorno de ansiedad generalizada. Lleva 6 meses en tratamiento con evolución positiva.',
+            'next_deadline'      => now()->addDays(7)->toDateString(),
+            'is_active'          => true,
+            'payment_status'     => 'paid',
+            'has_valid_consent'  => true,
+            'has_open_agreement' => false,
         ]);
 
-        $premium->assignRole('premium_user');
-
-        Subscription::create([
-            'user_id'    => $premium->id,
-            'plan'       => 'premium_monthly',
-            'status'     => 'active',
-            'started_at' => now(),
-            'expires_at' => now()->addDays(30),
+        ConsentForm::create([
+            'patient_id'       => $p1->id,
+            'user_id'          => $pro->id,
+            'template_version' => '1.0',
+            'content_snapshot' => $pro->rgpd_template,
+            'status'           => 'signed',
+            'signed_at'        => now()->subMonths(5),
+            'signed_ip'        => '127.0.0.1',
+            'expires_at'       => now()->addMonths(7)->toDateString(),
         ]);
 
-        // ── Datos demo premium: Cliente 1 — Estudio Alma ──
-        $client1 = Project::factory()->active()->create([
-            'user_id'     => $premium->id,
-            'name'        => 'Estudio Alma',
-            'description' => 'Rediseño de marca e identidad visual para estudio de yoga.',
-            'color'       => '#8B5CF6',
+        $s1a = ConsultingSession::create([
+            'patient_id'    => $p1->id,
+            'user_id'       => $pro->id,
+            'scheduled_at'  => now()->subWeeks(2),
+            'started_at'    => now()->subWeeks(2),
+            'ended_at'      => now()->subWeeks(2)->addMinutes(50),
+            'duration_minutes' => 50,
+            'status'        => 'completed',
+            'ai_summary'    => 'La paciente reportó mejora en las técnicas de respiración. Se exploró la raíz del pensamiento catastrófico.',
+        ]);
+        $s1b = ConsultingSession::create([
+            'patient_id'    => $p1->id,
+            'user_id'       => $pro->id,
+            'scheduled_at'  => now()->subWeek(),
+            'started_at'    => now()->subWeek(),
+            'ended_at'      => now()->subWeek()->addMinutes(50),
+            'duration_minutes' => 50,
+            'status'        => 'completed',
+            'ai_summary'    => 'Se trabajó el registro de pensamientos automáticos. La paciente completó las tareas asignadas.',
+        ]);
+        ConsultingSession::create([
+            'patient_id'   => $p1->id,
+            'user_id'      => $pro->id,
+            'scheduled_at' => now()->addDays(7),
+            'status'       => 'scheduled',
         ]);
 
-        Task::factory()->highPriority()->create([
-            'user_id'    => $premium->id,
-            'project_id' => $client1->id,
-            'name'       => 'Entregar propuesta de logotipo',
-            'due_date'   => now()->addDays(2),
+        Note::create([
+            'patient_id'            => $p1->id,
+            'user_id'               => $pro->id,
+            'consulting_session_id' => $s1a->id,
+            'content'               => 'Progreso notable en el manejo de las situaciones de estrés. Mantiene el diario de pensamientos.',
+            'type'                  => 'session_note',
         ]);
-        Task::factory()->completed()->create([
-            'user_id'    => $premium->id,
-            'project_id' => $client1->id,
-            'name'       => 'Moodboard inicial',
-        ]);
-        Task::factory()->create([
-            'user_id'    => $premium->id,
-            'project_id' => $client1->id,
-            'name'       => 'Revisar paleta de colores',
-            'priority'   => 'medium',
-            'due_date'   => now()->addDays(5),
+        Note::create([
+            'patient_id' => $p1->id,
+            'user_id'    => $pro->id,
+            'content'    => 'Llamó para comentar que tuvo un momento de ansiedad en el trabajo. Se le recordaron las técnicas de grounding.',
+            'type'       => 'quick_note',
         ]);
 
-        Idea::factory()->create([
-            'user_id'    => $premium->id,
-            'project_id' => $client1->id,
-            'name'       => 'Usar tipografía serif para transmitir calma',
-            'priority'   => 'high',
-        ]);
-        Idea::factory()->resolved()->create([
-            'user_id'    => $premium->id,
-            'project_id' => $client1->id,
-            'name'       => 'Incluir icono de loto en variante secundaria',
+        Agreement::create([
+            'patient_id'            => $p1->id,
+            'user_id'               => $pro->id,
+            'consulting_session_id' => $s1b->id,
+            'content'               => 'Practicar la técnica 5-4-3-2-1 cuando sienta ansiedad en el trabajo.',
+            'is_completed'          => true,
+            'completed_at'          => now()->subDays(3),
         ]);
 
-        Resource::factory()->create([
-            'user_id'    => $premium->id,
-            'project_id' => $client1->id,
-            'name'       => 'Briefing del cliente',
-            'url'        => 'https://drive.google.com/example-briefing',
-            'type'       => 'document',
+        Payment::create([
+            'patient_id'     => $p1->id,
+            'user_id'        => $pro->id,
+            'amount'         => 70.00,
+            'concept'        => 'Sesión de psicología #5',
+            'payment_method' => 'bizum',
+            'status'         => 'paid',
+            'due_date'       => now()->subWeeks(2)->toDateString(),
+            'paid_at'        => now()->subWeeks(2),
         ]);
-        Resource::factory()->create([
-            'user_id'    => $premium->id,
-            'project_id' => $client1->id,
-            'name'       => 'Moodboard en Figma',
-            'url'        => 'https://figma.com/file/example-moodboard',
-            'type'       => 'link',
-        ]);
-
-        // ── Datos demo premium: Cliente 2 — Carlos García ──
-        $client2 = Project::factory()->active()->create([
-            'user_id'     => $premium->id,
-            'name'        => 'Carlos García',
-            'description' => 'Desarrollo de app móvil para gestión de citas.',
-            'color'       => '#10B981',
+        Payment::create([
+            'patient_id'     => $p1->id,
+            'user_id'        => $pro->id,
+            'amount'         => 70.00,
+            'concept'        => 'Sesión de psicología #6',
+            'payment_method' => 'bizum',
+            'status'         => 'paid',
+            'due_date'       => now()->subWeek()->toDateString(),
+            'paid_at'        => now()->subWeek(),
         ]);
 
-        Task::factory()->highPriority()->create([
-            'user_id'    => $premium->id,
-            'project_id' => $client2->id,
-            'name'       => 'Mockups pantalla de reservas',
-            'due_date'   => now()->addDays(1),
-        ]);
-        Task::factory()->create([
-            'user_id'    => $premium->id,
-            'project_id' => $client2->id,
-            'name'       => 'Integrar pasarela de pago',
-            'priority'   => 'high',
-            'due_date'   => now()->addDays(7),
-        ]);
-        Task::factory()->completed()->create([
-            'user_id'    => $premium->id,
-            'project_id' => $client2->id,
-            'name'       => 'Diseño de wireframes',
-        ]);
-        Task::factory()->completed()->create([
-            'user_id'    => $premium->id,
-            'project_id' => $client2->id,
-            'name'       => 'Reunión de kick-off',
+        // ── Paciente 2: Marcos Ruiz — cobro pendiente + acuerdo abierto ──
+        $p2 = Patient::create([
+            'user_id'            => $pro->id,
+            'project_name'       => 'Marcos Ruiz',
+            'email'              => 'marcos.ruiz@ejemplo.com',
+            'phone'              => '+34 622 111 222',
+            'brand_tone'         => 'EMDR',
+            'service_scope'      => 'Estrés post-traumático. Episodio de accidente de tráfico hace 8 meses.',
+            'next_deadline'      => now()->addDays(3)->toDateString(),
+            'is_active'          => true,
+            'payment_status'     => 'pending',
+            'has_valid_consent'  => true,
+            'has_open_agreement' => true,
         ]);
 
-        Idea::factory()->create([
-            'user_id'    => $premium->id,
-            'project_id' => $client2->id,
-            'name'       => 'Añadir notificaciones push para recordatorios',
-            'priority'   => 'medium',
+        ConsentForm::create([
+            'patient_id'       => $p2->id,
+            'user_id'          => $pro->id,
+            'template_version' => '1.0',
+            'content_snapshot' => $pro->rgpd_template,
+            'status'           => 'signed',
+            'signed_at'        => now()->subMonths(3),
+            'signed_ip'        => '127.0.0.1',
+            'expires_at'       => now()->addMonths(9)->toDateString(),
         ]);
 
-        Resource::factory()->create([
-            'user_id'    => $premium->id,
-            'project_id' => $client2->id,
-            'name'       => 'Documento de requisitos',
-            'url'        => 'https://docs.google.com/example-requisitos',
-            'type'       => 'document',
+        $s2a = ConsultingSession::create([
+            'patient_id'      => $p2->id,
+            'user_id'         => $pro->id,
+            'scheduled_at'    => now()->subDays(10),
+            'started_at'      => now()->subDays(10),
+            'ended_at'        => now()->subDays(10)->addMinutes(60),
+            'duration_minutes'=> 60,
+            'status'          => 'completed',
+        ]);
+        ConsultingSession::create([
+            'patient_id'   => $p2->id,
+            'user_id'      => $pro->id,
+            'scheduled_at' => now()->addDays(3),
+            'status'       => 'scheduled',
         ]);
 
-        // ── Datos demo premium: Cliente 3 — LegalPro ──
-        $client3 = Project::factory()->create([
-            'user_id'     => $premium->id,
-            'name'        => 'LegalPro',
-            'description' => 'Web corporativa para despacho de abogados.',
-            'color'       => '#F59E0B',
-            'status'      => 'completed',
+        Note::create([
+            'patient_id'            => $p2->id,
+            'user_id'               => $pro->id,
+            'consulting_session_id' => $s2a->id,
+            'content'               => 'Primera sesión de EMDR. El paciente toleró bien la estimulación bilateral. Reducción leve de la intensidad del recuerdo traumático.',
+            'type'                  => 'session_note',
         ]);
 
-        Task::factory()->completed()->create([
-            'user_id'    => $premium->id,
-            'project_id' => $client3->id,
-            'name'       => 'Diseño homepage',
-        ]);
-        Task::factory()->completed()->create([
-            'user_id'    => $premium->id,
-            'project_id' => $client3->id,
-            'name'       => 'Sección equipo de abogados',
+        Agreement::create([
+            'patient_id'            => $p2->id,
+            'user_id'               => $pro->id,
+            'consulting_session_id' => $s2a->id,
+            'content'               => 'Escribir en el diario 10 minutos cada noche sobre las emociones del día.',
+            'is_completed'          => false,
         ]);
 
-        Idea::factory()->resolved()->create([
-            'user_id'    => $premium->id,
-            'project_id' => $client3->id,
-            'name'       => 'Añadir blog con noticias jurídicas',
+        Payment::create([
+            'patient_id' => $p2->id,
+            'user_id'    => $pro->id,
+            'amount'     => 80.00,
+            'concept'    => 'Sesión EMDR #3',
+            'status'     => 'pending',
+            'due_date'   => now()->subDays(5)->toDateString(),
         ]);
 
-        // ── Free user ──────────────────────────────────────────
-        $free = User::factory()->create([
-            'name'  => 'Free User',
-            'email' => 'free@clientkosmos.test',
+        // ── Paciente 3: Laura Sánchez — sin consentimiento + cobro vencido ──
+        $p3 = Patient::create([
+            'user_id'            => $pro->id,
+            'project_name'       => 'Laura Sánchez',
+            'email'              => 'laura.sanchez@ejemplo.com',
+            'brand_tone'         => 'Terapia humanista',
+            'service_scope'      => 'Duelo por pérdida familiar. Primera consulta hace 2 semanas.',
+            'next_deadline'      => now()->addDays(10)->toDateString(),
+            'is_active'          => true,
+            'payment_status'     => 'overdue',
+            'has_valid_consent'  => false,
+            'has_open_agreement' => false,
         ]);
 
-        $free->assignRole('free_user');
-
-        Subscription::create([
-            'user_id'    => $free->id,
-            'plan'       => 'free',
-            'status'     => 'active',
-            'started_at' => now(),
-            'expires_at' => null,
+        ConsultingSession::create([
+            'patient_id'      => $p3->id,
+            'user_id'         => $pro->id,
+            'scheduled_at'    => now()->subDays(14),
+            'started_at'      => now()->subDays(14),
+            'ended_at'        => now()->subDays(14)->addMinutes(50),
+            'duration_minutes'=> 50,
+            'status'          => 'completed',
+        ]);
+        ConsultingSession::create([
+            'patient_id'   => $p3->id,
+            'user_id'      => $pro->id,
+            'scheduled_at' => now()->addDays(10),
+            'status'       => 'scheduled',
         ]);
 
-        // ── Datos demo free: 1 cliente con pocas tareas ──
-        $freeClient = Project::factory()->active()->create([
-            'user_id'     => $free->id,
-            'name'        => 'Mi primer cliente',
-            'description' => 'Proyecto de prueba para explorar ClientKosmos.',
-            'color'       => '#6366F1',
+        Note::create([
+            'patient_id' => $p3->id,
+            'user_id'    => $pro->id,
+            'content'    => 'Primera sesión de evaluación. La paciente se muestra con poca energía y cierta resistencia a hablar del fallecimiento. Buen rapport inicial.',
+            'type'       => 'session_note',
         ]);
 
-        Task::factory()->create([
-            'user_id'    => $free->id,
-            'project_id' => $freeClient->id,
-            'name'       => 'Preparar presupuesto',
-            'priority'   => 'high',
-            'due_date'   => now()->addDays(3),
-        ]);
-        Task::factory()->create([
-            'user_id'    => $free->id,
-            'project_id' => $freeClient->id,
-            'name'       => 'Enviar contrato',
-            'priority'   => 'medium',
-            'due_date'   => now()->addDays(5),
-        ]);
-        Task::factory()->completed()->create([
-            'user_id'    => $free->id,
-            'project_id' => $freeClient->id,
-            'name'       => 'Primera reunión',
+        Payment::create([
+            'patient_id' => $p3->id,
+            'user_id'    => $pro->id,
+            'amount'     => 70.00,
+            'concept'    => 'Primera consulta',
+            'status'     => 'overdue',
+            'due_date'   => now()->subDays(10)->toDateString(),
         ]);
 
-        Idea::factory()->create([
-            'user_id'    => $free->id,
-            'project_id' => $freeClient->id,
-            'name'       => 'Proponer extensión de alcance',
-            'priority'   => 'low',
+        // ── Paciente 4: Javier Moreno — alta, todo en regla ──
+        $p4 = Patient::create([
+            'user_id'            => $pro->id,
+            'project_name'       => 'Javier Moreno',
+            'email'              => 'javier.moreno@ejemplo.com',
+            'phone'              => '+34 633 555 444',
+            'brand_tone'         => 'Terapia cognitivo-conductual',
+            'service_scope'      => 'Fobia social. Alta dada en el mes anterior tras 8 meses de tratamiento exitoso.',
+            'is_active'          => false,
+            'payment_status'     => 'paid',
+            'has_valid_consent'  => true,
+            'has_open_agreement' => false,
         ]);
+
+        ConsentForm::create([
+            'patient_id'       => $p4->id,
+            'user_id'          => $pro->id,
+            'template_version' => '1.0',
+            'content_snapshot' => $pro->rgpd_template,
+            'status'           => 'signed',
+            'signed_at'        => now()->subMonths(8),
+            'signed_ip'        => '127.0.0.1',
+            'expires_at'       => now()->addMonths(4)->toDateString(),
+        ]);
+
+        Payment::create([
+            'patient_id'     => $p4->id,
+            'user_id'        => $pro->id,
+            'amount'         => 70.00,
+            'concept'        => 'Sesión de cierre',
+            'payment_method' => 'transfer',
+            'status'         => 'paid',
+            'due_date'       => now()->subMonth()->toDateString(),
+            'paid_at'        => now()->subMonth(),
+        ]);
+
+        $this->command->info('Users seeded successfully.');
+        $this->command->info('  admin@clientkosmos.test   / password');
+        $this->command->info('  natalia@clientkosmos.test / password');
     }
 }

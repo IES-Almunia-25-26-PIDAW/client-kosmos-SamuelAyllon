@@ -234,6 +234,91 @@
     /* IA (Kosmo) */
     --ai-surface: #ECF7F5;
     --ai-border: #C2E4DE;
+
+    /* ── ClientKosmos Design System v1.0 — Explicit Token Aliases ── */
+    /* These are used directly by components as var(--color-*) */
+
+    /* Surface tokens */
+    --color-bg: #FAF8F5;
+    --color-surface: #FFFFFF;
+    --color-surface-alt: #F5F2ED;
+
+    /* Text tokens */
+    --color-text: #2C2825;
+    --color-text-secondary: #7A746C;
+    --color-text-muted: #B5AFA7;
+
+    /* Border tokens */
+    --color-border: #E0DBD3;
+    --color-border-subtle: #EBE7E0;
+
+    /* Primary tokens */
+    --color-primary: #1A7B6E;
+    --color-primary-hover: #135E54;
+    --color-primary-subtle: #E6F5F2;
+    --color-primary-fg: #FFFFFF;
+
+    /* Semantic tokens — success */
+    --color-success: #2D8044;
+    --color-success-subtle: #E8F5EC;
+    --color-success-fg: #1B5E2E;
+
+    /* Semantic tokens — warning */
+    --color-warning: #C48820;
+    --color-warning-subtle: #FEF5E0;
+    --color-warning-fg: #8A5E10;
+
+    /* Semantic tokens — error */
+    --color-error: #B83A3A;
+    --color-error-subtle: #FCEAEA;
+    --color-error-fg: #8C2020;
+
+    /* Semantic tokens — info */
+    --color-info: #3578B2;
+    --color-info-subtle: #E6F0FA;
+    --color-info-fg: #1E5280;
+
+    /* Semantic tokens — indigo */
+    --color-indigo: #6246A8;
+    --color-indigo-subtle: #F0ECF8;
+    --color-indigo-fg: #4A3280;
+
+    /* Semantic tokens — orange */
+    --color-orange: #D47020;
+    --color-orange-subtle: #FEF0E0;
+    --color-orange-fg: #9A4E10;
+
+    /* Kosmo AI tokens */
+    --color-kosmo: #1A7B6E;
+    --color-kosmo-surface: #ECF7F5;
+    --color-kosmo-border: #C2E4DE;
+
+    /* Typography tokens */
+    --font-display: 'Satoshi', 'Inter', system-ui, sans-serif;
+    --font-body: 'Inter', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+    --text-xs: 0.75rem;
+    --text-sm: 0.875rem;
+    --text-md: 1rem;
+    --text-lg: 1.125rem;
+    --text-xl: 1.5rem;
+    --text-2xl: 2rem;
+    --text-3xl: 3rem;
+
+    --leading-xs: 1rem;
+    --leading-sm: 1.25rem;
+    --leading-md: 1.5rem;
+    --leading-lg: 1.75rem;
+    --leading-xl: 2rem;
+    --leading-2xl: 2.5rem;
+    --leading-3xl: 3.5rem;
+
+    --tracking-tight: -0.03em;
+    --tracking-snug: -0.02em;
+    --tracking-normal: 0em;
+    --tracking-wide: 0.01em;
+    --tracking-wider: 0.02em;
 }
 
 .dark {
@@ -339,6 +424,52 @@
     /* IA (Kosmo) */
     --ai-surface: #1A2825;
     --ai-border: #2A4A42;
+
+    /* ── Dark Mode Token Aliases ── */
+
+    --color-bg: #161412;
+    --color-surface: #1E1C19;
+    --color-surface-alt: #252320;
+
+    --color-text: #E5E0DA;
+    --color-text-secondary: #9A958D;
+    --color-text-muted: #5E5A54;
+
+    --color-border: #3A3733;
+    --color-border-subtle: #2E2C28;
+
+    --color-primary: #4ABEAB;
+    --color-primary-hover: #6DD0C0;
+    --color-primary-subtle: #1A2E2B;
+    --color-primary-fg: #111A18;
+
+    --color-success: #5CB86E;
+    --color-success-subtle: #1A2E1E;
+    --color-success-fg: #7CD48A;
+
+    --color-warning: #E0A840;
+    --color-warning-subtle: #2E2518;
+    --color-warning-fg: #F0C060;
+
+    --color-error: #E06060;
+    --color-error-subtle: #2E1A1A;
+    --color-error-fg: #F08080;
+
+    --color-info: #5A9ED6;
+    --color-info-subtle: #1A2530;
+    --color-info-fg: #80B8E8;
+
+    --color-indigo: #9A7ED6;
+    --color-indigo-subtle: #231E30;
+    --color-indigo-fg: #B8A0E8;
+
+    --color-orange: #E89850;
+    --color-orange-subtle: #2E2018;
+    --color-orange-fg: #F0B070;
+
+    --color-kosmo: #4ABEAB;
+    --color-kosmo-surface: #1A2825;
+    --color-kosmo-border: #2A4A42;
 }
 
 @layer base {
@@ -715,5 +846,95 @@
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
     }
+}
+
+/* ── ClientKosmos Typography Classes (Design System §6) ── */
+.text-display-3xl {
+    font-family: var(--font-display);
+    font-size: var(--text-3xl);
+    line-height: var(--leading-3xl);
+    letter-spacing: var(--tracking-tight);
+    font-weight: 900;
+}
+
+.text-display-2xl {
+    font-family: var(--font-display);
+    font-size: var(--text-2xl);
+    line-height: var(--leading-2xl);
+    letter-spacing: var(--tracking-snug);
+    font-weight: 700;
+}
+
+.text-display-xl {
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    line-height: var(--leading-xl);
+    letter-spacing: var(--tracking-snug);
+    font-weight: 700;
+}
+
+.text-display-lg {
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    line-height: var(--leading-lg);
+    letter-spacing: -0.01em;
+    font-weight: 700;
+}
+
+.text-body-lg {
+    font-family: var(--font-body);
+    font-size: var(--text-lg);
+    line-height: var(--leading-lg);
+    letter-spacing: -0.01em;
+    font-weight: 400;
+}
+
+.text-body-md {
+    font-family: var(--font-body);
+    font-size: var(--text-md);
+    line-height: var(--leading-md);
+    letter-spacing: var(--tracking-normal);
+    font-weight: 400;
+}
+
+.text-body-sm {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    line-height: var(--leading-sm);
+    letter-spacing: var(--tracking-wide);
+    font-weight: 400;
+}
+
+.text-caption {
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    line-height: var(--leading-xs);
+    letter-spacing: var(--tracking-wider);
+    font-weight: 400;
+}
+
+.text-label {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    line-height: var(--leading-sm);
+    letter-spacing: var(--tracking-wide);
+    font-weight: 500;
+}
+
+.text-kpi {
+    font-family: var(--font-display);
+    font-size: var(--text-2xl);
+    line-height: var(--leading-2xl);
+    letter-spacing: var(--tracking-snug);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums lining-nums;
+}
+
+.text-mono {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    line-height: var(--leading-sm);
+    letter-spacing: var(--tracking-normal);
+    font-weight: 400;
 }
 

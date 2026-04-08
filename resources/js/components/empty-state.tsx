@@ -22,7 +22,7 @@ const EmptyState = React.forwardRef<HTMLDivElement, EmptyStateProps>(
       {action && (
         <button
           onClick={action.onClick}
-          className="inline-flex items-center justify-center px-4 py-2 rounded-md bg-[var(--color-primary)] text-[var(--color-primary-foreground)] font-medium hover:bg-[var(--color-primary-hover)] transition-colors"
+          className="inline-flex items-center justify-center px-4 py-2 rounded-md bg-[var(--color-primary)] text-[var(--color-primary-fg)] font-medium hover:bg-[var(--color-primary-hover)] transition-colors"
         >
           {action.label}
         </button>

@@ -1,8 +1,2 @@
-export type * from './task';
-export type * from './idea';
-export type * from './subscription';
-export type * from './payment';
+export type * from './patient';
 export type * from './role';
-export type * from './resource';
-export type * from './project';
-export type * from './ai-log';

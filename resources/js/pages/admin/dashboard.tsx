@@ -1,194 +1,100 @@
 import { Head, Link } from '@inertiajs/react';
-import { LayoutDashboard, Users, Crown, CreditCard, TrendingUp, DollarSign, Activity, ArrowRight, UserPlus } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import AppLayout from '@/layouts/app-layout';
-import type { BreadcrumbItem, AdminDashboardProps } from '@/types';
+import { Users, UserCheck, Brain, Calendar, Euro, TrendingUp } from 'lucide-react';
+import AdminLayout from '@/layouts/admin-layout';
+import { KPICard } from '@/components/patient/kpi-card';
 
-const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Admin', href: '/admin/dashboard' },
-    { title: 'Dashboard', href: '/admin/dashboard' },
-];
+interface AdminStats {
+    total_users: number;
+    active_users: number;
+    total_patients: number;
+    total_sessions: number;
+    total_revenue: number;
+    pending_amount: number;
+}
 
-const paymentStatusColors: Record<string, string> = {
-    completed: 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800',
-    pending:   'bg-yellow-100 text-yellow-700 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-800',
-    failed:    'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800',
-};
+interface RecentUser {
+    id: number;
+    name: string;
+    email: string;
+    role: string;
+    patients_count: number;
+    sessions_count: number;
+    created_at: string;
+}
 
-const paymentStatusLabels: Record<string, string> = {
-    completed: 'Completado', pending: 'Pendiente', failed: 'Fallido',
-};
+interface Props {
+    stats: AdminStats;
+    recentUsers: {
+        data: RecentUser[];
+        current_page: number;
+        last_page: number;
+        total: number;
+    };
+}
 
-export default function AdminDashboard({ stats, recentPayments, recentUsers }: AdminDashboardProps) {
+const formatDate = (d: string) =>
+    new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(d));
+
+export default function AdminDashboard({ stats, recentUsers }: Props) {
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Admin — Dashboard" />
+        <AdminLayout>
+            <Head title="Admin Dashboard — ClientKosmos" />
 
-            <div className="flex flex-col gap-6 p-4 md:p-6">
-
-                {/* Header */}
-                <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                        <LayoutDashboard className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                        <h1 className="text-2xl font-bold tracking-tight">Panel de administración</h1>
-                        <p className="text-sm text-muted-foreground">Estadísticas globales de ClientKosmos</p>
-                    </div>
+            <div className="flex flex-col gap-8 p-6 lg:p-8">
+                <div>
+                    <h1 className="text-display-2xl text-[var(--color-text)]">Panel de administración</h1>
+                    <p className="mt-1 text-body-md text-[var(--color-text-secondary)]">
+                        Vista global de la plataforma ClientKosmos
+                    </p>
                 </div>
 
-                {/* Stats */}
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    <Card className="shadow-sm">
-                        <CardContent className="flex items-center gap-4 pt-6">
-                            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-blue-500/10">
-                                <Users className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-                            </div>
-                            <div>
-                                <p className="text-3xl font-bold">{stats.total_users}</p>
-                                <p className="text-sm text-muted-foreground">Usuarios totales</p>
-                            </div>
-                        </CardContent>
-                    </Card>
-                    <Card className="shadow-sm">
-                        <CardContent className="flex items-center gap-4 pt-6">
-                            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-gray-500/10">
-                                <Users className="h-6 w-6 text-gray-600 dark:text-gray-400" />
-                            </div>
-                            <div>
-                                <p className="text-3xl font-bold">{stats.free_users}</p>
-                                <p className="text-sm text-muted-foreground">Usuarios gratuitos</p>
-                            </div>
-                        </CardContent>
-                    </Card>
-                    <Card className="shadow-sm">
-                        <CardContent className="flex items-center gap-4 pt-6">
-                            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-purple-500/10">
-                                <Crown className="h-6 w-6 text-purple-600 dark:text-purple-400" />
-                            </div>
-                            <div>
-                                <p className="text-3xl font-bold">{stats.premium_users}</p>
-                                <p className="text-sm text-muted-foreground">Usuarios premium</p>
-                            </div>
-                        </CardContent>
-                    </Card>
-                    <Card className="shadow-sm">
-                        <CardContent className="flex items-center gap-4 pt-6">
-                            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-green-500/10">
-                                <Activity className="h-6 w-6 text-green-600 dark:text-green-400" />
-                            </div>
-                            <div>
-                                <p className="text-3xl font-bold">{stats.active_subscriptions}</p>
-                                <p className="text-sm text-muted-foreground">Suscripciones activas</p>
-                            </div>
-                        </CardContent>
-                    </Card>
-                    <Card className="shadow-sm">
-                        <CardContent className="flex items-center gap-4 pt-6">
-                            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10">
-                                <TrendingUp className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
-                            </div>
-                            <div>
-                                <p className="text-3xl font-bold">${stats.payments_this_month.toFixed(2)}</p>
-                                <p className="text-sm text-muted-foreground">Ingresos este mes</p>
-                            </div>
-                        </CardContent>
-                    </Card>
-                    <Card className="shadow-sm">
-                        <CardContent className="flex items-center gap-4 pt-6">
-                            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-amber-500/10">
-                                <DollarSign className="h-6 w-6 text-amber-600 dark:text-amber-400" />
-                            </div>
-                            <div>
-                                <p className="text-3xl font-bold">${stats.total_revenue.toFixed(2)}</p>
-                                <p className="text-sm text-muted-foreground">Ingresos totales</p>
-                            </div>
-                        </CardContent>
-                    </Card>
+                {/* KPIs */}
+                <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
+                    <KPICard label="Profesionales" value={stats.total_users} icon={Users} />
+                    <KPICard label="Con pacientes activos" value={stats.active_users} icon={UserCheck} />
+                    <KPICard label="Total pacientes" value={stats.total_patients} icon={Brain} />
+                    <KPICard label="Total sesiones" value={stats.total_sessions} icon={Calendar} />
+                    <KPICard label="Facturado total" value={`€${Number(stats.total_revenue).toLocaleString('es-ES', { minimumFractionDigits: 2 })}`} icon={Euro} />
+                    <KPICard label="Pendiente de cobro" value={`€${Number(stats.pending_amount).toLocaleString('es-ES', { minimumFractionDigits: 2 })}`} icon={TrendingUp} />
                 </div>
 
-                {/* Recent data */}
-                <div className="grid gap-6 lg:grid-cols-2">
-
-                    {/* Pagos recientes */}
-                    <Card className="shadow-sm">
-                        <CardHeader className="flex flex-row items-center justify-between border-b bg-muted/30 pb-4">
-                            <div className="flex items-center gap-2">
-                                <CreditCard className="h-4 w-4 text-primary" />
-                                <CardTitle className="text-base font-semibold">Pagos recientes</CardTitle>
-                            </div>
-                            <Link href="/admin/payments" className="flex items-center gap-1 text-sm text-primary hover:underline">
-                                Ver todos <ArrowRight className="h-3 w-3" />
-                            </Link>
-                        </CardHeader>
-                        <CardContent className="pt-4">
-                            {recentPayments.length === 0 ? (
-                                <div className="rounded-xl border-2 border-dashed py-8 text-center">
-                                    <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-muted/50">
-                                        <CreditCard className="h-5 w-5 text-muted-foreground" />
-                                    </div>
-                                    <p className="text-sm text-muted-foreground">Sin pagos registrados.</p>
-                                </div>
-                            ) : (
-                                <div className="flex flex-col gap-2">
-                                    {recentPayments.map(payment => (
-                                        <div key={payment.id} className="flex items-center justify-between rounded-lg border p-3 transition-colors hover:bg-muted/30">
-                                            <div className="min-w-0">
-                                                <p className="truncate text-sm font-medium">{payment.user.name}</p>
-                                                <p className="truncate text-xs text-muted-foreground">{payment.user.email}</p>
-                                            </div>
-                                            <div className="flex shrink-0 items-center gap-3">
-                                                <Badge variant="outline" className={paymentStatusColors[payment.status]}>
-                                                    {paymentStatusLabels[payment.status]}
-                                                </Badge>
-                                                <span className="text-sm font-semibold">${payment.amount.toFixed(2)}</span>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </CardContent>
-                    </Card>
-
-                    {/* Usuarios recientes */}
-                    <Card className="shadow-sm">
-                        <CardHeader className="flex flex-row items-center justify-between border-b bg-muted/30 pb-4">
-                            <div className="flex items-center gap-2">
-                                <UserPlus className="h-4 w-4 text-primary" />
-                                <CardTitle className="text-base font-semibold">Usuarios recientes</CardTitle>
-                            </div>
-                            <Link href="/admin/users" className="flex items-center gap-1 text-sm text-primary hover:underline">
-                                Ver todos <ArrowRight className="h-3 w-3" />
-                            </Link>
-                        </CardHeader>
-                        <CardContent className="pt-4">
-                            {recentUsers.length === 0 ? (
-                                <div className="rounded-xl border-2 border-dashed py-8 text-center">
-                                    <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-muted/50">
-                                        <Users className="h-5 w-5 text-muted-foreground" />
-                                    </div>
-                                    <p className="text-sm text-muted-foreground">Sin usuarios registrados.</p>
-                                </div>
-                            ) : (
-                                <div className="flex flex-col gap-2">
-                                    {recentUsers.map(user => (
-                                        <div key={user.id} className="flex items-center justify-between rounded-lg border p-3 transition-colors hover:bg-muted/30">
-                                            <div className="min-w-0">
-                                                <p className="truncate text-sm font-medium">{user.name}</p>
-                                                <p className="truncate text-xs text-muted-foreground">{user.email}</p>
-                                            </div>
-                                            <span className="shrink-0 text-xs text-muted-foreground">
-                                                {new Date(user.created_at).toLocaleDateString('es-ES')}
-                                            </span>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </CardContent>
-                    </Card>
+                {/* Recent users table */}
+                <div>
+                    <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-display-lg text-[var(--color-text)]">Últimos profesionales</h2>
+                        <Link href="/admin/users" className="text-sm font-medium text-[var(--color-primary)] hover:underline">
+                            Ver todos →
+                        </Link>
+                    </div>
+                    <div className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] overflow-hidden shadow-[var(--shadow-sm)]">
+                        <table className="w-full text-sm">
+                            <thead>
+                                <tr className="border-b border-[var(--color-border-subtle)] bg-[var(--color-surface-alt)]">
+                                    <th className="px-4 py-3 text-left text-xs font-medium text-[var(--color-text-secondary)] uppercase tracking-wider">Usuario</th>
+                                    <th className="px-4 py-3 text-center text-xs font-medium text-[var(--color-text-secondary)] uppercase tracking-wider">Pacientes</th>
+                                    <th className="px-4 py-3 text-center text-xs font-medium text-[var(--color-text-secondary)] uppercase tracking-wider">Sesiones</th>
+                                    <th className="px-4 py-3 text-left text-xs font-medium text-[var(--color-text-secondary)] uppercase tracking-wider">Alta</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-[var(--color-border-subtle)]">
+                                {recentUsers.data.map((user) => (
+                                    <tr key={user.id} className="hover:bg-[var(--color-surface-alt)] transition-colors">
+                                        <td className="px-4 py-3">
+                                            <Link href={`/admin/users/${user.id}`} className="font-medium text-[var(--color-primary)] hover:underline">
+                                                {user.name}
+                                            </Link>
+                                            <p className="text-xs text-[var(--color-text-secondary)]">{user.email}</p>
+                                        </td>
+                                        <td className="px-4 py-3 text-center text-[var(--color-text)]">{user.patients_count}</td>
+                                        <td className="px-4 py-3 text-center text-[var(--color-text)]">{user.sessions_count}</td>
+                                        <td className="px-4 py-3 text-[var(--color-text-secondary)]">{formatDate(user.created_at)}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </AppLayout>
+        </AdminLayout>
     );
 }

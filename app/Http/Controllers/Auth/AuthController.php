@@ -10,23 +10,21 @@ use Illuminate\Support\Facades\Hash;
 class AuthController extends Controller
 {
     /**
-     * Autenticar usuario comprobando credenciales y rol asignado.
+     * Authenticate the user via Fortify.
      *
-     * Este método es invocado por Fortify durante el login.
-     * Devuelve el usuario si las credenciales son correctas y tiene un rol válido,
-     * o null para que Fortify rechace el intento de login.
+     * Returns the User if credentials are valid and the user has a valid role,
+     * or null to let Fortify reject the login attempt.
      */
     public function authenticate(Request $request): ?User
     {
         $user = User::where('email', $request->email)->first();
 
-        // Verificar credenciales
         if (! $user || ! Hash::check($request->password, $user->password)) {
             return null;
         }
 
-        // Seguridad: bloquear login si el usuario no tiene ningún rol asignado
-        if (! $user->hasAnyRole(['admin', 'premium_user', 'free_user'])) {
+        // Block login if user has no valid role
+        if (! in_array($user->role, ['professional', 'admin'])) {
             return null;
         }
 

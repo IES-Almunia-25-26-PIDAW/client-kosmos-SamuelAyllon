@@ -2,7 +2,21 @@ export type User = {
     id: number;
     name: string;
     email: string;
-    avatar?: string;
+    role: 'professional' | 'admin';
+    practice_name: string | null;
+    specialty: string | null;
+    city: string | null;
+    avatar_path: string | null;
+    default_rate: number | null;
+    default_session_duration: number;
+    nif: string | null;
+    fiscal_address: string | null;
+    invoice_prefix: string;
+    invoice_counter: number;
+    invoice_footer_text: string | null;
+    rgpd_template: string | null;
+    data_retention_months: number;
+    privacy_policy_url: string | null;
     email_verified_at: string | null;
     tutorial_completed_at: string | null;
     two_factor_enabled?: boolean;
@@ -13,8 +27,6 @@ export type User = {
 
 export type Auth = {
     user: User;
-    is_admin: boolean;
-    is_premium: boolean;
 };
 
 export type TwoFactorSetupData = {

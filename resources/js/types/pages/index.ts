@@ -1,5 +1,2 @@
-export type * from './dashboard-props';
-export type * from './tasks-props';
-export type * from './ideas-props';
-export type * from './subscription-props';
-export type * from './checkout-props';
+// Legacy page props removed during refactor.
+// Page-specific props are now defined inline in each page component.

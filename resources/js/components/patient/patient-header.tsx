@@ -1,74 +1,59 @@
-import { ArrowLeft, MoreVertical } from 'lucide-react';
-import * as React from 'react';
+import React from 'react';
+import { Link } from '@inertiajs/react';
+import { ArrowLeft, Edit, Trash2 } from 'lucide-react';
+import { StatusBadge } from '@/components/ui/status-badge';
+import type { Patient, PatientStatus } from '@/types';
 
-export interface PatientHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
-  name: string;
-  avatar?: string;
-  badges?: Array<{
-    label: string;
-    variant: 'paid' | 'pending' | 'overdue' | 'noConsent' | 'openDeal';
-  }>;
-  onBack?: () => void;
-  actions?: React.ReactNode;
+interface PatientHeaderProps {
+    patient: Patient;
+    className?: string;
 }
 
-const PatientHeader = React.forwardRef<HTMLDivElement, PatientHeaderProps>(
-  ({ className = '', name, avatar, badges, onBack, actions, ...props }, ref) => (
-    <div
-      ref={ref}
-      className={`sticky top-0 z-[var(--z-sticky)] border-b border-[var(--color-border)] bg-[var(--color-card)] shadow-sm ${className}`}
-      {...props}
-    >
-      <div className="h-16 px-4 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3 flex-1 min-w-0">
-          {onBack && (
-            <button
-              onClick={onBack}
-              className="flex-shrink-0 p-1 hover:bg-[var(--color-muted)] rounded transition-colors"
-              aria-label="Go back"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </button>
-          )}
+const PatientHeader: React.FC<PatientHeaderProps> = ({ patient, className = '' }) => {
+    const statuses: PatientStatus[] = patient.statuses ?? [];
 
-          {avatar && (
-            <img
-              src={avatar}
-              alt={name}
-              className="w-10 h-10 rounded-full object-cover flex-shrink-0"
-            />
-          )}
+    return (
+        <div className={`sticky top-0 z-[var(--z-sticky)] border-b border-[var(--color-border-subtle)] bg-[var(--color-surface)] shadow-[var(--shadow-sm)] ${className}`}>
+            <div className="h-[73px] px-4 lg:px-8 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <Link
+                        href="/patients"
+                        className="p-1.5 rounded-[var(--radius-sm)] hover:bg-[var(--color-surface-alt)] transition-colors"
+                        aria-label="Volver a pacientes"
+                    >
+                        <ArrowLeft size={18} className="text-[var(--color-text-secondary)]" />
+                    </Link>
 
-          <div className="min-w-0 flex-1">
-            <h1 className="font-semibold text-[var(--color-foreground)] truncate">{name}</h1>
-            {badges && badges.length > 0 && (
-              <div className="flex gap-1 mt-1 overflow-x-auto">
-                {badges.map((badge, idx) => (
-                  <span
-                    key={idx}
-                    className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${
-                      {
-                        paid: 'bg-[var(--color-success-subtle)] text-[var(--color-success-fg)]',
-                        pending: 'bg-[var(--color-warning-subtle)] text-[var(--color-warning-fg)]',
-                        overdue: 'bg-[var(--color-error-subtle)] text-[var(--color-error-fg)]',
-                        noConsent: 'bg-[var(--color-indigo-subtle)] text-[var(--color-indigo-fg)]',
-                        openDeal: 'bg-[var(--color-orange-subtle)] text-[var(--color-orange-fg)]',
-                      }[badge.variant] || ''
-                    }`}
-                  >
-                    {badge.label}
-                  </span>
-                ))}
-              </div>
-            )}
-          </div>
+                    {patient.avatar_path ? (
+                        <img src={patient.avatar_path} alt={patient.project_name} className="h-9 w-9 rounded-full object-cover shrink-0" />
+                    ) : (
+                        <div className="h-9 w-9 rounded-full bg-[var(--color-primary-subtle)] flex items-center justify-center shrink-0 text-[var(--color-primary)] text-sm font-semibold">
+                            {patient.project_name.substring(0, 2).toUpperCase()}
+                        </div>
+                    )}
+
+                    <div className="flex-1 min-w-0">
+                        <h1 className="text-label text-[var(--color-text)] truncate">{patient.project_name}</h1>
+                        {statuses.length > 0 && (
+                            <div className="flex gap-1 mt-0.5 overflow-x-auto">
+                                {statuses.map((s) => (
+                                    <StatusBadge key={s} status={s} variant="subtle" />
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0">
+                    <Link href={`/patients/${patient.id}/edit`} className="p-1.5 rounded-[var(--radius-sm)] hover:bg-[var(--color-surface-alt)] transition-colors" aria-label="Editar paciente">
+                        <Edit size={16} className="text-[var(--color-text-secondary)]" />
+                    </Link>
+                </div>
+            </div>
         </div>
+    );
+};
 
-        {actions && <div className="flex-shrink-0">{actions}</div>}
-      </div>
-    </div>
-  )
-);
 PatientHeader.displayName = 'PatientHeader';
 
 export { PatientHeader };
