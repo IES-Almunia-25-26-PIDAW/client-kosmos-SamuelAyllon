@@ -1,6 +1,6 @@
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import { useState } from 'react';
-import { ArrowLeft, Calendar, CheckCircle, FileText, Receipt, Shield } from 'lucide-react';
+import { CheckCircle, FileText, Receipt, Shield } from 'lucide-react';
 import AppLayout from '@/layouts/app-layout';
 import { PatientHeader } from '@/components/patient/patient-header';
 import { StatusBadge } from '@/components/ui/status-badge';

@@ -2,14 +2,14 @@
 
 # 🪐 ClientKosmos
 
-### Tu memoria operativa por cliente — Gestiona tu actividad freelance sin perder contexto
+### Plataforma de gestión de consulta para profesionales de servicios
 
 [![Laravel](https://img.shields.io/badge/Laravel-12-FF2D20?style=flat-square&logo=laravel&logoColor=white)](https://laravel.com)
 [![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=black)](https://react.dev)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![PHP](https://img.shields.io/badge/PHP-8.4+-777BB4?style=flat-square&logo=php&logoColor=white)](https://www.php.net)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.0-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
-[![Tests](https://img.shields.io/badge/Tests-156_casos-brightgreen?style=flat-square&logo=checkmarx&logoColor=white)]()
+[![Tests](https://img.shields.io/badge/Tests-97_casos-brightgreen?style=flat-square&logo=checkmarx&logoColor=white)]()
 [![Docker](https://img.shields.io/badge/Docker-samue45%2Fclient--kosmos-2496ED?style=flat-square&logo=docker&logoColor=white)](https://hub.docker.com/r/samue45/client-kosmos)
 [![License](https://img.shields.io/badge/License-MIT-green.svg?style=flat-square)](LICENSE)
 
@@ -20,7 +20,7 @@
 ## Tabla de Contenidos
 
 - [¿Qué es ClientKosmos?](#qué-es-clientkosmos)
-- [Planes y Funcionalidades](#planes-y-funcionalidades)
+- [Funcionalidades](#funcionalidades)
 - [Inicio Rápido](#inicio-rápido)
 - [Credenciales de Prueba](#credenciales-de-prueba)
 - [Stack Tecnológico](#stack-tecnológico)
@@ -34,88 +34,58 @@
 - [Variables de Entorno](#variables-de-entorno)
 - [Troubleshooting](#troubleshooting)
 - [Documentación](#documentación)
-- [Fases del Desarrollo](#fases-del-desarrollo)
 - [Licencia](#licencia)
 
 ---
 
 ## ¿Qué es ClientKosmos?
 
-**ClientKosmos** es una plataforma web freemium diseñada para **freelancers que gestionan varios clientes a la vez**. Cada cliente tiene su propia ficha con tareas, ideas, recursos y contexto, de modo que al cambiar de cliente retomas exactamente donde lo dejaste.
+**ClientKosmos** es una plataforma web de gestión de consulta para **profesionales autónomos de servicios**: psicólogos, coaches, terapeutas y asesores.
+
+Centraliza toda la operativa de una consulta en una única herramienta:
+
+- 🗂️ **Fichas de pacientes** — historial completo, notas, documentos y consentimientos
+- 💶 **Pagos y facturación** — control de cobros con estadísticas consolidadas
+- 🤖 **Kosmo IA** — asistente inteligente con briefings diarios y chat contextual
+- 🔒 **RGPD integrado** — formularios de consentimiento informado digitales
+- 👥 **Multiusuario** — cada profesional gestiona su propia consulta de forma privada
 
 ### El problema que resuelve
 
-La fragmentación de herramientas (una app para tareas, otra para ideas, otra para enlaces) genera:
+Muchos profesionales mezclan cuadernos, hojas de cálculo, carpetas de correo y aplicaciones sueltas. Esto genera:
 
-- **Pérdida de contexto** — al saltar de un cliente a otro se pierden detalles cruciales.
-- **Información dispersa** — ideas sueltas, enlaces en marcadores, tareas sin vincular al cliente.
-- **Falta de visión diaria** — no existe un lugar que muestre "qué tengo que hacer hoy y para quién".
-
-ClientKosmos unifica estas necesidades en fichas de cliente con:
-
-| Módulo | Descripción | Plan |
-|--------|-------------|------|
-| **Clientes** | Unidad central: cada cliente agrupa tareas, ideas y recursos | Todos |
-| **Tareas** | Con prioridades, fechas de vencimiento y vinculación a cliente | Todos |
-| **Ideas** | Captura rápida ligada a un cliente, sin límite | Todos |
-| **Panel Hoy** | Tareas del día agrupadas por cliente con badges de riesgo | Todos |
-| **Recursos** | Enlaces, documentos, videos e imágenes por cliente | Solo ✦ |
-| **Kosmo IA** | `planDay`, `clientSummary` y `clientUpdate` sobre datos reales | Solo ✦ |
-| **Nudges** | Sugerencias contextuales cuando hay tareas vencidas | Solo ✦ |
+- **Pérdida de contexto** entre sesiones
+- **Documentación dispersa** (notas en papel, facturas por email, consentimientos físicos)
+- **Riesgo legal** por RGPD incumplido o consentimientos mal gestionados
+- **Tiempo administrativo** que resta tiempo a los pacientes
 
 ---
 
-## Planes y Funcionalidades
+## Funcionalidades
 
-### Comparativa de planes
+### Módulos disponibles
 
-| Plan | Precio | Clientes | Tareas | Ideas | Recursos | IA (Kosmo) |
-|------|--------|:--------:|:------:|:-----:|:--------:|:----------:|
-| **Gratuito** | 0 € | 1 | 5 máx. pendientes | ∞ | — | — |
-| **Solo Mensual** | 11,99 €/mes | ∞ | ∞ | ∞ | ✓ | 3 acciones/día |
-| **Solo Anual** | 119 €/año | ∞ | ∞ | ∞ | ✓ | 3 acciones/día |
+| Módulo | Descripción |
+|--------|-------------|
+| **Dashboard** | Panel de control diario con métricas, alertas y briefing de Kosmo |
+| **Pacientes** | CRUD completo con ficha detallada, pre/post sesión |
+| **Notas** | Registro de sesiones anidado por paciente |
+| **Acuerdos** | Condiciones del servicio por paciente |
+| **Pagos** | Control de cobros (pendiente / pagado / vencido) |
+| **Documentos** | Archivos adjuntos por paciente |
+| **Consentimientos** | Formularios RGPD y consentimiento informado |
+| **Facturación** | Vista consolidada de ingresos con filtros |
+| **Kosmo IA** | Briefings diarios + chat contextual con Llama 3.3 70B |
+| **Ajustes** | Datos de consulta, fiscales y RGPD |
+| **Admin** | Gestión de usuarios del sistema (solo admins) |
 
-### Funcionalidades por plan
+### Autenticación y seguridad
 
-<details>
-<summary><strong>Core — Todos los usuarios</strong></summary>
-
-- Autenticación completa: registro, login, recuperación de contraseña, verificación de email y 2FA (Fortify)
-- Fichas de cliente con nombre, descripción, color y estado (activo / inactivo / completado)
-- Gestor de tareas vinculadas a cliente con límite free (5 pendientes máx.) — CRUD + completar/reabrir
-- Gestor de ideas sin límite — CRUD + resolver/reactivar
-- Panel Hoy con tareas del día agrupadas por cliente y badges de riesgo (vencidas en rojo, próximas en ámbar)
-- Header de contexto en ficha de cliente: tareas pendientes, urgentes, vencidas, próxima entrega e ideas activas
-- Upgrade prompts contextuales con copy refinado en límites de clientes, tareas e IA
-- Checkout y suscripción simulada (80 % éxito / 20 % fallo)
-- Tutorial interactivo con tour guiado (spotlight + chatbot Kosmo) para nuevos usuarios
-- Landing page completa (hero, features, pricing, footer)
-- Modo oscuro / claro con persistencia
-
-</details>
-
-<details>
-<summary><strong>Solo ✦ — Plan Premium</strong></summary>
-
-- Clientes ilimitados y tareas ilimitadas
-- Recursos por cliente (enlaces, documentos, videos, imágenes)
-- Nudges contextuales de Kosmo (descartables, reset diario) en Panel Hoy y ficha de cliente
-- IA contextual con Kosmo — 3 acciones:
-  - `planDay` — planifica el día con la información de todos tus clientes
-  - `clientSummary` — resume el estado actual de un cliente
-  - `clientUpdate` — genera un parte semanal detallado para un cliente
-
-</details>
-
-<details>
-<summary><strong>Admin — Panel de administración</strong></summary>
-
-- Dashboard con estadísticas globales
-- Gestión de usuarios (lista paginada + detalle + eliminación)
-- Historial de pagos con resumen de ingresos
-- Control de suscripciones con distribución por plan
-
-</details>
+- Registro con **verificación de email** obligatoria
+- **Autenticación de dos factores** (TOTP)
+- **Reset de contraseña** por email
+- **Rate limiting** en login (protección ante ataques de fuerza bruta)
+- **Policies de ownership** — cada profesional solo accede a sus propios datos
 
 ---
 
@@ -130,20 +100,18 @@ ClientKosmos unifica estas necesidades en fichas de cliente con:
 | Node.js | 18+ |
 | Git | cualquiera |
 
-> **Servicios externos necesarios:**
-> - **TiDB Cloud** (base de datos) — certificado SSL ISRG Root X1
-> - **Groq** (IA contextual) — cuenta gratuita en [console.groq.com](https://console.groq.com) + CA bundle Mozilla (solo Windows)
+> Para usar la IA (Kosmo) necesitas una API key gratuita de [Groq](https://console.groq.com).
 
-### Opción A — Setup automático (recomendado)
+### Opción A — Docker (recomendado, sin instalar PHP ni Node)
 
 ```bash
 git clone <repo-url>
-cd clientkosmos-samuel-ayllon
-# Edita .env con tus credenciales (ver Opción B paso 3), luego:
-composer setup
+cd client-kosmos-SamuelAyllon
+
+docker compose up --build -d
 ```
 
-El script `composer setup` ejecuta automáticamente: `composer install`, copia `.env.example`, genera `APP_KEY`, ejecuta migraciones, instala dependencias npm y compila el frontend.
+Abre **http://localhost:8000**. El primer arranque tarda ~60 s mientras la base de datos se inicializa.
 
 ### Opción B — Setup manual
 
@@ -151,80 +119,52 @@ El script `composer setup` ejecuta automáticamente: `composer install`, copia `
 
 ```bash
 git clone <repo-url>
-cd clientkosmos-samuel-ayllon
+cd client-kosmos-SamuelAyllon
 composer install
 npm install
 ```
 
-#### 2. Certificados SSL (solo Windows)
-
-> En **Linux/macOS** los certificados del sistema ya están disponibles — omite este paso.
-
-En **Windows**, PHP/cURL no incluye certificados SSL por defecto. Descárgalos con PowerShell (como administrador):
-
-```powershell
-mkdir C:\certs
-# Para TiDB Cloud (base de datos)
-Invoke-WebRequest -Uri "https://letsencrypt.org/certs/isrgrootx1.pem" -OutFile "C:\certs\isrgrootx1.pem"
-# Para Groq (IA contextual)
-Invoke-WebRequest -Uri "https://curl.se/ca/cacert.pem" -OutFile "C:\certs\cacert.pem"
-```
-
-#### 3. Configurar entorno
+#### 2. Configurar entorno
 
 ```bash
 cp .env.example .env
 php artisan key:generate
 ```
 
-Edita `.env` con tus credenciales:
+Edita `.env` con tu API key de Groq (opcional):
 
 ```env
-# ── Base de datos (TiDB Cloud) ─────────────────────────────────
-DB_CONNECTION=mysql
-DB_HOST=gateway01.eu-central-1.prod.aws.tidbcloud.com
-DB_PORT=4000
-DB_DATABASE=test
-DB_USERNAME=tu_usuario
-DB_PASSWORD=tu_password
-DB_SSL_CA=C:\certs\isrgrootx1.pem     # Solo Windows
-
-# ── IA contextual (Groq — gratuito) ────────────────────────────
 GROQ_API_KEY=gsk_tu_clave_aqui
-GROQ_BASE_URL=https://api.groq.com/openai/v1
-GROQ_MODEL=llama-3.3-70b-versatile
-GROQ_CA_BUNDLE=C:/certs/cacert.pem    # Solo Windows
 ```
 
-> **Obtener API key de Groq:** Regístrate gratis en [console.groq.com](https://console.groq.com), ve a "API Keys" y genera una clave. El plan gratuito permite 14.400 peticiones/día.
+> En Windows, si usas TiDB Cloud como base de datos, descarga también el certificado SSL (ver sección [Variables de Entorno](#variables-de-entorno)).
 
-#### 4. Migrar base de datos con datos de prueba
+#### 3. Migrar base de datos con datos de prueba
 
 ```bash
 php artisan migrate:fresh --seed
 ```
 
-#### 5. Iniciar el servidor
+#### 4. Iniciar el servidor
 
 ```bash
-composer dev      # Todo junto: backend + queue + frontend (recomendado)
+composer dev      # Todo junto: backend + vite (recomendado)
 
 # O por separado:
 php artisan serve  # Backend → http://localhost:8000
-npm run dev        # Frontend con hot reload (Vite)
+npm run dev        # Frontend con hot reload
 ```
 
 ---
 
 ## Credenciales de Prueba
 
-Después de `php artisan migrate:fresh --seed`:
+Tras ejecutar `php artisan migrate:fresh --seed`:
 
-| Rol | Email | Password | Datos demo |
-|-----|-------|:--------:|------------|
+| Rol | Email | Contraseña | Datos demo |
+|-----|-------|:----------:|------------|
 | **Admin** | admin@clientkosmos.test | `password` | Panel de administración |
-| **Premium (Solo)** | premium@clientkosmos.test | `password` | 3 clientes, tareas, ideas y recursos |
-| **Free** | free@clientkosmos.test | `password` | 1 cliente, 3 tareas, 1 idea |
+| **Profesional** | natalia@clientkosmos.test | `password` | Consulta con pacientes demo |
 
 ---
 
@@ -235,39 +175,37 @@ Después de `php artisan migrate:fresh --seed`:
 | Tecnología | Versión | Propósito |
 |-----------|---------|----------|
 | Laravel | 12 | Framework principal |
-| Laravel Fortify | 1.x | Autenticación (login, registro, 2FA, verificación de email) |
-| Spatie Permission | 7.x | Roles y permisos (`admin`, `premium_user`, `free_user`) |
-| Eloquent ORM | (Laravel 12) | Acceso a datos |
-| openai-php/client | 0.19 | Cliente SDK para IA (Groq vía API compatible con OpenAI) |
-| Laravel Wayfinder | 0.1.9 | Generación de rutas tipadas para TypeScript |
-| Pest | 3.x | Framework de testing (156 test cases) |
+| Laravel Fortify | 1.x | Autenticación (login, registro, 2FA, reset password, verificación email) |
+| Spatie Permission | 7.2 | Roles (`admin`, `professional`) y middleware de acceso |
+| openai-php/client | 0.19 | Cliente SDK para la API de Groq (compatible con OpenAI) |
+| Laravel Wayfinder | 0.1.9 | Rutas tipadas para TypeScript |
+| Pest | 3.x | Framework de testing (97 test cases, 487 aserciones) |
 
 ### Frontend
 
 | Tecnología | Versión | Propósito |
 |-----------|---------|----------|
-| React | 19 | UI interactiva |
+| React | 19 | UI interactiva con React Compiler |
 | TypeScript | 5.7 | Tipado estático |
 | Inertia.js | 2.3 | Puente Laravel–React (SPA monolítica sin API REST) |
-| Tailwind CSS | 4.0 | Estilos utility-first con tokens custom |
-| shadcn/ui | — | Componentes UI (Radix UI + Tailwind) |
-| Vite | 7 | Bundler con React Compiler |
+| Tailwind CSS | 4.0 | Estilos utility-first con design system propio |
+| shadcn/ui | — | Componentes UI accesibles (Radix UI + Tailwind) |
+| Vite | 7 | Bundler |
 | Lucide React | 0.475 | Iconografía |
 
 ### Base de datos e infraestructura
 
 | Entorno | Motor | Conexión |
 |---------|-------|----------|
-| Desarrollo local | SQLite (archivo local) | Sin configuración — `DB_CONNECTION=sqlite` en `.env` |
-| Producción / Docker | TiDB Cloud Serverless (MySQL-compatible) | Puerto 4000, SSL obligatorio — configurado en `.env.prod` |
-| Tests | SQLite in-memory | Sin configuración |
+| Desarrollo local | SQLite | Sin configuración — `DB_CONNECTION=sqlite` |
+| Producción / Docker | MySQL 8 / TiDB Cloud | Puerto 4000, SSL obligatorio |
+| Tests | SQLite in-memory | Rápido y aislado |
 
-### Integraciones IA
+### IA (Kosmo)
 
-| Servicio | Modelo | Plan gratuito | Variables de entorno |
-|---------|--------|---------------|----------------------|
-| **Groq** *(activo)* | Llama 3.3 70B | 14.400 req/día | `GROQ_API_KEY`, `GROQ_CA_BUNDLE` |
-| OpenAI GPT | gpt-4o, etc. | De pago | Cambiar `GROQ_BASE_URL` y `GROQ_API_KEY` |
+| Servicio | Modelo | Plan gratuito | Variables |
+|---------|--------|:-------------:|-----------|
+| **Groq** | Llama 3.3 70B Versatile | 14.400 req/día | `GROQ_API_KEY`, `GROQ_BASE_URL` |
 
 ---
 
@@ -275,114 +213,86 @@ Después de `php artisan migrate:fresh --seed`:
 
 ### Patrón general
 
-ClientKosmos sigue el patrón **SPA monolítica** con Inertia.js: el backend Laravel renderiza páginas React directamente sin necesidad de una API REST separada. Esto simplifica autenticación, validación y navegación.
+ClientKosmos usa **SPA monolítica con Inertia.js**: el backend Laravel sirve directamente las páginas React sin necesidad de una API REST separada.
 
 ```
-┌─────────────┐    Inertia.js    ┌──────────────────────┐   Eloquent   ┌─────────────────┐
-│   Browser   │ ◄──────────────► │  Laravel Controllers  │ ◄──────────► │  TiDB Cloud     │
-│  React SPA  │                  │  (Single-Action)      │              │  (MySQL 8)      │
-└─────────────┘                  └──────────┬───────────┘              └─────────────────┘
+┌─────────────┐    Inertia.js    ┌──────────────────────┐   Eloquent   ┌──────────────────┐
+│   Browser   │ ◄──────────────► │  Laravel Controllers  │ ◄──────────► │  SQLite / MySQL  │
+│  React SPA  │                  │  (Single-Action)      │              │  (TiDB Cloud)    │
+└─────────────┘                  └──────────┬───────────┘              └──────────────────┘
                                              │
                           ┌──────────────────┼──────────────────┐
                           ▼                  ▼                  ▼
-                      Policies          Middleware         FormRequests
-                   (ownership)       (roles: Spatie)      (validación)
+                      Policies          Middleware          Fortify
+                   (ownership)       (admin/professional)  (autenticación)
                                              │
                                              ▼
                                OpenAI PHP Client → Groq API
-                               (PlanDayAction, ClientSummaryAction,
-                                ClientUpdateAction)
+                               (KosmoIndexAction, KosmoChatAction)
 ```
 
-### Integración IA — Groq vía OpenAI SDK
+### Patrón Single-Action Controllers
 
-El cliente de IA se registra como **singleton** en `AppServiceProvider`:
+Cada acción del controlador tiene su propio archivo PHP con un único método `__invoke`:
 
-```php
-$this->app->singleton(OpenAIClient::class, function () {
-    return OpenAI::factory()
-        ->withApiKey(config('services.groq.api_key'))
-        ->withBaseUri(config('services.groq.base_url'))
-        ->withHttpClient(new GuzzleClient(['verify' => config('services.groq.ca_bundle')]))
-        ->make();
-});
+```
+app/Http/Controllers/
+├── Patient/
+│   ├── IndexAction.php       ← GET  /patients
+│   ├── StoreAction.php       ← POST /patients
+│   ├── ShowAction.php        ← GET  /patients/{patient}
+│   ├── UpdateAction.php      ← PUT  /patients/{patient}
+│   ├── DestroyAction.php     ← DEL  /patients/{patient}
+│   ├── PreSessionAction.php  ← GET  /patients/{patient}/pre-session
+│   └── PostSessionAction.php ← GET  /patients/{patient}/post-session
+└── ...
 ```
 
-Las acciones `Ai\PlanDayAction`, `Ai\ClientSummaryAction` y `Ai\ClientUpdateAction` reciben el cliente por inyección de dependencias. Toda la configuración reside en `config/services.php` bajo la clave `groq`.
-
-### Decisiones de diseño clave
-
-| Decisión | Detalle |
-|----------|---------|
-| **Patrón Single-Action** | Cada controlador tiene un único método `__invoke` — un archivo = una responsabilidad |
-| **Clientes ≡ Projects** | El modelo se llama `Project`, las URLs usan `/clients` y la UI dice "Clientes" |
-| **Hard delete en Task e Idea** | `SoftDeletes` eliminado en Fase 2; la columna `deleted_at` permanece en BD pero Eloquent la ignora |
-| **Límite de tareas free** | `User::canAddTask()` cuenta `status='pending'` — aplica al crear y al reabrir |
-| **Límite de clientes free** | `User::canAddProject()` — máximo 1 cliente en plan gratuito |
-| **Pago simulado** | `Payment::process()` con 80 % éxito; almacena solo los últimos 4 dígitos (PCI-DSS) |
-| **Ruta home** | `inertia('welcome')` sin redirect a login (requerido por los tests de landing page) |
+**Ventajas:** responsabilidad única, testabilidad, mantenibilidad, inyección de dependencias mínima.
 
 ---
 
 ## Estructura del Proyecto
 
 ```
-clientkosmos/
+client-kosmos-SamuelAyllon/
 ├── app/
+│   ├── Actions/Fortify/          ← Lógica de autenticación (Fortify)
 │   ├── Http/
-│   │   ├── Controllers/               ← Patrón Single-Action (__invoke)
-│   │   │   ├── Dashboard/             ← Panel Hoy
-│   │   │   ├── Project/               ← Fichas de cliente (CRUD + Complete)
-│   │   │   ├── Task/                  ← Tareas (CRUD + Complete + Reopen)
-│   │   │   ├── Idea/                  ← Ideas (CRUD + Resolve + Reactivate)
-│   │   │   ├── Resource/              ← Recursos por cliente (CRUD)
-│   │   │   ├── Ai/                    ← PlanDayAction, ClientSummaryAction, ClientUpdateAction
-│   │   │   ├── Subscription/ Checkout/ Tutorial/
-│   │   │   └── Admin/                 ← Dashboard, Users, Payments, Subscriptions
-│   │   └── Requests/                  ← Form Requests de validación
-│   ├── Models/
-│   │   ├── User.php          ← canAddTask(), canAddProject(), roles
-│   │   ├── Task.php          ← scopes, prioridades, markAsCompleted()
-│   │   ├── Idea.php          ← resolve/reactivate, status active/resolved
-│   │   ├── Project.php       ← scopes, color, brand_tone ("cliente")
-│   │   ├── Resource.php      ← link/document/video/image/other
-│   │   ├── Subscription.php  ← plan free/premium_monthly/premium_yearly
-│   │   ├── Payment.php       ← process() 80/20, generateTransactionId()
-│   │   └── AiLog.php         ← Registro de uso de IA
-│   ├── Providers/
-│   │   └── AppServiceProvider.php  ← Singleton OpenAI\Client → Groq
-│   └── Policies/                   ← Ownership: Project, Task, Idea, Resource
-├── config/
-│   └── services.php                ← Configuración Groq
+│   │   ├── Controllers/          ← Patrón Single-Action (__invoke)
+│   │   │   ├── Dashboard/
+│   │   │   ├── Patient/
+│   │   │   ├── Note/
+│   │   │   ├── Agreement/
+│   │   │   ├── Payment/
+│   │   │   ├── Document/
+│   │   │   ├── ConsentForm/
+│   │   │   ├── Billing/
+│   │   │   ├── Kosmo/
+│   │   │   ├── Onboarding/
+│   │   │   ├── Settings/         ← Consulta + Profile + Password + 2FA
+│   │   │   ├── Admin/Users/
+│   │   │   └── Auth/
+│   │   └── Middleware/
+│   ├── Models/                   ← User, Patient, Note, Agreement, Payment, ...
+│   ├── Policies/                 ← PatientPolicy (ownership)
+│   └── Providers/                ← AppServiceProvider (Groq singleton)
 ├── database/
-│   ├── migrations/                 ← 14 migraciones
-│   └── seeders/                    ← RoleSeeder + UserSeeder (3 usuarios demo)
-├── resources/
-│   ├── css/app.css                 ← Design system (tokens, animaciones, dark mode)
-│   └── js/
-│       ├── pages/
-│       │   ├── welcome.tsx         ← Landing page pública
-│       │   ├── dashboard.tsx       ← Panel Hoy
-│       │   ├── projects/           ← Fichas de cliente
-│       │   ├── tasks/  ideas/  resources/
-│       │   ├── subscription/  checkout/
-│       │   ├── admin/              ← Panel admin
-│       │   ├── auth/               ← Login, registro, 2FA, reset…
-│       │   └── settings/           ← Perfil, contraseña, apariencia, 2FA
-│       ├── components/
-│       │   ├── ui/                 ← 25+ componentes shadcn/ui
-│       │   └── tutorial-chatbot.tsx ← Tour interactivo con spotlight
-│       ├── types/                  ← TypeScript types (models, pages, admin)
-│       ├── hooks/                  ← appearance, clipboard, 2FA, mobile…
-│       ├── routes/                 ← Rutas tipadas (Laravel Wayfinder)
-│       └── layouts/                ← App (sidebar) + Auth (centrado)
+│   ├── migrations/
+│   ├── seeders/                  ← RoleSeeder + UserSeeder
+│   └── factories/                ← UserFactory, PatientFactory, PaymentFactory
+├── resources/js/
+│   ├── pages/                    ← dashboard, patients, billing, kosmo, settings, admin, auth
+│   ├── components/ui/            ← shadcn/ui customizados
+│   └── layouts/                  ← AppLayout (sidebar) + AuthLayout
 ├── routes/
-│   ├── web.php                     ← Todas las rutas (public + auth + premium + admin)
-│   └── settings.php                ← Rutas de configuración de cuenta
-├── tests/Feature/                  ← 156 test cases (Pest)
-├── docs/                           ← Documentación técnica y de usuario
-├── Dockerfile                      ← Multi-stage build
-└── docker-compose.yml              ← 3 servicios: app, db, mailpit
+│   ├── web.php                   ← Todas las rutas
+│   └── settings.php              ← Rutas de configuración de cuenta
+├── tests/Feature/                ← 97 tests (Pest)
+├── docs/                         ← Documentación técnica y de usuario
+├── deploy/                       ← Docker Compose para producción
+├── Dockerfile
+└── docker-compose.yml
 ```
 
 ---
@@ -392,7 +302,7 @@ clientkosmos/
 ### Servidor
 
 ```bash
-composer dev          # Todo junto: serve + queue + vite (recomendado)
+composer dev          # Todo junto: serve + vite (recomendado)
 php artisan serve     # Solo backend (puerto 8000)
 npm run dev           # Solo frontend con hot reload
 npm run build         # Build de producción
@@ -408,16 +318,15 @@ php artisan migrate                # Aplicar nuevas migraciones
 ### Testing
 
 ```bash
-php artisan test                          # Todos los tests
-php artisan test --filter=TaskIndex       # Test específico por nombre de clase
-php artisan test --coverage               # Con cobertura
-composer test                             # Lint + tests
+php artisan test --testsuite=Feature   # Todos los tests de Feature
+php artisan test --filter=PatientIndex # Test específico por nombre
 ```
 
 ### Caché y limpieza
 
 ```bash
 php artisan optimize:clear   # Limpia config, caché y vistas
+php artisan view:clear       # Solo caché de vistas compiladas
 php artisan config:clear     # Solo caché de configuración
 ```
 
@@ -434,63 +343,68 @@ composer lint      # Laravel Pint
 
 ## Roles y Permisos
 
-### Tres roles (Spatie Permission)
+### Dos roles (Spatie Permission)
 
-| Rol | Acceso |
-|-----|--------|
-| **`admin`** | Panel de administración: `/admin/dashboard`, `/admin/users`, `/admin/payments`, `/admin/subscriptions` |
-| **`premium_user`** | Clientes ilimitados, tareas ilimitadas, recursos e IA contextual (plan Solo) |
-| **`free_user`** | 1 cliente, máximo 5 tareas pendientes, ideas ilimitadas — sin recursos ni IA |
+| Rol | Asignación | Acceso |
+|-----|------------|--------|
+| **`professional`** | Automático al registrarse | Dashboard, pacientes, facturación, Kosmo, ajustes |
+| **`admin`** | Manual por otro admin | Panel de administración `/admin/*` |
 
-### Capas de protección
+### Middleware de protección
 
-| Capa | Mecanismo |
-|------|-----------|
-| **Rutas** | Middleware `role:premium_user` / `role:admin` (Spatie) |
-| **Recursos** | Policies — solo el propietario puede ver/modificar |
-| **Lógica de negocio** | `User::canAddTask()` y `User::canAddProject()` — validan los límites del plan free |
-| **Autenticación** | Fortify + bloqueo si el usuario no tiene rol asignado |
+| Middleware | Alias | Comportamiento |
+|-----------|-------|----------------|
+| `EnsureAdmin` | `admin` | Solo admins; redirige al dashboard si no |
+| `EnsureProfessional` | `professional` | Redirige admins al panel admin |
+| `auth` | — | Fortify: redirige a login si no autenticado |
+| `verified` | — | Fortify: redirige a verificación si email no confirmado |
+
+### Policies (ownership)
+
+Los datos de cada profesional son privados. `PatientPolicy` garantiza que ningún usuario puede ver o modificar pacientes de otro usuario.
 
 ---
 
 ## Rutas de la Aplicación
 
 ### Públicas
+
 ```
-GET  /          Landing page
-GET  /login     Login
-GET  /register  Registro
+GET  /          Bienvenida
+GET  /login     Login (Fortify)
+GET  /register  Registro (Fortify)
 ```
 
-### Autenticadas (todos los roles)
+### Profesional — `['auth', 'verified', 'professional']`
+
 ```
-GET/POST/PUT/DELETE  /clients                          Fichas de cliente (CRUD)
-PATCH                /clients/{id}/complete
-GET/POST/PUT/DELETE  /tasks                            Tareas
-PATCH                /tasks/{id}/complete | /reopen
-GET/POST/PUT/DELETE  /ideas                            Ideas
-PATCH                /ideas/{id}/resolve | /reactivate
-GET                  /subscription                     Ver suscripción
-GET/POST             /checkout                         Pago simulado
-POST                 /tutorial/complete                Marcar tutorial completado
+GET                  /dashboard
+GET, POST            /onboarding
+GET, POST, PUT, DEL  /patients
+GET                  /patients/{patient}
+GET                  /patients/{patient}/pre-session
+GET                  /patients/{patient}/post-session
+POST, PUT, DEL       /patients/{patient}/notes/...
+POST, PUT, DEL       /patients/{patient}/agreements/...
+POST, PUT, DEL       /patients/{patient}/payments/...
+POST, DEL            /patients/{patient}/documents/...
+POST, PUT            /patients/{patient}/consent-forms/...
+GET                  /billing
+GET, POST            /kosmo
+POST                 /kosmo/chat
+POST                 /kosmo/briefings/{briefing}/read
+GET, PUT             /settings
 ```
 
-### Solo ✦ — `premium_user`
-```
-POST          /ai/plan-day                         Planificar el día con IA
-POST          /ai/client-summary/{project}         Resumen de cliente con IA
-POST          /ai/client-update/{project}          Parte semanal con IA
-GET/POST      /clients/{project}/resources         Recursos del cliente
-PUT/DELETE    /resources/{resource}                Editar/eliminar recurso
-```
+### Admin — `['auth', 'verified', 'admin']`
 
-### Admin — `admin`
 ```
-GET         /admin/dashboard
 GET         /admin/users
-GET/DELETE  /admin/users/{user}
-GET         /admin/payments
-GET         /admin/subscriptions
+GET         /admin/users/create
+POST        /admin/users
+GET         /admin/users/{user}
+PUT         /admin/users/{user}/role
+DELETE      /admin/users/{user}
 ```
 
 ---
@@ -498,34 +412,49 @@ GET         /admin/subscriptions
 ## Testing
 
 ```bash
-php artisan test            # Ejecutar todos los tests
-php artisan test --coverage # Con informe de cobertura
-composer test               # Lint (Pint) + tests
+php artisan test --testsuite=Feature   # Ejecutar todos los Feature tests
 ```
 
-**156 test cases** distribuidos en los siguientes módulos:
+**97 test cases** — **487 aserciones** — todas en verde ✅
 
-| Módulo | Cobertura |
-|--------|-----------|
-| Auth | Registro, login, verificación email, reset password, 2FA |
-| Tasks | CRUD, completar/reabrir, límite free, autorización |
-| Ideas | CRUD, resolver/reactivar, autorización |
-| Clients | CRUD, completar cliente, ownership |
-| Resources | CRUD anidado bajo cliente, autorización |
-| Checkout | Flujo éxito/fallo, validación de tarjeta |
-| IA contextual | `planDay`, `clientSummary`, `clientUpdate`, control de roles |
-| Admin | Dashboard, usuarios, pagos, suscripciones |
-| Settings | Perfil, contraseña, 2FA |
+| Módulo | Tests | Cobertura |
+|--------|:-----:|-----------|
+| AdminController | 11 | CRUD usuarios, restricción de roles |
+| AuthController | 6 | Redirecciones post-login por rol, onboarding |
+| Auth/Authentication | 6 | Login, logout, rate limiting, 2FA redirect |
+| Auth/EmailVerification | 6 | Flujo completo de verificación de email |
+| Auth/PasswordConfirmation | 2 | Pantalla de confirmación |
+| Auth/PasswordReset | 5 | Reset de contraseña por email |
+| Auth/Registration | 3 | Registro + asignación de rol |
+| Auth/TwoFactorChallenge | 2 | Desafío 2FA |
+| Auth/VerificationNotification | 2 | Reenvío de email de verificación |
+| BillingController | 6 | Vista, estadísticas, filtros, aislamiento de datos |
+| DashboardController | 7 | Props, métricas, alertas, acceso por rol |
+| KosmoController | 7 | Briefings, chat, marcar leídos, autenticación |
+| PatientController | 15 | CRUD completo, ownership, pre/post sesión |
+| SettingsController | 7 | Vista, actualización de configuración |
+| Settings/PasswordUpdate | 3 | Actualización de contraseña |
+| Settings/ProfileUpdate | 5 | Perfil, email, eliminación de cuenta |
+| Settings/TwoFactorAuthentication | 4 | Configuración 2FA |
 
-Framework: **Pest 3** con helpers custom — `createAdmin()`, `createPremiumUser()`, `createFreeUser()`.
+Framework: **Pest 3** con `RefreshDatabase`, helpers `createAdmin()` / `createProfessional()` y `withoutVite()` global en `TestCase`.
 
 ---
 
 ## Docker
 
+### Desarrollo (con build local)
+
 ```bash
 docker compose up --build   # Primera vez (construye la imagen)
-docker compose up           # Arranque normal
+docker compose up -d        # Arranque normal
+```
+
+### Producción (sin código fuente)
+
+```bash
+cd deploy/
+docker compose up -d
 ```
 
 | Servicio | URL |
@@ -539,38 +468,32 @@ docker compose up           # Arranque normal
 |------------|--------|-----------|-------------|
 | `clientkosmos_app` | Custom (Dockerfile) | `8000` | Aplicación Laravel |
 | `clientkosmos_db` | `mysql:8.0` | `3306` | Base de datos MySQL |
-| `clientkosmos_mailpit` | `axllent/mailpit` | `1025` (SMTP), `8025` (UI) | Servidor de correo de prueba |
+| `clientkosmos_mailpit` | `axllent/mailpit` | `1025` (SMTP), `8025` (UI) | Servidor de correo |
 
-### Build multi-stage (Dockerfile)
+### Build multi-stage
 
 | Stage | Base | Acción |
 |-------|------|--------|
-| `deps` | `php:8.4-cli-alpine` | Instala dependencias PHP vía Composer |
-| `frontend` | `node:20-alpine` | Instala npm y ejecuta `npm run build` (Vite) |
-| `final` | `php:8.4-fpm-alpine` | Copia vendor + assets compilados; imagen mínima de producción |
+| `deps` | `php:8.4-cli-alpine` | Instala dependencias PHP (Composer) |
+| `frontend` | `node:20-alpine` | Compila assets con Vite (`npm run build`) |
+| `final` | `php:8.4-fpm-alpine` | Imagen mínima con `vendor/` + `public/build/` |
 
-### Comportamiento de `docker-entrypoint.sh`
+### Entrypoint automático
 
-- Copia `.env.example` → `.env` si no existe y escribe las variables del compose
-- Genera `APP_KEY` automáticamente si está vacío
-- Espera a que MySQL esté lista (`mysqladmin ping`)
-- Ejecuta `migrate --force` y `db:seed` solo si la tabla `users` está vacía
-- Cachea config/routes/vistas en producción y arranca `php artisan serve`
-
-> Los usuarios demo se crean automáticamente al levantar el contenedor por primera vez.
+Al arrancar el contenedor se ejecuta automáticamente:
+1. Copia `.env.example` → `.env` con las variables del compose
+2. Genera `APP_KEY` si está vacía
+3. Espera a que MySQL esté lista (`mysqladmin ping`)
+4. Ejecuta `migrate --force`
+5. Ejecuta `db:seed` solo si `users` está vacía
+6. Cachea configuración, rutas y vistas
+7. Arranca `php artisan serve --host=0.0.0.0 --port=8000`
 
 ---
 
 ## Variables de Entorno
 
-El proyecto usa **dos archivos de entorno** según el contexto:
-
-| Archivo | Uso | Base de datos |
-|---------|-----|---------------|
-| `.env` | Desarrollo local | SQLite (sin configuración) |
-| `.env.prod` | Producción / Docker | TiDB Cloud Serverless (MySQL, SSL) |
-
-### `.env` — Desarrollo local
+### Desarrollo local (SQLite)
 
 ```env
 APP_NAME=ClientKosmos
@@ -578,21 +501,17 @@ APP_ENV=local
 APP_DEBUG=true
 APP_URL=http://localhost:8000
 
-# ── Base de datos (SQLite — sin configuración extra) ───────────
+# Base de datos (SQLite — cero configuración)
 DB_CONNECTION=sqlite
-# DB_DATABASE= (por defecto: database/database.sqlite)
 
-# ── Sesión ──────────────────────────────────────────────────────
-SESSION_DRIVER=database
-
-# ── IA contextual (Groq — gratuito, recomendado) ───────────────
+# IA contextual (opcional pero recomendado)
 GROQ_API_KEY=gsk_xxxxxxxxxxxxxxxx
 GROQ_BASE_URL=https://api.groq.com/openai/v1
 GROQ_MODEL=llama-3.3-70b-versatile
-GROQ_CA_BUNDLE=C:/certs/cacert.pem    # Solo Windows (ver más abajo)
+GROQ_CA_BUNDLE=C:/certs/cacert.pem   # Solo Windows
 ```
 
-### `.env.prod` — Producción / TiDB Cloud
+### Producción (MySQL / TiDB Cloud)
 
 ```env
 APP_NAME=ClientKosmos
@@ -600,33 +519,36 @@ APP_ENV=production
 APP_DEBUG=false
 APP_URL=https://tu-dominio.com
 
-# ── Base de datos (TiDB Cloud Serverless) ──────────────────────
+# Base de datos (TiDB Cloud Serverless — MySQL compatible)
 DB_CONNECTION=mysql
 DB_HOST=gateway01.eu-central-1.prod.aws.tidbcloud.com
 DB_PORT=4000
 DB_DATABASE=test
 DB_USERNAME=tu_usuario
 DB_PASSWORD=tu_password
-DB_SSL_CA=C:\certs\isrgrootx1.pem     # Solo Windows
+DB_SSL_CA=/ruta/isrgrootx1.pem   # Certificado ISRG Root X1
 
-# ── Sesión ──────────────────────────────────────────────────────
-SESSION_DRIVER=database
-
-# ── IA contextual (Groq) ────────────────────────────────────────
+# IA contextual
 GROQ_API_KEY=gsk_xxxxxxxxxxxxxxxx
 GROQ_BASE_URL=https://api.groq.com/openai/v1
 GROQ_MODEL=llama-3.3-70b-versatile
-GROQ_CA_BUNDLE=C:/certs/cacert.pem    # Solo Windows
 ```
 
-### Certificados SSL (solo necesarios con TiDB Cloud)
+### Certificados SSL (solo necesarios en producción con TiDB Cloud)
 
-> En desarrollo local con SQLite **no se necesitan certificados**. Solo son necesarios al conectar con TiDB Cloud (`.env.prod`).
+> En desarrollo con SQLite **no se necesitan certificados**. En Docker, MySQL corre localmente.
 
-| Sistema operativo | Certificados | Acción necesaria |
-|-------------------|--------------|------------------|
-| **Windows** | No incluidos en PHP/cURL | Descargar con PowerShell (ver [Inicio Rápido](#inicio-rápido)) |
-| **Linux / macOS** | Preinstalados en el sistema | Ninguna — `GROQ_CA_BUNDLE` y `DB_SSL_CA` pueden omitirse |
+| Sistema | Acción |
+|---------|--------|
+| **Windows** | Descargar `isrgrootx1.pem` (TiDB) y `cacert.pem` (Groq) con PowerShell |
+| **Linux / macOS** | Sin acción — certificados del sistema disponibles automáticamente |
+
+```powershell
+# PowerShell (Windows) — como administrador
+mkdir C:\certs
+Invoke-WebRequest -Uri "https://letsencrypt.org/certs/isrgrootx1.pem" -OutFile "C:\certs\isrgrootx1.pem"
+Invoke-WebRequest -Uri "https://curl.se/ca/cacert.pem" -OutFile "C:\certs\cacert.pem"
+```
 
 ---
 
@@ -634,13 +556,14 @@ GROQ_CA_BUNDLE=C:/certs/cacert.pem    # Solo Windows
 
 | Síntoma | Causa probable | Solución |
 |---------|----------------|----------|
-| `cURL error 60` al usar la IA | PHP/cURL no encuentra certificados CA (habitual en Windows) | Descargar `cacert.pem` y configurar `GROQ_CA_BUNDLE` en `.env` |
-| `cURL error 60` al conectar a BD | Falta el certificado ISRG Root X1 (solo con TiDB Cloud) | Descargar `isrgrootx1.pem` y configurar `DB_SSL_CA` en `.env.prod` |
-| Error 419 en formularios | Token CSRF expirado | `php artisan config:clear` + borrar cookies del navegador |
+| `cURL error 60` con la IA | PHP/cURL sin certificados CA (Windows) | Descargar `cacert.pem` y configurar `GROQ_CA_BUNDLE` |
+| `cURL error 60` con BD | Falta certificado ISRG Root X1 (TiDB) | Descargar `isrgrootx1.pem` y configurar `DB_SSL_CA` |
+| Error 419 en formularios | Token CSRF expirado | `php artisan config:clear` + borrar cookies |
 | `RoleDoesNotExist` | Seeders no ejecutados | `php artisan migrate:fresh --seed` |
-| Frontend no actualiza | Caché de Vite | Reiniciar `npm run dev` o Ctrl+Shift+R en el navegador |
-| `SQLSTATE[HY000]` en conexión BD | Credenciales incorrectas o cert SSL faltante | Verificar `DB_HOST`, `DB_USERNAME`, `DB_PASSWORD` y `DB_SSL_CA` |
-| IA no responde / timeout | API key inválida o servicio caído | Verificar `GROQ_API_KEY` y consultar [status.groq.com](https://status.groq.com) |
+| Tests fallan con Vite | Manifest de Vite no encontrado | `php artisan view:clear` y volver a ejecutar |
+| Frontend no actualiza | Caché de Vite | Reiniciar `npm run dev` o Ctrl+Shift+R |
+| La app tarda en arrancar (Docker) | MySQL inicializando | Normal. Espera ~60 s y observa `docker compose logs -f app` |
+| Sesiones se invalidan (Docker) | `APP_KEY` cambia en cada contenedor | Fija la `APP_KEY` en el `docker-compose.yml` |
 
 ---
 
@@ -648,25 +571,11 @@ GROQ_CA_BUNDLE=C:/certs/cacert.pem    # Solo Windows
 
 | Documento | Descripción |
 |-----------|-------------|
-| [docs/manual-usuario.md](docs/manual-usuario.md) | Manual de uso para el usuario final |
-| [docs/decisiones-tecnicas.md](docs/decisiones-tecnicas.md) | Justificación técnica de cada decisión de diseño |
-| [docs/contexto-proyecto.md](docs/contexto-proyecto.md) | Contexto completo y estado actual del proyecto |
-| [docs/clientkosmos-style-guide.md.md](docs/clientkosmos-style-guide.md.md) | Guía de estilos y design system |
-| [docs/necesidad-y-justificacion.md](docs/necesidad-y-justificacion.md) | Necesidad y justificación del proyecto |
-
----
-
-## Fases del Desarrollo
-
-El proyecto se desarrolló en 5 fases incrementales:
-
-| Fase | Descripción | Estado |
-|------|-------------|:------:|
-| **Fase 1** | Restructuración backend: "Proyectos" → "Clientes", eliminación de módulos no necesarios, limpieza de rutas y modelos | ✅ |
-| **Fase 2** | Ficha de cliente completa (tareas + ideas + recursos en una sola vista) y dashboard "Panel Hoy" | ✅ |
-| **Fase 3** | IA contextual con 3 endpoints: `plan-day`, `client-summary`, `client-update` (Groq) | ✅ |
-| **Fase 4** | Pulido general, landing page, precios actualizados, datos demo en seeders | ✅ |
-| **Fase 5** | Rebrand ClientKosmos/Kosmo, Panel Hoy reestructurado, header de contexto por cliente, badges de riesgo, nudges de Kosmo, upgrade prompts contextuales, documentación actualizada | ✅ |
+| [docs/user_manual.md](docs/user_manual.md) | Manual de uso para el usuario final |
+| [docs/justificate_implementation.md](docs/justificate_implementation.md) | Justificación técnica de decisiones de diseño |
+| [docs/proyect_information.md](docs/proyect_information.md) | Contexto completo, estado actual y estructura |
+| [docs/clientkosmos-design-system.md](docs/clientkosmos-design-system.md) | Design system: tokens, componentes, tipografía |
+| [deploy/README.md](deploy/README.md) | Instrucciones de despliegue con Docker |
 
 ---
 
@@ -679,5 +588,7 @@ MIT — Ver [LICENSE](LICENSE) para más detalles.
 <div align="center">
 
 **Samuel Ayllón** — Proyecto Intermodular 2º DAM
+
+[Docker Hub](https://hub.docker.com/r/samue45/client-kosmos)
 
 </div>

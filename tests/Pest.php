@@ -1,12 +1,11 @@
 <?php
 
-use App\Models\Subscription;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
-use \Spatie\Permission\Models\Role;
-use \Spatie\Permission\PermissionRegistrar;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,7 +16,7 @@ uses(TestCase::class, RefreshDatabase::class)->in('Feature');
 
 /*
 |--------------------------------------------------------------------------
-| Antes de cada test: sembrar roles de Spatie (necesarios para middleware)
+| Antes de cada test: sembrar roles de Spatie y limpiar caché
 |--------------------------------------------------------------------------
 */
 beforeEach(function () {
@@ -34,7 +33,7 @@ beforeEach(function () {
 
 function ensureRolesExist(): void
 {
-    foreach (['admin', 'premium_user', 'free_user'] as $role) {
+    foreach (['admin', 'professional'] as $role) {
         Role::firstOrCreate(
             ['name' => $role, 'guard_name' => 'web']
         );
@@ -42,45 +41,32 @@ function ensureRolesExist(): void
     app()[PermissionRegistrar::class]->forgetCachedPermissions();
 }
 
+/**
+ * Crea un usuario administrador con tutorial completado.
+ */
 function createAdmin(): User
 {
     ensureRolesExist();
-    $user = User::factory()->create();
+
+    $user = User::factory()->create([
+        'tutorial_completed_at' => now(),
+    ]);
     $user->assignRole('admin');
 
     return $user;
 }
 
-function createPremiumUser(): User
+/**
+ * Crea un usuario profesional con tutorial completado.
+ */
+function createProfessional(): User
 {
     ensureRolesExist();
-    $user = User::factory()->create();
-    $user->assignRole('premium_user');
 
-    Subscription::create([
-        'user_id'    => $user->id,
-        'plan'       => 'premium_monthly',
-        'status'     => 'active',
-        'started_at' => now(),
-        'expires_at' => now()->addDays(30),
+    $user = User::factory()->create([
+        'tutorial_completed_at' => now(),
     ]);
-
-    return $user;
-}
-
-function createFreeUser(): User
-{
-    ensureRolesExist();
-    $user = User::factory()->create();
-    $user->assignRole('free_user');
-
-    Subscription::create([
-        'user_id'    => $user->id,
-        'plan'       => 'free',
-        'status'     => 'active',
-        'started_at' => now(),
-        'expires_at' => null,
-    ]);
+    $user->assignRole('professional');
 
     return $user;
 }

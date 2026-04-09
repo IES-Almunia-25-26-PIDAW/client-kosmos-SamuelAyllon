@@ -38,24 +38,24 @@ class TwoFactorChallengeTest extends TestCase
         }
 
         Features::twoFactorAuthentication([
-            'confirm' => true,
+            'confirm'         => true,
             'confirmPassword' => true,
         ]);
 
         $this->seed(RoleSeeder::class);
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
-        $user = User::factory()->create();
-        $user->assignRole('free_user');
+        $user = User::factory()->create(['tutorial_completed_at' => now()]);
+        $user->assignRole('professional');
 
         $user->forceFill([
-            'two_factor_secret' => encrypt('test-secret'),
+            'two_factor_secret'         => encrypt('test-secret'),
             'two_factor_recovery_codes' => encrypt(json_encode(['code1', 'code2'])),
-            'two_factor_confirmed_at' => now(),
+            'two_factor_confirmed_at'   => now(),
         ])->save();
 
-        $this->post(route('login'), [
-            'email' => $user->email,
+        $this->post('/login', [
+            'email'    => $user->email,
             'password' => 'password',
         ]);
 

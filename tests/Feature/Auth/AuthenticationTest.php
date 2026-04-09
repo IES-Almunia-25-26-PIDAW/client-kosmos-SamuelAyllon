@@ -5,7 +5,6 @@ namespace Tests\Feature\Auth;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\RateLimiter;
 use Laravel\Fortify\Features;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
@@ -26,11 +25,11 @@ class AuthenticationTest extends TestCase
         $this->seed(RoleSeeder::class);
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
-        $user = User::factory()->create();
-        $user->assignRole('free_user');
+        $user = User::factory()->create(['tutorial_completed_at' => now()]);
+        $user->assignRole('professional');
 
-        $response = $this->post(route('login.store'), [
-            'email' => $user->email,
+        $response = $this->post('/login', [
+            'email'    => $user->email,
             'password' => 'password',
         ]);
 
@@ -45,24 +44,24 @@ class AuthenticationTest extends TestCase
         }
 
         Features::twoFactorAuthentication([
-            'confirm' => true,
+            'confirm'         => true,
             'confirmPassword' => true,
         ]);
 
         $this->seed(RoleSeeder::class);
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
-        $user = User::factory()->create();
-        $user->assignRole('free_user');
+        $user = User::factory()->create(['tutorial_completed_at' => now()]);
+        $user->assignRole('professional');
 
         $user->forceFill([
-            'two_factor_secret' => encrypt('test-secret'),
+            'two_factor_secret'         => encrypt('test-secret'),
             'two_factor_recovery_codes' => encrypt(json_encode(['code1', 'code2'])),
-            'two_factor_confirmed_at' => now(),
+            'two_factor_confirmed_at'   => now(),
         ])->save();
 
-        $response = $this->post(route('login'), [
-            'email' => $user->email,
+        $response = $this->post('/login', [
+            'email'    => $user->email,
             'password' => 'password',
         ]);
 
@@ -75,8 +74,8 @@ class AuthenticationTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $this->post(route('login.store'), [
-            'email' => $user->email,
+        $this->post('/login', [
+            'email'    => $user->email,
             'password' => 'wrong-password',
         ]);
 
@@ -90,17 +89,24 @@ class AuthenticationTest extends TestCase
         $response = $this->actingAs($user)->post(route('logout'));
 
         $this->assertGuest();
-        $response->assertRedirect(route('home'));
+        $response->assertRedirect('/');
     }
 
     public function test_users_are_rate_limited()
     {
         $user = User::factory()->create();
 
-        RateLimiter::increment(md5('login'.implode('|', [$user->email, '127.0.0.1'])), amount: 5);
+        // Make 5 failed attempts to exhaust the Fortify rate limit
+        for ($i = 0; $i < 5; $i++) {
+            $this->post('/login', [
+                'email'    => $user->email,
+                'password' => 'wrong-password',
+            ]);
+        }
 
-        $response = $this->post(route('login.store'), [
-            'email' => $user->email,
+        // The 6th attempt should be throttled; Fortify returns 429.
+        $response = $this->post('/login', [
+            'email'    => $user->email,
             'password' => 'wrong-password',
         ]);
 

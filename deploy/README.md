@@ -59,11 +59,10 @@ Abre **http://localhost:8000** en el navegador.
 
 Creadas automáticamente por los seeders en el primer arranque:
 
-| Rol | Email | Password | Acceso |
-|-----|-------|:--------:|--------|
-| **Admin** | admin@clientkosmos.test | `password` | Panel de administración |
-| **Premium (Solo ✦)** | premium@clientkosmos.test | `password` | IA, recursos, clientes ilimitados |
-| **Free** | free@clientkosmos.test | `password` | 1 cliente, 5 tareas |
+| Rol | Email | Password |
+|-----|-------|:--------:|
+| **Admin** | admin@clientkosmos.test | `password` |
+| **Professional** | natalia@clientkosmos.test | `password` |
 
 ---
 

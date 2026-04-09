@@ -1,11 +1,13 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/react-starter-kit",
+    "name": "samuel-ayllon/client-kosmos",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
+    "description": "ClientKosmos — Workspace operativo para profesionales autonomos de servicios. Gestiona pacientes, sesiones, notas, pagos y consentimientos con asistente de IA (Kosmo).",
     "keywords": [
         "laravel",
-        "framework"
+        "inertia",
+        "react",
+        "clientkosmos"
     ],
     "license": "MIT",
     "require": {

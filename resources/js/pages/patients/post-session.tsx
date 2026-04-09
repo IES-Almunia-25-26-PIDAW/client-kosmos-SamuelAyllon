@@ -31,7 +31,7 @@ interface PaymentForm {
     [key: string]: string;
 }
 
-export default function PostSession({ patient, lastSession }: Props) {
+export default function PostSession({ patient }: Props) {
     const noteForm = useForm<NoteForm>({ content: '', type: 'session_note' });
     const agreementForm = useForm<AgreementForm>({ content: '' });
     const paymentForm = useForm<PaymentForm>({

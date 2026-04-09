@@ -28,9 +28,8 @@
 #   http://localhost:8025   → Mailpit (bandeja de correo de prueba)
 #
 # USUARIOS DE PRUEBA (creados automáticamente en el primer arranque):
-#   admin@clientkosmos.test   / password  → panel de administración
-#   premium@clientkosmos.test / password  → plan Solo ✦ con IA y recursos
-#   free@clientkosmos.test    / password  → plan gratuito (1 cliente, 5 tareas)
+#   admin@clientkosmos.test    / password  → admin
+#   natalia@clientkosmos.test  / password  → professional
 #
 # NOTA SOBRE APP_KEY:
 #   Si APP_KEY está vacía, el entrypoint la genera automáticamente en el primer

@@ -26,7 +26,8 @@ class AuthenticateAction extends Controller
         }
 
         // Seguridad: bloquear login si el usuario no tiene ningún rol asignado
-        if (! $user->hasAnyRole(['admin', 'premium_user', 'free_user'])) {
+        // En este proyecto solo existen los roles 'admin' y 'professional' (ver RoleSeeder).
+        if (! $user->hasAnyRole(['admin', 'professional'])) {
             return null;
         }
 

@@ -23,14 +23,30 @@ class RegistrationTest extends TestCase
         $this->seed(RoleSeeder::class);
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
-        $response = $this->post(route('register.store'), [
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-            'password' => 'password',
+        $response = $this->post(route('register'), [
+            'name'                  => 'Test User',
+            'email'                 => 'test@example.com',
+            'password'              => 'password',
             'password_confirmation' => 'password',
         ]);
 
         $this->assertAuthenticated();
         $response->assertRedirect(route('dashboard', absolute: false));
+    }
+
+    public function test_new_user_gets_professional_role_on_register()
+    {
+        $this->seed(RoleSeeder::class);
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
+
+        $this->post(route('register'), [
+            'name'                  => 'Test User',
+            'email'                 => 'test@example.com',
+            'password'              => 'password',
+            'password_confirmation' => 'password',
+        ]);
+
+        $user = \App\Models\User::where('email', 'test@example.com')->first();
+        $this->assertTrue($user->hasRole('professional'));
     }
 }

@@ -100,6 +100,17 @@ php /app/artisan package:discover --ansi
 # ──────────────────────────────────────────────────────────────────────────────
 # Aunque docker-compose espera a que MySQL pase el healthcheck, a veces
 # necesita unos segundos más. Este bucle intenta conectar hasta 30 veces.
+#
+# Validamos que las variables de conexión están definidas antes de usarlas.
+# Sin ellas el contenedor no puede funcionar, así que fallamos rápido con
+# un mensaje claro en lugar de dejar que bash explote con "unbound variable".
+if [ -z "${DB_HOST:-}" ] || [ -z "${DB_PORT:-}" ] || [ -z "${DB_USERNAME:-}" ] || [ -z "${DB_PASSWORD:-}" ]; then
+    echo "==> ERROR: Faltan variables de entorno de base de datos."
+    echo "    Asegúrate de pasar DB_HOST, DB_PORT, DB_USERNAME y DB_PASSWORD al contenedor."
+    echo "    Usa el archivo deploy/docker-compose.yml para levantarlo correctamente."
+    exit 1
+fi
+
 echo "==> Esperando a que la base de datos esté disponible..."
 max_retries=30
 retry=0
@@ -163,9 +174,8 @@ fi
 echo "==> ClientKosmos listo en http://localhost:8000"
 echo ""
 echo "    Usuarios de prueba:"
-echo "    admin@clientkosmos.test    / password"
-echo "    premium@clientkosmos.test  / password"
-echo "    free@clientkosmos.test     / password"
+echo "    admin@clientkosmos.test    / password  (admin)"
+echo "    natalia@clientkosmos.test  / password  (professional)"
 echo ""
 
 # ──────────────────────────────────────────────────────────────────────────────
