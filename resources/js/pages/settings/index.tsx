@@ -3,8 +3,7 @@ import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import type { Auth, User } from '@/types';
-import { usePage } from '@inertiajs/react';
+import type { User } from '@/types';
 
 interface Props {
     user: User;

@@ -1,7 +1,7 @@
 import { Sparkles } from 'lucide-react';
 import * as React from 'react';
 
-export interface KosmoIconProps extends React.SVGProps<SVGSVGElement> {}
+export type KosmoIconProps = React.SVGProps<SVGSVGElement>;
 
 const KosmoIcon = React.forwardRef<SVGSVGElement, KosmoIconProps>(
   ({ className = 'w-5 h-5', ...props }, ref) => (

@@ -4,7 +4,6 @@ import {
     Receipt,
     Sparkles,
     Settings,
-    Shield,
     Users,
 } from 'lucide-react';
 import { NavFooter } from '@/components/nav-footer';
