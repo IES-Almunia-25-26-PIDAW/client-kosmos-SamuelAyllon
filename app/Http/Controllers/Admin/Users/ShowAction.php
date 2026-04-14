@@ -11,7 +11,7 @@ class ShowAction extends Controller
 {
     public function __invoke(User $user): Response
     {
-        $user->loadCount(['patients', 'sessions'])
+        $user->loadCount(['patientProfiles', 'sessions'])
              ->loadSum(['payments as paid_amount' => fn ($q) => $q->where('status', 'paid')], 'amount');
 
         return Inertia::render('admin/users/show', compact('user'));

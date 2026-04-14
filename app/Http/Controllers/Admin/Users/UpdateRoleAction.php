@@ -11,19 +11,13 @@ class UpdateRoleAction extends Controller
 {
     public function __invoke(Request $request, User $user): RedirectResponse
     {
-        $request->validate(['role' => ['required', 'in:professional,admin']]);
+        $request->validate(['role' => ['required', 'in:admin,owner,professional,patient']]);
 
         if ($user->id === $request->user()->id) {
             return back()->withErrors(['role' => 'No puedes cambiar tu propio rol.']);
         }
 
-        $user->update(['role' => $request->role]);
-
-        if ($request->role === 'professional') {
-            $user->syncRoles(['professional']);
-        } else {
-            $user->syncRoles(['admin']);
-        }
+        $user->syncRoles([$request->role]);
 
         return back()->with('success', "Rol actualizado a {$request->role}.");
     }

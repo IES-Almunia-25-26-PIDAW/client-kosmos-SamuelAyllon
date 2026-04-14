@@ -8,11 +8,7 @@ class PaymentObserver
 {
     public function saved(Payment $payment): void
     {
-        $latestStatus = $payment->patient
-            ->payments()
-            ->orderByDesc('due_date')
-            ->value('status') ?? 'paid';
-
-        $payment->patient->updateQuietly(['payment_status' => $latestStatus]);
+        // payment_status was removed from patient_profiles in v2.
+        // Payment status is now computed dynamically from queries.
     }
 }

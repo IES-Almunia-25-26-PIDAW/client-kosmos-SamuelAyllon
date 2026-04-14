@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Patient;
 
 use App\Http\Controllers\Controller;
-use App\Models\Patient;
+use App\Models\PatientProfile;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -14,9 +14,10 @@ class IndexAction extends Controller
     {
         $this->authorize('viewAny', Patient::class);
 
-        $patients = Patient::where('user_id', $request->user()->id)
+        $patients = PatientProfile::withoutGlobalScopes()
+            ->where('user_id', $request->user()->id)
             ->where('is_active', true)
-            ->orderBy('project_name')
+            ->orderBy('id')
             ->get();
 
         return Inertia::render('patients/index', [

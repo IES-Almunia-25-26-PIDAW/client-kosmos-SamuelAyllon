@@ -3,7 +3,7 @@
 namespace App\Providers;
 
 use App\Http\Responses\LoginResponse;
-use App\Models\Patient;
+use App\Models\PatientProfile;
 use App\Models\Payment;
 use App\Models\User;
 use App\Observers\PatientObserver;
@@ -55,7 +55,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->configureDefaults();
 
-        Patient::observe(PatientObserver::class);
+        PatientProfile::observe(PatientObserver::class);
         Payment::observe(PaymentObserver::class);
 
         Gate::policy(User::class, AdminPolicy::class);

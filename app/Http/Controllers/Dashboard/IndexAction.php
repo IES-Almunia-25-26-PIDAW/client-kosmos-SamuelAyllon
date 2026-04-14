@@ -3,8 +3,9 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
+use App\Models\ConsentForm;
 use App\Models\KosmoBriefing;
-use App\Models\Patient;
+use App\Models\PatientProfile;
 use App\Models\Payment;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -16,7 +17,9 @@ class IndexAction extends Controller
     {
         $user = $request->user();
 
-        $activePatients = Patient::where('user_id', $user->id)
+        // Legacy query using user_id (professional) — will be refactored in S7
+        $activePatients = PatientProfile::withoutGlobalScopes()
+            ->where('user_id', $user->id)
             ->where('is_active', true)
             ->get();
 
@@ -27,13 +30,18 @@ class IndexAction extends Controller
             ->get();
 
         $alerts = [
-            'payment' => Patient::where('user_id', $user->id)
-                ->whereIn('payment_status', ['pending', 'overdue'])
-                ->get(['id', 'project_name', 'payment_status']),
-            'consent' => Patient::where('user_id', $user->id)
-                ->where('has_valid_consent', false)
+            'payment' => PatientProfile::withoutGlobalScopes()
+                ->where('user_id', $user->id)
+                ->whereHas('payments', fn ($q) => $q->whereIn('status', ['pending', 'overdue']))
                 ->where('is_active', true)
-                ->get(['id', 'project_name']),
+                ->get(['id', 'user_id']),
+            'consent' => PatientProfile::withoutGlobalScopes()
+                ->where('user_id', $user->id)
+                ->whereDoesntHave('consentForms', fn ($q) => $q
+                    ->where('status', 'signed')
+                    ->where(fn ($q2) => $q2->whereNull('expires_at')->orWhere('expires_at', '>', now())))
+                ->where('is_active', true)
+                ->get(['id', 'user_id']),
         ];
 
         $dailyBriefing = KosmoBriefing::where('user_id', $user->id)

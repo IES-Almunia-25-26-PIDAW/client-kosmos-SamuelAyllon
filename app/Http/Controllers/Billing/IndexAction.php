@@ -15,7 +15,7 @@ class IndexAction extends Controller
         $user = $request->user();
 
         $payments = Payment::where('user_id', $user->id)
-            ->with('patient:id,project_name')
+            ->with('patient:id,user_id')
             ->when($request->status, fn ($q, $s) => $q->where('status', $s))
             ->when($request->patient_id, fn ($q, $p) => $q->where('patient_id', $p))
             ->orderByDesc('due_date')

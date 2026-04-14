@@ -2,24 +2,13 @@
 
 namespace App\Observers;
 
-use App\Models\Patient;
+use App\Models\PatientProfile;
 
 class PatientObserver
 {
-    public function saved(Patient $patient): void
+    public function saved(PatientProfile $patient): void
     {
-        $hasConsent = $patient->consentForms()
-            ->where('status', 'signed')
-            ->where(fn ($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()))
-            ->exists();
-
-        $hasOpenAgreement = $patient->agreements()
-            ->where('is_completed', false)
-            ->exists();
-
-        $patient->updateQuietly([
-            'has_valid_consent'  => $hasConsent,
-            'has_open_agreement' => $hasOpenAgreement,
-        ]);
+        // has_valid_consent and has_open_agreement were removed from patient_profiles in v2.
+        // These values are now computed dynamically from queries.
     }
 }
