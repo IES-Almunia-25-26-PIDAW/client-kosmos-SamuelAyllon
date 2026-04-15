@@ -14,7 +14,7 @@ class ShowAction extends Controller
     {
         abort_if($invoice->patient_id !== $request->user()->id, 403);
 
-        $invoice->load(['items', 'clinic']);
+        $invoice->load(['items', 'workspace']);
 
         return Inertia::render('portal/invoices/show', [
             'invoice' => $invoice,

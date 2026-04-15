@@ -13,7 +13,7 @@ class IndexAction extends Controller
     public function __invoke(Request $request): Response
     {
         $availabilities = Availability::where('professional_id', $request->user()->id)
-            ->where('clinic_id', $request->user()->currentClinicId())
+            ->where('workspace_id', $request->user()->currentWorkspaceId())
             ->orderBy('day_of_week')
             ->orderBy('start_time')
             ->get();

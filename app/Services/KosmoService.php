@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Models\Appointment;
-use App\Models\Patient;
+use App\Models\PatientProfile;
 use App\Models\User;
 
 class KosmoService
@@ -20,7 +20,7 @@ class KosmoService
      * @todo Generate a pre-session briefing for the patient, summarizing last appointment,
      *       open agreements, invoice status and key notes
      */
-    public function generatePreSessionBriefing(Patient $patient, Appointment $appointment): void
+    public function generatePreSessionBriefing(PatientProfile $patient, Appointment $appointment): void
     {
         // @todo
     }

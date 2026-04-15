@@ -18,12 +18,12 @@ class StoreAction extends Controller
             'body'        => ['required', 'string'],
         ]);
 
-        $clinicId = $request->user()->currentClinicId();
+        $workspaceId = $request->user()->currentWorkspaceId();
 
-        abort_if(! $clinicId, 422, 'No hay una clínica activa asociada a tu cuenta.');
+        abort_if(! $workspaceId, 422, 'No hay una clínica activa asociada a tu cuenta.');
 
         Message::create([
-            'clinic_id'   => $clinicId,
+            'workspace_id'   => $workspaceId,
             'sender_id'   => $request->user()->id,
             'receiver_id' => $request->receiver_id,
             'subject'     => $request->subject,

@@ -1,23 +1,24 @@
 ---
 description: Directory structure and important files of the client-kosmos project
 globs:
-alwaysApply: true
+alwaysApply: false
 ---
 # Project Directory Structure
 
-This is a **Laravel 11 + Inertia.js + React (TypeScript)** application for a psychology/consulting client management platform called **Kosmos**. The stack uses Vite, Tailwind CSS, shadcn/ui, and Spatie Permissions.
+This is a **Laravel 12 + Inertia.js + React (TypeScript)** application for a psychology/consulting client management platform called **Kosmos**. The stack uses Vite, Tailwind CSS v4, shadcn/ui, Spatie Permissions, Laravel Fortify, and Laravel Wayfinder.
 
 ## Root-Level Important Files
 
 | File | Purpose |
 |------|---------|
 | `artisan` | Laravel CLI entry point |
-| `composer.json` | PHP dependencies (Laravel, Fortify, Sanctum, Spatie Permissions, etc.) |
+| `bootstrap/app.php` | Application bootstrap (middleware, exceptions, routing) |
+| `composer.json` | PHP dependencies (Laravel, Fortify, Spatie Permissions, Wayfinder, OpenAI client, etc.) |
 | `package.json` | Node dependencies (React, Inertia, TypeScript, Tailwind, shadcn) |
 | `vite.config.ts` | Vite bundler config for frontend assets |
 | `tsconfig.json` | TypeScript compiler configuration |
 | `components.json` | shadcn/ui component configuration |
-| `phpunit.xml` | PHPUnit test configuration |
+| `phpunit.xml` | PHPUnit / Pest test configuration |
 | `pint.json` | Laravel Pint (PHP code style) configuration |
 | `eslint.config.js` | ESLint rules for TypeScript/React |
 | `.prettierrc` | Prettier formatting rules |
@@ -30,69 +31,110 @@ This is a **Laravel 11 + Inertia.js + React (TypeScript)** application for a psy
 app/
 ├── Actions/
 │   └── Fortify/
-│       ├── CreateNewUser.php          # User registration logic
-│       └── ResetUserPassword.php     # Password reset logic
+│       ├── CreateNewUser.php
+│       └── ResetUserPassword.php
 ├── Concerns/
-│   ├── PasswordValidationRules.php   # Reusable password validation trait
-│   └── ProfileValidationRules.php    # Reusable profile validation trait
+│   ├── PasswordValidationRules.php
+│   └── ProfileValidationRules.php
 ├── Http/
 │   ├── Controllers/
 │   │   ├── Admin/
-│   │   │   ├── Users/                # CRUD actions for admin user management
+│   │   │   ├── Clinics/            # Admin clinic list/show
+│   │   │   ├── Users/              # CRUD + role updates
 │   │   │   └── ImpersonationController.php
-│   │   ├── Agreement/                # Agreement CRUD (Store, Update, Destroy)
-│   │   ├── Auth/Authenticate/        # Custom authentication action
-│   │   ├── Billing/                  # Billing index
-│   │   ├── ConsentForm/              # RGPD consent form Store/Update
-│   │   ├── Dashboard/                # Main dashboard index
-│   │   ├── Document/                 # Document Store/Destroy
-│   │   ├── Kosmo/                    # AI assistant (Chat, Index, MarkRead)
-│   │   ├── Note/                     # Session notes CRUD
-│   │   ├── Onboarding/               # Onboarding flow
-│   │   ├── Patient/                  # Full patient CRUD + Pre/PostSession
-│   │   ├── Payment/                  # Payment CRUD
+│   │   ├── Agreement/
+│   │   ├── Appointment/ # Sessions: CRUD, call, transcribe, summarize, generate invoice
+│   │   ├── Auth/Authenticate/
+│   │   ├── Clinic/
+│   │   │   ├── Analytics/
+│   │   │   ├── Services/
+│   │   │   ├── Settings/
+│   │   │   └── Team/
+│   │   ├── ConsentForm/
+│   │   ├── Dashboard/
+│   │   ├── Document/
+│   │   ├── Invoice/              # Professional invoices (index/show/store/update, PDF, send)
+│   │   ├── Kosmo/
+│   │   ├── Message/
+│   │   ├── Note/
+│   │   ├── Onboarding/
+│   │   ├── Patient/              # CRUD, pre/post session, portal invite
+│   │   ├── Portal/               # Patient-facing area
+│   │   │   ├── Appointment/
+│   │   │   ├── ConsentForm/
+│   │   │   ├── Dashboard/
+│   │   │   ├── Document/
+│   │   │   ├── Invoice/
+│   │   │   ├── Message/
+│   │   │   └── Profile/
+│   │   ├── Schedule/
+│   │   │   └── Availability/
 │   │   └── Settings/
-│   │       ├── Password/             # Password change
-│   │       ├── Profile/              # Profile edit/update/delete
+│   │       ├── Password/
+│   │       ├── Profile/
 │   │       └── TwoFactorAuthentication/
 │   ├── Middleware/
-│   │   ├── EnsureAdmin.php           # Role guard: admin only
-│   │   ├── EnsureProfessional.php    # Role guard: professional only
-│   │   ├── HandleAppearance.php      # Persists light/dark mode preference
-│   │   └── HandleInertiaRequests.php # Shares global Inertia props
-│   ├── Requests/                     # Form Request validation classes
+│   │   ├── EnsureAdmin.php
+│   │   ├── EnsureProfessional.php
+│   │   ├── EnsureClinicAccess.php
+│   │   ├── HandleAppearance.php
+│   │   └── HandleInertiaRequests.php
+│   ├── Requests/
+│   │   ├── Settings/             # Profile, password, 2FA, delete account
+│   │   ├── StorePatientRequest.php
+│   │   ├── StoreNoteRequest.php
+│   │   ├── StorePaymentRequest.php   # Validates invoice create/update payload
+│   │   └── SignConsentFormRequest.php
 │   └── Responses/
-│       └── LoginResponse.php         # Custom post-login redirect
+│       └── LoginResponse.php
 ├── Jobs/
-│   ├── CheckConsentExpiry.php        # Scheduled: checks expired RGPD consents
-│   ├── GenerateDailyBriefing.php     # Scheduled: AI daily briefing for Kosmo
-│   ├── GeneratePreSessionBriefing.php # Triggered before a session
-│   └── SendPaymentReminder.php       # Scheduled: payment reminder emails
+│   ├── CheckConsentExpiry.php
+│   ├── GenerateDailyBriefing.php
+│   ├── GeneratePreSessionBriefing.php
+│   └── SendPaymentReminder.php
 ├── Models/
-│   ├── User.php                      # Core user model (Fortify + Spatie roles)
-│   ├── Patient.php                   # Patient record
-│   ├── ConsultingSession.php         # Individual consulting session
-│   ├── Note.php                      # Session note
-│   ├── Agreement.php                 # Professional agreement/contract
-│   ├── ConsentForm.php               # RGPD consent form
-│   ├── Document.php                  # Uploaded document
-│   ├── KosmoBriefing.php             # AI-generated briefing record
-│   └── Payment.php                   # Payment record
-├── Providers/                        # Laravel service providers
+│   ├── Concerns/
+│   │   └── BelongsToClinic.php
+│   ├── User.php
+│   ├── Clinic.php
+│   ├── PatientProfile.php        # Core patient row (linked to user + clinic + professional)
+│   ├── Patient.php               # Domain model / relations
+│   ├── PatientProfessional.php   # Pivot model
+│   ├── Appointment.php
+│   ├── Service.php
+│   ├── Availability.php
+│   ├── SessionRecording.php
+│   ├── Note.php
+│   ├── Agreement.php
+│   ├── ConsentForm.php
+│   ├── Document.php
+│   ├── KosmoBriefing.php
+│   ├── Invoice.php
+│   ├── InvoiceItem.php
+│   └── Message.php
+├── Observers/
+│   ├── PatientObserver.php
+│   └── PaymentObserver.php       # Typed on Invoice (billing side-effects)
+├── Policies/
+│   ├── AdminPolicy.php
+│   ├── PatientPolicy.php
+│   └── PaymentPolicy.php         # Authorization for Invoice resources
+├── Providers/
+│   └── AppServiceProvider.php
 └── Services/
-    ├── BillingService.php            # Billing calculations
-    ├── KosmoService.php              # AI (Kosmo) integration logic
-    ├── PatientContextService.php     # Builds context for AI briefings
-    ├── PaymentReminderService.php    # Payment reminder scheduling
-    └── RgpdService.php               # RGPD/consent management
+    ├── BillingService.php # Invoice numbers, PDF, calculations
+    ├── KosmoService.php
+    ├── PatientContextService.php
+    ├── PaymentReminderService.php
+    └── RgpdService.php
 ```
 
 ## Routes (`routes/`)
 
 | File | Purpose |
 |------|---------|
-| `routes/web.php` | All main application routes (patients, dashboard, kosmo, admin, etc.) |
-| `routes/settings.php` | Settings-specific routes (profile, password, 2FA) |
+| `routes/web.php` | Home, professional app (patients, appointments, clinic, invoices, schedule, messages, Kosmo), admin, **patient portal** (`/portal/*`) |
+| `routes/settings.php` | Settings routes (profile, password, 2FA) |
 | `routes/console.php` | Artisan scheduled commands |
 
 ## Database (`database/`)
@@ -100,23 +142,41 @@ app/
 ```
 database/
 ├── factories/
+│   ├── AppointmentFactory.php
+│   ├── ClinicFactory.php
+│   ├── InvoiceFactory.php
 │   ├── PatientFactory.php
-│   ├── PaymentFactory.php
+│   ├── PatientProfileFactory.php
+│   ├── PaymentFactory.php        # Legacy name / invoice-related tests
 │   └── UserFactory.php
-├── migrations/                       # Chronological schema migrations
-│   ├── *_create_users_table.php
-│   ├── *_create_patients_table.php
-│   ├── *_create_consulting_sessions_table.php
-│   ├── *_create_notes_table.php
-│   ├── *_create_agreements_table.php
-│   ├── *_create_payments_table.php
-│   ├── *_create_consent_forms_table.php
-│   ├── *_create_documents_table.php
-│   ├── *_create_kosmo_briefings_table.php
-│   └── *_create_permission_tables.php  # Spatie role/permission tables
+├── migrations/
+│   ├── 0001_01_01_000000_create_users_table.php
+│   ├── 0001_01_01_000001_create_cache_table.php
+│   ├── 0001_01_01_000002_create_jobs_table.php
+│   ├── 2025_08_14_170933_add_two_factor_columns_to_users_table.php
+│   ├── 2026_02_20_114017_create_permission_tables.php
+│   ├── 2026_03_03_125112_add_tutorial_completed_at_to_users_table.php
+│   ├── 2026_04_08_000001_create_patient_profiles_table.php
+│   ├── 2026_04_08_000003_create_notes_table.php
+│   ├── 2026_04_08_000004_create_agreements_table.php
+│   ├── 2026_04_08_000006_create_consent_forms_table.php
+│   ├── 2026_04_08_000007_create_documents_table.php
+│   ├── 2026_04_08_000008_create_kosmo_briefings_table.php
+│   ├── 2026_05_05_000001_create_clinics_table.php
+│   ├── 2026_05_05_000002_create_clinic_user_table.php
+│   ├── 2026_05_05_000003_create_services_table.php
+│   ├── 2026_05_05_000004_create_availabilities_table.php
+│   ├── 2026_05_05_000005_create_appointments_table.php
+│   ├── 2026_05_05_000006_create_session_recordings_table.php
+│   ├── 2026_05_05_000007_create_invoices_table.php
+│   ├── 2026_05_05_000008_create_invoice_items_table.php
+│   ├── 2026_05_05_000009_create_messages_table.php
+│   ├── 2026_05_05_000010_create_patient_professional_table.php
+│   └── 2026_05_05_000011_modify_users_table.php
 └── seeders/
     ├── DatabaseSeeder.php
-    ├── RoleSeeder.php                # Seeds admin/professional roles
+    ├── PermissionSeeder.php
+    ├── RoleSeeder.php
     └── UserSeeder.php
 ```
 
@@ -124,35 +184,50 @@ database/
 
 ```
 resources/js/
-├── app.tsx                           # Client-side Inertia bootstrap
-├── ssr.tsx                           # SSR Inertia bootstrap
+├── app.tsx
+├── ssr.tsx
 ├── components/
-│   ├── ui/                           # shadcn/ui primitives (button, card, dialog, etc.)
+│   ├── ui/                       # shadcn/ui primitives — do not edit in place
 │   ├── admin/
-│   │   └── impersonation-banner.tsx  # Admin impersonation indicator
+│   │   └── impersonation-banner.tsx
 │   ├── kosmo/
-│   │   ├── kosmo-briefing.tsx        # AI briefing display
+│   │   ├── kosmo-briefing.tsx
 │   │   ├── kosmo-chip.tsx
 │   │   ├── kosmo-icon.tsx
 │   │   └── kosmo-nudge.tsx
 │   ├── patient/
-│   │   ├── kpi-card.tsx              # Patient KPI metric card
-│   │   ├── patient-card.tsx          # Patient list card
-│   │   └── patient-header.tsx        # Patient detail header
-│   ├── app-sidebar.tsx               # Main navigation sidebar
-│   ├── app-header.tsx                # Top header bar
-│   ├── app-shell.tsx                 # Root shell wrapper
-│   ├── bottom-bar.tsx                # Mobile bottom navigation
+│   │   ├── kpi-card.tsx
+│   │   ├── patient-card.tsx
+│   │   └── patient-header.tsx
+│   ├── alert-error.tsx
+│   ├── appearance-tabs.tsx
+│   ├── app-content.tsx
+│   ├── app-header.tsx
+│   ├── app-logo.tsx
+│   ├── app-logo-icon.tsx
+│   ├── app-shell.tsx
+│   ├── app-sidebar.tsx
+│   ├── app-sidebar-header.tsx
+│   ├── bottom-bar.tsx
 │   ├── breadcrumbs.tsx
+│   ├── delete-user.tsx
 │   ├── empty-state.tsx
-│   ├── form-field.tsx                # Reusable labelled input wrapper
+│   ├── form-field.tsx
 │   ├── heading.tsx
-│   ├── tutorial-chatbot.tsx          # Onboarding chatbot UI
-│   └── ...
+│   ├── input-error.tsx
+│   ├── nav-footer.tsx
+│   ├── nav-main.tsx
+│   ├── nav-user.tsx
+│   ├── text-link.tsx
+│   ├── tutorial-chatbot.tsx
+│   ├── two-factor-recovery-codes.tsx
+│   ├── two-factor-setup-modal.tsx
+│   ├── user-info.tsx
+│   └── user-menu-content.tsx
 ├── layouts/
-│   ├── app-layout.tsx                # Main authenticated layout
-│   ├── auth-layout.tsx               # Unauthenticated/auth pages layout
-│   ├── admin-layout.tsx              # Admin section layout
+│   ├── app-layout.tsx
+│   ├── auth-layout.tsx
+│   ├── admin-layout.tsx
 │   ├── app/
 │   │   ├── app-header-layout.tsx
 │   │   └── app-sidebar-layout.tsx
@@ -162,33 +237,22 @@ resources/js/
 │   │   └── auth-split-layout.tsx
 │   └── settings/
 │       └── layout.tsx
-├── pages/
-│   ├── dashboard.tsx                 # Professional dashboard
-│   ├── onboarding.tsx                # First-time onboarding flow
-│   ├── welcome.tsx                   # Public welcome/landing page
+├── pages/ # Files currently in repo (see note below)
+│   ├── dashboard.tsx
+│   ├── onboarding.tsx
+│   ├── welcome.tsx
 │   ├── admin/
 │   │   ├── dashboard.tsx
 │   │   └── users/ (index, show, create)
-│   ├── auth/                         # Login, register, 2FA, password reset
+│   ├── auth/ # login, register, 2FA, password reset, verify, etc.
 │   ├── billing/
-│   │   └── index.tsx
+│   │   └── index.tsx             # Billing overview (invoices-focused)
 │   ├── kosmo/
-│   │   └── index.tsx                 # AI assistant chat page
-│   ├── patients/
-│   │   ├── index.tsx                 # Patient list
-│   │   ├── create.tsx
-│   │   ├── edit.tsx
-│   │   ├── show.tsx                  # Patient detail with tabs
-│   │   ├── pre-session.tsx           # Pre-session briefing
-│   │   └── post-session.tsx          # Post-session notes
-│   └── settings/
-│       ├── index.tsx
-│       ├── profile.tsx
-│       ├── password.tsx
-│       ├── two-factor.tsx
-│       └── appearance.tsx
+│   │   └── index.tsx
+│   ├── patients/ (index, create, edit, show, pre-session, post-session)
+│   └── settings/ (index, profile, password, two-factor, appearance)
 ├── hooks/
-│   ├── use-appearance.tsx            # Light/dark mode
+│   ├── use-appearance.tsx
 │   ├── use-clipboard.ts
 │   ├── use-current-url.ts
 │   ├── use-initials.tsx
@@ -196,49 +260,49 @@ resources/js/
 │   ├── use-mobile-navigation.ts
 │   └── use-two-factor-auth.ts
 ├── lib/
-│   ├── utils.ts                      # cn() utility and shared helpers
-│   └── axios.ts                      # Axios instance with CSRF config
+│   ├── utils.ts
+│   └── axios.ts
 └── types/
-    ├── index.ts                      # Re-exports all types
-    ├── auth.ts                       # Auth / user types
-    ├── navigation.ts                 # Nav item types
-    ├── ui.ts                         # UI variant types
-    ├── global.d.ts                   # Global ambient declarations
+    ├── index.ts
+    ├── auth.ts
+    ├── navigation.ts
+    ├── ui.ts
+    ├── global.d.ts
     ├── vite-env.d.ts
     ├── admin/index.ts
-    ├── models/
-    │   ├── index.ts
-    │   ├── patient.ts
-    │   └── role.ts
-    ├── pages/index.ts                # Inertia page prop types
-    └── shared/
-        ├── index.ts
-        ├── pagination.ts
-        └── view-types.ts
+    ├── models/ (index, patient, role)
+    ├── pages/index.ts
+    └── shared/ (index, pagination, view-types)
 ```
+
+**Inertia pages vs. controllers:** Several actions render pages under `appointments/`, `clinic/`, `invoices/`, `messages/`, `schedule/`, and `portal/` that are not yet present under `resources/js/pages/` in this checkout. New UI should follow the exact `Inertia::render('…')` paths in the corresponding controller.
+
+Wayfinder may generate `resources/js/actions/` during `npm run dev`; treat those files as generated output, not hand-edited source.
 
 ## Views & Assets
 
 | Path | Purpose |
 |------|---------|
 | `resources/views/app.blade.php` | Single Blade entry point for Inertia |
-| `resources/css/app.css` | Global CSS / Tailwind directives |
+| `resources/css/app.css` | Global CSS / Tailwind v4 (`@import "tailwindcss"`, `@theme`) |
 
 ## Tests (`tests/`)
 
 ```
 tests/
 ├── Feature/
-│   ├── Auth/                         # Authentication flows
-│   ├── Settings/                     # Profile, password, 2FA settings
+│   ├── Auth/ # Authentication, registration, 2FA challenge, password reset, etc.
+│   ├── Settings/               # Profile, password, 2FA settings
 │   ├── AdminControllerTest.php
+│   ├── AuthControllerTest.php
 │   ├── BillingControllerTest.php
 │   ├── DashboardTest.php
 │   ├── KosmoControllerTest.php
-│   └── PatientControllerTest.php
+│   ├── PatientControllerTest.php
+│   └── SettingsControllerTest.php
 ├── Unit/
 │   └── ExampleTest.php
-├── Pest.php                          # Pest configuration
+├── Pest.php
 └── TestCase.php
 ```
 
@@ -246,14 +310,19 @@ tests/
 
 | File | Purpose |
 |------|---------|
-| `docs/clientkosmos-design-system.md` | Full design system specification (colors, typography, components) |
-| `docs/justificate_implementation.md` | Technical decisions and implementation rationale |
+| `docs/clientkosmos-design-system.md` | Design system (colors, typography, components) |
+| `docs/justificate_implementation.md` | Technical decisions and rationale |
+| `docs/proyect_information.md` | Project information |
+| `docs/user_manual.md` | User manual |
 
 ## Key Conventions
 
-- **Controllers use single-action classes** named after the HTTP verb they serve (`IndexAction`, `StoreAction`, `UpdateAction`, `DestroyAction`, etc.), grouped in folders by resource.
-- **Roles**: Two main roles — `admin` and `professional`. Guards are `EnsureAdmin` and `EnsureProfessional` middleware.
-- **Frontend pages** mirror backend controllers: a page in `resources/js/pages/patients/` corresponds to `app/Http/Controllers/Patient/`.
-- **Types** are centrally defined in `resources/js/types/` and re-exported from `index.ts` files — always import from the nearest index.
-- **shadcn/ui components** live in `resources/js/components/ui/` and should not be edited directly; extend them via wrapper components.
-- **AI feature (Kosmo)**: Backend logic in `app/Services/KosmoService.php` and `app/Models/KosmoBriefing.php`; frontend in `resources/js/pages/kosmo/` and `resources/js/components/kosmo/`.
+- **Controllers use single-action classes** (`IndexAction`, `StoreAction`, `UpdateAction`, `DestroyAction`, …) grouped by resource.
+- **Roles:** `admin` and `professional`, with `EnsureAdmin` and `EnsureProfessional`. Clinic-scoped access uses `EnsureClinicAccess` where applied.
+- **Clinics:** Multi-user clinics via `clinic_user`; many models use `BelongsToClinic` / `clinic_id`.
+- **Sessions:** `Appointment` replaces the older consulting-session concept; notes and invoices link to appointments where relevant.
+- **Billing:** `Invoice` / `InvoiceItem` are the persisted billing records; `StorePaymentRequest` and `PaymentPolicy`/`PaymentObserver` names are legacy but operate on invoices.
+- **Patient portal:** Routes under `/portal` with `Portal\…` controllers for dashboard, appointments, invoices, documents, consent forms, messages, profile.
+- **Frontend pages** mirror backend `Inertia::render` paths; keep `resources/js/types/pages/` in sync for props.
+- **shadcn/ui** in `resources/js/components/ui/` — extend via wrappers in `components/`, do not fork primitives.
+- **Kosmo:** Backend in `app/Services/KosmoService.php` and `app/Models/KosmoBriefing.php`; frontend in `pages/kosmo/` and `components/kosmo/`.

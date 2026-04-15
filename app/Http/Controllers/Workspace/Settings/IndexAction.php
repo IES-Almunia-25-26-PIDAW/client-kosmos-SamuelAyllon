@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Clinic\Settings;
+namespace App\Http\Controllers\Workspace\Settings;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -11,10 +11,10 @@ class IndexAction extends Controller
 {
     public function __invoke(Request $request): Response
     {
-        $clinic = $request->user()->currentClinic();
+        $workspace = $request->user()->currentWorkspace();
 
-        return Inertia::render('clinic/settings/index', [
-            'clinic' => $clinic,
+        return Inertia::render('workspace/settings/index', [
+            'workspace' => $workspace,
         ]);
     }
 }

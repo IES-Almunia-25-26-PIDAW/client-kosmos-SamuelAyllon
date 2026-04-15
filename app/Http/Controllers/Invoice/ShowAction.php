@@ -13,7 +13,7 @@ class ShowAction extends Controller
     {
         $this->authorize('view', $invoice);
 
-        $invoice->load(['items', 'patient', 'clinic']);
+        $invoice->load(['items', 'patient', 'workspace']);
 
         return Inertia::render('invoices/show', [
             'invoice' => $invoice,

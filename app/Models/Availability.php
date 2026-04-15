@@ -10,7 +10,7 @@ class Availability extends Model
     use HasFactory;
 
     protected $fillable = [
-        'professional_id', 'clinic_id', 'day_of_week',
+        'professional_id', 'workspace_id', 'day_of_week',
         'start_time', 'end_time', 'slot_duration_minutes', 'is_active',
     ];
 
@@ -28,8 +28,8 @@ class Availability extends Model
         return $this->belongsTo(User::class, 'professional_id');
     }
 
-    public function clinic()
+    public function workspace()
     {
-        return $this->belongsTo(Clinic::class);
+        return $this->belongsTo(Workspace::class);
     }
 }

@@ -13,63 +13,24 @@ class PermissionSeeder extends Seeder
     {
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
-        // ── Definición de permisos por dominio ────────────────────────────────
         $permissions = [
             // Admin
             'panel.admin',
             'users.impersonate',
 
-            // Owner — gestión de clínica y equipo
-            'clinic.manage',
-            'clinic.team.invite',
-            'clinic.team.manage',
-            'clinic.patients.view-all',   // configurable por owner
-            'clinic.metrics.view',
+            // Workspace — gestión funcional
+            'workspace.manage',
+            'workspace.billing.manage',
+            'workspace.team.invite',
+            'workspace.team.manage',
+            'workspace.metrics.view',
 
-            // Owner + Professional — gestión clínica diaria
-            'patients.create',
-            'patients.read',
-            'patients.update',
-            'patients.delete',
-            'appointments.create',
-            'appointments.read',
-            'appointments.update',
-            'appointments.delete',
-            'invoices.create',
-            'invoices.read',
-            'invoices.update',
-            'invoices.delete',
-            'video.manage',               // iniciar y gestionar videollamada
-            'video.join',                 // unirse a videollamada
-            'transcriptions.read',
-            'kosmo.use',
-            'messages.send',
-            'messages.read',
+            // Collaboration — acuerdos y derivaciones entre profesionales autónomos
+            'collaboration.manage',
+            'referrals.send',
+            'referrals.respond',
 
-            // Patient — portal propio
-            'appointments.book',
-            'invoices.own.read',
-            'consents.sign',
-        ];
-
-        foreach ($permissions as $permission) {
-            Permission::firstOrCreate(['name' => $permission, 'guard_name' => 'web']);
-        }
-
-        // ── Asignación de permisos a roles ────────────────────────────────────
-        $admin = Role::findByName('admin');
-        $admin->syncPermissions([
-            'panel.admin',
-            'users.impersonate',
-        ]);
-
-        $owner = Role::findByName('owner');
-        $owner->syncPermissions([
-            'clinic.manage',
-            'clinic.team.invite',
-            'clinic.team.manage',
-            'clinic.patients.view-all',
-            'clinic.metrics.view',
+            // Professional — gestión clínica diaria
             'patients.create',
             'patients.read',
             'patients.update',
@@ -88,10 +49,33 @@ class PermissionSeeder extends Seeder
             'kosmo.use',
             'messages.send',
             'messages.read',
+
+            // Patient — portal propio
+            'appointments.book',
+            'invoices.own.read',
+            'consents.sign',
+        ];
+
+        foreach ($permissions as $permission) {
+            Permission::firstOrCreate(['name' => $permission, 'guard_name' => 'web']);
+        }
+
+        $admin = Role::findByName('admin');
+        $admin->syncPermissions([
+            'panel.admin',
+            'users.impersonate',
         ]);
 
         $professional = Role::findByName('professional');
         $professional->syncPermissions([
+            'workspace.manage',
+            'workspace.billing.manage',
+            'workspace.team.invite',
+            'workspace.team.manage',
+            'workspace.metrics.view',
+            'collaboration.manage',
+            'referrals.send',
+            'referrals.respond',
             'patients.create',
             'patients.read',
             'patients.update',

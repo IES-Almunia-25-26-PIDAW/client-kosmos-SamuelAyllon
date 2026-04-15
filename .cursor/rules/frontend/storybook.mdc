@@ -1,6 +1,7 @@
 ---
 description: Estándares para la creación de componentes y sus historias en Storybook
-globs: src/components/**/*.{tsx,ts}
+globs: resources/js/components/**/*.{tsx,ts}
+alwaysApply: false
 ---
 
 # Storybook Standards (CSF 3.0)

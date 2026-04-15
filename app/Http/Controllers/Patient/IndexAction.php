@@ -12,10 +12,10 @@ class IndexAction extends Controller
 {
     public function __invoke(Request $request): Response
     {
-        $this->authorize('viewAny', Patient::class);
+        $this->authorize('viewAny', PatientProfile::class);
 
-        $patients = PatientProfile::withoutGlobalScopes()
-            ->where('user_id', $request->user()->id)
+        $patients = PatientProfile::query()
+            ->where('professional_id', $request->user()->id)
             ->where('is_active', true)
             ->orderBy('id')
             ->get();

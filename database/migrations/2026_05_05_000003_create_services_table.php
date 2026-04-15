@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('services', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('clinic_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('workspace_id')->constrained('workspaces')->cascadeOnDelete();
             $table->string('name');
             $table->text('description')->nullable();
             $table->unsignedSmallInteger('duration_minutes')->default(50);
@@ -19,7 +19,7 @@ return new class extends Migration
             $table->boolean('is_active')->default(true);
             $table->timestamps();
 
-            $table->index(['clinic_id', 'is_active']);
+            $table->index(['workspace_id', 'is_active']);
         });
     }
 

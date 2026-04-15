@@ -13,10 +13,10 @@ class BookAction extends Controller
 {
     public function __invoke(Request $request): Response
     {
-        $clinicId = $request->user()->patientProfile?->clinic_id;
+        $workspaceId = $request->user()->patientProfile?->workspace_id;
 
-        $services      = Service::where('clinic_id', $clinicId)->where('is_active', true)->get();
-        $availabilities = Availability::where('clinic_id', $clinicId)->where('is_active', true)->get();
+        $services      = Service::where('workspace_id', $workspaceId)->where('is_active', true)->get();
+        $availabilities = Availability::where('workspace_id', $workspaceId)->where('is_active', true)->get();
 
         return Inertia::render('portal/appointments/book', [
             'services'       => $services,

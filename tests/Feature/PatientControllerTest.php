@@ -1,8 +1,5 @@
 <?php
 
-use App\Models\Patient;
-use App\Models\User;
-
 // ── Acceso por rol ────────────────────────────────────────────────────────────
 
 it('redirects guests from patients index to login', function () {
@@ -22,8 +19,9 @@ it('patients index only shows patients belonging to authenticated user', functio
     $user = createProfessional();
     $other = createProfessional();
 
-    Patient::factory()->count(2)->create(['user_id' => $user->id, 'is_active' => true]);
-    Patient::factory()->create(['user_id' => $other->id, 'is_active' => true]);
+    createPatientProfileFor($user, ['is_active' => true]);
+    createPatientProfileFor($user, ['is_active' => true]);
+    createPatientProfileFor($other, ['is_active' => true]);
 
     $this->actingAs($user)
         ->get(route('patients.index'))
@@ -51,9 +49,11 @@ it('professional can create a patient', function () {
         ])
         ->assertRedirect();
 
-    $this->assertDatabaseHas('patients', [
-        'user_id'      => $user->id,
-        'project_name' => 'Ana García',
+    $this->assertDatabaseHas('users', [
+        'name' => 'Ana García',
+    ]);
+    $this->assertDatabaseHas('patient_profiles', [
+        'professional_id' => $user->id,
     ]);
 });
 
@@ -67,7 +67,7 @@ it('store patient requires project_name', function () {
 
 it('professional can view their own patient', function () {
     $user = createProfessional();
-    $patient = Patient::factory()->create(['user_id' => $user->id]);
+    $patient = createPatientProfileFor($user);
 
     $this->actingAs($user)
         ->get(route('patients.show', $patient))
@@ -78,7 +78,7 @@ it('professional can view their own patient', function () {
 it('professional cannot view another users patient', function () {
     $user = createProfessional();
     $other = createProfessional();
-    $patient = Patient::factory()->create(['user_id' => $other->id]);
+    $patient = createPatientProfileFor($other);
 
     $this->actingAs($user)
         ->get(route('patients.show', $patient))
@@ -89,7 +89,7 @@ it('professional cannot view another users patient', function () {
 
 it('professional can access edit patient page', function () {
     $user = createProfessional();
-    $patient = Patient::factory()->create(['user_id' => $user->id]);
+    $patient = createPatientProfileFor($user);
 
     $this->actingAs($user)
         ->get(route('patients.edit', $patient))
@@ -99,7 +99,7 @@ it('professional can access edit patient page', function () {
 
 it('professional can update their own patient', function () {
     $user = createProfessional();
-    $patient = Patient::factory()->create(['user_id' => $user->id]);
+    $patient = createPatientProfileFor($user);
 
     $this->actingAs($user)
         ->put(route('patients.update', $patient), [
@@ -107,16 +107,16 @@ it('professional can update their own patient', function () {
         ])
         ->assertRedirect(route('patients.show', $patient));
 
-    $this->assertDatabaseHas('patients', [
-        'id'           => $patient->id,
-        'project_name' => 'Nombre Actualizado',
+    $this->assertDatabaseHas('users', [
+        'id' => $patient->user_id,
+        'name' => 'Nombre Actualizado',
     ]);
 });
 
 it('professional cannot update another users patient', function () {
     $user = createProfessional();
     $other = createProfessional();
-    $patient = Patient::factory()->create(['user_id' => $other->id]);
+    $patient = createPatientProfileFor($other);
 
     $this->actingAs($user)
         ->put(route('patients.update', $patient), ['project_name' => 'Hack'])
@@ -127,19 +127,19 @@ it('professional cannot update another users patient', function () {
 
 it('professional can delete their own patient', function () {
     $user = createProfessional();
-    $patient = Patient::factory()->create(['user_id' => $user->id]);
+    $patient = createPatientProfileFor($user);
 
     $this->actingAs($user)
         ->delete(route('patients.destroy', $patient))
         ->assertRedirect(route('patients.index'));
 
-    $this->assertSoftDeleted('patients', ['id' => $patient->id]);
+    $this->assertSoftDeleted('patient_profiles', ['id' => $patient->id]);
 });
 
 it('professional cannot delete another users patient', function () {
     $user = createProfessional();
     $other = createProfessional();
-    $patient = Patient::factory()->create(['user_id' => $other->id]);
+    $patient = createPatientProfileFor($other);
 
     $this->actingAs($user)
         ->delete(route('patients.destroy', $patient))
@@ -150,7 +150,7 @@ it('professional cannot delete another users patient', function () {
 
 it('professional can access pre-session page for their patient', function () {
     $user = createProfessional();
-    $patient = Patient::factory()->create(['user_id' => $user->id]);
+    $patient = createPatientProfileFor($user);
 
     $this->actingAs($user)
         ->get(route('patients.pre-session', $patient))
@@ -160,7 +160,7 @@ it('professional can access pre-session page for their patient', function () {
 
 it('professional can access post-session page for their patient', function () {
     $user = createProfessional();
-    $patient = Patient::factory()->create(['user_id' => $user->id]);
+    $patient = createPatientProfileFor($user);
 
     $this->actingAs($user)
         ->get(route('patients.post-session', $patient))

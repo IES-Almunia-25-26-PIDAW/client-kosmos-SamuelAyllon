@@ -5,15 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class PatientProfessional extends Model
+class CaseAssignment extends Model
 {
     use HasFactory;
 
-    protected $table = 'patient_professional';
+    protected $table = 'case_assignments';
 
     protected $fillable = [
-        'patient_id', 'professional_id', 'clinic_id',
-        'is_primary', 'status', 'started_at', 'ended_at', 'notes',
+        'patient_id', 'professional_id', 'workspace_id',
+        'is_primary', 'role', 'status', 'started_at', 'ended_at', 'notes',
     ];
 
     protected function casts(): array
@@ -35,9 +35,9 @@ class PatientProfessional extends Model
         return $this->belongsTo(User::class, 'professional_id');
     }
 
-    public function clinic()
+    public function workspace()
     {
-        return $this->belongsTo(Clinic::class);
+        return $this->belongsTo(Workspace::class);
     }
 
     public function patientProfile()
@@ -50,5 +50,15 @@ class PatientProfessional extends Model
             'patient_id',
             'id'
         );
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('status', 'active');
+    }
+
+    public function scopePrimary($query)
+    {
+        return $query->where('is_primary', true);
     }
 }

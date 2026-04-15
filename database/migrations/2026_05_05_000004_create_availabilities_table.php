@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('availabilities', function (Blueprint $table) {
             $table->id();
             $table->foreignId('professional_id')->constrained('users')->cascadeOnDelete();
-            $table->foreignId('clinic_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('workspace_id')->nullable()->constrained('workspaces')->nullOnDelete();
             $table->unsignedTinyInteger('day_of_week');
             $table->time('start_time');
             $table->time('end_time');
@@ -19,7 +19,7 @@ return new class extends Migration
             $table->boolean('is_active')->default(true);
             $table->timestamps();
 
-            $table->index(['professional_id', 'clinic_id', 'day_of_week']);
+            $table->index(['professional_id', 'workspace_id', 'day_of_week']);
         });
     }
 

@@ -2,25 +2,25 @@
 
 namespace App\Models\Concerns;
 
-use App\Models\Clinic;
+use App\Models\Workspace;
 use Illuminate\Database\Eloquent\Builder;
 
-trait BelongsToClinic
+trait BelongsToWorkspace
 {
-    public static function bootBelongsToClinic(): void
+    public static function bootBelongsToWorkspace(): void
     {
-        static::addGlobalScope('clinic', function (Builder $query) {
-            if (auth()->check() && auth()->user()->currentClinicId()) {
+        static::addGlobalScope('workspace', function (Builder $query) {
+            if (auth()->check() && auth()->user()->currentWorkspaceId()) {
                 $query->where(
-                    (new static)->getTable().'.clinic_id',
-                    auth()->user()->currentClinicId()
+                    (new static)->getTable().'.workspace_id',
+                    auth()->user()->currentWorkspaceId()
                 );
             }
         });
     }
 
-    public function clinic()
+    public function workspace()
     {
-        return $this->belongsTo(Clinic::class);
+        return $this->belongsTo(Workspace::class);
     }
 }

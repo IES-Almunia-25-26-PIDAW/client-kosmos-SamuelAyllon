@@ -11,7 +11,7 @@ class Message extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'clinic_id', 'sender_id', 'receiver_id',
+        'workspace_id', 'sender_id', 'receiver_id',
         'subject', 'body', 'read_at',
         'related_type', 'related_id',
     ];
@@ -23,9 +23,9 @@ class Message extends Model
         ];
     }
 
-    public function clinic()
+    public function workspace()
     {
-        return $this->belongsTo(Clinic::class);
+        return $this->belongsTo(Workspace::class);
     }
 
     public function sender()

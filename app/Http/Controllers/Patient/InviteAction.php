@@ -3,13 +3,13 @@
 namespace App\Http\Controllers\Patient;
 
 use App\Http\Controllers\Controller;
-use App\Models\Patient;
+use App\Models\PatientProfile;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class InviteAction extends Controller
 {
-    public function __invoke(Request $request, Patient $patient): RedirectResponse
+    public function __invoke(Request $request, PatientProfile $patient): RedirectResponse
     {
         $this->authorize('update', $patient);
 

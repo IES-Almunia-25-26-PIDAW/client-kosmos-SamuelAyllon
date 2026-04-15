@@ -11,7 +11,7 @@ class Invoice extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'clinic_id', 'patient_id', 'professional_id', 'invoice_number',
+        'workspace_id', 'patient_id', 'professional_id', 'invoice_number',
         'status', 'issued_at', 'due_at', 'paid_at',
         'subtotal', 'tax_rate', 'tax_amount', 'total',
         'payment_method', 'stripe_payment_id', 'notes', 'pdf_path',
@@ -30,9 +30,9 @@ class Invoice extends Model
         ];
     }
 
-    public function clinic()
+    public function workspace()
     {
-        return $this->belongsTo(Clinic::class);
+        return $this->belongsTo(Workspace::class);
     }
 
     public function patient()

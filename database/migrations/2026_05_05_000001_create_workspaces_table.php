@@ -8,9 +8,9 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('clinics', function (Blueprint $table) {
+        Schema::create('workspaces', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('owner_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('creator_id')->constrained('users')->cascadeOnDelete();
             $table->string('name');
             $table->string('slug')->unique();
             $table->string('tax_name')->nullable();
@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('phone')->nullable();
             $table->string('email')->nullable();
             $table->string('logo_path')->nullable();
+            $table->text('location_address')->nullable();
             $table->json('settings')->nullable();
             $table->timestamps();
             $table->softDeletes();
@@ -27,6 +28,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('clinics');
+        Schema::dropIfExists('workspaces');
     }
 };

@@ -12,12 +12,12 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasFactory, Notifiable, HasRoles, TwoFactorAuthenticatable, SoftDeletes;
+    use HasFactory, HasRoles, Notifiable, SoftDeletes, TwoFactorAuthenticatable;
 
     protected $fillable = [
         'name', 'email', 'password',
         'avatar_path', 'phone', 'date_of_birth', 'address',
-        'emergency_contact', 'patient_notes',
+        'patient_notes',
         'stripe_customer_id', 'google_refresh_token', 'gdrive_refresh_token',
         'tutorial_completed_at',
     ];
@@ -32,26 +32,30 @@ class User extends Authenticatable implements MustVerifyEmail
     protected function casts(): array
     {
         return [
-            'email_verified_at'     => 'datetime',
+            'email_verified_at' => 'datetime',
             'tutorial_completed_at' => 'datetime',
-            'date_of_birth'         => 'date',
-            'emergency_contact'     => 'array',
-            'password'              => 'hashed',
+            'date_of_birth' => 'date',
+            'password' => 'hashed',
         ];
     }
 
     // ==================== RELACIONES ====================
 
-    public function clinics()
+    public function workspaces()
     {
-        return $this->belongsToMany(Clinic::class, 'clinic_user')
-            ->withPivot(['role', 'can_view_all_patients', 'joined_at', 'is_active'])
+        return $this->belongsToMany(Workspace::class, 'workspace_members')
+            ->withPivot(['role', 'joined_at', 'is_active'])
             ->withTimestamps();
     }
 
-    public function ownedClinics()
+    public function createdWorkspaces()
     {
-        return $this->hasMany(Clinic::class, 'owner_id');
+        return $this->hasMany(Workspace::class, 'creator_id');
+    }
+
+    public function professionalProfile()
+    {
+        return $this->hasOne(ProfessionalProfile::class);
     }
 
     public function appointments()
@@ -74,9 +78,29 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(PatientProfile::class, 'professional_id');
     }
 
-    public function patientProfessionals()
+    public function caseAssignments()
     {
-        return $this->hasMany(PatientProfessional::class, 'patient_id');
+        return $this->hasMany(CaseAssignment::class, 'professional_id');
+    }
+
+    public function patientCaseAssignments()
+    {
+        return $this->hasMany(CaseAssignment::class, 'patient_id');
+    }
+
+    public function collaborationAgreements()
+    {
+        return CollaborationAgreement::forProfessional($this->id);
+    }
+
+    public function referralsSent()
+    {
+        return $this->hasMany(Referral::class, 'from_professional_id');
+    }
+
+    public function referralsReceived()
+    {
+        return $this->hasMany(Referral::class, 'to_professional_id');
     }
 
     public function sentMessages()
@@ -111,11 +135,6 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasRole('admin');
     }
 
-    public function isOwner(): bool
-    {
-        return $this->hasRole('owner');
-    }
-
     public function isProfessional(): bool
     {
         return $this->hasRole('professional');
@@ -136,16 +155,17 @@ class User extends Authenticatable implements MustVerifyEmail
         $this->update(['tutorial_completed_at' => now()]);
     }
 
-    public function currentClinicId(): ?int
+    public function currentWorkspaceId(): ?int
     {
-        return session('current_clinic_id')
-            ?? $this->clinics()->first()?->id
-            ?? $this->ownedClinics()->first()?->id;
+        return session('current_workspace_id')
+            ?? $this->workspaces()->first()?->id
+            ?? $this->createdWorkspaces()->first()?->id;
     }
 
-    public function currentClinic(): ?Clinic
+    public function currentWorkspace(): ?Workspace
     {
-        $id = $this->currentClinicId();
-        return $id ? Clinic::find($id) : null;
+        $id = $this->currentWorkspaceId();
+
+        return $id ? Workspace::find($id) : null;
     }
 }

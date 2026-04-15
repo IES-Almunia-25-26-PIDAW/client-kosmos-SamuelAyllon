@@ -12,14 +12,14 @@ return new class extends Migration
             $table->id();
             $table->foreignId('patient_id')->constrained('patient_profiles')->cascadeOnDelete();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('clinic_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('workspace_id')->nullable()->constrained('workspaces')->nullOnDelete();
             $table->string('name');
             $table->string('local_path')->nullable();
             $table->enum('storage_type', ['local', 'gdrive'])->default('local');
             $table->string('gdrive_file_id')->nullable();
             $table->string('gdrive_url')->nullable();
             $table->string('mime_type')->nullable();
-            $table->unsignedInteger('file_size')->nullable();
+            $table->unsignedInteger('size_bytes')->nullable();
             $table->enum('category', ['rgpd_consent', 'informed_consent', 'report', 'invoice', 'other'])->default('other');
             $table->boolean('is_rgpd')->default(false);
             $table->date('expires_at')->nullable();

@@ -11,7 +11,7 @@ class Appointment extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'clinic_id', 'patient_id', 'professional_id', 'service_id',
+        'workspace_id', 'patient_id', 'professional_id', 'service_id',
         'starts_at', 'ends_at', 'status', 'modality',
         'meeting_room_id', 'meeting_url',
         'cancellation_reason', 'cancelled_by', 'notes',
@@ -25,9 +25,9 @@ class Appointment extends Model
         ];
     }
 
-    public function clinic()
+    public function workspace()
     {
-        return $this->belongsTo(Clinic::class);
+        return $this->belongsTo(Workspace::class);
     }
 
     public function patient()

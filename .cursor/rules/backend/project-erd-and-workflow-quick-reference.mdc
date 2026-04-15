@@ -1,0 +1,44 @@
+---
+description: Lightweight always-on summary of project data model and workflow
+globs:
+alwaysApply: true
+---
+# Project ERD & Workflow Quick Reference
+
+Use this compact rule on every task as a fast mental model.
+When needed, rely on `project-erd-and-workflow.mdc` for full details.
+
+## Core Domain Map
+
+- Identity: `users` (roles: `admin`, `professional`, `patient`).
+- Multi-tenant context: `clinics` + `clinic_user`.
+- Patient domain: `patient_profiles` + `patient_professional`.
+- Scheduling: `services` + `availabilities` + `appointments`.
+- Session artifacts: `session_recordings`, `notes`, `agreements`, `consent_forms`, `documents`, `kosmo_briefings`.
+- Billing: `invoices` + `invoice_items`.
+- Communication: `messages`.
+
+## Critical FK Semantics
+
+1. `appointments.patient_id`, `invoices.patient_id`, `patient_professional.patient_id` -> `users.id`.
+2. `notes.patient_id`, `agreements.patient_id`, `consent_forms.patient_id`, `documents.patient_id`, `kosmo_briefings.patient_id` -> `patient_profiles.id`.
+3. Prefer explicit naming in code/comments when switching between patient user vs patient profile identity.
+
+## Workflow Snapshot
+
+1. Auth + role resolution.
+2. Professional onboarding + clinic context.
+3. Patient creation (`users` + `patient_profiles`).
+4. Agenda setup (`services`, `availabilities`).
+5. Appointment lifecycle (`appointments`).
+6. Session operations (call, transcription/summary, documentation).
+7. Billing generation and follow-up (`invoices`, `invoice_items`).
+8. Portal patient actions (view records, sign consent, join/cancel appointment, messages).
+
+## Non-Negotiable Consistency Rules
+
+- Preserve clinic scoping where `clinic_id` exists.
+- Keep billing line/header integrity (`invoice_items` always tied to `invoices`).
+- Protect role boundaries (`admin` vs `professional` vs `patient`).
+- Validate status transitions end-to-end (appointments, invoices, consent forms).
+- Update tests/factories/policies when relationships or flows change.

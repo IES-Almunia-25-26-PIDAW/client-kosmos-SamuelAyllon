@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Clinic\Team;
+namespace App\Http\Controllers\Workspace\Team;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
@@ -15,10 +15,10 @@ class InviteAction extends Controller
     {
         $request->validate([
             'email' => ['required', 'email'],
-            'role'  => ['required', 'in:professional,receptionist,admin'],
+            'role'  => ['required', 'in:member,billing_manager'],
         ]);
 
-        $clinic = $request->user()->currentClinic();
+        $workspace = $request->user()->currentWorkspace();
 
         $user = User::firstOrCreate(
             ['email' => $request->email],
@@ -28,12 +28,11 @@ class InviteAction extends Controller
             ],
         );
 
-        $clinic->users()->syncWithoutDetaching([
+        $workspace->members()->syncWithoutDetaching([
             $user->id => [
-                'role'                  => $request->role,
-                'can_view_all_patients' => false,
-                'joined_at'             => now(),
-                'is_active'             => true,
+                'role'      => $request->role,
+                'joined_at' => now(),
+                'is_active' => true,
             ],
         ]);
 

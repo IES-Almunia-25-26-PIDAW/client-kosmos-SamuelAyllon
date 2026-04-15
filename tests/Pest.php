@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\PatientProfile;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -23,6 +24,7 @@ beforeEach(function () {
     $this->withoutVite();
     app()[PermissionRegistrar::class]->forgetCachedPermissions();
     $this->seed(RoleSeeder::class);
+    app()[PermissionRegistrar::class]->forgetCachedPermissions();
 })->in('Feature');
 
 /*
@@ -33,7 +35,7 @@ beforeEach(function () {
 
 function ensureRolesExist(): void
 {
-    foreach (['admin', 'professional'] as $role) {
+    foreach (['admin', 'owner', 'professional', 'patient'] as $role) {
         Role::firstOrCreate(
             ['name' => $role, 'guard_name' => 'web']
         );
@@ -69,4 +71,23 @@ function createProfessional(): User
     $user->assignRole('professional');
 
     return $user;
+}
+
+/**
+ * Perfil clínico vinculado a un profesional (y usuario portal paciente).
+ */
+function createPatientProfileFor(User $professional, array $overrides = []): PatientProfile
+{
+    Role::firstOrCreate(['name' => 'patient', 'guard_name' => 'web']);
+    app()[PermissionRegistrar::class]->forgetCachedPermissions();
+
+    $portalUser = User::factory()->create();
+    $portalUser->assignRole('patient');
+
+    return PatientProfile::factory()->create(array_merge([
+        'user_id' => $portalUser->id,
+        'professional_id' => $professional->id,
+        'workspace_id' => null,
+        'is_active' => true,
+    ], $overrides));
 }

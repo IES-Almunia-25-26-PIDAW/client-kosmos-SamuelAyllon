@@ -3,13 +3,13 @@
 namespace App\Http\Controllers\Patient;
 
 use App\Http\Controllers\Controller;
-use App\Models\Patient;
+use App\Models\PatientProfile;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class EditAction extends Controller
 {
-    public function __invoke(Patient $patient): Response
+    public function __invoke(PatientProfile $patient): Response
     {
         $this->authorize('update', $patient);
 

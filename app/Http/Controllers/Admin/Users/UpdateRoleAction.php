@@ -11,7 +11,7 @@ class UpdateRoleAction extends Controller
 {
     public function __invoke(Request $request, User $user): RedirectResponse
     {
-        $request->validate(['role' => ['required', 'in:admin,owner,professional,patient']]);
+        $request->validate(['role' => ['required', 'in:admin,professional,patient']]);
 
         if ($user->id === $request->user()->id) {
             return back()->withErrors(['role' => 'No puedes cambiar tu propio rol.']);

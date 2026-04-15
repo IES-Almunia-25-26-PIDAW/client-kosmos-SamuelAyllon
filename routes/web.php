@@ -1,7 +1,7 @@
 <?php
 
-use App\Http\Controllers\Admin\Clinics\IndexAction as AdminClinicIndexAction;
-use App\Http\Controllers\Admin\Clinics\ShowAction as AdminClinicShowAction;
+use App\Http\Controllers\Admin\Workspaces\IndexAction as AdminWorkspaceIndexAction;
+use App\Http\Controllers\Admin\Workspaces\ShowAction as AdminWorkspaceShowAction;
 use App\Http\Controllers\Admin\Users\CreateAction as AdminUserCreateAction;
 use App\Http\Controllers\Admin\Users\DestroyAction as AdminUserDestroyAction;
 use App\Http\Controllers\Admin\Users\IndexAction as AdminUserIndexAction;
@@ -21,17 +21,17 @@ use App\Http\Controllers\Appointment\SummarizeAction;
 use App\Http\Controllers\Appointment\TranscribeAction;
 use App\Http\Controllers\Appointment\UpdateAction as AppointmentUpdateAction;
 use App\Http\Controllers\Appointment\UpdateStatusAction;
-use App\Http\Controllers\Clinic\Analytics\IndexAction as ClinicAnalyticsIndexAction;
-use App\Http\Controllers\Clinic\Services\DestroyAction as ClinicServiceDestroyAction;
-use App\Http\Controllers\Clinic\Services\IndexAction as ClinicServiceIndexAction;
-use App\Http\Controllers\Clinic\Services\StoreAction as ClinicServiceStoreAction;
-use App\Http\Controllers\Clinic\Services\UpdateAction as ClinicServiceUpdateAction;
-use App\Http\Controllers\Clinic\Settings\IndexAction as ClinicSettingsIndexAction;
-use App\Http\Controllers\Clinic\Settings\UpdateAction as ClinicSettingsUpdateAction;
-use App\Http\Controllers\Clinic\Team\DestroyAction as ClinicTeamDestroyAction;
-use App\Http\Controllers\Clinic\Team\IndexAction as ClinicTeamIndexAction;
-use App\Http\Controllers\Clinic\Team\InviteAction as ClinicTeamInviteAction;
-use App\Http\Controllers\Clinic\Team\UpdatePermissionsAction as ClinicTeamUpdatePermissionsAction;
+use App\Http\Controllers\Workspace\Analytics\IndexAction as WorkspaceAnalyticsIndexAction;
+use App\Http\Controllers\Workspace\Services\DestroyAction as WorkspaceServiceDestroyAction;
+use App\Http\Controllers\Workspace\Services\IndexAction as WorkspaceServiceIndexAction;
+use App\Http\Controllers\Workspace\Services\StoreAction as WorkspaceServiceStoreAction;
+use App\Http\Controllers\Workspace\Services\UpdateAction as WorkspaceServiceUpdateAction;
+use App\Http\Controllers\Workspace\Settings\IndexAction as WorkspaceSettingsIndexAction;
+use App\Http\Controllers\Workspace\Settings\UpdateAction as WorkspaceSettingsUpdateAction;
+use App\Http\Controllers\Workspace\Team\DestroyAction as WorkspaceTeamDestroyAction;
+use App\Http\Controllers\Workspace\Team\IndexAction as WorkspaceTeamIndexAction;
+use App\Http\Controllers\Workspace\Team\InviteAction as WorkspaceTeamInviteAction;
+use App\Http\Controllers\Workspace\Team\UpdatePermissionsAction as WorkspaceTeamUpdatePermissionsAction;
 use App\Http\Controllers\ConsentForm\StoreAction as ConsentFormStoreAction;
 use App\Http\Controllers\ConsentForm\UpdateAction as ConsentFormUpdateAction;
 use App\Http\Controllers\Dashboard\IndexAction as DashboardIndexAction;
@@ -169,22 +169,22 @@ Route::middleware(['auth', 'verified', 'professional'])->group(function () {
     Route::patch('/schedule/availability/{availability}',  AvailabilityUpdateAction::class);
     Route::delete('/schedule/availability/{availability}', AvailabilityDestroyAction::class)->name('schedule.availability.destroy');
 
-    // Clinic management
-    Route::prefix('clinic')->name('clinic.')->group(function () {
-        Route::get('/settings',  ClinicSettingsIndexAction::class)->name('settings.index');
-        Route::put('/settings',  ClinicSettingsUpdateAction::class)->name('settings.update');
-        Route::get('/analytics', ClinicAnalyticsIndexAction::class)->name('analytics.index');
+    // Workspace management
+    Route::prefix('workspace')->name('workspace.')->group(function () {
+        Route::get('/settings',  WorkspaceSettingsIndexAction::class)->name('settings.index');
+        Route::put('/settings',  WorkspaceSettingsUpdateAction::class)->name('settings.update');
+        Route::get('/analytics', WorkspaceAnalyticsIndexAction::class)->name('analytics.index');
 
-        Route::get('/team',                        ClinicTeamIndexAction::class)->name('team.index');
-        Route::post('/team/invite',                ClinicTeamInviteAction::class)->name('team.invite');
-        Route::put('/team/{user}/permissions',     ClinicTeamUpdatePermissionsAction::class)->name('team.permissions');
-        Route::delete('/team/{user}',              ClinicTeamDestroyAction::class)->name('team.destroy');
+        Route::get('/team',                        WorkspaceTeamIndexAction::class)->name('team.index');
+        Route::post('/team/invite',                WorkspaceTeamInviteAction::class)->name('team.invite');
+        Route::put('/team/{user}/permissions',     WorkspaceTeamUpdatePermissionsAction::class)->name('team.permissions');
+        Route::delete('/team/{user}',              WorkspaceTeamDestroyAction::class)->name('team.destroy');
 
-        Route::get('/services',              ClinicServiceIndexAction::class)->name('services.index');
-        Route::post('/services',             ClinicServiceStoreAction::class)->name('services.store');
-        Route::put('/services/{service}',    ClinicServiceUpdateAction::class)->name('services.update');
-        Route::patch('/services/{service}',  ClinicServiceUpdateAction::class);
-        Route::delete('/services/{service}', ClinicServiceDestroyAction::class)->name('services.destroy');
+        Route::get('/services',              WorkspaceServiceIndexAction::class)->name('services.index');
+        Route::post('/services',             WorkspaceServiceStoreAction::class)->name('services.store');
+        Route::put('/services/{service}',    WorkspaceServiceUpdateAction::class)->name('services.update');
+        Route::patch('/services/{service}',  WorkspaceServiceUpdateAction::class);
+        Route::delete('/services/{service}', WorkspaceServiceDestroyAction::class)->name('services.destroy');
     });
 
     // Messages
@@ -213,8 +213,8 @@ Route::middleware(['auth', 'verified', 'admin'])
         Route::put('/users/{user}/role',  AdminUserUpdateRoleAction::class)->name('users.role');
         Route::delete('/users/{user}',    AdminUserDestroyAction::class)->name('users.destroy');
 
-        Route::get('/clinics',         AdminClinicIndexAction::class)->name('clinics.index');
-        Route::get('/clinics/{clinic}', AdminClinicShowAction::class)->name('clinics.show');
+        Route::get('/workspaces',         AdminWorkspaceIndexAction::class)->name('workspaces.index');
+        Route::get('/workspaces/{workspace}', AdminWorkspaceShowAction::class)->name('workspaces.show');
     });
 
 // ─── Patient portal routes ─────────────────────────────────────────────────────

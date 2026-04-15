@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Middleware\EnsureAdmin;
-use App\Http\Middleware\EnsureClinicAccess;
+use App\Http\Middleware\EnsureWorkspaceAccess;
 use App\Http\Middleware\EnsureProfessional;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
@@ -34,7 +34,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'role_or_permission' => RoleOrPermissionMiddleware::class,
             'admin'              => EnsureAdmin::class,
             'professional'       => EnsureProfessional::class,
-            'clinic.access'      => EnsureClinicAccess::class,
+            'workspace.access'   => EnsureWorkspaceAccess::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

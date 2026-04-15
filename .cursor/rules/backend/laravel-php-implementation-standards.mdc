@@ -1,0 +1,61 @@
+---
+description: Laravel and PHP implementation standards aligned with this project architecture
+globs:
+alwaysApply: true
+---
+# Laravel and PHP Implementation Standards
+
+Apply these standards for backend work in this Laravel 12 project.
+Prioritize consistency with the current architecture: single-action controllers, Inertia responses, service-oriented domain logic, and enum-driven modeling.
+
+## Code Comments and Readability
+
+- Do not add obvious comments or docblocks that restate code.
+- Add comments only when the intent or business reason is non-obvious.
+- Do not add variable docblocks unless explicitly requested.
+
+## PHP Preferences
+
+- Prefer `match` over `switch` when possible.
+- Place all new enums in `app/Enums`.
+- If an enum exists for a domain value, use enum cases (or `->value` where required) instead of raw strings.
+- Avoid one-time temporary variables such as `$currentUser = auth()->user()` if used only once.
+
+## Enum + Database Consistency
+
+- If a column represents enum values, set migration defaults from enum cases.
+- Add model casts for enum-backed fields in `$casts`.
+- Keep enums, migration defaults, seed data, and tests aligned to the same enum source.
+
+## Controllers, Services, and Routes
+
+- Keep controllers slim; move non-trivial business logic into service classes.
+- If a service is used in only one controller method, inject it into that method.
+- If a service is used in multiple methods in the same controller, inject through constructor.
+- Single-action controllers must expose `__invoke()`.
+- Keep route definitions explicit and aligned with existing `*Action` naming.
+- Do not create controller actions that only return a Blade view; use `Route::view()` for pure Blade pages.
+
+## Laravel Style Conventions
+
+- Prefer Laravel helpers over facades when equivalent helpers exist:
+  - `auth()->id()` over `Auth::id()`
+  - `redirect()->route()` over `Redirect::route()`
+  - `str()->slug()` over `Str::slug()`
+- Do not use `whereKey()` / `whereKeyNot()`; use explicit columns like `where('id', ...)`.
+- Do not use `Model::query()->create()`; use `Model::create()`.
+- When migrations add columns, update model `$fillable` where applicable.
+- Never chain migration generator commands with `&&` or `;`; run each command separately to avoid timestamp collisions.
+
+## Observers and Providers
+
+- Register model observers with PHP attributes on the model:
+  - `#[ObservedBy([SomeObserver::class])]`
+- Avoid registering observers in `AppServiceProvider` unless there is a strict exception.
+
+## Project-Specific Alignment
+
+- Keep patient identity semantics explicit:
+  - `users.id` represents patient user identity in some tables.
+  - `patient_profiles.id` represents clinical patient profile identity in others.
+- Preserve clinic scoping (`clinic_id`) and role boundaries (`admin`, `professional`, `patient`) in all query and policy changes.

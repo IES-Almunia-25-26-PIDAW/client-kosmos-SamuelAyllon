@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\Patient;
+use App\Models\PatientProfile;
 
 class PatientContextService
 {
@@ -11,7 +11,7 @@ class PatientContextService
      *       Eager-loads: last 3 sessions, recent notes, open agreements,
      *       last payment, and current valid consent.
      */
-    public function getPreSessionContext(Patient $patient): array
+    public function getPreSessionContext(PatientProfile $patient): array
     {
         // @todo
         return [];

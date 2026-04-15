@@ -1,0 +1,43 @@
+---
+description: Filament-specific rules to apply only if Filament is installed in this project
+globs:
+alwaysApply: false
+---
+# Filament Conditional Standards
+
+Apply this rule only when Filament resources are present in the repository.
+If Filament is not installed, ignore this rule.
+
+## Resource Generation and Testing
+
+- When generating a Filament resource, also create smoke tests.
+- When changing a Filament resource, run relevant resource tests and update them as needed.
+- Do not generate View/Infolist pages unless explicitly requested.
+
+## Route and URL Conventions
+
+- Prefer `ResourceClass::getUrl()` over raw `route()` calls for Filament resource links.
+
+## Pest + Livewire Test Style
+
+- Use `Livewire::test(ClassName::class)` in Pest tests.
+- Do not rely on `livewire()` helper from optional plugins.
+
+## Enum Usage in Filament
+
+- If enum classes exist for model fields, use enums instead of hardcoded strings.
+- Implement enum interfaces (`HasLabel`, `HasColor`, `HasIcon`) when labels/colors/icons are needed in Filament UI.
+- Follow exact Filament interface return types.
+
+## Action Authorization
+
+- For Filament actions requiring permissions, use `->authorize('ability')`.
+- Do not manually duplicate authorization with `Gate::authorize()`/`Gate::allows()` inside the same action definition.
+
+## Filament v4 Notes
+
+- Do not set `ignoreRecord: true` on `unique()` unless customizing behavior.
+- Use `->schema()` instead of deprecated `->form()` on Actions/Filters.
+- Use `->mutateDataUsing()` instead of deprecated `->mutateFormDataUsing()`.
+- Use `TextEntry::make()->state()` instead of deprecated `Placeholder::make()`.
+- Use `->hiddenLabel()` instead of empty `->label('')` for hidden labels.

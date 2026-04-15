@@ -1,0 +1,44 @@
+---
+description: Pest testing standards for feature work in this Laravel project
+globs:
+alwaysApply: true
+---
+# Pest Testing Standards
+
+Use these testing rules whenever backend behavior changes.
+
+## Mandatory Coverage Rule
+
+- Every new backend feature must include automated Pest tests.
+- For bug fixes, add or update a regression test when feasible.
+
+## Pre-Test Validation Checklist
+
+Before writing tests:
+
+1. Check schema details (defaults, nullable fields, FK constraints).
+2. Verify actual relationship method names in the model files.
+3. Build realistic states from migrations/factories, not assumptions.
+
+## Data and Relationship Accuracy
+
+- Do not assume relationship names from FK columns.
+- Do not assume empty model fields are `null` (respect migration defaults).
+- Use factory states or explicit attribute overrides to match real constraints.
+
+## Enum-First Test Data
+
+- If a model field is enum-casted, use enum cases in test setup.
+- Avoid hardcoded status/type strings when enum classes exist.
+
+## Form and Validation Assertions
+
+- For failed submissions that redirect back, assert both:
+  - validation errors
+  - preserved old input (`assertSessionHasOldInput()`).
+
+## Scope and Safety Expectations
+
+- Assert authorization and role boundaries when behavior differs by role.
+- Assert clinic scoping where records are tenant-bound by `clinic_id`.
+- Update related policy/factory expectations when schema or relationships change.

@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\Models\Clinic;
+use App\Models\Workspace;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -19,7 +19,7 @@ class InvoiceFactory extends Factory
         $total = $subtotal + $taxAmount;
 
         return [
-            'clinic_id'        => Clinic::factory(),
+            'workspace_id'        => Workspace::factory(),
             'patient_id'       => User::factory(),
             'professional_id'  => User::factory(),
             'invoice_number'   => 'CK-'.now()->year.'-'.fake()->unique()->numerify('#####'),

@@ -8,22 +8,21 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('clinic_user', function (Blueprint $table) {
+        Schema::create('workspace_members', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('clinic_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('workspace_id')->constrained('workspaces')->cascadeOnDelete();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->enum('role', ['owner', 'professional'])->default('professional');
-            $table->boolean('can_view_all_patients')->default(false);
+            $table->enum('role', ['member', 'billing_manager'])->default('member');
             $table->timestamp('joined_at')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
 
-            $table->unique(['clinic_id', 'user_id']);
+            $table->unique(['workspace_id', 'user_id']);
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('clinic_user');
+        Schema::dropIfExists('workspace_members');
     }
 };

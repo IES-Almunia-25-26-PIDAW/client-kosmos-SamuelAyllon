@@ -1,0 +1,27 @@
+---
+description: Livewire/Alpine/Tailwind+daisyUI rules applied only when Livewire code exists
+globs: app/Http/Livewire/**/*.php,resources/views/livewire/**/*.blade.php
+alwaysApply: false
+---
+# Livewire Conditional Guidance
+
+Apply this rule only for Livewire components and related Blade files.
+If the task is in Inertia/React code, ignore this rule.
+
+## Livewire Standards
+
+- Use Livewire class components and lifecycle hooks.
+- Keep components small and reusable.
+- Use proper validation and authorization inside actions.
+- Use loading states (`wire:loading`, `wire:target`) for UX.
+
+## UI Standards
+
+- Use Tailwind utility classes consistently.
+- Use daisyUI components/themes when present in the project.
+- Keep accessibility attributes (`aria-*`) where relevant.
+
+## Backend Alignment
+
+- Keep business logic in services/actions, not bloated components.
+- Reuse Laravel policies, requests, events, and queues where needed.

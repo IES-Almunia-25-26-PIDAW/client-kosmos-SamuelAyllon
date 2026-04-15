@@ -22,7 +22,7 @@ class StoreAction extends Controller
 
         $appointment = Appointment::create([
             ...$validated,
-            'clinic_id'       => $request->user()->currentClinicId(),
+            'workspace_id'       => $request->user()->currentWorkspaceId(),
             'professional_id' => $request->user()->id,
             'status'          => 'pending',
         ]);

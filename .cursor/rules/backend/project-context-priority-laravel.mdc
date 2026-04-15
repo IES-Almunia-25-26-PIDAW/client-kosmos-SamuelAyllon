@@ -1,0 +1,38 @@
+---
+description: Prioritize real project stack and architecture before applying generic Laravel guidance
+globs:
+alwaysApply: true
+---
+# Project Context Priority (Laravel)
+
+Before implementing, anchor decisions to this repository's actual stack and structure.
+
+## Stack Reality Check
+
+1. Use repository facts first (installed dependencies, routes, architecture).
+2. If generic guidance conflicts with repo reality, follow repo reality.
+3. Treat Livewire/Filament rules as conditional unless those dependencies and folders exist.
+
+## Current Architecture Priority
+
+- Backend: Laravel 12, PHP 8.4, single-action controllers (`*Action` + `__invoke`).
+- Frontend bridge: Inertia + React + TypeScript (not Livewire-first).
+- Tests: Pest as default for new backend feature coverage.
+- Multi-tenant and domain constraints: clinic scoping and patient identity semantics must be preserved.
+
+## Implementation Checklist
+
+When changing backend behavior:
+
+1. Validate model relationships and FK semantics before coding.
+2. Keep controllers slim; move non-trivial logic to services.
+3. Prefer enums over raw strings when enum classes exist.
+4. Update tests/factories/policies affected by domain changes.
+
+## Documentation Lookup Order
+
+1. Project rules and repository code.
+2. Laravel Boost `search-docs` if available.
+3. Context7 when Boost coverage is missing.
+
+Use this lookup flow automatically during implementation; do not wait for explicit user instruction to switch to Context7.

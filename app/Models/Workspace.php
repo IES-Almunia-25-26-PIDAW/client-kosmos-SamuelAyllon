@@ -6,13 +6,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Clinic extends Model
+class Workspace extends Model
 {
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'owner_id', 'name', 'slug', 'tax_name', 'tax_id', 'tax_address',
-        'phone', 'email', 'logo_path', 'settings',
+        'creator_id', 'name', 'slug', 'tax_name', 'tax_id', 'tax_address',
+        'phone', 'email', 'logo_path', 'location_address', 'settings',
     ];
 
     protected function casts(): array
@@ -22,23 +22,25 @@ class Clinic extends Model
         ];
     }
 
-    public function owner()
+    public function isOnlineOnly(): bool
     {
-        return $this->belongsTo(User::class, 'owner_id');
+        return is_null($this->location_address);
     }
 
-    public function users()
+    public function hasCollaborators(): bool
     {
-        return $this->belongsToMany(User::class, 'clinic_user')
-            ->withPivot(['role', 'can_view_all_patients', 'joined_at', 'is_active'])
-            ->withTimestamps();
+        return $this->members()->count() > 1;
     }
 
-    public function professionals()
+    public function creator()
     {
-        return $this->belongsToMany(User::class, 'clinic_user')
-            ->withPivot(['role', 'can_view_all_patients', 'joined_at', 'is_active'])
-            ->wherePivot('role', 'professional')
+        return $this->belongsTo(User::class, 'creator_id');
+    }
+
+    public function members()
+    {
+        return $this->belongsToMany(User::class, 'workspace_members')
+            ->withPivot(['role', 'joined_at', 'is_active'])
             ->withTimestamps();
     }
 
@@ -60,5 +62,10 @@ class Clinic extends Model
     public function messages()
     {
         return $this->hasMany(Message::class);
+    }
+
+    public function collaborationAgreements()
+    {
+        return $this->hasMany(CollaborationAgreement::class);
     }
 }

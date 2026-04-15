@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Clinic\Services;
+namespace App\Http\Controllers\Workspace\Services;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
@@ -10,7 +10,7 @@ class StoreAction extends Controller
 {
     public function __invoke(Request $request): RedirectResponse
     {
-        $clinic = $request->user()->currentClinic();
+        $workspace = $request->user()->currentWorkspace();
 
         $validated = $request->validate([
             'name'             => ['required', 'string', 'max:255'],
@@ -20,7 +20,7 @@ class StoreAction extends Controller
             'color'            => ['nullable', 'string', 'max:7'],
         ]);
 
-        $clinic->services()->create([...$validated, 'is_active' => true]);
+        $workspace->services()->create([...$validated, 'is_active' => true]);
 
         return back()->with('success', 'Servicio creado.');
     }

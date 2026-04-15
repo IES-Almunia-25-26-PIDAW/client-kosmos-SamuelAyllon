@@ -15,8 +15,8 @@ class StoreAction extends Controller
         $profile = $request->user()->patientProfile()->firstOrFail();
 
         $validated = $request->validate([
-            'service_id'      => ['required', Rule::exists('services', 'id')->where('clinic_id', $profile->clinic_id)],
-            'professional_id' => ['required', Rule::exists('clinic_user', 'user_id')->where('clinic_id', $profile->clinic_id)->where('is_active', true)],
+            'service_id'      => ['required', Rule::exists('services', 'id')->where('workspace_id', $profile->workspace_id)],
+            'professional_id' => ['required', Rule::exists('workspace_members', 'user_id')->where('workspace_id', $profile->workspace_id)->where('is_active', true)],
             'starts_at'       => ['required', 'date', 'after:now'],
             'modality'        => ['required', 'in:in_person,video_call'],
         ]);
@@ -24,7 +24,7 @@ class StoreAction extends Controller
         $service = \App\Models\Service::findOrFail($validated['service_id']);
 
         Appointment::create([
-            'clinic_id'       => $profile->clinic_id,
+            'workspace_id'       => $profile->workspace_id,
             'patient_id'      => $request->user()->id,
             'professional_id' => $validated['professional_id'],
             'service_id'      => $validated['service_id'],

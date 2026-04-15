@@ -10,7 +10,7 @@ class Service extends Model
     use HasFactory;
 
     protected $fillable = [
-        'clinic_id', 'name', 'description', 'duration_minutes', 'price', 'color', 'is_active',
+        'workspace_id', 'name', 'description', 'duration_minutes', 'price', 'color', 'is_active',
     ];
 
     protected function casts(): array
@@ -22,9 +22,9 @@ class Service extends Model
         ];
     }
 
-    public function clinic()
+    public function workspace()
     {
-        return $this->belongsTo(Clinic::class);
+        return $this->belongsTo(Workspace::class);
     }
 
     public function appointments()

@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('appointments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('clinic_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('workspace_id')->nullable()->constrained('workspaces')->nullOnDelete();
             $table->foreignId('patient_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('professional_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('service_id')->nullable()->constrained('services')->nullOnDelete();
@@ -27,7 +27,7 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
 
-            $table->index(['clinic_id', 'professional_id', 'starts_at']);
+            $table->index(['workspace_id', 'professional_id', 'starts_at']);
             $table->index(['patient_id', 'status']);
         });
     }

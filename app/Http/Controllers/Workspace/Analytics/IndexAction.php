@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Controllers\Clinic\Analytics;
+namespace App\Http\Controllers\Workspace\Analytics;
 
 use App\Http\Controllers\Controller;
 use App\Models\Appointment;
 use App\Models\Invoice;
-use App\Models\PatientProfessional;
+use App\Models\CaseAssignment;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -14,27 +14,27 @@ class IndexAction extends Controller
 {
     public function __invoke(Request $request): Response
     {
-        $clinicId = $request->user()->currentClinicId();
+        $workspaceId = $request->user()->currentWorkspaceId();
 
         $stats = [
-            'total_patients'     => PatientProfessional::where('clinic_id', $clinicId)
+            'total_patients'     => CaseAssignment::where('workspace_id', $workspaceId)
                 ->where('status', 'active')
                 ->count(),
-            'appointments_month' => Appointment::where('clinic_id', $clinicId)
+            'appointments_month' => Appointment::where('workspace_id', $workspaceId)
                 ->whereYear('starts_at', now()->year)
                 ->whereMonth('starts_at', now()->month)
                 ->count(),
-            'revenue_month'      => Invoice::where('clinic_id', $clinicId)
+            'revenue_month'      => Invoice::where('workspace_id', $workspaceId)
                 ->where('status', 'paid')
                 ->whereYear('paid_at', now()->year)
                 ->whereMonth('paid_at', now()->month)
                 ->sum('total'),
-            'pending_invoices'   => Invoice::where('clinic_id', $clinicId)
+            'pending_invoices'   => Invoice::where('workspace_id', $workspaceId)
                 ->whereIn('status', ['draft', 'sent'])
                 ->count(),
         ];
 
-        return Inertia::render('clinic/analytics/index', [
+        return Inertia::render('workspace/analytics/index', [
             'stats' => $stats,
         ]);
     }

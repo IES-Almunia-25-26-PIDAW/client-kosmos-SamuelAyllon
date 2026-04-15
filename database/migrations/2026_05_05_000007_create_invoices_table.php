@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('invoices', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('clinic_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('workspace_id')->nullable()->constrained('workspaces')->nullOnDelete();
             $table->foreignId('patient_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('professional_id')->constrained('users')->cascadeOnDelete();
             $table->string('invoice_number')->unique();
@@ -29,7 +29,7 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
 
-            $table->index(['clinic_id', 'status']);
+            $table->index(['workspace_id', 'status']);
             $table->index(['patient_id', 'status']);
         });
     }

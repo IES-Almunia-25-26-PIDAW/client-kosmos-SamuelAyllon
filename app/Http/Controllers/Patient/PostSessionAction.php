@@ -3,13 +3,13 @@
 namespace App\Http\Controllers\Patient;
 
 use App\Http\Controllers\Controller;
-use App\Models\Patient;
+use App\Models\PatientProfile;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class PostSessionAction extends Controller
 {
-    public function __invoke(Patient $patient): Response
+    public function __invoke(PatientProfile $patient): Response
     {
         $this->authorize('view', $patient);
 
@@ -18,9 +18,9 @@ class PostSessionAction extends Controller
             ->first();
 
         return Inertia::render('patients/post-session', [
-            'patient'         => $patient,
+            'patient' => $patient,
             'lastAppointment' => $lastAppointment,
-            'lastInvoice'     => $patient->invoices()->orderByDesc('due_at')->first(),
+            'lastInvoice' => $patient->invoices()->orderByDesc('due_at')->first(),
         ]);
     }
 }

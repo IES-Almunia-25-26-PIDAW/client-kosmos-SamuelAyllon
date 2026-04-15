@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('messages', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('clinic_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('workspace_id')->nullable()->constrained('workspaces')->nullOnDelete();
             $table->foreignId('sender_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('receiver_id')->constrained('users')->cascadeOnDelete();
             $table->string('subject')->nullable();
@@ -21,7 +21,7 @@ return new class extends Migration
             $table->softDeletes();
 
             $table->index(['receiver_id', 'read_at']);
-            $table->index(['clinic_id', 'sender_id', 'receiver_id']);
+            $table->index(['workspace_id', 'sender_id', 'receiver_id']);
         });
     }
 

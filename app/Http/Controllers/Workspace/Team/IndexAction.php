@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Clinic\Team;
+namespace App\Http\Controllers\Workspace\Team;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -11,14 +11,14 @@ class IndexAction extends Controller
 {
     public function __invoke(Request $request): Response
     {
-        $clinic = $request->user()->currentClinic();
+        $workspace = $request->user()->currentWorkspace();
 
-        $members = $clinic->users()
-            ->withPivot(['role', 'can_view_all_patients', 'joined_at', 'is_active'])
+        $members = $workspace->members()
+            ->withPivot(['role', 'joined_at', 'is_active'])
             ->get();
 
-        return Inertia::render('clinic/team/index', [
-            'clinic'  => $clinic,
+        return Inertia::render('workspace/team/index', [
+            'workspace' => $workspace,
             'members' => $members,
         ]);
     }

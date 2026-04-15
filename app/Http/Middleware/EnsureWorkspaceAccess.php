@@ -6,12 +6,12 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class EnsureClinicAccess
+class EnsureWorkspaceAccess
 {
     /**
-     * Verify the authenticated user belongs to the active clinic.
+     * Verify the authenticated user belongs to the active workspace.
      *
-     * The active clinic is resolved from the session key `current_clinic_id`.
+     * The active workspace is resolved from the session key `current_workspace_id`.
      * Admins bypass this check entirely.
      */
     public function handle(Request $request, Closure $next): Response
@@ -22,24 +22,24 @@ class EnsureClinicAccess
             abort(401);
         }
 
-        // Admins have global access — no clinic scope needed
+        // Admins have global access — no workspace scope needed
         if ($user->hasRole('admin')) {
             return $next($request);
         }
 
-        $clinicId = session('current_clinic_id') ?? $user->currentClinicId();
+        $workspaceId = session('current_workspace_id') ?? $user->currentWorkspaceId();
 
-        if (! $clinicId) {
-            abort(403, 'No hay clínica activa asignada.');
+        if (! $workspaceId) {
+            abort(403, 'No hay espacio de trabajo activo asignado.');
         }
 
-        $belongsToClinic = $user->clinics()
-            ->where('clinics.id', $clinicId)
-            ->where('clinic_user.is_active', true)
+        $belongsToWorkspace = $user->workspaces()
+            ->where('workspaces.id', $workspaceId)
+            ->where('workspace_members.is_active', true)
             ->exists();
 
-        if (! $belongsToClinic) {
-            abort(403, 'No tienes acceso a esta clínica.');
+        if (! $belongsToWorkspace) {
+            abort(403, 'No tienes acceso a este espacio de trabajo.');
         }
 
         return $next($request);

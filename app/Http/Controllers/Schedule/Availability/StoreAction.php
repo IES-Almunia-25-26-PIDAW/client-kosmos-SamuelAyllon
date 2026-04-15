@@ -21,7 +21,7 @@ class StoreAction extends Controller
         Availability::create([
             ...$validated,
             'professional_id' => $request->user()->id,
-            'clinic_id'       => $request->user()->currentClinicId(),
+            'workspace_id'       => $request->user()->currentWorkspaceId(),
             'is_active'       => true,
         ]);
 

@@ -22,7 +22,7 @@ class GenerateInvoiceAction extends Controller
         $amount  = $service?->price ?? 0;
 
         $invoice = Invoice::create([
-            'clinic_id'       => $appointment->clinic_id,
+            'workspace_id'       => $appointment->workspace_id,
             'patient_id'      => $appointment->patient_id,
             'professional_id' => $appointment->professional_id,
             'invoice_number'  => $billing->generateInvoiceNumber($request->user()),

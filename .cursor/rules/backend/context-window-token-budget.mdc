@@ -1,0 +1,35 @@
+---
+description: Minimize token usage while preserving enough context for correct Laravel backend changes
+globs:
+alwaysApply: true
+---
+# Context Window and Token Budget
+
+Use this protocol on every backend task to stay precise and token-efficient.
+
+## First Pass (Minimal Context)
+
+1. Read only what is needed to complete the user request.
+2. Start with fast discovery:
+   - `rg` for symbols/usage
+   - `Glob` for file location
+   - `ReadFile` only for the exact files to edit or verify
+3. Avoid reading full large files when a small range is enough.
+
+## Context Expansion Rules
+
+- Expand context only if blocked by missing information.
+- Prefer schema/model/controller/test files directly related to the change.
+- Avoid broad repo exploration when the request is narrow.
+
+## Edit and Verify Loop
+
+1. Implement the smallest complete change.
+2. Run only relevant checks first (targeted tests/lints).
+3. Expand to broader checks only if needed.
+
+## Output Discipline
+
+- Keep user updates concise and action-oriented.
+- Summarize changes by intent and affected paths.
+- Do not include large code dumps unless explicitly requested.

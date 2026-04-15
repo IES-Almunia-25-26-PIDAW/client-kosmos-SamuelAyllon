@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Models\ConsentForm;
-use App\Models\Patient;
+use App\Models\PatientProfile;
 use App\Models\User;
 use Illuminate\Support\Collection;
 
@@ -12,7 +12,7 @@ class RgpdService
     /**
      * @todo Check if the patient has a valid (signed, non-expired) consent form
      */
-    public function hasValidConsent(Patient $patient): bool
+    public function hasValidConsent(PatientProfile $patient): bool
     {
         // @todo
         return false;

@@ -22,53 +22,20 @@ it('settings page returns the authenticated user', function () {
         );
 });
 
-it('professional can update practice settings', function () {
+it('professional can update profile name and phone from settings', function () {
     $user = createProfessional();
 
     $this->actingAs($user)
         ->put('/settings', [
-            'practice_name' => 'Consulta Psicología Kosmos',
-            'specialty'     => 'Psicología clínica',
-            'city'          => 'Madrid',
+            'name' => 'Dr. Prueba Actualizado',
+            'phone' => '+34 600 000 999',
         ])
         ->assertRedirect()
         ->assertSessionHasNoErrors();
 
     $user->refresh();
-    $this->assertSame('Consulta Psicología Kosmos', $user->practice_name);
-    $this->assertSame('Psicología clínica', $user->specialty);
-});
-
-it('professional can update fiscal settings', function () {
-    $user = createProfessional();
-
-    $this->actingAs($user)
-        ->put('/settings', [
-            'nif'             => '12345678Z',
-            'default_rate'    => 75.50,
-            'invoice_prefix'  => 'CK',
-        ])
-        ->assertRedirect()
-        ->assertSessionHasNoErrors();
-
-    $user->refresh();
-    $this->assertSame('12345678Z', $user->nif);
-    $this->assertSame('CK', $user->invoice_prefix);
-});
-
-it('professional can update rgpd settings', function () {
-    $user = createProfessional();
-
-    $this->actingAs($user)
-        ->put('/settings', [
-            'rgpd_template'         => 'Texto de consentimiento RGPD personalizado.',
-            'data_retention_months' => 60,
-        ])
-        ->assertRedirect()
-        ->assertSessionHasNoErrors();
-
-    $user->refresh();
-    $this->assertSame(60, $user->data_retention_months);
+    expect($user->name)->toBe('Dr. Prueba Actualizado');
+    expect($user->phone)->toBe('+34 600 000 999');
 });
 
 it('admin cannot access professional settings (is redirected)', function () {

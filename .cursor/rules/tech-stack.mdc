@@ -1,7 +1,7 @@
 ---
 description: Technology stack, dependency versions, and best practices for client-kosmos
 globs:
-alwaysApply: true
+alwaysApply: false
 ---
 # Technology Stack & Dependency Guide
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Clinic\Team;
+namespace App\Http\Controllers\Workspace\Team;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
@@ -11,14 +11,14 @@ class DestroyAction extends Controller
 {
     public function __invoke(Request $request, User $user): RedirectResponse
     {
-        $clinic = $request->user()->currentClinic();
+        $workspace = $request->user()->currentWorkspace();
 
-        if ($clinic->owner_id === $user->id) {
-            return back()->withErrors(['user' => 'No puedes eliminar al propietario de la clínica.']);
+        if ($workspace->creator_id === $user->id) {
+            return back()->withErrors(['user' => 'No puedes eliminar al creador del espacio de trabajo.']);
         }
 
-        $clinic->users()->detach($user->id);
+        $workspace->members()->detach($user->id);
 
-        return back()->with('success', 'Miembro eliminado del equipo.');
+        return back()->with('success', 'Miembro eliminado del espacio de trabajo.');
     }
 }

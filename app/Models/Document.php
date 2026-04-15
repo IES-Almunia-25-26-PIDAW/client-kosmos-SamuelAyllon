@@ -11,15 +11,15 @@ class Document extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'patient_id', 'user_id', 'clinic_id', 'name', 'local_path',
+        'patient_id', 'user_id', 'workspace_id', 'name', 'local_path',
         'storage_type', 'gdrive_file_id', 'gdrive_url',
-        'mime_type', 'file_size', 'category', 'is_rgpd', 'expires_at',
+        'mime_type', 'size_bytes', 'category', 'is_rgpd', 'expires_at',
     ];
 
     protected function casts(): array
     {
         return [
-            'is_rgpd'    => 'boolean',
+            'is_rgpd' => 'boolean',
             'expires_at' => 'date',
         ];
     }
@@ -34,8 +34,8 @@ class Document extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function clinic()
+    public function workspace()
     {
-        return $this->belongsTo(Clinic::class);
+        return $this->belongsTo(Workspace::class);
     }
 }

@@ -11,8 +11,8 @@ class IndexAction extends Controller
 {
     public function __invoke(): Response
     {
-        $users = User::withCount(['patientProfiles', 'sessions'])
-            ->withSum(['payments as paid_amount' => fn ($q) => $q->where('status', 'paid')], 'amount')
+        $users = User::withCount(['patientProfiles', 'professionalAppointments'])
+            ->withSum(['professionalInvoices as paid_amount' => fn ($q) => $q->where('status', 'paid')], 'total')
             ->latest()
             ->paginate(25);
 

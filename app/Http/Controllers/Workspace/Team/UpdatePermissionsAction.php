@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Clinic\Team;
+namespace App\Http\Controllers\Workspace\Team;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
@@ -12,15 +12,13 @@ class UpdatePermissionsAction extends Controller
     public function __invoke(Request $request, User $user): RedirectResponse
     {
         $request->validate([
-            'role'                  => ['required', 'in:professional,receptionist,admin'],
-            'can_view_all_patients' => ['boolean'],
+            'role' => ['required', 'in:member,billing_manager'],
         ]);
 
-        $clinic = $request->user()->currentClinic();
+        $workspace = $request->user()->currentWorkspace();
 
-        $clinic->users()->updateExistingPivot($user->id, [
-            'role'                  => $request->role,
-            'can_view_all_patients' => $request->boolean('can_view_all_patients'),
+        $workspace->members()->updateExistingPivot($user->id, [
+            'role' => $request->role,
         ]);
 
         return back()->with('success', 'Permisos actualizados.');
