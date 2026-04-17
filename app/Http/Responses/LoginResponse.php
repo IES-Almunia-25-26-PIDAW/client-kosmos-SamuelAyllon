@@ -20,7 +20,7 @@ class LoginResponse implements LoginResponseContract
             return redirect()->route('admin.users.index');
         }
 
-        if (! $user->hasCompletedTutorial()) {
+        if ($user->isProfessional() && ! $user->hasCompletedTutorial()) {
             return redirect()->route('onboarding');
         }
 

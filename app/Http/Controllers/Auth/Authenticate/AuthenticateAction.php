@@ -25,9 +25,7 @@ class AuthenticateAction extends Controller
             return null;
         }
 
-        // Seguridad: bloquear login si el usuario no tiene ningún rol asignado
-        // En este proyecto solo existen los roles 'admin' y 'professional' (ver RoleSeeder).
-        if (! $user->hasAnyRole(['admin', 'professional'])) {
+        if (! $user->hasAnyRole(['admin', 'professional', 'patient'])) {
             return null;
         }
 
