@@ -23,7 +23,7 @@ import {
     AlertCircle,
 } from 'lucide-react';
 import { useEffect, useState, useRef } from 'react';
-import logo from '@/assets/logo.png';
+import logo from '@/assets/logo.svg';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
