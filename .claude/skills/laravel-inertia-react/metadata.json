@@ -18,7 +18,7 @@
     "forms",
     "validation",
     "routing",
-    "ziggy"
+    "wayfinder"
   ],
   "categories": [
     "page-components",
@@ -50,9 +50,9 @@
       "description": "Official React documentation for hooks, components, and TypeScript"
     },
     {
-      "name": "Ziggy Documentation",
-      "url": "https://github.com/tighten/ziggy",
-      "description": "Use Laravel named routes in JavaScript with type safety"
+      "name": "Wayfinder Documentation",
+      "url": "https://github.com/laravel/wayfinder",
+      "description": "Type-safe TypeScript action/route imports generated from Laravel controllers"
     }
   ],
   "dependencies": {
@@ -111,7 +111,7 @@
       "rules": [
         "shared-auth-user",
         "shared-flash-messages",
-        "shared-ziggy-routes",
+        "shared-wayfinder-routes",
         "shared-app-config"
       ]
     },

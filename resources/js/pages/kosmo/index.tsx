@@ -7,6 +7,8 @@ import { KosmoBriefing as KosmoBriefingComponent } from '@/components/kosmo/kosm
 import { EmptyState } from '@/components/empty-state';
 import { Button } from '@/components/ui/button';
 import type { KosmoBriefing } from '@/types';
+import ChatAction from '@/actions/App/Http/Controllers/Kosmo/ChatAction';
+import MarkReadAction from '@/actions/App/Http/Controllers/Kosmo/MarkReadAction';
 
 interface Props {
     briefings: KosmoBriefing[];
@@ -40,7 +42,7 @@ export default function KosmoPage({ briefings }: Props) {
         setLoading(true);
 
         try {
-            const res = await fetch(route('kosmo.chat'), {
+            const res = await fetch(ChatAction.url(), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -189,7 +191,7 @@ export default function KosmoPage({ briefings }: Props) {
                                                 : 'Ver detalle'}
                                         </p>
                                     }
-                                    onDismiss={() => router.post(route('kosmo.briefings.read', briefing.id))}
+                                    onDismiss={() => router.post(MarkReadAction.url(briefing.id))}
                                 />
                             ))
                         )}

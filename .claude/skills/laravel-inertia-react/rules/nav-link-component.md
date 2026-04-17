@@ -148,7 +148,7 @@ function AdvancedLinkExamples() {
       {/* Basic link */}
       <Link href="/users">Users</Link>
 
-      {/* Using Ziggy routes */}
+      {/* Using Wayfinder routes */}
       <Link href={route('users.show', { user: 1 })}>View User</Link>
 
       {/* Preserve scroll position */}
@@ -213,6 +213,6 @@ Using Inertia's Link component is essential for proper SPA behavior:
 3. **Prefetching**: Inertia can prefetch pages on hover for faster navigation
 4. **Progress Indicator**: Integrates with Inertia's loading progress bar
 5. **HTTP Methods**: Support for POST, PUT, PATCH, DELETE via method prop
-6. **Ziggy Integration**: Works seamlessly with Laravel's named routes
+6. **Wayfinder Integration**: Works seamlessly with Laravel's named routes via generated action imports
 7. **History Management**: Proper browser back/forward button behavior
 8. **Accessibility**: Renders semantic anchor tags with proper href attributes

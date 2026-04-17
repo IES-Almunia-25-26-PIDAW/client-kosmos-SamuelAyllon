@@ -73,12 +73,6 @@ export interface PageProps {
     success?: string;
     error?: string;
   };
-  ziggy: {
-    url: string;
-    port: number | null;
-    defaults: Record<string, unknown>;
-    routes: Record<string, unknown>;
-  };
 }
 
 // resources/js/Pages/Users/Index.tsx
@@ -117,4 +111,4 @@ Proper props typing is essential for Inertia applications:
 3. **Error Prevention**: Catch typos and missing properties before runtime
 4. **Refactoring Safety**: TypeScript will flag all affected components when data shapes change
 5. **Documentation**: Types serve as living documentation for the data flow
-6. **Shared Data Access**: Extending PageProps ensures access to auth, flash messages, and Ziggy routes
+6. **Shared Data Access**: Extending PageProps ensures access to auth, flash messages, and Wayfinder routes

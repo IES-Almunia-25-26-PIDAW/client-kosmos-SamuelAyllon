@@ -74,8 +74,8 @@ it('admin can create a new professional user', function () {
 
     $this->actingAs($admin)
         ->post(route('admin.users.store'), [
-            'name'     => 'Nuevo Profesional',
-            'email'    => 'nuevo@clientkosmos.test',
+            'name' => 'Nuevo Profesional',
+            'email' => 'nuevo@clientkosmos.test',
             'password' => 'password123',
         ])
         ->assertRedirect();
@@ -91,7 +91,7 @@ it('admin can delete a user', function () {
 
     $this->actingAs($admin)
         ->delete(route('admin.users.destroy', $professional))
-        ->assertRedirect(route('admin.users.index'));
+        ->assertRedirect(route('admin.dashboard'));
 
     $this->assertSoftDeleted('users', ['id' => $professional->id]);
 });

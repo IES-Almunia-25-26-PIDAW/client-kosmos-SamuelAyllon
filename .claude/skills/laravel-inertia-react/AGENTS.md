@@ -65,7 +65,7 @@ SPA-like navigation without full page reloads:
 Global props shared across all pages:
 - Authentication user data
 - Flash messages from Laravel
-- Ziggy routes for type-safe routing
+- Wayfinder routes for type-safe routing
 - App configuration and feature flags
 
 **When to reference**: Accessing user data, displaying flash messages, using Laravel routes in JS, or sharing global config.
@@ -214,7 +214,7 @@ Dashboard.layout = (page) => <AppLayout>{page}</AppLayout>;
 ## Best Practices for AI Agents
 
 1. **Always Type Props**: Use TypeScript interfaces extending PageProps
-2. **Use route() Helper**: Never hardcode URLs, always use Ziggy's route() function
+2. **Use Wayfinder imports**: Never hardcode URLs, always import from `@/actions/`
 3. **Handle Errors**: Display validation errors inline with proper UX
 4. **Preserve State**: Use preserveState for filters and preserveScroll for pagination
 5. **Lazy Load**: Use Inertia::lazy() for expensive props on Laravel side
@@ -260,7 +260,7 @@ Explanation
 | Set up navigation | nav-link-component, nav-programmatic |
 | Display flash messages | shared-flash-messages |
 | Access current user | shared-auth-user |
-| Use Laravel routes | shared-ziggy-routes |
+| Use Laravel routes | shared-wayfinder-routes |
 | Create layout | layout-persistent |
 | Partial reload | page-partial-reloads |
 | Preserve scroll | page-scroll-preservation |
@@ -279,7 +279,7 @@ Explanation
 - [Inertia.js](https://inertiajs.com/) - Core concepts and API
 - [Laravel](https://laravel.com/docs) - Backend framework
 - [React](https://react.dev/) - Frontend library
-- [Ziggy](https://github.com/tighten/ziggy) - Laravel routes in JavaScript
+- [Wayfinder](https://github.com/laravel/wayfinder) - Type-safe TypeScript route imports from Laravel controllers
 
 ## Support
 

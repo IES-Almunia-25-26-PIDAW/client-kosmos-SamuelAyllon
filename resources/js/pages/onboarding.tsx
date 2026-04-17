@@ -4,6 +4,7 @@ import { Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import OnboardingStoreAction from '@/actions/App/Http/Controllers/Onboarding/StoreAction';
 
 type OnboardingStep = 1 | 2 | 3;
 
@@ -17,7 +18,6 @@ interface FormData {
         brand_tone: string;
         next_deadline: string;
     };
-    [key: string]: unknown;
 }
 
 const specialties = [
@@ -45,7 +45,7 @@ export default function Onboarding() {
     });
 
     const submit = () => {
-        post(route('onboarding'));
+        post(OnboardingStoreAction.url());
     };
 
     const stepLabels = ['Sobre tu consulta', 'Tu primer paciente', 'Ya casi'];

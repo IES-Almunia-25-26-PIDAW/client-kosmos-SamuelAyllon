@@ -4,6 +4,7 @@ import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import PatientStoreAction from '@/actions/App/Http/Controllers/Patient/StoreAction';
 
 interface FormData {
     project_name: string;
@@ -27,7 +28,7 @@ export default function PatientCreate() {
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
-        post(route('patients.store'));
+        post(PatientStoreAction.url());
     };
 
     return (

@@ -3,6 +3,8 @@ import type { ReactNode } from 'react';
 import { ArrowLeft, UserPlus } from 'lucide-react';
 import AdminLayout from '@/layouts/admin-layout';
 import { Button } from '@/components/ui/button';
+import IndexAction from '@/actions/App/Http/Controllers/Admin/Users/IndexAction';
+import StoreAction from '@/actions/App/Http/Controllers/Admin/Users/StoreAction';
 
 export default function AdminUserCreate() {
     const { data, setData, post, processing, errors } = useForm({
@@ -13,7 +15,7 @@ export default function AdminUserCreate() {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        post(route('admin.users.store'));
+        post(StoreAction.url());
     };
 
     return (
@@ -23,7 +25,7 @@ export default function AdminUserCreate() {
             <div className="flex flex-col gap-6 p-6 lg:p-8 max-w-2xl">
                 <div>
                     <Link
-                        href={route('admin.users.index')}
+                        href={IndexAction.url()}
                         className="inline-flex items-center gap-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text)] mb-4"
                     >
                         <ArrowLeft size={16} />
@@ -94,7 +96,7 @@ export default function AdminUserCreate() {
                     </div>
 
                     <div className="flex items-center justify-end gap-3 pt-2 border-t border-[var(--color-border-subtle)]">
-                        <Link href={route('admin.users.index')}>
+                        <Link href={IndexAction.url()}>
                             <Button type="button" variant="secondary">
                                 Cancelar
                             </Button>

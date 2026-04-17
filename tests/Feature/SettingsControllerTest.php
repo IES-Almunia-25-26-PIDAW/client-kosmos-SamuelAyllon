@@ -43,5 +43,5 @@ it('admin cannot access professional settings (is redirected)', function () {
 
     $this->actingAs($admin)
         ->get(route('settings'))
-        ->assertRedirect(route('admin.users.index'));
+        ->assertRedirect(route('profile.edit'));
 });

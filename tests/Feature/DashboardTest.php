@@ -78,7 +78,7 @@ it('admin is redirected away from professional dashboard', function () {
 
     $this->actingAs($admin)
         ->get(route('dashboard'))
-        ->assertRedirect(route('admin.users.index'));
+        ->assertRedirect(route('admin.dashboard'));
 });
 
 it('dashboard alerts contain invoice and consent keys', function () {

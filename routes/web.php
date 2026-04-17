@@ -1,11 +1,11 @@
 <?php
 
+use App\Http\Controllers\Admin\DashboardIndexAction as AdminDashboardIndexAction;
 use App\Http\Controllers\Admin\Users\CreateAction as AdminUserCreateAction;
 use App\Http\Controllers\Admin\Users\DestroyAction as AdminUserDestroyAction;
 use App\Http\Controllers\Admin\Users\IndexAction as AdminUserIndexAction;
 use App\Http\Controllers\Admin\Users\ShowAction as AdminUserShowAction;
 use App\Http\Controllers\Admin\Users\StoreAction as AdminUserStoreAction;
-use App\Http\Controllers\Admin\Users\UpdateRoleAction as AdminUserUpdateRoleAction;
 use App\Http\Controllers\Admin\Workspaces\IndexAction as AdminWorkspaceIndexAction;
 use App\Http\Controllers\Admin\Workspaces\ShowAction as AdminWorkspaceShowAction;
 use App\Http\Controllers\Agreement\DestroyAction as AgreementDestroyAction;
@@ -228,11 +228,11 @@ Route::middleware(['auth', 'verified', 'admin'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
+        Route::get('/', AdminDashboardIndexAction::class)->name('dashboard');
         Route::get('/users', AdminUserIndexAction::class)->name('users.index');
         Route::get('/users/create', AdminUserCreateAction::class)->name('users.create');
         Route::post('/users', AdminUserStoreAction::class)->name('users.store');
         Route::get('/users/{user}', AdminUserShowAction::class)->name('users.show');
-        Route::put('/users/{user}/role', AdminUserUpdateRoleAction::class)->name('users.role');
         Route::delete('/users/{user}', AdminUserDestroyAction::class)->name('users.destroy');
 
         Route::get('/workspaces', AdminWorkspaceIndexAction::class)->name('workspaces.index');

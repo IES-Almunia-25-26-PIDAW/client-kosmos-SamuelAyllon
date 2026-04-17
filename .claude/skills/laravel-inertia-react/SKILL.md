@@ -456,7 +456,7 @@ laravel-inertia-react/
 - [Inertia.js Documentation](https://inertiajs.com/) - Official Inertia.js docs
 - [Laravel Documentation](https://laravel.com/docs) - Laravel framework docs
 - [React Documentation](https://react.dev/) - Official React docs
-- [Ziggy](https://github.com/tighten/ziggy) - Laravel route helper for JavaScript
+- [Wayfinder](https://github.com/laravel/wayfinder) - Type-safe TypeScript route imports generated from Laravel controllers
 
 ## License
 

@@ -9,8 +9,12 @@ use Inertia\Response;
 
 class IndexAction extends Controller
 {
-    public function __invoke(Request $request): Response
+    public function __invoke(Request $request): Response|\Illuminate\Http\RedirectResponse
     {
+        if ($request->user()->isAdmin()) {
+            return redirect()->route('profile.edit');
+        }
+
         return Inertia::render('settings/index', [
             'user' => $request->user(),
         ]);

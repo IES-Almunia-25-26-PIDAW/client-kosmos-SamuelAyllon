@@ -1,16 +1,16 @@
-import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import type { ReactNode } from 'react';
-import { ArrowLeft, UserCog, Trash2 } from 'lucide-react';
+import { ArrowLeft, Trash2 } from 'lucide-react';
 import AdminLayout from '@/layouts/admin-layout';
 import { Button } from '@/components/ui/button';
 import { KPICard } from '@/components/patient/kpi-card';
 import type { Auth } from '@/types';
+import DashboardIndexAction from '@/actions/App/Http/Controllers/Admin/DashboardIndexAction';
 
 interface UserDetail {
     id: number;
     name: string;
     email: string;
-    role: 'professional' | 'admin';
     practice_name: string | null;
     specialty: string | null;
     city: string | null;
@@ -26,13 +26,8 @@ interface Props {
 
 export default function AdminUserShow({ user }: Props) {
     const { auth } = usePage<{ auth: Auth }>().props;
-    const { data, setData, put, processing } = useForm({ role: user.role });
 
     const isSelf = user.id === auth.user.id;
-
-    const handleRoleChange = () => {
-        put(`/admin/users/${user.id}/role`);
-    };
 
     const handleDelete = () => {
         if (!confirm(`¿Eliminar a ${user.name}? Esta acción no se puede deshacer.`)) return;
@@ -50,7 +45,7 @@ export default function AdminUserShow({ user }: Props) {
                 <div className="flex items-start justify-between">
                     <div>
                         <Link
-                            href={route('admin.users.index')}
+                            href={DashboardIndexAction.url()}
                             className="inline-flex items-center gap-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text)] mb-4"
                         >
                             <ArrowLeft size={16} />
@@ -98,32 +93,6 @@ export default function AdminUserShow({ user }: Props) {
                         )}
                     </dl>
                 </div>
-
-                {!isSelf && (
-                    <div className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-[var(--shadow-sm)] space-y-4">
-                        <h2 className="text-display-lg text-[var(--color-text)]">Rol</h2>
-                        <div className="flex items-center gap-4">
-                            <select
-                                value={data.role}
-                                onChange={(e) => setData('role', e.target.value as 'professional' | 'admin')}
-                                className="h-10 px-3 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] text-[var(--color-text)] text-base focus:outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
-                            >
-                                <option value="professional">Profesional</option>
-                                <option value="admin">Administrador</option>
-                            </select>
-                            <Button
-                                variant="secondary"
-                                size="sm"
-                                onClick={handleRoleChange}
-                                loading={processing}
-                                disabled={data.role === user.role}
-                            >
-                                <UserCog size={14} />
-                                Actualizar rol
-                            </Button>
-                        </div>
-                    </div>
-                )}
             </div>
         </>
     );

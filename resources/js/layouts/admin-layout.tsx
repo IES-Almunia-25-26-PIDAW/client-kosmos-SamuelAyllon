@@ -33,7 +33,7 @@ function AdminNavUser({ user }: { user: User }) {
 }
 
 const adminNavItems = [
-    { href: '/admin/users', label: 'Usuarios', icon: Users },
+    { href: '/admin', label: 'Usuarios', icon: Users },
 ];
 
 export default function AdminLayout({ children }: AdminLayoutProps) {

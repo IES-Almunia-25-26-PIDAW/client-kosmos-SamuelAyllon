@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import type { Patient } from '@/types';
+import PatientUpdateAction from '@/actions/App/Http/Controllers/Patient/UpdateAction';
 
 interface Props {
     patient: Patient;
@@ -22,7 +23,7 @@ export default function PatientEdit({ patient }: Props) {
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
-        put(route('patients.update', patient.id));
+        put(PatientUpdateAction.url(patient.id));
     };
 
     return (
