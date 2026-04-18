@@ -258,7 +258,7 @@ En código y tests, no mezclar ambos significados.
 | `patient_id` | FK → **`patient_profiles.id`** nullable, null on delete |
 | `appointment_id` | FK → `appointments.id` nullable, null on delete |
 | `type` | enum: `daily`, `pre_session`, `post_session`, `weekly`, `nudge` |
-| `content` | json |
+| `content` | json (cast a `array` en el modelo) |
 | `is_read` | boolean default false |
 | `for_date` | date nullable |
 | `created_at`, `updated_at` | timestamps |

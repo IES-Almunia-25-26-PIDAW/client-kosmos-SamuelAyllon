@@ -49,6 +49,40 @@ alwaysApply: false
 - The custom `LoginResponse` in `app/Http/Responses/LoginResponse.php` controls post-login redirects.
 - 2FA is enabled — always test 2FA flows when modifying auth logic.
 
+### Controller Architecture
+- **Single-action controllers only**. One class per HTTP endpoint with a single `__invoke()` method — no resource controllers.
+- Namespaced by domain folder under `app/Http/Controllers/<Domain>/`. Current domains:
+  `Admin`, `Agreement`, `Appointment`, `Auth`, `Billing`, `CollaborationAgreement`,
+  `ConsentForm`, `Dashboard`, `Document`, `Invoice`, `Kosmo`, `Message`, `Note`,
+  `Onboarding`, `Patient`, `Payment`, `Portal`, `Referral`, `Schedule`, `Settings`,
+  `Workspace`.
+- Class names end with the action verb: `IndexAction`, `ShowAction`, `StoreAction`,
+  `UpdateAction`, `DestroyAction`, etc. → e.g. `App\Http\Controllers\Appointment\IndexAction`.
+- Render Inertia pages with **lowercase kebab-case** page paths matching
+  `resources/js/pages/<domain>/<action>.tsx`:
+  ```php
+  return Inertia::render('appointments/index', [...]);
+  ```
+  Never use `Appointments/Index` (PascalCase) — it will not resolve.
+
+### Custom Middleware & Aliases
+- Registered in [bootstrap/app.php](bootstrap/app.php) (Laravel 12 fluent config):
+  - `admin` → `EnsureAdmin` — Spatie `admin` role gate.
+  - `professional` → `EnsureProfessional` — Spatie `professional` role gate.
+  - `workspace.access` → `EnsureWorkspaceAccess` — verifies membership/ownership of the
+    current workspace.
+- Spatie shorthands are also aliased: `role`, `permission`, `role_or_permission`.
+- `HandleInertiaRequests` and `HandleAppearance` are appended to the `web` group.
+
+### Inertia Shared Data
+- `HandleInertiaRequests::share()` exposes these keys globally to every Inertia page:
+  - `name` — `config('app.name')`.
+  - `auth.user` — the current `User` or `null`.
+  - `isImpersonating` — `bool`, true if the session holds `impersonating_id`.
+  - `sidebarOpen` — `bool`, derived from the `sidebar_state` cookie (default open).
+  - `flash.success` / `flash.error` — transient session messages.
+- Consume with `usePage().props` and type via `resources/js/types/shared/`.
+
 ### Inertia Laravel ^2.0 (+ `@inertiajs/react` ^2.3.7)
 - **Major v2 features in use:**
   - `<Deferred>` component for lazy-loaded props — prefer it over loading spinners on initial page load for heavy data.
@@ -61,7 +95,19 @@ alwaysApply: false
 ### Laravel Wayfinder ^0.1.9 (+ `@laravel/vite-plugin-wayfinder` ^0.1.3)
 - Generates **type-safe TypeScript action/route imports** from Laravel controllers.
 - After adding or renaming routes/controllers, run `npm run dev` (or `php artisan wayfinder:generate`) to regenerate types.
-- Import routes like: `import { route } from '@/actions/patient/index'` — never hardcode URL strings.
+- **Action controllers** → `resources/js/actions/App/Http/Controllers/<Domain>/<Action>.ts`
+  (default export, one per `__invoke` controller):
+  ```ts
+  import IndexAction from '@/actions/App/Http/Controllers/Appointment/IndexAction';
+  IndexAction.url({ query: { status: 'scheduled' } });
+  IndexAction.get();          // { url, method: 'get' }
+  IndexAction.form();         // form-action definition
+  ```
+- **Named routes** (e.g. Fortify) → `resources/js/routes/<name>.ts` (named exports):
+  ```ts
+  import { store } from '@/routes/register';
+  post(store.url(), { onSuccess: () => reset() });
+  ```
 - Do NOT use the legacy `route()` Ziggy helper; Wayfinder is the project standard.
 
 ### Spatie Laravel Permission ^7.2
@@ -92,6 +138,7 @@ alwaysApply: false
 - Run `npm run types` (runs `tsc --noEmit`) to type-check without emitting files.
 - Strict mode is expected — never use `any`; use `unknown` + type guards or precise types instead.
 - All Inertia page prop types live in `resources/js/types/` and are re-exported from index files — always import from the nearest `index.ts`.
+- **Files in `resources/js/{pages,layouts,components}/` use lowercase kebab-case** (`appointments/index.tsx`, `app-layout.tsx`, `input-error.tsx`). Never PascalCase (`Pages/`, `AppLayout.tsx`) — Inertia page resolution is case-sensitive and mirrors the `Inertia::render()` path.
 
 ### Vite ^7.0.4
 - Requires **Node 20.18+**.
@@ -150,7 +197,15 @@ alwaysApply: false
 ### Laravel Wayfinder (Dev)
 - `@laravel/vite-plugin-wayfinder` auto-generates `resources/js/actions/` during `npm run dev`.
 - The generated files are **auto-generated** — do not edit them manually; they will be overwritten.
-- This repo **gitignores** `resources/js/actions/` (regenerate locally after pull or route changes).
+- This repo **gitignores** `resources/js/{actions,routes,wayfinder}/` (regenerate locally after pull or route changes).
+
+### Laravel Boost MCP
+- The Boost MCP server is available to Claude and agents. See [CLAUDE.md](../CLAUDE.md) for the full list; key tools:
+  - `search-docs` — version-aware docs for installed packages (use before code changes).
+  - `database-schema` / `database-query` — inspect schema / run read-only queries.
+  - `browser-logs` — read recent browser console errors.
+  - `get-absolute-url` — resolve the project's dev URL (scheme + port).
+  - `application-info`, `last-error`, `read-log-entries`, `database-connections`.
 
 ---
 

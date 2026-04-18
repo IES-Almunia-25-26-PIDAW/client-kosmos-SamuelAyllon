@@ -235,6 +235,29 @@ flowchart TD
     P --> P4[Mensajes y perfil]
 ```
 
+## Status Enums & Transitions
+
+All enum columns below are defined as SQL `ENUM` in the migrations (single source of
+truth: `database/migrations/`). Default value is shown after `=`. There are **no
+PHP `enum` classes** in `app/Enums/`; the allowed values live in the migrations and are
+enforced at the DB level.
+
+| Table.column | Allowed values (default bold) | Notes |
+|---|---|---|
+| `appointments.status` | **`pending`**, `confirmed`, `in_progress`, `completed`, `cancelled`, `no_show` | Typical flow: `pending` → `confirmed` → `in_progress` → `completed`. Terminal: `cancelled`, `no_show` (requires `cancellation_reason` + `cancelled_by` when `cancelled`). |
+| `appointments.modality` | `in_person`, **`video_call`** | When `video_call`, `meeting_room_id` / `meeting_url` become relevant. |
+| `patient_profiles.status` | **`active`**, `inactive`, `discharged` | `discharged` is terminal; gate creation of new clinical records on `active`. |
+| `invoices.status` | **`draft`**, `sent`, `paid`, `overdue`, `cancelled` | Flow: `draft` → `sent` → (`paid` \| `overdue`). `cancelled` is terminal. `paid` requires `paid_at`. |
+| `invoices.payment_method` | `cash`, `transfer`, `card`, `bizum`, `stripe`, `other` (nullable) | Set only when `status = paid`. `stripe` requires `stripe_payment_id`. |
+| `case_assignments.role` | **`primary`**, `secondary`, `substitute`, `co_therapist` | Only one `primary` per `(patient_id, workspace_id)` is expected (enforce at app level; DB has unique on the triple `patient_id, professional_id, workspace_id`). |
+| `case_assignments.status` | **`active`**, `paused`, `ended` | `ended` requires `ended_at`. |
+| `workspace_members.role` | **`member`**, `billing_manager` | Distinct from Spatie roles (`admin`, `professional`, `patient`) — do not conflate. |
+| `consent_forms.status` | **`pending`**, `signed`, `expired`, `revoked` | `signed` requires `signed_at`, `signature_data`, `signed_ip`. `expires_at` can trigger `expired`. |
+
+When adding new code paths, the **default** value is what a freshly-created row lands
+on; any code that creates a row without setting `status` should be auditable as "still
+in the starting state".
+
 ## Mandatory Modeling Guidance
 
 1. Distinguish patient identity (`users.id`) from clinical profile (`patient_profiles.id`).
