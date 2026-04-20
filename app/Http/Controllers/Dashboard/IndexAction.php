@@ -17,6 +17,15 @@ class IndexAction extends Controller
     {
         $user = $request->user();
 
+        if ($user->isPatient()) {
+            return $this->patientDashboard($user);
+        }
+
+        return $this->professionalDashboard($user);
+    }
+
+    private function professionalDashboard($user): Response
+    {
         $activePatientProfiles = PatientProfile::withoutGlobalScopes()
             ->where('professional_id', $user->id)
             ->where('is_active', true)
@@ -123,12 +132,67 @@ class IndexAction extends Controller
             'collection_rate' => $this->getCollectionRate($user->id),
         ];
 
-        return Inertia::render('dashboard', [
+        return Inertia::render('dashboard/professional', [
             'activePatients' => $activePatientProfiles,
             'todayAppointments' => $todaySessions,
             'pendingPayments' => $pendingPayments,
             'alerts' => $alerts,
             'dailyBriefing' => $dailyBriefing,
+            'stats' => $stats,
+        ]);
+    }
+
+    private function patientDashboard($user): Response
+    {
+        $upcomingAppointments = $user->appointments()
+            ->with(['professional:id,name,avatar_path,specialty', 'service:id,name'])
+            ->where('starts_at', '>=', now())
+            ->whereNotIn('status', ['cancelled'])
+            ->orderBy('starts_at')
+            ->take(5)
+            ->get()
+            ->map(fn ($appointment) => [
+                'id' => $appointment->id,
+                'scheduled_at' => $appointment->starts_at,
+                'modality' => $appointment->modality ?? 'presencial',
+                'status' => $appointment->status,
+                'professional' => [
+                    'id' => $appointment->professional_id,
+                    'name' => $appointment->professional?->name ?? 'Profesional',
+                    'specialty' => $appointment->professional?->specialty,
+                    'avatar_path' => $appointment->professional?->avatar_path,
+                ],
+                'service_name' => $appointment->service?->name,
+            ]);
+
+        $recentInvoices = $user->invoices()
+            ->orderByDesc('created_at')
+            ->take(4)
+            ->get()
+            ->map(fn ($invoice) => [
+                'id' => $invoice->id,
+                'amount' => (float) $invoice->total,
+                'status' => $invoice->status,
+                'due_at' => $invoice->due_at?->format('Y-m-d'),
+                'created_at' => $invoice->created_at?->format('Y-m-d'),
+            ]);
+
+        $stats = [
+            'upcoming_appointments' => $user->appointments()
+                ->where('starts_at', '>=', now())
+                ->whereNotIn('status', ['cancelled'])
+                ->count(),
+            'completed_sessions' => $user->appointments()
+                ->where('status', 'completed')
+                ->count(),
+            'pending_invoices' => $user->invoices()
+                ->whereIn('status', ['sent', 'overdue'])
+                ->sum('total'),
+        ];
+
+        return Inertia::render('dashboard/patient', [
+            'upcomingAppointments' => $upcomingAppointments,
+            'recentInvoices' => $recentInvoices,
             'stats' => $stats,
         ]);
     }

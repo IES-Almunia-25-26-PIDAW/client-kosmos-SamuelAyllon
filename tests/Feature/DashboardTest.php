@@ -12,7 +12,7 @@ it('authenticated professional can visit dashboard', function () {
     $this->actingAs($user)
         ->get(route('dashboard'))
         ->assertOk()
-        ->assertInertia(fn ($page) => $page->component('dashboard'));
+        ->assertInertia(fn ($page) => $page->component('dashboard/professional'));
 });
 
 it('dashboard returns activePatients, todayAppointments, alerts, dailyBriefing and stats', function () {
@@ -28,7 +28,7 @@ it('dashboard returns activePatients, todayAppointments, alerts, dailyBriefing a
         ->get(route('dashboard'))
         ->assertOk()
         ->assertInertia(fn ($page) => $page
-            ->component('dashboard')
+            ->component('dashboard/professional')
             ->has('activePatients')
             ->has('todayAppointments')
             ->has('alerts')
@@ -43,7 +43,7 @@ it('dashboard stats include expected keys', function () {
     $this->actingAs($user)
         ->get(route('dashboard'))
         ->assertInertia(fn ($page) => $page
-            ->component('dashboard')
+            ->component('dashboard/professional')
             ->has('stats.appointments_this_week')
             ->has('stats.pending_invoices')
             ->has('stats.active_patients')
@@ -68,8 +68,25 @@ it('dashboard shows active patients count correctly', function () {
     $this->actingAs($user)
         ->get(route('dashboard'))
         ->assertInertia(fn ($page) => $page
-            ->component('dashboard')
+            ->component('dashboard/professional')
             ->has('activePatients', 2)
+        );
+});
+
+it('authenticated patient can visit dashboard and sees patient view', function () {
+    $patient = createPatient();
+
+    $this->actingAs($patient)
+        ->get(route('dashboard'))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('dashboard/patient')
+            ->has('upcomingAppointments')
+            ->has('recentInvoices')
+            ->has('stats')
+            ->has('stats.upcoming_appointments')
+            ->has('stats.completed_sessions')
+            ->has('stats.pending_invoices')
         );
 });
 
@@ -78,7 +95,7 @@ it('admin is redirected away from professional dashboard', function () {
 
     $this->actingAs($admin)
         ->get(route('dashboard'))
-        ->assertRedirect(route('admin.dashboard'));
+        ->assertRedirect(route('admin.users.index'));
 });
 
 it('dashboard alerts contain invoice and consent keys', function () {
@@ -87,7 +104,7 @@ it('dashboard alerts contain invoice and consent keys', function () {
     $this->actingAs($user)
         ->get(route('dashboard'))
         ->assertInertia(fn ($page) => $page
-            ->component('dashboard')
+            ->component('dashboard/professional')
             ->has('alerts.invoice')
             ->has('alerts.consent')
         );

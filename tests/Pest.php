@@ -75,6 +75,21 @@ function createProfessional(): User
 }
 
 /**
+ * Crea un usuario paciente con tutorial completado.
+ */
+function createPatient(): User
+{
+    ensureRolesExist();
+
+    $user = User::factory()->create([
+        'tutorial_completed_at' => now(),
+    ]);
+    $user->assignRole('patient');
+
+    return $user;
+}
+
+/**
  * Perfil clínico vinculado a un profesional (y usuario portal paciente).
  */
 function createPatientProfileFor(User $professional, array $overrides = []): PatientProfile
