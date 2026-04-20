@@ -77,9 +77,9 @@ export default function AppointmentsIndex({ appointments, filters }: Props) {
 
                 {/* Header */}
                 <div>
-                    <h1 className="text-display-2xl text-[var(--color-text)]">Calendario de citas</h1>
+                    <h1 className="text-display-2xl text-[var(--color-text)]">Listado  de citas</h1>
                     <p className="mt-1 text-body-md text-[var(--color-text-secondary)]">
-                        Historial y gestión de todas tus sesiones
+                        Historial y gestión de todas tus citas
                     </p>
                 </div>
 

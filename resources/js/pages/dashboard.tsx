@@ -185,7 +185,7 @@ export default function Dashboard({
                                 href="/appointments"
                                 className="text-sm font-medium text-[var(--color-primary)] hover:underline flex items-center gap-1"
                             >
-                                Ver calendario completo <ArrowRight size={14} />
+                                Ver todas las citas <ArrowRight size={14} />
                             </Link>
                         </div>
 

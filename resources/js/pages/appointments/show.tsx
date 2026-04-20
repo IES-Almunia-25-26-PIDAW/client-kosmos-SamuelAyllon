@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { ArrowLeft, CalendarDays, Clock, MapPin, Video, FileText, CheckSquare } from 'lucide-react';
 import AppLayout from '@/layouts/app-layout';
 import PatientShowAction from '@/actions/App/Http/Controllers/Patient/ShowAction';
-import IndexAction from '@/actions/App/Http/Controllers/Appointment/IndexAction';
+import DashboardIndexAction from '@/actions/App/Http/Controllers/Dashboard/IndexAction';
 
 interface User {
     id: number;
@@ -114,11 +114,11 @@ export default function AppointmentShow({ appointment }: Props) {
                 {/* Back + header */}
                 <div>
                     <Link
-                        href={IndexAction.url()}
+                        href={DashboardIndexAction.url()}
                         className="inline-flex items-center gap-1.5 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text)] transition-colors mb-3"
                     >
                         <ArrowLeft size={16} />
-                        Volver a citas
+                        Volver al dashboard
                     </Link>
                     <div className="flex items-start justify-between gap-4 flex-wrap">
                         <div>
