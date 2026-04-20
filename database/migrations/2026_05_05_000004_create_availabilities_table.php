@@ -12,7 +12,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('professional_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('workspace_id')->nullable()->constrained('workspaces')->nullOnDelete();
-            $table->unsignedTinyInteger('day_of_week');
+            $table->date('specific_date')->nullable();
+            $table->unsignedTinyInteger('day_of_week')->nullable();
             $table->time('start_time');
             $table->time('end_time');
             $table->unsignedSmallInteger('slot_duration_minutes')->default(50);

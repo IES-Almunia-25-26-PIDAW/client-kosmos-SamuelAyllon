@@ -10,16 +10,17 @@ class Availability extends Model
     use HasFactory;
 
     protected $fillable = [
-        'professional_id', 'workspace_id', 'day_of_week',
+        'professional_id', 'workspace_id', 'specific_date', 'day_of_week',
         'start_time', 'end_time', 'slot_duration_minutes', 'is_active',
     ];
 
     protected function casts(): array
     {
         return [
-            'day_of_week'           => 'integer',
+            'specific_date' => 'date',
+            'day_of_week' => 'integer',
             'slot_duration_minutes' => 'integer',
-            'is_active'             => 'boolean',
+            'is_active' => 'boolean',
         ];
     }
 

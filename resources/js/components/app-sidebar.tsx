@@ -55,7 +55,7 @@ const professionalNavItems: NavItem[] = [
     },
     {
         title: 'Calendario',
-        href: '/calendar',
+        href: '/schedule',
         icon: CalendarRange,
     },
     {

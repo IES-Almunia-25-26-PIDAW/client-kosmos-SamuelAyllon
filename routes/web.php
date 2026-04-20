@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\Workspaces\ShowAction as AdminWorkspaceShowAction
 use App\Http\Controllers\Agreement\DestroyAction as AgreementDestroyAction;
 use App\Http\Controllers\Agreement\StoreAction as AgreementStoreAction;
 use App\Http\Controllers\Agreement\UpdateAction as AgreementUpdateAction;
+use App\Http\Controllers\Appointment\DestroyAction as AppointmentDestroyAction;
 use App\Http\Controllers\Appointment\EndCallAction;
 use App\Http\Controllers\Appointment\GenerateInvoiceAction;
 use App\Http\Controllers\Appointment\IndexAction as AppointmentIndexAction;
@@ -115,8 +116,7 @@ Route::middleware(['auth', 'verified', 'professional'])->group(function () {
     Route::post('/patients', PatientStoreAction::class)->name('patients.store');
     Route::get('/patients/{patient}', PatientShowAction::class)->name('patients.show');
     Route::get('/patients/{patient}/edit', PatientEditAction::class)->name('patients.edit');
-    Route::put('/patients/{patient}', PatientUpdateAction::class)->name('patients.update');
-    Route::patch('/patients/{patient}', PatientUpdateAction::class);
+    Route::match(['put', 'patch'], '/patients/{patient}', PatientUpdateAction::class)->name('patients.update');
     Route::delete('/patients/{patient}', PatientDestroyAction::class)->name('patients.destroy');
 
     Route::get('/patients/{patient}/pre-session', PatientPreSessionAction::class)->name('patients.pre-session');
@@ -125,20 +125,17 @@ Route::middleware(['auth', 'verified', 'professional'])->group(function () {
 
     // Patient sub-resources: Notes
     Route::post('/patients/{patient}/notes', NoteStoreAction::class)->name('patients.notes.store');
-    Route::put('/patients/{patient}/notes/{note}', NoteUpdateAction::class)->name('patients.notes.update');
-    Route::patch('/patients/{patient}/notes/{note}', NoteUpdateAction::class);
+    Route::match(['put', 'patch'], '/patients/{patient}/notes/{note}', NoteUpdateAction::class)->name('patients.notes.update');
     Route::delete('/patients/{patient}/notes/{note}', NoteDestroyAction::class)->name('patients.notes.destroy');
 
     // Patient sub-resources: Agreements
     Route::post('/patients/{patient}/agreements', AgreementStoreAction::class)->name('patients.agreements.store');
-    Route::put('/patients/{patient}/agreements/{agreement}', AgreementUpdateAction::class)->name('patients.agreements.update');
-    Route::patch('/patients/{patient}/agreements/{agreement}', AgreementUpdateAction::class);
+    Route::match(['put', 'patch'], '/patients/{patient}/agreements/{agreement}', AgreementUpdateAction::class)->name('patients.agreements.update');
     Route::delete('/patients/{patient}/agreements/{agreement}', AgreementDestroyAction::class)->name('patients.agreements.destroy');
 
     // Patient sub-resources: Invoices (replaces old payments routes)
     Route::post('/patients/{patient}/invoices', InvoiceStoreAction::class)->name('patients.invoices.store');
-    Route::put('/patients/{patient}/invoices/{invoice}', InvoiceUpdateAction::class)->name('patients.invoices.update');
-    Route::patch('/patients/{patient}/invoices/{invoice}', InvoiceUpdateAction::class);
+    Route::match(['put', 'patch'], '/patients/{patient}/invoices/{invoice}', InvoiceUpdateAction::class)->name('patients.invoices.update');
     Route::delete('/patients/{patient}/invoices/{invoice}', InvoiceDestroyAction::class)->name('patients.invoices.destroy');
 
     // Patient sub-resources: Documents
@@ -147,8 +144,7 @@ Route::middleware(['auth', 'verified', 'professional'])->group(function () {
 
     // Patient sub-resources: Consent Forms
     Route::post('/patients/{patient}/consent-forms', ConsentFormStoreAction::class)->name('patients.consent-forms.store');
-    Route::put('/patients/{patient}/consent-forms/{consentForm}', ConsentFormUpdateAction::class)->name('patients.consent-forms.update');
-    Route::patch('/patients/{patient}/consent-forms/{consentForm}', ConsentFormUpdateAction::class);
+    Route::match(['put', 'patch'], '/patients/{patient}/consent-forms/{consentForm}', ConsentFormUpdateAction::class)->name('patients.consent-forms.update');
 
     // Invoices
     Route::get('/invoices', InvoiceIndexAction::class)->name('invoices.index');
@@ -160,21 +156,20 @@ Route::middleware(['auth', 'verified', 'professional'])->group(function () {
     Route::get('/appointments', AppointmentIndexAction::class)->name('appointments.index');
     Route::post('/appointments', AppointmentStoreAction::class)->name('appointments.store');
     Route::get('/appointments/{appointment}', AppointmentShowAction::class)->name('appointments.show');
-    Route::put('/appointments/{appointment}', AppointmentUpdateAction::class)->name('appointments.update');
-    Route::patch('/appointments/{appointment}', AppointmentUpdateAction::class);
+    Route::match(['put', 'patch'], '/appointments/{appointment}', AppointmentUpdateAction::class)->name('appointments.update');
     Route::patch('/appointments/{appointment}/status', UpdateStatusAction::class)->name('appointments.status');
     Route::post('/appointments/{appointment}/start-call', StartCallAction::class)->name('appointments.start-call');
     Route::post('/appointments/{appointment}/end-call', EndCallAction::class)->name('appointments.end-call');
     Route::post('/appointments/{appointment}/transcribe', TranscribeAction::class)->name('appointments.transcribe');
     Route::post('/appointments/{appointment}/summarize', SummarizeAction::class)->name('appointments.summarize');
     Route::post('/appointments/{appointment}/generate-invoice', GenerateInvoiceAction::class)->name('appointments.generate-invoice');
+    Route::delete('/appointments/{appointment}', AppointmentDestroyAction::class)->name('appointments.destroy');
 
     // Schedule
     Route::get('/schedule', ScheduleIndexAction::class)->name('schedule.index');
     Route::get('/schedule/availability', AvailabilityIndexAction::class)->name('schedule.availability.index');
     Route::post('/schedule/availability', AvailabilityStoreAction::class)->name('schedule.availability.store');
-    Route::put('/schedule/availability/{availability}', AvailabilityUpdateAction::class)->name('schedule.availability.update');
-    Route::patch('/schedule/availability/{availability}', AvailabilityUpdateAction::class);
+    Route::match(['put', 'patch'], '/schedule/availability/{availability}', AvailabilityUpdateAction::class)->name('schedule.availability.update');
     Route::delete('/schedule/availability/{availability}', AvailabilityDestroyAction::class)->name('schedule.availability.destroy');
 
     // Workspace management
@@ -190,15 +185,13 @@ Route::middleware(['auth', 'verified', 'professional'])->group(function () {
 
         Route::get('/services', WorkspaceServiceIndexAction::class)->name('services.index');
         Route::post('/services', WorkspaceServiceStoreAction::class)->name('services.store');
-        Route::put('/services/{service}', WorkspaceServiceUpdateAction::class)->name('services.update');
-        Route::patch('/services/{service}', WorkspaceServiceUpdateAction::class);
+        Route::match(['put', 'patch'], '/services/{service}', WorkspaceServiceUpdateAction::class)->name('services.update');
         Route::delete('/services/{service}', WorkspaceServiceDestroyAction::class)->name('services.destroy');
 
         // Collaboration agreements
         Route::get('/collaborations', CollaborationIndexAction::class)->name('collaborations.index');
         Route::post('/collaborations', CollaborationStoreAction::class)->name('collaborations.store');
-        Route::put('/collaborations/{collaboration}', CollaborationUpdateAction::class)->name('collaborations.update');
-        Route::patch('/collaborations/{collaboration}', CollaborationUpdateAction::class);
+        Route::match(['put', 'patch'], '/collaborations/{collaboration}', CollaborationUpdateAction::class)->name('collaborations.update');
         Route::delete('/collaborations/{collaboration}', CollaborationDestroyAction::class)->name('collaborations.destroy');
     });
 
@@ -218,8 +211,7 @@ Route::middleware(['auth', 'verified', 'professional'])->group(function () {
     // Referrals
     Route::get('/referrals', ReferralIndexAction::class)->name('referrals.index');
     Route::post('/referrals', ReferralStoreAction::class)->name('referrals.store');
-    Route::put('/referrals/{referral}', ReferralUpdateAction::class)->name('referrals.update');
-    Route::patch('/referrals/{referral}', ReferralUpdateAction::class);
+    Route::match(['put', 'patch'], '/referrals/{referral}', ReferralUpdateAction::class)->name('referrals.update');
     Route::delete('/referrals/{referral}', ReferralDestroyAction::class)->name('referrals.destroy');
 });
 
@@ -266,8 +258,7 @@ Route::middleware(['auth', 'verified'])
         Route::post('/messages', PortalMessageStoreAction::class)->name('messages.store');
 
         Route::get('/profile', PortalProfileShowAction::class)->name('profile.show');
-        Route::put('/profile', PortalProfileUpdateAction::class)->name('profile.update');
-        Route::patch('/profile', PortalProfileUpdateAction::class);
+        Route::match(['put', 'patch'], '/profile', PortalProfileUpdateAction::class)->name('profile.update');
     });
 
 require __DIR__.'/settings.php';
