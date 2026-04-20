@@ -234,4 +234,49 @@ Use Wayfinder to generate TypeScript functions for Laravel routes. Import from `
 
 - IMPORTANT: Activate `inertia-react-development` when working with Inertia React client-side patterns.
 
+=== kosmos excellence rules ===
+
+# Kosmos — Estándares de Excelencia
+
+Estas reglas son **obligatorias** y complementan (no sustituyen) las Laravel Boost guidelines anteriores. El usuario actúa como Lead Architect / QA Manager; la IA debe operar con ese nivel de rigor.
+
+## Pilares (cargar el archivo correspondiente al entrar en su dominio)
+
+1. **Documentación** → [.claude/documentation.md](.claude/documentation.md) — ADRs, declaración de uso de IA, README con diagramas, PHPDoc/JSDoc.
+2. **Clean Code & DB** → [.claude/clean-code-db.md](.claude/clean-code-db.md) — SOLID, Pint, 3FN, FKs con política explícita.
+3. **El Escudo — Testing y Seguridad** → [.claude/testing-security.md](.claude/testing-security.md) — Pest 3 obligatorio, Fortify, rate limiting, `.env`.
+4. **DevOps** → [.claude/devops.md](.claude/devops.md) — Dockerfile multi-stage, compose con healthchecks, CI gate (Pint + Pest + Lint + Build).
+5. **Frontend & A11y** → [.claude/frontend-a11y.md](.claude/frontend-a11y.md) — migración Tailwind → Chakra UI (con MCP), WCAG 2.2 AA, validación dual.
+
+## Protocolo de Ejecución (OBLIGATORIO antes de cualquier cambio)
+
+Leer [.claude/execution-protocol.md](.claude/execution-protocol.md). Resumen no-negociable:
+
+1. **Pre-cambio:** verificar versiones (Laravel 12.x, PHP 8.4, React 19), activar skills relevantes, consultar `search-docs` (Boost MCP) y Chakra MCP cuando aplique.
+2. **Pre-cierre (todos deben pasar):** `vendor/bin/pint --dirty --format agent` → `php artisan test --compact` → `npm run lint` → `npm run build`.
+3. **Commits:** Conventional Commits (`<type>(<scope>): <subject>`), referenciar `ADR-XXXX` si aplica.
+4. **Nunca:** `--no-verify`, commitear `.env`, desactivar tests, añadir dependencias sin ADR, introducir clases Tailwind nuevas en componentes nuevos.
+
+## Contexto de proyecto (fuente de verdad)
+
+Los documentos propios de Kosmos (no del skill pack) viven en [.claude/project-context/](.claude/project-context/):
+
+- `tech-stack.md` — versiones y dependencias en uso
+- `database-schema-full-reference.md` — esquema completo (consultar antes de tocar migraciones/modelos)
+- `project-erd-and-workflow.md` — ERD y flujos de negocio
+
+Estos deben actualizarse en la misma PR que el cambio que los afecta.
+
+## Artefactos vivos
+
+La IA debe mantener actualizados:
+
+- `docs/decision-log.md` — toda decisión arquitectónica, dependencia o excepción a estos estándares.
+- `docs/ai-usage-declaration.md` — cada PR asistido por IA.
+- `README.md` — sección Arquitectura y enlaces a `.claude/`.
+
+## Regla de conflicto
+
+Si un requisito del usuario colisiona con estos estándares, **no saltarlos en silencio**: proponer ADR con la excepción y pedir confirmación.
+
 </laravel-boost-guidelines>

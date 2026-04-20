@@ -4,9 +4,9 @@ description: Laravel + Inertia.js + React integration patterns. Use when buildin
 license: MIT
 metadata:
   author: AsyrafHussin
-  version: "1.0.2"
-  laravelVersion: "13.x"
-  phpVersion: "8.3+"
+  version: "1.0.2-kosmos"
+  laravelVersion: "12.x"
+  phpVersion: "8.4+"
 ---
 
 # Laravel + Inertia.js + React
@@ -464,8 +464,9 @@ MIT License. This skill is provided as-is for educational and development purpos
 
 ## Metadata
 
-- **Version**: 1.0.1
-- **Last Updated**: 2026-01-17
-- **Maintainer**: Asyraf Hussin
+- **Version**: 1.0.2-kosmos
+- **Last Updated**: 2026-04-20
+- **Original Author**: Asyraf Hussin (MIT) — adaptado al stack Kosmos
 - **Rule Count**: 24 rules across 6 categories
-- **Tech Stack**: Laravel 10+, Inertia.js 1.0+, React 18+, TypeScript 5+
+- **Tech Stack**: Laravel 12+, Inertia.js 2+, React 19+, TypeScript 5+, PHP 8.4+
+- **Project context**: los archivos específicos del proyecto (schema, ERD, tech-stack) viven en [`.claude/project-context/`](../../project-context/), no dentro de este skill pack.

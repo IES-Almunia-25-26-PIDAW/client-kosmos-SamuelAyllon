@@ -4,7 +4,7 @@ globs:
   - database/migrations/**/*.php
   - database/factories/**/*.php
   - app/Models/**/*.php
-alwaysApply: true
+alwaysApply: fasle
 ---
 # Referencia completa del esquema de base de datos (Kosmos)
 
