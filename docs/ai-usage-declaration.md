@@ -46,3 +46,12 @@ Registro transparente del uso de herramientas de IA en el desarrollo de ClientKo
 - **Alcance IA:** validación interactiva del Dialog (settings/delete-user) y confirmación de contraseña (Fortify); detección y corrección del bug sistémico `type="submit"` en botones Chakra dentro de formularios Inertia v2. Archivos modificados: [`delete-user.tsx`](../resources/js/components/delete-user.tsx), [`confirm-password.tsx`](../resources/js/pages/auth/confirm-password.tsx), [`forgot-password.tsx`](../resources/js/pages/auth/forgot-password.tsx), [`settings/password.tsx`](../resources/js/pages/settings/password.tsx), [`settings/profile.tsx`](../resources/js/pages/settings/profile.tsx).
 - **Revisión humana:** Samuel Ayllón validó manualmente Dialog + confirm-password en navegador. Resto del checklist (2FA InputOTP, Select, AlertDialog, NavigationMenu, StatusBadge, Sidebar) queda pendiente.
 - **Relación con ADR:** ADR-0003
+
+### Fase 3a — Migración de componentes ligeros a Chakra UI v3
+
+- **Fecha:** 2026-04-21
+- **Herramientas:** Claude Code (Opus 4.7), Explore subagent (inventario de Tailwind residual), Plan mode
+- **Alcance IA:** reescritura de [`resources/js/components/input-error.tsx`](../resources/js/components/input-error.tsx), [`user-info.tsx`](../resources/js/components/user-info.tsx) y [`text-link.tsx`](../resources/js/components/text-link.tsx) eliminando `cn()` y clases Tailwind/`dark:`. Se usan primitivos Chakra (`Text`, `Box`, `chakra(Link)`) y tokens semánticos ya existentes (`danger.fg`, `fg.muted`, `border.subtle`). API pública preservada; consumidores no requieren cambios.
+- **Revisión humana:** pendiente — Samuel Ayllón debe validar visualmente mensajes de error en `/login`, hover/focus de `TextLink` en auth, y render del `UserInfo` en el menú de usuario del sidebar (light + dark).
+- **Prompt(s) relevantes:** "revisa el archivo @docs/decision-log.md y continuemos con la transición de tailwindcss a chakra".
+- **Relación con ADR:** ADR-0004
