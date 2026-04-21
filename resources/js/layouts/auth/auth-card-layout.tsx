@@ -1,3 +1,4 @@
+import { Box, Flex, Image, chakra } from '@chakra-ui/react';
 import { Link } from '@inertiajs/react';
 import type { PropsWithChildren } from 'react';
 import {
@@ -10,6 +11,8 @@ import {
 import { home } from '@/routes';
 import logo from '@/assets/logo.png';
 
+const ChakraLink = chakra(Link);
+
 export default function AuthCardLayout({
     children,
     title,
@@ -20,29 +23,41 @@ export default function AuthCardLayout({
     description?: string;
 }>) {
     return (
-        <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-muted p-6 md:p-10">
-            <div className="flex w-full max-w-md flex-col gap-6">
-                <Link
+        <Flex
+            minH="100svh"
+            direction="column"
+            alignItems="center"
+            justifyContent="center"
+            gap="6"
+            bg="bg.muted"
+            p={{ base: '6', md: '10' }}
+        >
+            <Flex w="full" maxW="md" direction="column" gap="6">
+                <ChakraLink
                     href={home()}
-                    className="flex items-center gap-2 self-center font-medium"
+                    display="flex"
+                    alignItems="center"
+                    gap="2"
+                    alignSelf="center"
+                    fontWeight="medium"
                 >
-                    <div className="flex h-9 w-9 items-center justify-center">
-                        <img src={logo} alt="ClientKosmos" className="size-9 object-contain" />
-                    </div>
-                </Link>
+                    <Flex h="9" w="9" alignItems="center" justifyContent="center">
+                        <Image src={logo} alt="ClientKosmos" boxSize="9" objectFit="contain" />
+                    </Flex>
+                </ChakraLink>
 
-                <div className="flex flex-col gap-6">
+                <Flex direction="column" gap="6">
                     <Card className="rounded-xl">
                         <CardHeader className="px-10 pt-8 pb-0 text-center">
                             <CardTitle className="text-xl">{title}</CardTitle>
                             <CardDescription>{description}</CardDescription>
                         </CardHeader>
                         <CardContent className="px-10 py-8">
-                            {children}
+                            <Box>{children}</Box>
                         </CardContent>
                     </Card>
-                </div>
-            </div>
-        </div>
+                </Flex>
+            </Flex>
+        </Flex>
     );
 }

@@ -1,6 +1,7 @@
+import { Box, Button as ChakraButton, Flex, Grid, Stack, Text } from '@chakra-ui/react';
 import { Head, useForm } from '@inertiajs/react';
-import { UserPlus, User, Mail, Lock, KeyRound, Briefcase, Heart, Phone, BookOpen, Award, FileText, Calendar } from 'lucide-react';
-import { useState, type ReactNode, type FormEvent } from 'react';
+import { Award, BookOpen, Briefcase, Calendar, FileText, Heart, KeyRound, Lock, Mail, Phone, User, UserPlus } from 'lucide-react';
+import { useState, type FormEvent, type ReactNode } from 'react';
 import InputError from '@/components/input-error';
 import PasswordStrength from '@/components/password-strength';
 import TextLink from '@/components/text-link';
@@ -24,7 +25,41 @@ const SPECIALTIES = [
 
 type UserType = 'professional' | 'patient';
 
-const inputClass = 'pl-10 h-11 border-2 rounded-xl transition-all focus:ring-2 focus:ring-primary/20';
+const inputPadStyle = { paddingLeft: '2.5rem' };
+
+type TypeButtonProps = {
+    active: boolean;
+    onClick: () => void;
+    icon: typeof Briefcase;
+    label: string;
+};
+
+function TypeButton({ active, onClick, icon: Icon, label }: TypeButtonProps) {
+    return (
+        <ChakraButton
+            type="button"
+            onClick={onClick}
+            variant="plain"
+            display="flex"
+            flexDirection="column"
+            alignItems="center"
+            gap="2"
+            borderRadius="xl"
+            borderWidth="2px"
+            borderColor={active ? 'brand.solid' : 'border'}
+            bg={active ? 'brand.subtle' : 'transparent'}
+            color={active ? 'brand.solid' : 'fg.muted'}
+            p="4"
+            fontSize="sm"
+            fontWeight="semibold"
+            h="auto"
+            _hover={{ borderColor: active ? 'brand.solid' : 'brand.emphasized' }}
+        >
+            <Box as={Icon} h="6" w="6" />
+            {label}
+        </ChakraButton>
+    );
+}
 
 export default function Register() {
     const [userType, setUserType] = useState<UserType>('professional');
@@ -36,12 +71,10 @@ export default function Register() {
         password: '',
         password_confirmation: '',
         phone: '',
-        // Professional fields
         license_number: '',
         collegiate_number: '',
         specialties: [] as string[],
         bio: '',
-        // Patient fields
         date_of_birth: '',
     });
 
@@ -70,41 +103,29 @@ export default function Register() {
     return (
         <>
             <Head title="Registro" />
-            <form onSubmit={submit} className="flex flex-col gap-6">
-                {/* Type selector */}
-                <div className="grid grid-cols-2 gap-3">
-                    <button
-                        type="button"
+            <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                <Grid templateColumns="repeat(2, 1fr)" gap="3">
+                    <TypeButton
+                        active={userType === 'professional'}
                         onClick={() => selectType('professional')}
-                        className={`flex flex-col items-center gap-2 rounded-xl border-2 p-4 text-sm font-semibold transition-all ${
-                            userType === 'professional'
-                                ? 'border-primary bg-primary/5 text-primary'
-                                : 'border-border text-muted-foreground hover:border-primary/40'
-                        }`}
-                    >
-                        <Briefcase className="h-6 w-6" />
-                        Profesional
-                    </button>
-                    <button
-                        type="button"
+                        icon={Briefcase}
+                        label="Profesional"
+                    />
+                    <TypeButton
+                        active={userType === 'patient'}
                         onClick={() => selectType('patient')}
-                        className={`flex flex-col items-center gap-2 rounded-xl border-2 p-4 text-sm font-semibold transition-all ${
-                            userType === 'patient'
-                                ? 'border-primary bg-primary/5 text-primary'
-                                : 'border-border text-muted-foreground hover:border-primary/40'
-                        }`}
-                    >
-                        <Heart className="h-6 w-6" />
-                        Paciente
-                    </button>
-                </div>
+                        icon={Heart}
+                        label="Paciente"
+                    />
+                </Grid>
 
-                <div className="grid gap-5">
-                    {/* Name */}
-                    <div className="grid gap-2">
-                        <Label htmlFor="name" className="text-sm font-semibold">Nombre completo</Label>
-                        <div className="relative">
-                            <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Stack gap="5">
+                    <Stack gap="2">
+                        <Label htmlFor="name">
+                            <Text as="span" fontSize="sm" fontWeight="semibold">Nombre completo</Text>
+                        </Label>
+                        <Box position="relative">
+                            <Box as={User} position="absolute" left="3" top="50%" transform="translateY(-50%)" h="4" w="4" color="fg.muted" />
                             <Input
                                 id="name"
                                 type="text"
@@ -116,17 +137,18 @@ export default function Register() {
                                 value={data.name}
                                 onChange={(e) => setData('name', e.target.value)}
                                 placeholder="Tu nombre"
-                                className={inputClass}
+                                style={inputPadStyle}
                             />
-                        </div>
-                        <InputError message={errors.name} className="mt-1" />
-                    </div>
+                        </Box>
+                        <InputError message={errors.name} />
+                    </Stack>
 
-                    {/* Email */}
-                    <div className="grid gap-2">
-                        <Label htmlFor="email" className="text-sm font-semibold">Correo electrónico</Label>
-                        <div className="relative">
-                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Stack gap="2">
+                        <Label htmlFor="email">
+                            <Text as="span" fontSize="sm" fontWeight="semibold">Correo electrónico</Text>
+                        </Label>
+                        <Box position="relative">
+                            <Box as={Mail} position="absolute" left="3" top="50%" transform="translateY(-50%)" h="4" w="4" color="fg.muted" />
                             <Input
                                 id="email"
                                 type="email"
@@ -137,19 +159,20 @@ export default function Register() {
                                 value={data.email}
                                 onChange={(e) => setData('email', e.target.value)}
                                 placeholder="email@ejemplo.com"
-                                className={inputClass}
+                                style={inputPadStyle}
                             />
-                        </div>
+                        </Box>
                         <InputError message={errors.email} />
-                    </div>
+                    </Stack>
 
-                    {/* Phone (shared) */}
-                    <div className="grid gap-2">
-                        <Label htmlFor="phone" className="text-sm font-semibold">
-                            Teléfono <span className="text-muted-foreground font-normal">(opcional)</span>
+                    <Stack gap="2">
+                        <Label htmlFor="phone">
+                            <Text as="span" fontSize="sm" fontWeight="semibold">
+                                Teléfono <Text as="span" color="fg.muted" fontWeight="normal">(opcional)</Text>
+                            </Text>
                         </Label>
-                        <div className="relative">
-                            <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Box position="relative">
+                            <Box as={Phone} position="absolute" left="3" top="50%" transform="translateY(-50%)" h="4" w="4" color="fg.muted" />
                             <Input
                                 id="phone"
                                 type="tel"
@@ -159,22 +182,23 @@ export default function Register() {
                                 value={data.phone}
                                 onChange={(e) => setData('phone', e.target.value)}
                                 placeholder="+34 600 000 000"
-                                className={inputClass}
+                                style={inputPadStyle}
                             />
-                        </div>
+                        </Box>
                         <InputError message={errors.phone} />
-                    </div>
+                    </Stack>
 
-                    {/* Professional-specific fields */}
                     {userType === 'professional' && (
                         <>
-                            <div className="grid grid-cols-2 gap-3">
-                                <div className="grid gap-2">
-                                    <Label htmlFor="collegiate_number" className="text-sm font-semibold">
-                                        Nº colegiado <span className="text-muted-foreground font-normal">(opcional)</span>
+                            <Grid templateColumns="repeat(2, 1fr)" gap="3">
+                                <Stack gap="2">
+                                    <Label htmlFor="collegiate_number">
+                                        <Text as="span" fontSize="sm" fontWeight="semibold">
+                                            Nº colegiado <Text as="span" color="fg.muted" fontWeight="normal">(opcional)</Text>
+                                        </Text>
                                     </Label>
-                                    <div className="relative">
-                                        <Award className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                    <Box position="relative">
+                                        <Box as={Award} position="absolute" left="3" top="50%" transform="translateY(-50%)" h="4" w="4" color="fg.muted" />
                                         <Input
                                             id="collegiate_number"
                                             type="text"
@@ -182,18 +206,20 @@ export default function Register() {
                                             value={data.collegiate_number}
                                             onChange={(e) => setData('collegiate_number', e.target.value)}
                                             placeholder="M-12345"
-                                            className={inputClass}
+                                            style={inputPadStyle}
                                         />
-                                    </div>
+                                    </Box>
                                     <InputError message={errors.collegiate_number} />
-                                </div>
+                                </Stack>
 
-                                <div className="grid gap-2">
-                                    <Label htmlFor="license_number" className="text-sm font-semibold">
-                                        Nº licencia <span className="text-muted-foreground font-normal">(opcional)</span>
+                                <Stack gap="2">
+                                    <Label htmlFor="license_number">
+                                        <Text as="span" fontSize="sm" fontWeight="semibold">
+                                            Nº licencia <Text as="span" color="fg.muted" fontWeight="normal">(opcional)</Text>
+                                        </Text>
                                     </Label>
-                                    <div className="relative">
-                                        <BookOpen className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                    <Box position="relative">
+                                        <Box as={BookOpen} position="absolute" left="3" top="50%" transform="translateY(-50%)" h="4" w="4" color="fg.muted" />
                                         <Input
                                             id="license_number"
                                             type="text"
@@ -201,46 +227,62 @@ export default function Register() {
                                             value={data.license_number}
                                             onChange={(e) => setData('license_number', e.target.value)}
                                             placeholder="LIC-12345"
-                                            className={inputClass}
+                                            style={inputPadStyle}
                                         />
-                                    </div>
+                                    </Box>
                                     <InputError message={errors.license_number} />
-                                </div>
-                            </div>
+                                </Stack>
+                            </Grid>
 
-                            <div className="grid gap-2">
-                                <Label className="text-sm font-semibold">
-                                    Especialidades <span className="text-muted-foreground font-normal">(opcional)</span>
+                            <Stack gap="2">
+                                <Label>
+                                    <Text as="span" fontSize="sm" fontWeight="semibold">
+                                        Especialidades <Text as="span" color="fg.muted" fontWeight="normal">(opcional)</Text>
+                                    </Text>
                                 </Label>
-                                <div className="grid grid-cols-2 gap-2">
-                                    {SPECIALTIES.map((s) => (
-                                        <label
-                                            key={s.value}
-                                            className={`flex cursor-pointer items-center gap-2 rounded-lg border-2 px-3 py-2 text-xs font-medium transition-all ${
-                                                data.specialties.includes(s.value)
-                                                    ? 'border-primary bg-primary/5 text-primary'
-                                                    : 'border-border text-muted-foreground hover:border-primary/40'
-                                            }`}
-                                        >
-                                            <input
-                                                type="checkbox"
-                                                className="sr-only"
-                                                checked={data.specialties.includes(s.value)}
-                                                onChange={() => toggleSpecialty(s.value)}
-                                            />
-                                            {s.label}
-                                        </label>
-                                    ))}
-                                </div>
+                                <Grid templateColumns="repeat(2, 1fr)" gap="2">
+                                    {SPECIALTIES.map((s) => {
+                                        const active = data.specialties.includes(s.value);
+                                        return (
+                                            <Flex
+                                                as="label"
+                                                key={s.value}
+                                                cursor="pointer"
+                                                alignItems="center"
+                                                gap="2"
+                                                borderRadius="lg"
+                                                borderWidth="2px"
+                                                borderColor={active ? 'brand.solid' : 'border'}
+                                                bg={active ? 'brand.subtle' : 'transparent'}
+                                                color={active ? 'brand.solid' : 'fg.muted'}
+                                                px="3"
+                                                py="2"
+                                                fontSize="xs"
+                                                fontWeight="medium"
+                                                _hover={{ borderColor: active ? 'brand.solid' : 'brand.emphasized' }}
+                                            >
+                                                <input
+                                                    type="checkbox"
+                                                    style={{ position: 'absolute', width: 1, height: 1, padding: 0, margin: -1, overflow: 'hidden', clip: 'rect(0,0,0,0)', whiteSpace: 'nowrap', borderWidth: 0 }}
+                                                    checked={active}
+                                                    onChange={() => toggleSpecialty(s.value)}
+                                                />
+                                                {s.label}
+                                            </Flex>
+                                        );
+                                    })}
+                                </Grid>
                                 <InputError message={errors.specialties} />
-                            </div>
+                            </Stack>
 
-                            <div className="grid gap-2">
-                                <Label htmlFor="bio" className="text-sm font-semibold">
-                                    Presentación <span className="text-muted-foreground font-normal">(opcional)</span>
+                            <Stack gap="2">
+                                <Label htmlFor="bio">
+                                    <Text as="span" fontSize="sm" fontWeight="semibold">
+                                        Presentación <Text as="span" color="fg.muted" fontWeight="normal">(opcional)</Text>
+                                    </Text>
                                 </Label>
-                                <div className="relative">
-                                    <FileText className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                <Box position="relative">
+                                    <Box as={FileText} position="absolute" left="3" top="3" h="4" w="4" color="fg.muted" />
                                     <Textarea
                                         id="bio"
                                         name="bio"
@@ -248,40 +290,42 @@ export default function Register() {
                                         value={data.bio}
                                         onChange={(e) => setData('bio', e.target.value)}
                                         placeholder="Cuéntanos brevemente tu enfoque terapéutico..."
-                                        className="pl-10 border-2 rounded-xl transition-all focus:ring-2 focus:ring-primary/20"
+                                        style={inputPadStyle}
                                     />
-                                </div>
+                                </Box>
                                 <InputError message={errors.bio} />
-                            </div>
+                            </Stack>
                         </>
                     )}
 
-                    {/* Patient-specific fields */}
                     {userType === 'patient' && (
-                        <div className="grid gap-2">
-                            <Label htmlFor="date_of_birth" className="text-sm font-semibold">
-                                Fecha de nacimiento <span className="text-muted-foreground font-normal">(opcional)</span>
+                        <Stack gap="2">
+                            <Label htmlFor="date_of_birth">
+                                <Text as="span" fontSize="sm" fontWeight="semibold">
+                                    Fecha de nacimiento <Text as="span" color="fg.muted" fontWeight="normal">(opcional)</Text>
+                                </Text>
                             </Label>
-                            <div className="relative">
-                                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Box position="relative">
+                                <Box as={Calendar} position="absolute" left="3" top="50%" transform="translateY(-50%)" h="4" w="4" color="fg.muted" />
                                 <Input
                                     id="date_of_birth"
                                     type="date"
                                     name="date_of_birth"
                                     value={data.date_of_birth}
                                     onChange={(e) => setData('date_of_birth', e.target.value)}
-                                    className={inputClass}
+                                    style={inputPadStyle}
                                 />
-                            </div>
+                            </Box>
                             <InputError message={errors.date_of_birth} />
-                        </div>
+                        </Stack>
                     )}
 
-                    {/* Password */}
-                    <div className="grid gap-2">
-                        <Label htmlFor="password" className="text-sm font-semibold">Contraseña</Label>
-                        <div className="relative">
-                            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Stack gap="2">
+                        <Label htmlFor="password">
+                            <Text as="span" fontSize="sm" fontWeight="semibold">Contraseña</Text>
+                        </Label>
+                        <Box position="relative">
+                            <Box as={Lock} position="absolute" left="3" top="50%" transform="translateY(-50%)" h="4" w="4" color="fg.muted" />
                             <Input
                                 id="password"
                                 type="password"
@@ -292,20 +336,19 @@ export default function Register() {
                                 value={data.password}
                                 onChange={(e) => setData('password', e.target.value)}
                                 placeholder="Mínimo 8 caracteres"
-                                className={inputClass}
+                                style={inputPadStyle}
                             />
-                        </div>
+                        </Box>
                         <PasswordStrength password={data.password} />
                         <InputError message={errors.password} />
-                    </div>
+                    </Stack>
 
-                    {/* Password confirmation */}
-                    <div className="grid gap-2">
-                        <Label htmlFor="password_confirmation" className="text-sm font-semibold">
-                            Confirmar contraseña
+                    <Stack gap="2">
+                        <Label htmlFor="password_confirmation">
+                            <Text as="span" fontSize="sm" fontWeight="semibold">Confirmar contraseña</Text>
                         </Label>
-                        <div className="relative">
-                            <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Box position="relative">
+                            <Box as={KeyRound} position="absolute" left="3" top="50%" transform="translateY(-50%)" h="4" w="4" color="fg.muted" />
                             <Input
                                 id="password_confirmation"
                                 type="password"
@@ -316,30 +359,37 @@ export default function Register() {
                                 value={data.password_confirmation}
                                 onChange={(e) => setData('password_confirmation', e.target.value)}
                                 placeholder="Repite tu contraseña"
-                                className={inputClass}
+                                style={inputPadStyle}
                             />
-                        </div>
+                        </Box>
                         <InputError message={errors.password_confirmation} />
-                    </div>
+                    </Stack>
 
                     <Button
                         type="submit"
-                        className="mt-2 w-full h-11 text-base font-semibold rounded-xl shadow-lg shadow-primary/25 transition-all hover:shadow-xl hover:shadow-primary/30"
+                        mt="2"
+                        w="full"
+                        h="11"
+                        fontSize="md"
+                        fontWeight="semibold"
+                        borderRadius="xl"
                         tabIndex={6}
                         disabled={processing}
                         data-test="register-user-button"
                     >
-                        {processing ? <Spinner /> : <UserPlus className="h-4 w-4 mr-2" />}
+                        {processing ? <Spinner /> : <Box as={UserPlus} h="4" w="4" mr="2" />}
                         Crear cuenta
                     </Button>
-                </div>
+                </Stack>
 
-                <div className="text-center text-sm text-muted-foreground pt-2">
+                <Text textAlign="center" fontSize="sm" color="fg.muted" pt="2">
                     ¿Ya tienes una cuenta?{' '}
-                    <TextLink href={login()} tabIndex={7} className="text-primary font-semibold hover:underline">
-                        Inicia sesión
+                    <TextLink href={login()} tabIndex={7}>
+                        <Text as="span" color="brand.solid" fontWeight="semibold" _hover={{ textDecoration: 'underline' }}>
+                            Inicia sesión
+                        </Text>
                     </TextLink>
-                </div>
+                </Text>
             </form>
         </>
     );

@@ -1,3 +1,4 @@
+import { Box, Flex, Stack, Text } from '@chakra-ui/react';
 import { Form, Head } from '@inertiajs/react';
 import { CheckCircle2 } from 'lucide-react';
 import type { ReactNode } from 'react';
@@ -32,26 +33,38 @@ export default function Login({
             <Head title="Iniciar sesión" />
 
             {status && (
-                <div className="flex items-center gap-3 rounded-xl border-2 border-green-500/20 bg-green-500/10 px-4 py-3 mb-6">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-500/20">
-                        <CheckCircle2 className="h-4 w-4 text-green-600" />
-                    </div>
-                    <span className="text-sm font-medium text-green-700 dark:text-green-400">{status}</span>
-                </div>
+                <Flex
+                    alignItems="center"
+                    gap="3"
+                    borderRadius="xl"
+                    borderWidth="2px"
+                    borderColor="success.subtle"
+                    bg="success.subtle"
+                    px="4"
+                    py="3"
+                    mb="6"
+                >
+                    <Flex h="8" w="8" alignItems="center" justifyContent="center" borderRadius="lg" bg="success.subtle">
+                        <Box as={CheckCircle2} h="4" w="4" color="success.fg" />
+                    </Flex>
+                    <Text fontSize="sm" fontWeight="medium" color="success.fg">{status}</Text>
+                </Flex>
             )}
 
             <Form
                 action={store.url()}
                 method="post"
                 resetOnSuccess={['password']}
-                className="flex flex-col gap-6"
+                style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}
             >
                 {({ processing, errors }) => (
                     <>
-                        <div className="grid gap-5">
-                            <div className="grid gap-1.5">
-                                <Label htmlFor="email" className="text-[11px] font-semibold tracking-widest uppercase text-muted-foreground">
-                                    Email address
+                        <Stack gap="5">
+                            <Stack gap="1.5">
+                                <Label htmlFor="email">
+                                    <Text as="span" fontSize="11px" fontWeight="semibold" letterSpacing="widest" textTransform="uppercase" color="fg.muted">
+                                        Email address
+                                    </Text>
                                 </Label>
                                 <Input
                                     id="email"
@@ -62,26 +75,25 @@ export default function Login({
                                     tabIndex={1}
                                     autoComplete="email"
                                     placeholder="email@ejemplo.com"
-                                    className="h-11 rounded-xl border-2 transition-all focus:ring-2 focus:ring-primary/20"
                                 />
                                 <InputError message={errors.email} />
-                            </div>
+                            </Stack>
 
-                            <div className="grid gap-1.5">
-                                <div className="flex items-center justify-between">
-                                    <Label htmlFor="password" className="text-[11px] font-semibold tracking-widest uppercase text-muted-foreground">
-                                        Password
+                            <Stack gap="1.5">
+                                <Flex alignItems="center" justifyContent="space-between">
+                                    <Label htmlFor="password">
+                                        <Text as="span" fontSize="11px" fontWeight="semibold" letterSpacing="widest" textTransform="uppercase" color="fg.muted">
+                                            Password
+                                        </Text>
                                     </Label>
                                     {canResetPassword && (
-                                        <TextLink
-                                            href={request()}
-                                            className="text-xs text-muted-foreground hover:text-foreground"
-                                            tabIndex={5}
-                                        >
-                                            Forgot?
+                                        <TextLink href={request()} tabIndex={5}>
+                                            <Text as="span" fontSize="xs" color="fg.muted" _hover={{ color: 'fg' }}>
+                                                Forgot?
+                                            </Text>
                                         </TextLink>
                                     )}
-                                </div>
+                                </Flex>
                                 <Input
                                     id="password"
                                     type="password"
@@ -90,41 +102,44 @@ export default function Login({
                                     tabIndex={2}
                                     autoComplete="current-password"
                                     placeholder="••••••••••"
-                                    className="h-11 rounded-xl border-2 transition-all focus:ring-2 focus:ring-primary/20"
                                 />
                                 <InputError message={errors.password} />
-                            </div>
+                            </Stack>
 
-                            <div className="flex items-center space-x-2.5">
-                                <Checkbox
-                                    id="remember"
-                                    name="remember"
-                                    tabIndex={3}
-                                    className="border-2 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                                />
-                                <Label htmlFor="remember" className="cursor-pointer text-sm text-muted-foreground">
-                                    Keep my session active
+                            <Flex alignItems="center" gap="2.5">
+                                <Checkbox id="remember" name="remember" tabIndex={3} />
+                                <Label htmlFor="remember">
+                                    <Text as="span" cursor="pointer" fontSize="sm" color="fg.muted">
+                                        Keep my session active
+                                    </Text>
                                 </Label>
-                            </div>
+                            </Flex>
 
                             <Button
                                 type="submit"
-                                className="mt-1 h-11 w-full rounded-xl text-sm font-semibold"
+                                mt="1"
+                                h="11"
+                                w="full"
+                                borderRadius="xl"
+                                fontSize="sm"
+                                fontWeight="semibold"
                                 tabIndex={4}
                                 disabled={processing}
                                 data-test="login-button"
                             >
                                 {processing ? <Spinner /> : 'Sign in'}
                             </Button>
-                        </div>
+                        </Stack>
 
                         {canRegister && (
-                            <p className="text-center text-sm text-muted-foreground">
+                            <Text textAlign="center" fontSize="sm" color="fg.muted">
                                 No tienes cuenta?{' '}
-                                <TextLink href={register()} tabIndex={5} className="font-semibold text-foreground hover:underline">
-                                    Regístrate aquí
+                                <TextLink href={register()} tabIndex={5}>
+                                    <Text as="span" fontWeight="semibold" color="fg" _hover={{ textDecoration: 'underline' }}>
+                                        Regístrate aquí
+                                    </Text>
                                 </TextLink>
-                            </p>
+                            </Text>
                         )}
                     </>
                 )}

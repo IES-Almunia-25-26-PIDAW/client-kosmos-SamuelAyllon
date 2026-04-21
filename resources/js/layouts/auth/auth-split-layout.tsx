@@ -1,6 +1,9 @@
+import { Box, Flex, Grid, Heading, Stack, Text, chakra } from '@chakra-ui/react';
 import { Link } from '@inertiajs/react';
 import { home } from '@/routes';
 import type { AuthLayoutProps } from '@/types';
+
+const ChakraLink = chakra(Link);
 
 export default function AuthSplitLayout({
     children,
@@ -8,39 +11,74 @@ export default function AuthSplitLayout({
     description,
 }: AuthLayoutProps) {
     return (
-        <div className="grid min-h-dvh lg:grid-cols-2">
-            <div className="relative hidden flex-col justify-between bg-[#111b12] p-10 text-white lg:flex">
-                <Link href={home()} className="flex flex-col gap-0.5">
-                    <span className="text-xs font-bold tracking-[0.25em] uppercase text-white">ClientKosmos</span>
-                    <span className="text-[10px] tracking-[0.2em] uppercase text-white/40">Therapeutic Harmony</span>
-                </Link>
+        <Grid minH="100dvh" templateColumns={{ base: '1fr', lg: '1fr 1fr' }}>
+            <Flex
+                position="relative"
+                display={{ base: 'none', lg: 'flex' }}
+                direction="column"
+                justifyContent="space-between"
+                bg="#111b12"
+                p="10"
+                color="white"
+            >
+                <ChakraLink href={home()} display="flex" flexDirection="column" gap="0.5">
+                    <Text
+                        fontSize="xs"
+                        fontWeight="bold"
+                        letterSpacing="0.25em"
+                        textTransform="uppercase"
+                        color="white"
+                    >
+                        ClientKosmos
+                    </Text>
+                    <Text
+                        fontSize="10px"
+                        letterSpacing="0.2em"
+                        textTransform="uppercase"
+                        color="whiteAlpha.500"
+                    >
+                        Therapeutic Harmony
+                    </Text>
+                </ChakraLink>
 
-                <div className="space-y-5">
-                    <h2 className="text-[2.6rem] font-bold leading-[1.15] text-white">
+                <Stack gap="5">
+                    <Heading
+                        as="h2"
+                        fontSize="2.6rem"
+                        fontWeight="bold"
+                        lineHeight="1.15"
+                        color="white"
+                    >
                         A digital sanctuary for your{' '}
-                        <span className="text-emerald-400">clinical mastery.</span>
-                    </h2>
-                    <p className="max-w-xs text-sm leading-relaxed text-white/50">
+                        <Box as="span" color="emerald.400">
+                            clinical mastery.
+                        </Box>
+                    </Heading>
+                    <Text maxW="xs" fontSize="sm" lineHeight="relaxed" color="whiteAlpha.600">
                         Transition from the noise of administration to the clarity of therapy.
                         Designed for practitioners who value deep focus and human connection.
-                    </p>
-                </div>
+                    </Text>
+                </Stack>
 
-                <div />
-            </div>
+                <Box />
+            </Flex>
 
-            <div className="flex items-center justify-center p-8">
-                <div className="w-full max-w-sm space-y-8">
-                    <div className="space-y-1.5">
-                        <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
+            <Flex alignItems="center" justifyContent="center" p="8">
+                <Stack w="full" maxW="sm" gap="8">
+                    <Stack gap="1.5">
+                        <Heading as="h1" fontSize="2xl" fontWeight="bold" letterSpacing="tight">
+                            {title}
+                        </Heading>
                         {description && (
-                            <p className="text-sm text-muted-foreground">{description}</p>
+                            <Text fontSize="sm" color="fg.muted">
+                                {description}
+                            </Text>
                         )}
-                    </div>
+                    </Stack>
 
                     {children}
-                </div>
-            </div>
-        </div>
+                </Stack>
+            </Flex>
+        </Grid>
     );
 }
