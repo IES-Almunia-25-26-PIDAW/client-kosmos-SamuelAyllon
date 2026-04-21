@@ -1,4 +1,4 @@
-import { Breadcrumb as ChakraBreadcrumb } from '@chakra-ui/react';
+import { Breadcrumb as ChakraBreadcrumb, Box } from '@chakra-ui/react';
 import { ChevronRight, MoreHorizontal } from 'lucide-react';
 import * as React from 'react';
 
@@ -104,7 +104,7 @@ function BreadcrumbEllipsis(
             {...props}
         >
             <MoreHorizontal style={{ width: '1rem', height: '1rem' }} />
-            <span className="sr-only">More</span>
+            <Box as="span" srOnly>More</Box>
         </ChakraBreadcrumb.Ellipsis>
     );
 }

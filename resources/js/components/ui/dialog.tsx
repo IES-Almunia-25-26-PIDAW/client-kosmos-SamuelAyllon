@@ -105,7 +105,7 @@ function DialogContent({
                             <XIcon
                                 style={{ width: '1rem', height: '1rem' }}
                             />
-                            <span className="sr-only">Close</span>
+                            <Box as="span" srOnly>Close</Box>
                         </ChakraDialog.CloseTrigger>
                     )}
                 </ChakraDialog.Content>

@@ -3,7 +3,6 @@ import {
     type ButtonProps as ChakraButtonProps,
 } from '@chakra-ui/react';
 import * as React from 'react';
-import { cn } from '@/lib/utils';
 
 type LegacyVariant =
     | 'default'
@@ -28,15 +27,17 @@ const VARIANT_MAP: Record<LegacyVariant, ChakraStylingProps> = {
     link: { variant: 'plain', colorPalette: 'brand' },
 };
 
-const SIZE_MAP: Record<
-    LegacySize,
-    { size: ChakraButtonProps['size']; extraClassName?: string }
-> = {
+type SizeMapEntry = {
+    size: ChakraButtonProps['size'];
+    extraProps?: Partial<ChakraButtonProps>;
+};
+
+const SIZE_MAP: Record<LegacySize, SizeMapEntry> = {
     default: { size: 'sm' },
     sm: { size: 'xs' },
     md: { size: 'sm' },
     lg: { size: 'md' },
-    icon: { size: 'sm', extraClassName: 'aspect-square p-0' },
+    icon: { size: 'sm', extraProps: { aspectRatio: '1', p: '0' } },
 };
 
 type ButtonProps = Omit<
@@ -52,7 +53,6 @@ type ButtonProps = Omit<
 function Button({
     variant = 'default',
     size = 'default',
-    className,
     loading = false,
     asChild = false,
     children,
@@ -71,7 +71,7 @@ function Button({
             loading={loading}
             asChild={asChild}
             disabled={disabled || loading}
-            className={cn(mappedSize.extraClassName, className)}
+            {...mappedSize.extraProps}
             {...props}
         >
             {children}

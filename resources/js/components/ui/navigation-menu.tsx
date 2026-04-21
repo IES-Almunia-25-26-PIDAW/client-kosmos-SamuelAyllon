@@ -166,7 +166,6 @@ function NavigationMenuTrigger({
                     height: '0.75rem',
                     transition: 'transform 300ms',
                 }}
-                className="nav-menu-chevron"
             />
         </StyledTrigger>
     );

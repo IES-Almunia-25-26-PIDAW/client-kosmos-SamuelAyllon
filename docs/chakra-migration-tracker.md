@@ -4,7 +4,7 @@ Seguimiento de la migración de Tailwind CSS → Chakra UI v3 (ADR-0006).
 Actualizar este archivo manualmente cada vez que se migre un archivo.  
 Estado calculado sobre la base de `className=` vs `from '@chakra-ui'` en cada archivo.
 
-**Última revisión:** 2026-04-21 (Fase 4a paso 4)
+**Última revisión:** 2026-04-21 (Fase 4a completa + limpieza parciales UI)
 
 ---
 
@@ -169,11 +169,11 @@ Estado calculado sobre la base de `className=` vs `from '@chakra-ui'` en cada ar
 | [components/ui/card.tsx](../resources/js/components/ui/card.tsx) | ✅ | |
 | [components/ui/checkbox.tsx](../resources/js/components/ui/checkbox.tsx) | ✅ | |
 | [components/ui/dropdown-menu.tsx](../resources/js/components/ui/dropdown-menu.tsx) | ✅ | |
-| [components/ui/button.tsx](../resources/js/components/ui/button.tsx) | ⚠️ | 1 `className` restante |
-| [components/ui/breadcrumb.tsx](../resources/js/components/ui/breadcrumb.tsx) | ⚠️ | 1 `className` restante |
-| [components/ui/dialog.tsx](../resources/js/components/ui/dialog.tsx) | ⚠️ | 1 `className` restante |
-| [components/ui/navigation-menu.tsx](../resources/js/components/ui/navigation-menu.tsx) | ⚠️ | 1 `className` restante |
-| [components/ui/sheet.tsx](../resources/js/components/ui/sheet.tsx) | ⚠️ | 1 `className` restante |
+| [components/ui/button.tsx](../resources/js/components/ui/button.tsx) | ✅ | |
+| [components/ui/breadcrumb.tsx](../resources/js/components/ui/breadcrumb.tsx) | ✅ | |
+| [components/ui/dialog.tsx](../resources/js/components/ui/dialog.tsx) | ✅ | |
+| [components/ui/navigation-menu.tsx](../resources/js/components/ui/navigation-menu.tsx) | ✅ | |
+| [components/ui/sheet.tsx](../resources/js/components/ui/sheet.tsx) | ✅ | |
 | [components/ui/placeholder-pattern.tsx](../resources/js/components/ui/placeholder-pattern.tsx) | ❌ | 1 `className` |
 | [components/ui/icon.tsx](../resources/js/components/ui/icon.tsx) | ❌ | 1 `className` |
 
@@ -214,11 +214,11 @@ Estado calculado sobre la base de `className=` vs `from '@chakra-ui'` en cada ar
 | Components Shell/Nav | 3 | 0 | 8 | 11 |
 | Components Patient | 3 | 0 | 0 | 3 |
 | Components Kosmo | 4 | 0 | 0 | 4 |
-| Components UI | 20 | 5 | 2 | 27 |
+| Components UI | 25 | 0 | 2 | 27 |
 | Components Otros | 12 | 0 | 2 | 14 |
-| **TOTAL** | **60** | **6** | **32** | **98** |
+| **TOTAL** | **65** | **1** | **32** | **98** |
 
-**Progreso global: ~67% migrado** (60 completos + 6 parciales de 98 archivos)
+**Progreso global: ~67% migrado** (65 completos + 1 parcial de 98 archivos)
 
 ---
 
@@ -248,7 +248,6 @@ Estado calculado sobre la base de `className=` vs `from '@chakra-ui'` en cada ar
 
 ### Parciales pendientes de limpiar
 - `layouts/auth/auth-card-layout.tsx`
-- `components/ui/button`, `breadcrumb`, `dialog`, `navigation-menu`, `sheet`
 
 ---
 

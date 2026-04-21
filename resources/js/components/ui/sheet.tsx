@@ -1,4 +1,4 @@
-import { Drawer, Portal } from '@chakra-ui/react';
+import { Box, Drawer, Portal } from '@chakra-ui/react';
 import { XIcon } from 'lucide-react';
 import * as React from 'react';
 
@@ -112,7 +112,7 @@ function SheetContent({
                         }}
                     >
                         <XIcon style={{ width: '1rem', height: '1rem' }} />
-                        <span className="sr-only">Close</span>
+                        <Box as="span" srOnly>Close</Box>
                     </Drawer.CloseTrigger>
                 </Drawer.Content>
             </Drawer.Positioner>
