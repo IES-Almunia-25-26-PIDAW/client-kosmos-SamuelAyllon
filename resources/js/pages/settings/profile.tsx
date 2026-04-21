@@ -1,6 +1,7 @@
+import { Box, Flex, Heading, Stack, Text, chakra } from '@chakra-ui/react';
 import { Transition } from '@headlessui/react';
 import { Form, Head, Link, usePage } from '@inertiajs/react';
-import { User, Mail, CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, Mail, User } from 'lucide-react';
 import type { ReactNode } from 'react';
 import ProfileActions from '@/actions/App/Http/Controllers/Settings/Profile';
 import DeleteUser from '@/components/delete-user';
@@ -15,11 +16,10 @@ import { edit } from '@/routes/profile';
 import { send } from '@/routes/verification';
 import type { Auth, BreadcrumbItem } from '@/types';
 
+const ChakraLink = chakra(Link);
+
 const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Ajustes de perfil',
-        href: edit().url,
-    },
+    { title: 'Ajustes de perfil', href: edit().url },
 ];
 
 export default function Profile({
@@ -35,34 +35,36 @@ export default function Profile({
         <>
             <Head title="Ajustes de perfil" />
 
-            <h1 className="sr-only">Ajustes de Perfil</h1>
+            <Heading as="h1" srOnly>Ajustes de Perfil</Heading>
 
             <SettingsLayout>
-                <Card className="shadow-sm">
-                    <CardHeader className="border-b bg-muted/30 pb-4">
-                        <div className="flex items-center gap-2">
-                            <User className="h-5 w-5 text-primary" />
-                            <CardTitle className="text-base font-semibold">Información del perfil</CardTitle>
-                        </div>
+                <Card>
+                    <CardHeader>
+                        <Flex alignItems="center" gap="2">
+                            <Box as={User} h="5" w="5" color="brand.solid" />
+                            <CardTitle>
+                                <Text as="span" fontSize="md" fontWeight="semibold">Información del perfil</Text>
+                            </CardTitle>
+                        </Flex>
                         <CardDescription>
                             Actualiza tu nombre y dirección de correo electrónico
                         </CardDescription>
                     </CardHeader>
-                    <CardContent className="pt-6">
+                    <CardContent>
                         <Form
                             action={ProfileActions.UpdateAction.url()}
                             method="patch"
-                            options={{
-                                preserveScroll: true,
-                            }}
-                            className="space-y-6"
+                            options={{ preserveScroll: true }}
+                            style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}
                         >
                             {({ processing, recentlySuccessful, errors }) => (
                                 <>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="name" className="flex items-center gap-2 text-sm font-medium">
-                                            <User className="h-4 w-4 text-muted-foreground" />
-                                            Nombre
+                                    <Stack gap="2">
+                                        <Label htmlFor="name">
+                                            <Flex alignItems="center" gap="2" fontSize="sm" fontWeight="medium">
+                                                <Box as={User} h="4" w="4" color="fg.muted" />
+                                                Nombre
+                                            </Flex>
                                         </Label>
                                         <Input
                                             id="name"
@@ -72,16 +74,15 @@ export default function Profile({
                                             autoComplete="name"
                                             placeholder="Tu nombre completo"
                                         />
-                                        <InputError
-                                            className="mt-1"
-                                            message={errors.name}
-                                        />
-                                    </div>
+                                        <InputError message={errors.name} />
+                                    </Stack>
 
-                                    <div className="space-y-2">
-                                        <Label htmlFor="email" className="flex items-center gap-2 text-sm font-medium">
-                                            <Mail className="h-4 w-4 text-muted-foreground" />
-                                            Correo electrónico
+                                    <Stack gap="2">
+                                        <Label htmlFor="email">
+                                            <Flex alignItems="center" gap="2" fontSize="sm" fontWeight="medium">
+                                                <Box as={Mail} h="4" w="4" color="fg.muted" />
+                                                Correo electrónico
+                                            </Flex>
                                         </Label>
                                         <Input
                                             id="email"
@@ -92,48 +93,52 @@ export default function Profile({
                                             autoComplete="username"
                                             placeholder="tu@email.com"
                                         />
-                                        <InputError
-                                            className="mt-1"
-                                            message={errors.email}
-                                        />
-                                    </div>
+                                        <InputError message={errors.email} />
+                                    </Stack>
 
-                                    {mustVerifyEmail &&
-                                        auth.user.email_verified_at === null && (
-                                            <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-900/50 dark:bg-yellow-900/20">
-                                                <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                                                    Tu correo electrónico no está verificado.{' '}
-                                                    <Link
-                                                        href={send()}
-                                                        as="button"
-                                                        className="font-medium underline underline-offset-4 hover:text-yellow-900 dark:hover:text-yellow-100"
-                                                    >
-                                                        Haz clic aquí para reenviar el correo de verificación.
-                                                    </Link>
-                                                </p>
+                                    {mustVerifyEmail && auth.user.email_verified_at === null && (
+                                        <Box
+                                            borderRadius="lg"
+                                            borderWidth="1px"
+                                            borderColor="warning.subtle"
+                                            bg="warning.subtle"
+                                            p="4"
+                                        >
+                                            <Text fontSize="sm" color="warning.fg">
+                                                Tu correo electrónico no está verificado.{' '}
+                                                <ChakraLink
+                                                    href={send()}
+                                                    as="button"
+                                                    fontWeight="medium"
+                                                    textDecoration="underline"
+                                                    textUnderlineOffset="4px"
+                                                    _hover={{ color: 'warning.solid' }}
+                                                >
+                                                    Haz clic aquí para reenviar el correo de verificación.
+                                                </ChakraLink>
+                                            </Text>
 
-                                                {status ===
-                                                    'verification-link-sent' && (
-                                                    <div className="mt-2 flex items-center gap-2 text-sm font-medium text-green-600 dark:text-green-400">
-                                                        <CheckCircle2 className="h-4 w-4" />
-                                                        Se ha enviado un nuevo enlace de verificación.
-                                                    </div>
-                                                )}
-                                            </div>
-                                        )}
+                                            {status === 'verification-link-sent' && (
+                                                <Flex mt="2" alignItems="center" gap="2" fontSize="sm" fontWeight="medium" color="success.fg">
+                                                    <Box as={CheckCircle2} h="4" w="4" />
+                                                    Se ha enviado un nuevo enlace de verificación.
+                                                </Flex>
+                                            )}
+                                        </Box>
+                                    )}
 
-                                    <div className="flex items-center gap-4 border-t pt-6">
+                                    <Flex alignItems="center" gap="4" borderTopWidth="1px" borderColor="border" pt="6">
                                         <Button
                                             type="submit"
                                             disabled={processing}
                                             data-test="update-profile-button"
-                                            className="min-w-[100px]"
+                                            minW="100px"
                                         >
                                             {processing ? (
-                                                <span className="flex items-center gap-2">
-                                                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                                                <Flex alignItems="center" gap="2">
+                                                    <Box h="4" w="4" borderRadius="full" borderWidth="2px" borderColor="currentColor" borderTopColor="transparent" css={{ animation: 'spin 1s linear infinite' }} />
                                                     Guardando...
-                                                </span>
+                                                </Flex>
                                             ) : (
                                                 'Guardar'
                                             )}
@@ -146,12 +151,12 @@ export default function Profile({
                                             leave="transition ease-in-out"
                                             leaveTo="opacity-0"
                                         >
-                                            <p className="flex items-center gap-1.5 text-sm text-green-600">
-                                                <CheckCircle2 className="h-4 w-4" />
+                                            <Flex alignItems="center" gap="1.5" fontSize="sm" color="success.fg">
+                                                <Box as={CheckCircle2} h="4" w="4" />
                                                 Guardado
-                                            </p>
+                                            </Flex>
                                         </Transition>
-                                    </div>
+                                    </Flex>
                                 </>
                             )}
                         </Form>

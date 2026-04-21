@@ -1,3 +1,4 @@
+import { Box, Flex, Heading, Stack, Text } from '@chakra-ui/react';
 import { Head } from '@inertiajs/react';
 import { Palette } from 'lucide-react';
 import type { ReactNode } from 'react';
@@ -9,10 +10,7 @@ import { edit as editAppearance } from '@/routes/appearance';
 import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Ajustes de apariencia',
-        href: editAppearance().url,
-    },
+    { title: 'Ajustes de apariencia', href: editAppearance().url },
 ];
 
 export default function Appearance() {
@@ -20,26 +18,28 @@ export default function Appearance() {
         <>
             <Head title="Ajustes de apariencia" />
 
-            <h1 className="sr-only">Ajustes de Apariencia</h1>
+            <Heading as="h1" srOnly>Ajustes de Apariencia</Heading>
 
             <SettingsLayout>
-                <Card className="shadow-sm">
-                    <CardHeader className="border-b bg-muted/30 pb-4">
-                        <div className="flex items-center gap-2">
-                            <Palette className="h-5 w-5 text-primary" />
-                            <CardTitle className="text-base font-semibold">Tema de la aplicación</CardTitle>
-                        </div>
+                <Card>
+                    <CardHeader>
+                        <Flex alignItems="center" gap="2">
+                            <Box as={Palette} h="5" w="5" color="brand.solid" />
+                            <CardTitle>
+                                <Text as="span" fontSize="md" fontWeight="semibold">Tema de la aplicación</Text>
+                            </CardTitle>
+                        </Flex>
                         <CardDescription>
                             Personaliza la apariencia de tu cuenta
                         </CardDescription>
                     </CardHeader>
-                    <CardContent className="pt-6">
-                        <div className="space-y-4">
-                            <p className="text-sm text-muted-foreground">
+                    <CardContent>
+                        <Stack gap="4">
+                            <Text fontSize="sm" color="fg.muted">
                                 Selecciona el tema que prefieras para la interfaz. El tema del sistema se adaptará automáticamente a la configuración de tu dispositivo.
-                            </p>
+                            </Text>
                             <AppearanceTabs />
-                        </div>
+                        </Stack>
                     </CardContent>
                 </Card>
             </SettingsLayout>
