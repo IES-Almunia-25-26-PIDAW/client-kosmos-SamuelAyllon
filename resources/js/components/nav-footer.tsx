@@ -19,7 +19,6 @@ const FooterLink = chakra('a', {
 
 export function NavFooter({
     items,
-    className,
     ...props
 }: ComponentPropsWithoutRef<typeof SidebarGroup> & {
     items: NavItem[];
@@ -27,7 +26,7 @@ export function NavFooter({
     return (
         <SidebarGroup
             {...props}
-            className={`group-data-[collapsible=icon]:p-0 ${className || ''}`}
+            css={{ '[data-collapsible=icon] &': { padding: '0' } }}
         >
             <SidebarGroupContent>
                 <SidebarMenu>
