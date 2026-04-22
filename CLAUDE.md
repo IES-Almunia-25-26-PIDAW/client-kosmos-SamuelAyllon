@@ -26,8 +26,8 @@
 
 **Frontend**
 - React 19 · TypeScript 5.7 · Inertia React v2
-- Chakra UI v3.34 (target de migración) · Tailwind v4 (legado, solo componentes existentes)
-- Vite 7 · ESLint 9 · Prettier 3 · Radix UI (restos pre-migración)
+- Chakra UI v3.34 — **único sistema visual** (Tailwind eliminado; Radix UI: restos pre-migración a reemplazar)
+- Vite 7 · ESLint 9 · Prettier 3
 
 Fuente de verdad de versiones: [package.json](package.json) y [composer.json](composer.json). No asumir — leer.
 
@@ -68,7 +68,8 @@ Fuente de verdad de versiones: [package.json](package.json) y [composer.json](co
 ## 4. Prohibiciones
 
 - ❌ `useState` local cuando los datos vienen de props de Inertia o shared data.
-- ❌ Nuevas clases Tailwind en **componentes nuevos** (migración Chakra en curso — ver ADR-0006).
+- ❌ Clases Tailwind en cualquier componente, nuevo o existente — Chakra UI v3 es el único sistema visual permitido.
+- ❌ Crear componentes visuales sin consultar primero el MCP de Chakra (`mcp__chakra-ui__*`) y la skill `chakra-ui-v3`.
 - ❌ URLs hardcoded — usar Wayfinder.
 - ❌ Dependencias nuevas sin ADR aprobado en [docs/decision-log.md](docs/decision-log.md).
 - ❌ Commits con `--no-verify`, `--no-gpg-sign` o similares.
@@ -119,13 +120,16 @@ Validar intención antes de codificar. Para cambios no triviales → **Plan Mode
 
 ### Pre-cambio (obligatorio)
 1. **`search-docs`** (Laravel Boost MCP) sobre el tema antes de proponer código.
-2. **UI:** consultar MCP de Chakra — `mcp__chakra-ui__list_components`, `get_component_example`, `v2_to_v3_code_review`.
+2. **UI (obligatorio para cualquier componente visual):**
+   - Leer `.agents/skills/chakra-ui-v3/SKILL.md` y `resources/js/lib/chakra-system.ts` antes de escribir código.
+   - Consultar MCP de Chakra: `mcp__chakra-ui__list_components`, `get_component_example`, `get_component_props`, `v2_to_v3_code_review`.
+   - Usar los tokens semánticos de `chakra-system.ts` (`brand`, `bg`, `fg`, `border`, `sidebar`, etc.) en lugar de valores hardcoded o clases CSS.
 3. **Activar la skill relevante** del registry (carga modular, no duplicar su contenido aquí):
    - Backend: `laravel-patterns`, `laravel-specialist`, `php-pro`.
    - Frontend: `frontend-design`, `vercel-react-best-practices`, `vercel-composition-patterns`, `typescript-advanced-types`.
-   - UI/Estilo: `tailwind-css-patterns`, `tailwind-v4-shadcn`, `shadcn`.
+   - UI/Estilo: `chakra-ui-v3` (**obligatoria** en cualquier tarea visual).
    - Calidad: `accessibility`, `seo`, `vite`.
-4. Usar también las skills declaradas en el CLAUDE.md global (`developing-with-fortify`, `wayfinder-development`, `pest-testing`, `inertia-react-development`, `laravel-inertia-react`, `tailwindcss-development`, `laravel-best-practices`).
+4. Usar también las skills declaradas en el CLAUDE.md global (`developing-with-fortify`, `wayfinder-development`, `pest-testing`, `inertia-react-development`, `laravel-inertia-react`, `laravel-best-practices`).
 
 ### Herramientas preferidas
 - Boost MCP (`database-query`, `database-schema`, `browser-logs`, `last-error`, `read-log-entries`, `get-absolute-url`) sobre alternativas manuales.
