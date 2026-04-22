@@ -27,7 +27,7 @@ class PreSessionAction extends Controller
             ->latest()
             ->first();
 
-        return Inertia::render('patients/pre-session', [
+        return Inertia::render('professional/patients/pre-session', [
             'patient' => $patient,
             'context' => $context,
             'briefing' => $briefing,

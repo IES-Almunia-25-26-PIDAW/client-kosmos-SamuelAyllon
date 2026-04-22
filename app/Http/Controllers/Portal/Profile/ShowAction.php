@@ -11,11 +11,11 @@ class ShowAction extends Controller
 {
     public function __invoke(Request $request): Response
     {
-        $user    = $request->user()->load('patientProfile');
+        $user = $request->user()->load('patientProfile');
         $profile = $user->patientProfile;
 
-        return Inertia::render('portal/profile/show', [
-            'user'    => $user,
+        return Inertia::render('patient/profile/show', [
+            'user' => $user,
             'profile' => $profile,
         ]);
     }

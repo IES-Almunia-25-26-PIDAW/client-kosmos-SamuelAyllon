@@ -3,16 +3,16 @@
 use App\Models\PatientProfile;
 
 it('redirects guests to login', function () {
-    $this->get(route('dashboard'))->assertRedirect(route('login'));
+    $this->get(route('professional.dashboard'))->assertRedirect(route('login'));
 });
 
 it('authenticated professional can visit dashboard', function () {
     $user = createProfessional();
 
     $this->actingAs($user)
-        ->get(route('dashboard'))
+        ->get(route('professional.dashboard'))
         ->assertOk()
-        ->assertInertia(fn ($page) => $page->component('dashboard/professional'));
+        ->assertInertia(fn ($page) => $page->component('professional/dashboard'));
 });
 
 it('dashboard returns activePatients, todayAppointments, alerts, dailyBriefing and stats', function () {
@@ -25,10 +25,10 @@ it('dashboard returns activePatients, todayAppointments, alerts, dailyBriefing a
     ]);
 
     $this->actingAs($user)
-        ->get(route('dashboard'))
+        ->get(route('professional.dashboard'))
         ->assertOk()
         ->assertInertia(fn ($page) => $page
-            ->component('dashboard/professional')
+            ->component('professional/dashboard')
             ->has('activePatients')
             ->has('todayAppointments')
             ->has('alerts')
@@ -41,9 +41,9 @@ it('dashboard stats include expected keys', function () {
     $user = createProfessional();
 
     $this->actingAs($user)
-        ->get(route('dashboard'))
+        ->get(route('professional.dashboard'))
         ->assertInertia(fn ($page) => $page
-            ->component('dashboard/professional')
+            ->component('professional/dashboard')
             ->has('stats.appointments_this_week')
             ->has('stats.pending_invoices')
             ->has('stats.active_patients')
@@ -66,9 +66,9 @@ it('dashboard shows active patients count correctly', function () {
     ]);
 
     $this->actingAs($user)
-        ->get(route('dashboard'))
+        ->get(route('professional.dashboard'))
         ->assertInertia(fn ($page) => $page
-            ->component('dashboard/professional')
+            ->component('professional/dashboard')
             ->has('activePatients', 2)
         );
 });
@@ -77,16 +77,13 @@ it('authenticated patient can visit dashboard and sees patient view', function (
     $patient = createPatient();
 
     $this->actingAs($patient)
-        ->get(route('dashboard'))
+        ->get(route('patient.dashboard'))
         ->assertOk()
         ->assertInertia(fn ($page) => $page
-            ->component('dashboard/patient')
+            ->component('patient/dashboard')
             ->has('upcomingAppointments')
-            ->has('recentInvoices')
-            ->has('stats')
-            ->has('stats.upcoming_appointments')
-            ->has('stats.completed_sessions')
-            ->has('stats.pending_invoices')
+            ->has('pendingInvoices')
+            ->has('unreadMessages')
         );
 });
 
@@ -94,7 +91,7 @@ it('admin is redirected away from professional dashboard', function () {
     $admin = createAdmin();
 
     $this->actingAs($admin)
-        ->get(route('dashboard'))
+        ->get(route('professional.dashboard'))
         ->assertRedirect(route('admin.users.index'));
 });
 
@@ -102,9 +99,9 @@ it('dashboard alerts contain invoice and consent keys', function () {
     $user = createProfessional();
 
     $this->actingAs($user)
-        ->get(route('dashboard'))
+        ->get(route('professional.dashboard'))
         ->assertInertia(fn ($page) => $page
-            ->component('dashboard/professional')
+            ->component('professional/dashboard')
             ->has('alerts.invoice')
             ->has('alerts.consent')
         );

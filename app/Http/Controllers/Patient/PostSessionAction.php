@@ -17,7 +17,7 @@ class PostSessionAction extends Controller
             ->orderByDesc('starts_at')
             ->first();
 
-        return Inertia::render('patients/post-session', [
+        return Inertia::render('professional/patients/post-session', [
             'patient' => $patient,
             'lastAppointment' => $lastAppointment,
             'lastInvoice' => $patient->invoices()->orderByDesc('due_at')->first(),

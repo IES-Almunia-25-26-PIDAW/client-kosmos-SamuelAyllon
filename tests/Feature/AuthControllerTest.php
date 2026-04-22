@@ -21,7 +21,7 @@ it('professional can log in and is redirected to dashboard', function () {
     $this->post('/login', [
         'email' => $user->email,
         'password' => 'password',
-    ])->assertRedirect(route('dashboard'));
+    ])->assertRedirect(route('professional.dashboard'));
 
     $this->assertAuthenticatedAs($user);
 });
@@ -34,7 +34,7 @@ it('professional without completed tutorial is redirected to onboarding', functi
     $this->post('/login', [
         'email' => $user->email,
         'password' => 'password',
-    ])->assertRedirect(route('onboarding'));
+    ])->assertRedirect(route('professional.onboarding'));
 
     $this->assertAuthenticatedAs($user);
 });

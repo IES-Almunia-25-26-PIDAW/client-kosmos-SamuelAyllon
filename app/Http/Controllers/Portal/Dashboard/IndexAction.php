@@ -34,10 +34,10 @@ class IndexAction extends Controller
             ->whereNull('read_at')
             ->count();
 
-        return Inertia::render('portal/dashboard', [
+        return Inertia::render('patient/dashboard', [
             'upcomingAppointments' => $upcomingAppointments,
-            'pendingInvoices'      => $pendingInvoices,
-            'unreadMessages'       => $unreadMessages,
+            'pendingInvoices' => $pendingInvoices,
+            'unreadMessages' => $unreadMessages,
         ]);
     }
 }

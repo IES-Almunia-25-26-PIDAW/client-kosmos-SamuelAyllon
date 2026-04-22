@@ -16,7 +16,7 @@ class ShowAction extends Controller
 
         $appointment->load(['professional:id,name', 'service:id,name,duration_minutes']);
 
-        return Inertia::render('portal/appointments/show', [
+        return Inertia::render('patient/appointments/show', [
             'appointment' => $appointment,
         ]);
     }

@@ -13,10 +13,10 @@ it('professional can view the waiting room for their appointment', function () {
     ]);
 
     $this->actingAs($professional)
-        ->get(route('appointments.waiting', $appointment))
+        ->get(route('professional.appointments.waiting', $appointment))
         ->assertOk()
         ->assertInertia(fn ($page) => $page
-            ->component('appointments/waiting')
+            ->component('professional/appointments/waiting')
             ->has('appointment')
         );
 });
@@ -33,7 +33,7 @@ it('another professional cannot view the waiting room', function () {
     ]);
 
     $this->actingAs($stranger)
-        ->get(route('appointments.waiting', $appointment))
+        ->get(route('professional.appointments.waiting', $appointment))
         ->assertForbidden();
 });
 
@@ -49,8 +49,8 @@ it('joining the waiting room stamps professional_joined_at and redirects', funct
     ]);
 
     $this->actingAs($professional)
-        ->post(route('appointments.join-waiting', $appointment))
-        ->assertRedirect(route('appointments.waiting', $appointment));
+        ->post(route('professional.appointments.join-waiting', $appointment))
+        ->assertRedirect(route('professional.appointments.waiting', $appointment));
 
     expect($appointment->fresh()->professional_joined_at)->not->toBeNull();
 });
@@ -69,7 +69,7 @@ it('joining the waiting room does not overwrite existing timestamp', function ()
     ]);
 
     $this->actingAs($professional)
-        ->post(route('appointments.join-waiting', $appointment))
+        ->post(route('professional.appointments.join-waiting', $appointment))
         ->assertRedirect();
 
     expect($appointment->fresh()->professional_joined_at->timestamp)
@@ -88,7 +88,7 @@ it('non-owner cannot join the waiting room', function () {
     ]);
 
     $this->actingAs($stranger)
-        ->post(route('appointments.join-waiting', $appointment))
+        ->post(route('professional.appointments.join-waiting', $appointment))
         ->assertForbidden();
 
     expect($appointment->fresh()->professional_joined_at)->toBeNull();

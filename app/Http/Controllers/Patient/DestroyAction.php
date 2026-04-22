@@ -14,7 +14,7 @@ class DestroyAction extends Controller
 
         $patient->delete();
 
-        return redirect()->route('patients.index')
+        return redirect()->route('professional.patients.index')
             ->with('success', 'Paciente eliminado correctamente.');
     }
 }

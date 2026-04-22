@@ -23,7 +23,7 @@ class IndexAction extends Controller
             ->latest()
             ->get();
 
-        return Inertia::render('referrals/index', [
+        return Inertia::render('professional/referrals/index', [
             'sent' => $sent,
             'received' => $received,
         ]);

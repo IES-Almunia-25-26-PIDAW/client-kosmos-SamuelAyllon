@@ -11,10 +11,10 @@ class IndexAction extends Controller
 {
     public function __invoke(Request $request): Response
     {
-        $workspace   = $request->user()->currentWorkspace();
+        $workspace = $request->user()->currentWorkspace();
         $services = $workspace->services()->orderBy('name')->get();
 
-        return Inertia::render('workspace/services/index', [
+        return Inertia::render('professional/workspace/services/index', [
             'workspace' => $workspace,
             'services' => $services,
         ]);

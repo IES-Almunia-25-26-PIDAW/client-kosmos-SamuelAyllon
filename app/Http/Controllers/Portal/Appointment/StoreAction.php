@@ -34,7 +34,7 @@ class StoreAction extends Controller
             'status'          => 'pending',
         ]);
 
-        return redirect()->route('portal.appointments.index')
+        return redirect()->route('patient.appointments.index')
             ->with('success', 'Cita solicitada.');
     }
 }

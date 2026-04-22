@@ -15,7 +15,7 @@ class WaitingShowAction extends Controller
 
         $appointment->load(['patient', 'professional']);
 
-        return Inertia::render('appointments/waiting', [
+        return Inertia::render('professional/appointments/waiting', [
             'appointment' => $appointment,
         ]);
     }

@@ -64,7 +64,7 @@ class IndexAction extends Controller
                 'is_recurring' => false,
             ]);
 
-        return Inertia::render('schedule/index', [
+        return Inertia::render('professional/schedule/index', [
             'appointments' => $appointments,
             'recurringSlots' => $recurringSlots,
             'specificSlots' => $specificSlots,

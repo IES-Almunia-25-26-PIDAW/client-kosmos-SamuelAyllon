@@ -20,7 +20,7 @@ class IndexAction extends Controller
             ->latest()
             ->get();
 
-        return Inertia::render('workspace/collaborations/index', [
+        return Inertia::render('professional/workspace/collaborations/index', [
             'agreements' => $agreements,
         ]);
     }

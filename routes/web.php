@@ -77,6 +77,7 @@ use App\Http\Controllers\Portal\Invoice\IndexAction as PortalInvoiceIndexAction;
 use App\Http\Controllers\Portal\Invoice\ShowAction as PortalInvoiceShowAction;
 use App\Http\Controllers\Portal\Message\IndexAction as PortalMessageIndexAction;
 use App\Http\Controllers\Portal\Message\StoreAction as PortalMessageStoreAction;
+use App\Http\Controllers\Portal\Professional\IndexAction as PortalProfessionalIndexAction;
 use App\Http\Controllers\Portal\Profile\ShowAction as PortalProfileShowAction;
 use App\Http\Controllers\Portal\Profile\UpdateAction as PortalProfileUpdateAction;
 use App\Http\Controllers\Referral\DestroyAction as ReferralDestroyAction;
@@ -106,8 +107,24 @@ use Inertia\Inertia;
 
 Route::get('/', fn () => Inertia::render('welcome'))->name('home');
 
+// ─── Dashboard catch-all (Fortify home, email verification redirect) ──────────
+Route::middleware(['auth', 'verified'])
+    ->get('/dashboard', function () {
+        $user = auth()->user();
+        if ($user->isAdmin()) {
+            return redirect()->route('admin.dashboard');
+        }
+        if ($user->isProfessional()) {
+            return redirect()->route('professional.dashboard');
+        }
+        return redirect()->route('patient.dashboard');
+    })->name('dashboard');
+
 // ─── Professional routes ───────────────────────────────────────────────────────
-Route::middleware(['auth', 'verified', 'professional'])->group(function () {
+Route::middleware(['auth', 'verified', 'professional'])
+    ->prefix('professional')
+    ->name('professional.')
+    ->group(function () {
 
     Route::get('/dashboard', DashboardIndexAction::class)->name('dashboard');
     Route::get('/onboarding', OnboardingIndexAction::class)->name('onboarding');
@@ -236,12 +253,14 @@ Route::middleware(['auth', 'verified', 'admin'])
         Route::get('/workspaces/{workspace}', AdminWorkspaceShowAction::class)->name('workspaces.show');
     });
 
-// ─── Patient portal routes ─────────────────────────────────────────────────────
+// ─── Patient routes ─────────────────────────────────────────────────────
 Route::middleware(['auth', 'verified'])
-    ->prefix('portal')
-    ->name('portal.')
+    ->prefix('patient')
+    ->name('patient.')
     ->group(function () {
         Route::get('/', PortalDashboardIndexAction::class)->name('dashboard');
+
+        Route::get('/professionals', PortalProfessionalIndexAction::class)->name('professionals.index');
 
         Route::get('/appointments', PortalAppointmentIndexAction::class)->name('appointments.index');
         Route::get('/appointments/book', PortalAppointmentBookAction::class)->name('appointments.book');

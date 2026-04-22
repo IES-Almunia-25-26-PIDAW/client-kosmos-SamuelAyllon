@@ -27,7 +27,7 @@ class StoreAction extends Controller
             'status'          => 'pending',
         ]);
 
-        return redirect()->route('appointments.show', $appointment)
+        return redirect()->route('professional.appointments.show', $appointment)
             ->with('success', 'Cita creada.');
     }
 }

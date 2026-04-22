@@ -34,8 +34,8 @@ class IndexAction extends Controller
             ->select('id', 'name', 'avatar_path')
             ->get();
 
-        return Inertia::render('messages/index', [
-            'inbox'         => $inbox,
+        return Inertia::render('professional/messages/index', [
+            'inbox' => $inbox,
             'conversations' => $conversations,
         ]);
     }

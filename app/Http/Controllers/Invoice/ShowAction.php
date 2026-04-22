@@ -15,7 +15,7 @@ class ShowAction extends Controller
 
         $invoice->load(['items', 'patient', 'workspace']);
 
-        return Inertia::render('invoices/show', [
+        return Inertia::render('professional/invoices/show', [
             'invoice' => $invoice,
         ]);
     }

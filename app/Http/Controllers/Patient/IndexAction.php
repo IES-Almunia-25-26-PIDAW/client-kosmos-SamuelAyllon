@@ -20,7 +20,7 @@ class IndexAction extends Controller
             ->orderBy('id')
             ->get();
 
-        return Inertia::render('patients/index', [
+        return Inertia::render('professional/patients/index', [
             'patients' => $patients,
         ]);
     }

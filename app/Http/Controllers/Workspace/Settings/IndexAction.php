@@ -13,7 +13,7 @@ class IndexAction extends Controller
     {
         $workspace = $request->user()->currentWorkspace();
 
-        return Inertia::render('workspace/settings/index', [
+        return Inertia::render('professional/workspace/settings/index', [
             'workspace' => $workspace,
         ]);
     }

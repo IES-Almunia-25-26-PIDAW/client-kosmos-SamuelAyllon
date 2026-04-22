@@ -10,8 +10,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
-import schedule from '@/routes/schedule';
-import availability from '@/routes/schedule/availability';
+import schedule from '@/routes/professional/schedule';
+import availability from '@/routes/professional/schedule/availability';
 
 interface AppointmentEvent {
     id: number;

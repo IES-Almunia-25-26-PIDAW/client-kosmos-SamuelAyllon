@@ -4,17 +4,17 @@ use App\Models\Appointment;
 use App\Models\Availability;
 
 it('redirects guests to login', function () {
-    $this->get(route('schedule.index'))->assertRedirect(route('login'));
+    $this->get(route('professional.schedule.index'))->assertRedirect(route('login'));
 });
 
 it('professional can view schedule page', function () {
     $user = createProfessional();
 
     $this->actingAs($user)
-        ->get(route('schedule.index'))
+        ->get(route('professional.schedule.index'))
         ->assertOk()
         ->assertInertia(fn ($page) => $page
-            ->component('schedule/index')
+            ->component('professional/schedule/index')
             ->has('appointments')
             ->has('recurringSlots')
             ->has('specificSlots')
@@ -39,10 +39,10 @@ it('schedule page returns appointments in the date range', function () {
     ]);
 
     $this->actingAs($professional)
-        ->get(route('schedule.index'))
+        ->get(route('professional.schedule.index'))
         ->assertOk()
         ->assertInertia(fn ($page) => $page
-            ->component('schedule/index')
+            ->component('professional/schedule/index')
             ->has('appointments', 1)
         );
 });
@@ -62,10 +62,10 @@ it('schedule page returns recurring availability slots', function () {
     ]);
 
     $this->actingAs($professional)
-        ->get(route('schedule.index'))
+        ->get(route('professional.schedule.index'))
         ->assertOk()
         ->assertInertia(fn ($page) => $page
-            ->component('schedule/index')
+            ->component('professional/schedule/index')
             ->has('recurringSlots', 1)
         );
 });
@@ -86,10 +86,10 @@ it('schedule page returns specific-date availability slots in range', function (
     ]);
 
     $this->actingAs($professional)
-        ->get(route('schedule.index'))
+        ->get(route('professional.schedule.index'))
         ->assertOk()
         ->assertInertia(fn ($page) => $page
-            ->component('schedule/index')
+            ->component('professional/schedule/index')
             ->has('specificSlots', 1)
         );
 });
@@ -108,10 +108,10 @@ it('does not return appointments belonging to other professionals', function () 
     ]);
 
     $this->actingAs($professional)
-        ->get(route('schedule.index'))
+        ->get(route('professional.schedule.index'))
         ->assertOk()
         ->assertInertia(fn ($page) => $page
-            ->component('schedule/index')
+            ->component('professional/schedule/index')
             ->has('appointments', 0)
         );
 });

@@ -6,7 +6,7 @@ import { EmptyState } from '@/components/empty-state';
 import { KPICard } from '@/components/patient/kpi-card';
 import { StatusBadge } from '@/components/ui/status-badge';
 import AppLayout from '@/layouts/app-layout';
-import { index as invoicesIndex } from '@/routes/invoices';
+import { index as invoicesIndex } from '@/routes/professional/invoices';
 import type { Payment } from '@/types';
 
 interface Stats {

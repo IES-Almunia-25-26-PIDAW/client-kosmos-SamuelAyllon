@@ -30,9 +30,9 @@ class ConversationAction extends Controller
             ->whereNull('read_at')
             ->update(['read_at' => now()]);
 
-        return Inertia::render('messages/conversation', [
+        return Inertia::render('professional/messages/conversation', [
             'recipient' => $user->only('id', 'name', 'avatar_path'),
-            'messages'  => $messages,
+            'messages' => $messages,
         ]);
     }
 }

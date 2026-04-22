@@ -41,8 +41,8 @@ class ShowRoomAction extends Controller
             'jitsiDomain' => 'meet.jit.si',
             'jitsiRoomName' => $appointment->meeting_room_id,
             'exitUrl' => $isPatient
-                ? route('portal.appointments.show', $appointment)
-                : route('appointments.show', $appointment),
+                ? route('patient.appointments.show', $appointment)
+                : route('professional.appointments.show', $appointment),
         ]);
     }
 

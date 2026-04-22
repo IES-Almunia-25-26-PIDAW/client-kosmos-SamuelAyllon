@@ -20,7 +20,7 @@ class IndexAction extends Controller
             ->limit(20)
             ->get();
 
-        return Inertia::render('kosmo/index', [
+        return Inertia::render('professional/kosmo/index', [
             'briefings' => $briefings,
         ]);
     }

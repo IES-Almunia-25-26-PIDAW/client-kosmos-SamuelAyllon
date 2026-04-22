@@ -3,16 +3,16 @@
 // ── Acceso por rol ────────────────────────────────────────────────────────────
 
 it('redirects guests from patients index to login', function () {
-    $this->get(route('patients.index'))->assertRedirect(route('login'));
+    $this->get(route('professional.patients.index'))->assertRedirect(route('login'));
 });
 
 it('professional can view patients index', function () {
     $user = createProfessional();
 
     $this->actingAs($user)
-        ->get(route('patients.index'))
+        ->get(route('professional.patients.index'))
         ->assertOk()
-        ->assertInertia(fn ($page) => $page->component('patients/index'));
+        ->assertInertia(fn ($page) => $page->component('professional/patients/index'));
 });
 
 it('patients index only shows patients belonging to authenticated user', function () {
@@ -24,9 +24,9 @@ it('patients index only shows patients belonging to authenticated user', functio
     createPatientProfileFor($other, ['is_active' => true]);
 
     $this->actingAs($user)
-        ->get(route('patients.index'))
+        ->get(route('professional.patients.index'))
         ->assertInertia(fn ($page) => $page
-            ->component('patients/index')
+            ->component('professional/patients/index')
             ->has('patients', 2)
         );
 });
@@ -35,16 +35,16 @@ it('patients index only shows patients belonging to authenticated user', functio
 
 it('professional can access create patient page', function () {
     $this->actingAs(createProfessional())
-        ->get(route('patients.create'))
+        ->get(route('professional.patients.create'))
         ->assertOk()
-        ->assertInertia(fn ($page) => $page->component('patients/create'));
+        ->assertInertia(fn ($page) => $page->component('professional/patients/create'));
 });
 
 it('professional can create a patient', function () {
     $user = createProfessional();
 
     $this->actingAs($user)
-        ->post(route('patients.store'), [
+        ->post(route('professional.patients.store'), [
             'project_name' => 'Ana García',
         ])
         ->assertRedirect();
@@ -59,7 +59,7 @@ it('professional can create a patient', function () {
 
 it('store patient requires project_name', function () {
     $this->actingAs(createProfessional())
-        ->post(route('patients.store'), [])
+        ->post(route('professional.patients.store'), [])
         ->assertSessionHasErrors('project_name');
 });
 
@@ -70,9 +70,9 @@ it('professional can view their own patient', function () {
     $patient = createPatientProfileFor($user);
 
     $this->actingAs($user)
-        ->get(route('patients.show', $patient))
+        ->get(route('professional.patients.show', $patient))
         ->assertOk()
-        ->assertInertia(fn ($page) => $page->component('patients/show'));
+        ->assertInertia(fn ($page) => $page->component('professional/patients/show'));
 });
 
 it('professional cannot view another users patient', function () {
@@ -81,7 +81,7 @@ it('professional cannot view another users patient', function () {
     $patient = createPatientProfileFor($other);
 
     $this->actingAs($user)
-        ->get(route('patients.show', $patient))
+        ->get(route('professional.patients.show', $patient))
         ->assertForbidden();
 });
 
@@ -92,9 +92,9 @@ it('professional can access edit patient page', function () {
     $patient = createPatientProfileFor($user);
 
     $this->actingAs($user)
-        ->get(route('patients.edit', $patient))
+        ->get(route('professional.patients.edit', $patient))
         ->assertOk()
-        ->assertInertia(fn ($page) => $page->component('patients/edit'));
+        ->assertInertia(fn ($page) => $page->component('professional/patients/edit'));
 });
 
 it('professional can update their own patient', function () {
@@ -102,10 +102,10 @@ it('professional can update their own patient', function () {
     $patient = createPatientProfileFor($user);
 
     $this->actingAs($user)
-        ->put(route('patients.update', $patient), [
+        ->put(route('professional.patients.update', $patient), [
             'project_name' => 'Nombre Actualizado',
         ])
-        ->assertRedirect(route('patients.show', $patient));
+        ->assertRedirect(route('professional.patients.show', $patient));
 
     $this->assertDatabaseHas('users', [
         'id' => $patient->user_id,
@@ -119,7 +119,7 @@ it('professional cannot update another users patient', function () {
     $patient = createPatientProfileFor($other);
 
     $this->actingAs($user)
-        ->put(route('patients.update', $patient), ['project_name' => 'Hack'])
+        ->put(route('professional.patients.update', $patient), ['project_name' => 'Hack'])
         ->assertForbidden();
 });
 
@@ -130,8 +130,8 @@ it('professional can delete their own patient', function () {
     $patient = createPatientProfileFor($user);
 
     $this->actingAs($user)
-        ->delete(route('patients.destroy', $patient))
-        ->assertRedirect(route('patients.index'));
+        ->delete(route('professional.patients.destroy', $patient))
+        ->assertRedirect(route('professional.patients.index'));
 
     $this->assertSoftDeleted('patient_profiles', ['id' => $patient->id]);
 });
@@ -142,7 +142,7 @@ it('professional cannot delete another users patient', function () {
     $patient = createPatientProfileFor($other);
 
     $this->actingAs($user)
-        ->delete(route('patients.destroy', $patient))
+        ->delete(route('professional.patients.destroy', $patient))
         ->assertForbidden();
 });
 
@@ -153,9 +153,9 @@ it('professional can access pre-session page for their patient', function () {
     $patient = createPatientProfileFor($user);
 
     $this->actingAs($user)
-        ->get(route('patients.pre-session', $patient))
+        ->get(route('professional.patients.pre-session', $patient))
         ->assertOk()
-        ->assertInertia(fn ($page) => $page->component('patients/pre-session'));
+        ->assertInertia(fn ($page) => $page->component('professional/patients/pre-session'));
 });
 
 it('professional can access post-session page for their patient', function () {
@@ -163,7 +163,7 @@ it('professional can access post-session page for their patient', function () {
     $patient = createPatientProfileFor($user);
 
     $this->actingAs($user)
-        ->get(route('patients.post-session', $patient))
+        ->get(route('professional.patients.post-session', $patient))
         ->assertOk()
-        ->assertInertia(fn ($page) => $page->component('patients/post-session'));
+        ->assertInertia(fn ($page) => $page->component('professional/patients/post-session'));
 });

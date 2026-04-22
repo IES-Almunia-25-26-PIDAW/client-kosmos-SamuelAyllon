@@ -132,7 +132,7 @@ class IndexAction extends Controller
             'collection_rate' => $this->getCollectionRate($user->id),
         ];
 
-        return Inertia::render('dashboard/professional', [
+        return Inertia::render('professional/dashboard', [
             'activePatients' => $activePatientProfiles,
             'todayAppointments' => $todaySessions,
             'pendingPayments' => $pendingPayments,
@@ -190,7 +190,7 @@ class IndexAction extends Controller
                 ->sum('total'),
         ];
 
-        return Inertia::render('dashboard/patient', [
+        return Inertia::render('patient/dashboard', [
             'upcomingAppointments' => $upcomingAppointments,
             'recentInvoices' => $recentInvoices,
             'stats' => $stats,

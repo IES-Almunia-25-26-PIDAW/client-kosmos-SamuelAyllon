@@ -18,7 +18,7 @@ class IndexAction extends Controller
             ->orderBy('start_time')
             ->get();
 
-        return Inertia::render('schedule/availability/index', [
+        return Inertia::render('professional/schedule/availability/index', [
             'availabilities' => $availabilities,
         ]);
     }

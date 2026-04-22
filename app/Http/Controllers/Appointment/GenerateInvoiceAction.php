@@ -44,7 +44,7 @@ class GenerateInvoiceAction extends Controller
             'appointment_id' => $appointment->id,
         ]);
 
-        return redirect()->route('invoices.show', $invoice)
+        return redirect()->route('professional.invoices.show', $invoice)
             ->with('success', 'Borrador de factura generado.');
     }
 }

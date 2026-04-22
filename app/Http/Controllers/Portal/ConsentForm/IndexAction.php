@@ -18,7 +18,7 @@ class IndexAction extends Controller
             ->orderByDesc('created_at')
             ->get();
 
-        return Inertia::render('portal/consent-forms/index', [
+        return Inertia::render('patient/consent-forms/index', [
             'consentForms' => $consentForms,
         ]);
     }

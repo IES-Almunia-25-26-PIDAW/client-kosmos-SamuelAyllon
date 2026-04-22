@@ -3,14 +3,14 @@
 use App\Models\KosmoBriefing;
 
 it('redirects guests from kosmo to login', function () {
-    $this->get(route('kosmo'))->assertRedirect(route('login'));
+    $this->get(route('professional.kosmo'))->assertRedirect(route('login'));
 });
 
 it('professional can view kosmo page', function () {
     $this->actingAs(createProfessional())
-        ->get(route('kosmo'))
+        ->get(route('professional.kosmo'))
         ->assertOk()
-        ->assertInertia(fn ($page) => $page->component('kosmo/index'));
+        ->assertInertia(fn ($page) => $page->component('professional/kosmo/index'));
 });
 
 it('kosmo page returns unread briefings', function () {
@@ -25,9 +25,9 @@ it('kosmo page returns unread briefings', function () {
     ]);
 
     $this->actingAs($user)
-        ->get(route('kosmo'))
+        ->get(route('professional.kosmo'))
         ->assertInertia(fn ($page) => $page
-            ->component('kosmo/index')
+            ->component('professional/kosmo/index')
             ->has('briefings', 1)
         );
 });
@@ -44,9 +44,9 @@ it('kosmo page does not return read briefings', function () {
     ]);
 
     $this->actingAs($user)
-        ->get(route('kosmo'))
+        ->get(route('professional.kosmo'))
         ->assertInertia(fn ($page) => $page
-            ->component('kosmo/index')
+            ->component('professional/kosmo/index')
             ->has('briefings', 0)
         );
 });
@@ -63,7 +63,7 @@ it('professional can mark a briefing as read', function () {
     ]);
 
     $this->actingAs($user)
-        ->post(route('kosmo.briefings.read', $briefing))
+        ->post(route('professional.kosmo.briefings.read', $briefing))
         ->assertRedirect();
 
     $this->assertDatabaseHas('kosmo_briefings', [
@@ -85,10 +85,10 @@ it('professional cannot mark another users briefing as read', function () {
     ]);
 
     $this->actingAs($user)
-        ->post(route('kosmo.briefings.read', $briefing))
+        ->post(route('professional.kosmo.briefings.read', $briefing))
         ->assertForbidden();
 });
 
 it('redirects guests from kosmo chat to login when not authenticated', function () {
-    $this->post(route('kosmo.chat'), ['message' => 'Hola'])->assertRedirect(route('login'));
+    $this->post(route('professional.kosmo.chat'), ['message' => 'Hola'])->assertRedirect(route('login'));
 });

@@ -17,7 +17,7 @@ class IndexAction extends Controller
             ->withPivot(['role', 'joined_at', 'is_active'])
             ->get();
 
-        return Inertia::render('workspace/team/index', [
+        return Inertia::render('professional/workspace/team/index', [
             'workspace' => $workspace,
             'members' => $members,
         ]);

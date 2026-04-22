@@ -58,7 +58,7 @@ class StoreAction extends Controller
             'started_at'      => now(),
         ]);
 
-        return redirect()->route('patients.show', $profile)
+        return redirect()->route('professional.patients.show', $profile)
             ->with('success', 'Paciente añadido correctamente.');
     }
 }

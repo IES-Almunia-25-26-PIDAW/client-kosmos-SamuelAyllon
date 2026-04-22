@@ -3,7 +3,7 @@
 use App\Models\Availability;
 
 it('guest cannot create availability slot', function () {
-    $this->post(route('schedule.availability.store'), [
+    $this->post(route('professional.schedule.availability.store'), [
         'date' => now()->toDateString(),
         'start_time' => '09:00',
         'end_time' => '10:00',
@@ -15,7 +15,7 @@ it('professional can create a one-time availability slot', function () {
     $date = now()->addDay()->toDateString();
 
     $this->actingAs($professional)
-        ->post(route('schedule.availability.store'), [
+        ->post(route('professional.schedule.availability.store'), [
             'date' => $date,
             'start_time' => '09:00',
             'end_time' => '10:00',
@@ -39,7 +39,7 @@ it('professional can create a recurring weekly availability slot', function () {
     $date = $tuesday->toDateString();
 
     $this->actingAs($professional)
-        ->post(route('schedule.availability.store'), [
+        ->post(route('professional.schedule.availability.store'), [
             'date' => $date,
             'start_time' => '10:00',
             'end_time' => '11:00',
@@ -59,7 +59,7 @@ it('validates required fields when creating slot', function () {
     $professional = createProfessional();
 
     $this->actingAs($professional)
-        ->post(route('schedule.availability.store'), [])
+        ->post(route('professional.schedule.availability.store'), [])
         ->assertSessionHasErrors(['date', 'start_time', 'end_time']);
 });
 
@@ -67,7 +67,7 @@ it('validates end_time must be after start_time', function () {
     $professional = createProfessional();
 
     $this->actingAs($professional)
-        ->post(route('schedule.availability.store'), [
+        ->post(route('professional.schedule.availability.store'), [
             'date' => now()->toDateString(),
             'start_time' => '10:00',
             'end_time' => '09:00',

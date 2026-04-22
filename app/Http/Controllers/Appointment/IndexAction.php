@@ -22,9 +22,9 @@ class IndexAction extends Controller
             ->paginate(20)
             ->withQueryString();
 
-        return Inertia::render('appointments/index', [
+        return Inertia::render('professional/appointments/index', [
             'appointments' => $appointments,
-            'filters'      => $request->only(['status', 'date']),
+            'filters' => $request->only(['status', 'date']),
         ]);
     }
 }

@@ -12,7 +12,7 @@ class StoreAction extends Controller
     {
         $request->user()->completeTutorial();
 
-        return redirect()->route('dashboard')
+        return redirect()->route('professional.dashboard')
             ->with('success', 'Todo listo. Kosmo te acompañará en cada sesión.');
     }
 }

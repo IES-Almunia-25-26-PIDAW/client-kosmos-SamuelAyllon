@@ -12,7 +12,7 @@ it('guest cannot delete an appointment', function () {
         'workspace_id' => null,
     ]);
 
-    $this->delete(route('appointments.destroy', $appointment))
+    $this->delete(route('professional.appointments.destroy', $appointment))
         ->assertRedirect(route('login'));
 });
 
@@ -27,7 +27,7 @@ it('professional can soft-delete their own appointment', function () {
     ]);
 
     $this->actingAs($professional)
-        ->delete(route('appointments.destroy', $appointment))
+        ->delete(route('professional.appointments.destroy', $appointment))
         ->assertRedirect();
 
     $this->assertSoftDeleted('appointments', ['id' => $appointment->id]);
@@ -48,10 +48,10 @@ it('deleted appointment no longer appears in schedule', function () {
     $appointment->delete();
 
     $this->actingAs($professional)
-        ->get(route('schedule.index'))
+        ->get(route('professional.schedule.index'))
         ->assertOk()
         ->assertInertia(fn ($page) => $page
-            ->component('schedule/index')
+            ->component('professional/schedule/index')
             ->has('appointments', 0)
         );
 });

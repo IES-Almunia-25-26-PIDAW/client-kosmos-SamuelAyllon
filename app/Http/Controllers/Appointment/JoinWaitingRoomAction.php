@@ -16,6 +16,6 @@ class JoinWaitingRoomAction extends Controller
             $appointment->update(['professional_joined_at' => now()]);
         }
 
-        return redirect()->route('appointments.waiting', $appointment);
+        return redirect()->route('professional.appointments.waiting', $appointment);
     }
 }

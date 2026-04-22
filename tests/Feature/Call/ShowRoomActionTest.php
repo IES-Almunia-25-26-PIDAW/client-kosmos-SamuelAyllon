@@ -129,7 +129,7 @@ it('el paciente que une la llamada recibe patient_joined_at y redirige a la sala
     $patient = \App\Models\User::find($appointment->patient_id);
 
     $this->actingAs($patient)
-        ->get(route('portal.appointments.join', $appointment))
+        ->get(route('patient.appointments.join', $appointment))
         ->assertRedirect(route('call.room', ['roomId' => $appointment->meeting_room_id]));
 
     expect($appointment->fresh()->patient_joined_at)->not->toBeNull();
@@ -144,7 +144,7 @@ it('el portal no sobreescribe patient_joined_at si ya existe', function () {
     $patient = \App\Models\User::find($appointment->patient_id);
 
     $this->actingAs($patient)
-        ->get(route('portal.appointments.join', $appointment));
+        ->get(route('patient.appointments.join', $appointment));
 
     expect($appointment->fresh()->patient_joined_at->timestamp)->toBe($original->timestamp);
 });
@@ -158,8 +158,8 @@ it('el portal redirige a la cita si la sala aún no fue iniciada', function () {
     $patient = \App\Models\User::find($appointment->patient_id);
 
     $this->actingAs($patient)
-        ->get(route('portal.appointments.join', $appointment))
-        ->assertRedirect(route('portal.appointments.show', $appointment));
+        ->get(route('patient.appointments.join', $appointment))
+        ->assertRedirect(route('patient.appointments.show', $appointment));
 });
 
 it('otro paciente no puede unirse a una cita ajena', function () {
@@ -167,6 +167,6 @@ it('otro paciente no puede unirse a una cita ajena', function () {
     $otherPatient = createPatient();
 
     $this->actingAs($otherPatient)
-        ->get(route('portal.appointments.join', $appointment))
+        ->get(route('patient.appointments.join', $appointment))
         ->assertForbidden();
 });

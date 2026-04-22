@@ -13,6 +13,6 @@ class CreateAction extends Controller
     {
         $this->authorize('create', PatientProfile::class);
 
-        return Inertia::render('patients/create');
+        return Inertia::render('professional/patients/create');
     }
 }

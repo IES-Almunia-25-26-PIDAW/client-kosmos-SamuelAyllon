@@ -6,7 +6,6 @@ import {
     FileText,
     Handshake,
     Home,
-    Library,
     MessageSquare,
     Receipt,
     Settings,
@@ -14,6 +13,18 @@ import {
     Users,
 } from 'lucide-react';
 import type { MouseEventHandler } from 'react';
+import { dashboard, kosmo, settings } from '@/routes/professional';
+import { index as messagesIndex } from '@/routes/professional/messages';
+import { index as patientsIndex } from '@/routes/professional/patients';
+import { dashboard as portalDashboard } from '@/routes/patient';
+import { index as portalAppointmentsIndex } from '@/routes/patient/appointments';
+import { index as portalConsentFormsIndex } from '@/routes/patient/consent-forms';
+import { index as portalInvoicesIndex } from '@/routes/patient/invoices';
+import { index as portalMessagesIndex } from '@/routes/patient/messages';
+import { index as portalProfessionalsIndex } from '@/routes/patient/professionals';
+import { index as invoicesIndex } from '@/routes/professional/invoices';
+import { index as scheduleIndex } from '@/routes/professional/schedule';
+import { index as teamIndex } from '@/routes/professional/workspace/team';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -32,7 +43,7 @@ import AppLogo from './app-logo';
 const footerNavItems: NavItem[] = [
     {
         title: 'Ajustes',
-        href: '/settings',
+        href: settings.url(),
         icon: Settings,
     },
 ];
@@ -40,37 +51,37 @@ const footerNavItems: NavItem[] = [
 const professionalNavItems: NavItem[] = [
     {
         title: 'Hoy',
-        href: '/dashboard',
+        href: dashboard.url(),
         icon: CalendarDays,
     },
     {
         title: 'Pacientes',
-        href: '/patients',
+        href: patientsIndex.url(),
         icon: Users,
     },
     {
         title: 'Cobros',
-        href: '/invoices',
+        href: invoicesIndex.url(),
         icon: CircleDollarSign,
     },
     {
-        title: 'Recursos',
-        href: '/resources',
-        icon: Library,
+        title: 'Mensajes',
+        href: messagesIndex.url(),
+        icon: MessageSquare,
     },
     {
         title: 'Calendario',
-        href: '/schedule',
+        href: scheduleIndex.url(),
         icon: CalendarRange,
     },
     {
         title: 'Kosmo',
-        href: '/kosmo',
+        href: kosmo.url(),
         icon: Sparkles,
     },
     {
         title: 'Equipo',
-        href: '/team',
+        href: teamIndex.url(),
         icon: Handshake,
     },
 ];
@@ -78,32 +89,32 @@ const professionalNavItems: NavItem[] = [
 const patientNavItems: NavItem[] = [
     {
         title: 'Inicio',
-        href: '/portal',
+        href: portalDashboard.url(),
         icon: Home,
     },
     {
         title: 'Citas',
-        href: '/portal/appointments',
+        href: portalAppointmentsIndex.url(),
         icon: CalendarDays,
     },
     {
         title: 'Mensajes',
-        href: '/portal/messages',
+        href: portalMessagesIndex.url(),
         icon: MessageSquare,
     },
     {
         title: 'Acuerdos',
-        href: '/portal/consent-forms',
+        href: portalConsentFormsIndex.url(),
         icon: FileText,
     },
     {
         title: 'Facturas',
-        href: '/portal/invoices',
+        href: portalInvoicesIndex.url(),
         icon: Receipt,
     },
     {
         title: 'Profesionales',
-        href: '#',
+        href: portalProfessionalsIndex.url(),
         icon: Users,
     },
 ];
@@ -127,7 +138,7 @@ export function AppSidebar({ onMouseEnter, onMouseLeave }: AppSidebarProps = {})
     const isAdmin = role === 'admin';
     const isPatient = role === 'patient';
 
-    const homeHref = isAdmin ? '/admin/users' : isPatient ? '/portal' : '/dashboard';
+    const homeHref = isAdmin ? '/admin/users' : isPatient ? portalDashboard.url() : dashboard.url();
 
     return (
         <Sidebar collapsible="icon" variant="inset" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>

@@ -18,7 +18,7 @@ class IndexAction extends Controller
             ->orderByDesc('created_at')
             ->get(['id', 'name', 'category', 'mime_type', 'file_size', 'created_at']);
 
-        return Inertia::render('portal/documents/index', [
+        return Inertia::render('patient/documents/index', [
             'documents' => $documents,
         ]);
     }

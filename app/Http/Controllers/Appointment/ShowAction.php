@@ -27,7 +27,7 @@ class ShowAction extends Controller
             ->latest('created_at')
             ->first();
 
-        return Inertia::render('appointments/show', [
+        return Inertia::render('professional/appointments/show', [
             'appointment' => $appointment,
             'lastClinicalNote' => $lastClinicalNote,
         ]);

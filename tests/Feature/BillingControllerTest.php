@@ -4,22 +4,22 @@ use App\Models\Invoice;
 use App\Models\User;
 
 it('redirects guests from invoices index to login', function () {
-    $this->get(route('invoices.index'))->assertRedirect(route('login'));
+    $this->get(route('professional.invoices.index'))->assertRedirect(route('login'));
 });
 
 it('professional can view invoices page', function () {
     $this->actingAs(createProfessional())
-        ->get(route('invoices.index'))
+        ->get(route('professional.invoices.index'))
         ->assertOk()
-        ->assertInertia(fn ($page) => $page->component('invoices/index', false));
+        ->assertInertia(fn ($page) => $page->component('professional/invoices/index', false));
 });
 
 it('invoices page returns invoices, stats and filters', function () {
     $this->actingAs(createProfessional())
-        ->get(route('invoices.index'))
+        ->get(route('professional.invoices.index'))
         ->assertInertia(fn ($page) => $page
-            ->component('invoices/index', false)
-            ->has('invoices')
+            ->component('professional/invoices/index', false)
+            ->has('payments')
             ->has('stats')
             ->has('filters')
         );
@@ -27,7 +27,7 @@ it('invoices page returns invoices, stats and filters', function () {
 
 it('invoice stats include total_paid, total_pending and total_overdue', function () {
     $this->actingAs(createProfessional())
-        ->get(route('invoices.index'))
+        ->get(route('professional.invoices.index'))
         ->assertInertia(fn ($page) => $page
             ->has('stats.total_paid')
             ->has('stats.total_pending')
@@ -52,10 +52,10 @@ it('invoices index only shows invoices belonging to authenticated professional',
     ]);
 
     $this->actingAs($user)
-        ->get(route('invoices.index'))
+        ->get(route('professional.invoices.index'))
         ->assertInertia(fn ($page) => $page
-            ->component('invoices/index', false)
-            ->has('invoices.data', 3)
+            ->component('professional/invoices/index', false)
+            ->has('payments.data', 3)
         );
 });
 
@@ -67,9 +67,9 @@ it('invoices index can be filtered by invoice status', function () {
     Invoice::factory()->create(['professional_id' => $user->id, 'patient_id' => $patientUser->id, 'status' => 'draft']);
 
     $this->actingAs($user)
-        ->get(route('invoices.index', ['status' => 'paid']))
+        ->get(route('professional.invoices.index', ['status' => 'paid']))
         ->assertInertia(fn ($page) => $page
-            ->component('invoices/index', false)
-            ->has('invoices.data', 1)
+            ->component('professional/invoices/index', false)
+            ->has('payments.data', 1)
         );
 });

@@ -13,7 +13,7 @@ class EditAction extends Controller
     {
         $this->authorize('update', $patient);
 
-        return Inertia::render('patients/edit', [
+        return Inertia::render('professional/patients/edit', [
             'patient' => $patient,
         ]);
     }

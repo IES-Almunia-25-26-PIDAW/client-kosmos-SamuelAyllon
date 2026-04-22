@@ -18,7 +18,7 @@ class IndexAction extends Controller
             ->paginate(15)
             ->withQueryString();
 
-        return Inertia::render('portal/appointments/index', [
+        return Inertia::render('patient/appointments/index', [
             'appointments' => $appointments,
         ]);
     }

@@ -16,14 +16,14 @@ class IndexAction extends Controller
 
         $messages = Message::where(function ($q) use ($user) {
             $q->where('receiver_id', $user->id)
-              ->orWhere('sender_id', $user->id);
+                ->orWhere('sender_id', $user->id);
         })
             ->with('sender:id,name,avatar_path')
             ->orderByDesc('created_at')
             ->paginate(20)
             ->withQueryString();
 
-        return Inertia::render('portal/messages/index', [
+        return Inertia::render('patient/messages/index', [
             'messages' => $messages,
         ]);
     }

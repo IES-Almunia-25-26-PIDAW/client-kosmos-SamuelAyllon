@@ -31,7 +31,7 @@ class UpdateAction extends Controller
             $patient->update(['clinical_notes' => $clinicalLines]);
         }
 
-        return redirect()->route('patients.show', $patient)
+        return redirect()->route('professional.patients.show', $patient)
             ->with('success', 'Paciente actualizado correctamente.');
     }
 }

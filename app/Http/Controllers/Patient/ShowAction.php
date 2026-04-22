@@ -61,7 +61,7 @@ class ShowAction extends Controller
             'updated_at' => $i->updated_at?->toIso8601String(),
         ]);
 
-        return Inertia::render('patients/show', [
+        return Inertia::render('professional/patients/show', [
             'patient' => array_merge($patient->toArray(), [
                 'sessions' => $sessions,
                 'payments' => $payments,

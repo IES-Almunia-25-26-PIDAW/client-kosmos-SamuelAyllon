@@ -27,7 +27,7 @@ class CancelAction extends Controller
             'cancellation_reason' => $request->cancellation_reason,
         ]);
 
-        return redirect()->route('portal.appointments.index')
+        return redirect()->route('patient.appointments.index')
             ->with('success', 'Cita cancelada.');
     }
 }

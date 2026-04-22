@@ -62,7 +62,7 @@ class IndexAction extends Controller
             ] : null,
         ]);
 
-        return Inertia::render('invoices/index', [
+        return Inertia::render('professional/invoices/index', [
             'payments' => $payments,
             'stats' => $stats,
             'filters' => $request->only(['status', 'patient_id']),

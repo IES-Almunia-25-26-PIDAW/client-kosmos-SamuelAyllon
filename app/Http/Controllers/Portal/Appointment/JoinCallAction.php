@@ -21,7 +21,7 @@ class JoinCallAction extends Controller
 
         if (! $appointment->meeting_room_id) {
             return redirect()
-                ->route('portal.appointments.show', $appointment)
+                ->route('patient.appointments.show', $appointment)
                 ->withErrors(['meeting' => 'La sala aún no ha sido iniciada por el profesional.']);
         }
 
