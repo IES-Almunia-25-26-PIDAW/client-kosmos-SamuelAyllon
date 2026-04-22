@@ -2,10 +2,10 @@ import { Badge, Box, Flex, Grid, Heading, Stack, Text, chakra } from '@chakra-ui
 import { Head, Link } from '@inertiajs/react';
 import { Bell, CalendarDays, FileText, Video } from 'lucide-react';
 import type { ReactNode } from 'react';
-import AppointmentIndexAction from '@/actions/App/Http/Controllers/Appointment/IndexAction';
-import AppointmentShowAction from '@/actions/App/Http/Controllers/Appointment/ShowAction';
-import InvoiceIndexAction from '@/actions/App/Http/Controllers/Invoice/IndexAction';
-import InvoiceShowAction from '@/actions/App/Http/Controllers/Invoice/ShowAction';
+import AppointmentIndexAction from '@/actions/App/Http/Controllers/Portal/Appointment/IndexAction';
+import AppointmentShowAction from '@/actions/App/Http/Controllers/Portal/Appointment/ShowAction';
+import InvoiceIndexAction from '@/actions/App/Http/Controllers/Portal/Invoice/IndexAction';
+import InvoiceShowAction from '@/actions/App/Http/Controllers/Portal/Invoice/ShowAction';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 
@@ -20,7 +20,6 @@ interface UpcomingAppointment {
     professional: {
         id: number;
         name: string;
-        specialty: string | null;
         avatar_path: string | null;
     };
     service_name: string | null;
@@ -42,17 +41,10 @@ interface Agreement {
     progress: number;
 }
 
-interface PatientStats {
-    upcoming_appointments: number;
-    completed_sessions: number;
-    pending_invoices: number;
-}
-
 interface Props {
     upcomingAppointments: UpcomingAppointment[];
     recentInvoices: RecentInvoice[];
     agreements?: Agreement[];
-    stats: PatientStats;
 }
 
 const formatDateTime = (dt: string): string => {
@@ -79,11 +71,7 @@ const getDueDays = (dueAt: string | null): number | null => {
 const formatInvoiceNumber = (id: number): string =>
     `#INV-${new Date().getFullYear()}-${String(id).padStart(3, '0')}`;
 
-export default function PatientDashboard({
-    upcomingAppointments,
-    recentInvoices,
-    agreements = [],
-}: Props) {
+export default function PatientDashboard({ upcomingAppointments, recentInvoices, agreements = [] }: Props) {
     const nextAppointment = upcomingAppointments[0] ?? null;
 
     return (

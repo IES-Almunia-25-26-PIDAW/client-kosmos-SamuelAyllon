@@ -19,12 +19,24 @@ class IndexAction extends Controller
         $upcomingAppointments = Appointment::where('patient_id', $user->id)
             ->whereIn('status', ['pending', 'confirmed'])
             ->where('starts_at', '>=', now())
-            ->with(['professional:id,name', 'service:id,name'])
+            ->with(['professional:id,name,avatar_path', 'service:id,name'])
             ->orderBy('starts_at')
             ->limit(5)
-            ->get();
+            ->get()
+            ->map(fn ($appointment) => [
+                'id' => $appointment->id,
+                'scheduled_at' => $appointment->starts_at,
+                'modality' => $appointment->modality,
+                'status' => $appointment->status,
+                'service_name' => $appointment->service?->name,
+                'professional' => [
+                    'id' => $appointment->professional->id,
+                    'name' => $appointment->professional->name,
+                    'avatar_path' => $appointment->professional->avatar_path,
+                ],
+            ]);
 
-        $pendingInvoices = Invoice::where('patient_id', $user->id)
+        $recentInvoices = Invoice::where('patient_id', $user->id)
             ->whereIn('status', ['sent', 'overdue'])
             ->orderBy('due_at')
             ->limit(5)
@@ -36,7 +48,7 @@ class IndexAction extends Controller
 
         return Inertia::render('patient/dashboard', [
             'upcomingAppointments' => $upcomingAppointments,
-            'pendingInvoices' => $pendingInvoices,
+            'recentInvoices' => $recentInvoices,
             'unreadMessages' => $unreadMessages,
         ]);
     }
