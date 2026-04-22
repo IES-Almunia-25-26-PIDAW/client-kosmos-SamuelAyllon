@@ -135,6 +135,8 @@ function Sidebar({
     variant = 'sidebar',
     collapsible = 'offcanvas',
     children,
+    onMouseEnter,
+    onMouseLeave,
     ...props
 }: React.ComponentProps<'div'> & {
     side?: 'left' | 'right';
@@ -238,6 +240,8 @@ function Sidebar({
                 display={{ base: 'none', md: 'flex' }}
                 h="100svh"
                 w="var(--sidebar-width)"
+                onMouseEnter={onMouseEnter}
+                onMouseLeave={onMouseLeave}
                 css={{
                     transition: 'left right width 200ms linear',
                     ...(side === 'left'

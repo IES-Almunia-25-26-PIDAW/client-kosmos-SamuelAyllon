@@ -3,12 +3,17 @@ import {
     CalendarDays,
     CalendarRange,
     CircleDollarSign,
+    FileText,
     Handshake,
+    Home,
     Library,
-    Sparkles,
+    MessageSquare,
+    Receipt,
     Settings,
+    Sparkles,
     Users,
 } from 'lucide-react';
+import type { MouseEventHandler } from 'react';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -70,6 +75,39 @@ const professionalNavItems: NavItem[] = [
     },
 ];
 
+const patientNavItems: NavItem[] = [
+    {
+        title: 'Inicio',
+        href: '/portal',
+        icon: Home,
+    },
+    {
+        title: 'Citas',
+        href: '/portal/appointments',
+        icon: CalendarDays,
+    },
+    {
+        title: 'Mensajes',
+        href: '/portal/messages',
+        icon: MessageSquare,
+    },
+    {
+        title: 'Acuerdos',
+        href: '/portal/consent-forms',
+        icon: FileText,
+    },
+    {
+        title: 'Facturas',
+        href: '/portal/invoices',
+        icon: Receipt,
+    },
+    {
+        title: 'Profesionales',
+        href: '#',
+        icon: Users,
+    },
+];
+
 const adminNavItems: NavItem[] = [
     {
         title: 'Usuarios',
@@ -78,17 +116,26 @@ const adminNavItems: NavItem[] = [
     },
 ];
 
-export function AppSidebar() {
+type AppSidebarProps = {
+    onMouseEnter?: MouseEventHandler<HTMLDivElement>;
+    onMouseLeave?: MouseEventHandler<HTMLDivElement>;
+};
+
+export function AppSidebar({ onMouseEnter, onMouseLeave }: AppSidebarProps = {}) {
     const { auth } = usePage<{ auth: Auth }>().props;
-    const isAdmin = auth?.user?.role === 'admin';
+    const role = auth?.user?.role;
+    const isAdmin = role === 'admin';
+    const isPatient = role === 'patient';
+
+    const homeHref = isAdmin ? '/admin/users' : isPatient ? '/portal' : '/dashboard';
 
     return (
-        <Sidebar collapsible="icon" variant="inset">
+        <Sidebar collapsible="icon" variant="inset" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
             <SidebarHeader>
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild h="24 !important">
-                            <Link href={isAdmin ? '/admin/users' : '/dashboard'} prefetch>
+                            <Link href={homeHref} prefetch>
                                 <AppLogo />
                             </Link>
                         </SidebarMenuButton>
@@ -97,14 +144,13 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                {isAdmin
-                    ? <NavMain items={adminNavItems} label="Administración" />
-                    : <NavMain items={professionalNavItems} label="General" />
-                }
+                {isAdmin && <NavMain items={adminNavItems} label="Administración" />}
+                {isPatient && <NavMain items={patientNavItems} label="Mi portal" />}
+                {!isAdmin && !isPatient && <NavMain items={professionalNavItems} label="General" />}
             </SidebarContent>
 
             <SidebarFooter>
-                {!isAdmin && <NavFooter items={footerNavItems} mt="auto" />}
+                {!isAdmin && !isPatient && <NavFooter items={footerNavItems} mt="auto" />}
                 <NavUser />
             </SidebarFooter>
         </Sidebar>

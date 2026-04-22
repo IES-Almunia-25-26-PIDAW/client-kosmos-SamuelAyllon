@@ -1,11 +1,13 @@
-import { Badge, Box, Flex, Grid, Heading, Stack, Text, chakra } from '@chakra-ui/react';
-import { Head, Link, usePage } from '@inertiajs/react';
-import { ArrowRight, CalendarDays, CheckCircle, Receipt } from 'lucide-react';
+import { Box, Flex, Grid, Heading, Image, Stack, Text, chakra } from '@chakra-ui/react';
+import { Head, Link } from '@inertiajs/react';
+import { Bell, CalendarDays, Receipt, Video } from 'lucide-react';
 import type { ReactNode } from 'react';
+import AppointmentIndexAction from '@/actions/App/Http/Controllers/Appointment/IndexAction';
 import AppointmentShowAction from '@/actions/App/Http/Controllers/Appointment/ShowAction';
+import InvoiceIndexAction from '@/actions/App/Http/Controllers/Invoice/IndexAction';
+import InvoiceShowAction from '@/actions/App/Http/Controllers/Invoice/ShowAction';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
-import type { Auth } from '@/types';
 
 const ChakraLink = chakra(Link);
 
@@ -43,24 +45,8 @@ interface Props {
     stats: PatientStats;
 }
 
-const greeting = (): string => {
-    const hour = new Date().getHours();
-    if (hour < 12) return 'Buenos días';
-    if (hour < 20) return 'Buenas tardes';
-    return 'Buenas noches';
-};
-
-const formatDate = (): string =>
-    new Intl.DateTimeFormat('es-ES', {
-        weekday: 'long',
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-    }).format(new Date());
-
 const formatDateTime = (dt: string): string =>
     new Intl.DateTimeFormat('es-ES', {
-        weekday: 'short',
         day: 'numeric',
         month: 'short',
         hour: '2-digit',
@@ -80,22 +66,6 @@ const getModalityLabel = (modality: string): string => {
 const isOnlineModality = (modality: string): boolean =>
     ['video_call', 'online', 'telefono'].includes(modality?.toLowerCase());
 
-const invoiceStatusLabel: Record<string, string> = {
-    draft: 'Borrador',
-    sent: 'Pendiente',
-    paid: 'Pagada',
-    overdue: 'Vencida',
-    cancelled: 'Cancelada',
-};
-
-const invoiceStatusColorPalette: Record<string, string> = {
-    paid: 'green',
-    overdue: 'red',
-    sent: 'orange',
-    draft: 'gray',
-    cancelled: 'gray',
-};
-
 const getInitials = (name: string): string =>
     name
         .split(' ')
@@ -104,343 +74,400 @@ const getInitials = (name: string): string =>
         .join('')
         .toUpperCase();
 
-export default function PatientDashboard({ upcomingAppointments, recentInvoices, stats }: Props) {
-    const { auth } = usePage<{ auth: Auth }>().props;
+const formatInvoiceNumber = (id: number): string =>
+    `#INV-${new Date().getFullYear()}-${String(id).padStart(3, '0')}`;
+
+const getDueDays = (dueAt: string | null): number | null => {
+    if (!dueAt) return null;
+    const due = new Date(dueAt);
+    const now = new Date();
+    return Math.ceil((due.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+};
+
+const appointmentStatusLabel: Record<string, string> = {
+    confirmed: 'Confirmada',
+    pending: 'Pendiente',
+    scheduled: 'Programada',
+    cancelled: 'Cancelada',
+};
+
+export default function PatientDashboard({ upcomingAppointments, recentInvoices }: Props) {
     const nextAppointment = upcomingAppointments[0] ?? null;
+    const otherAppointments = upcomingAppointments.slice(1);
 
     return (
         <>
             <Head title="Inicio — ClientKosmos" />
 
-            <Stack gap="6" p={{ base: '6', lg: '8' }}>
+            <Stack gap="16" px="8" pt="14" pb="8">
 
-                <Box>
-                    <Heading as="h1" fontSize="3xl" fontWeight="bold" color="fg">
-                        {greeting()}, {auth.user.name.split(' ')[0]}
-                    </Heading>
-                    <Text mt="0.5" fontSize="md" color="fg.muted" textTransform="capitalize">
-                        {formatDate()}
-                    </Text>
-                </Box>
+                {/* ── Header section ── */}
+                <Stack gap="13">
 
-                <Grid templateColumns={{ base: '1fr', sm: 'repeat(3, 1fr)' }} gap="4">
-                    <Flex
-                        borderRadius="lg"
-                        bg="brand.solid"
-                        p="5"
-                        alignItems="center"
-                        justifyContent="space-between"
-                        boxShadow="sm"
-                    >
-                        <Box>
-                            <Text fontSize="xs" fontWeight="semibold" textTransform="uppercase" letterSpacing="wider" color="white/70">
-                                Próximas citas
-                            </Text>
-                            <Text fontSize="3xl" fontWeight="bold" color="white" mt="1" lineHeight="none">
-                                {stats.upcoming_appointments.toString().padStart(2, '0')}
-                            </Text>
+                    {/* Title row */}
+                    <Flex alignItems="center" justifyContent="space-between">
+                        <Heading
+                            as="h1"
+                            fontSize="4xl"
+                            fontWeight="bold"
+                            color="fg"
+                            letterSpacing="-0.48px"
+                        >
+                            Tu próxima cita
+                        </Heading>
+                        <Box
+                            as="button"
+                            bg="white"
+                            borderWidth="1px"
+                            borderColor="border"
+                            p="3"
+                            borderRadius="lg"
+                            cursor="pointer"
+                            _hover={{ bg: 'bg.subtle' }}
+                            transition="background 0.2s"
+                        >
+                            <Box as={Bell} w="5" h="5" color="fg.muted" />
                         </Box>
-                        <Flex borderRadius="md" bg="white/15" p="2.5">
-                            <Box as={CalendarDays} w="22px" h="22px" color="white" />
-                        </Flex>
                     </Flex>
 
-                    <Flex
-                        borderRadius="lg"
-                        borderWidth="1px"
-                        borderColor="border"
-                        bg="bg.surface"
-                        p="5"
-                        alignItems="center"
-                        justifyContent="space-between"
-                        boxShadow="sm"
-                    >
-                        <Box>
-                            <Text fontSize="xs" fontWeight="semibold" textTransform="uppercase" letterSpacing="wider" color="fg.muted">
-                                Sesiones completadas
-                            </Text>
-                            <Text fontSize="3xl" fontWeight="bold" color="fg" mt="1" lineHeight="none">
-                                {stats.completed_sessions.toString().padStart(2, '0')}
-                            </Text>
+                    {/* Hero card: next session */}
+                    {nextAppointment ? (
+                        <Box
+                            bg="white"
+                            borderRadius="xl"
+                            boxShadow="0px 2px 23.5px 5px rgba(12,29,42,0.19)"
+                            p="8"
+                            position="relative"
+                            overflow="hidden"
+                            minH="297px"
+                            display="flex"
+                            alignItems="center"
+                            maxW="821px"
+                        >
+                            {/* Left content */}
+                            <Stack gap="6" position="relative" zIndex={1} maxW="55%">
+                                {/* Badge */}
+                                <Box
+                                    display="inline-flex"
+                                    bg="#93f0e0"
+                                    px="3"
+                                    py="1"
+                                    borderRadius="full"
+                                    alignSelf="flex-start"
+                                >
+                                    <Text
+                                        fontSize="10px"
+                                        fontWeight="bold"
+                                        color="#006f63"
+                                        textTransform="uppercase"
+                                        letterSpacing="1px"
+                                    >
+                                        Tu próxima sesión
+                                    </Text>
+                                </Box>
+
+                                {/* Doctor info */}
+                                <Stack gap="1">
+                                    <Heading fontSize="3xl" fontWeight="bold" color="fg">
+                                        {nextAppointment.professional.name}
+                                    </Heading>
+                                    <Flex alignItems="center" gap="2">
+                                        <Box as={CalendarDays} w="3.5" h="3.5" color="fg.muted" flexShrink={0} />
+                                        <Text fontSize="md" color="fg.muted">
+                                            {formatDateTime(nextAppointment.scheduled_at)}
+                                        </Text>
+                                    </Flex>
+                                </Stack>
+
+                                {/* CTA button */}
+                                <Button asChild variant="primary" size="lg" alignSelf="flex-start">
+                                    <ChakraLink href={AppointmentShowAction.url(nextAppointment.id)}>
+                                        <Box as={Video} w="4" h="3" mr="1.5" />
+                                        {isOnlineModality(nextAppointment.modality) ? 'Join Session' : 'Ver cita'}
+                                    </ChakraLink>
+                                </Button>
+                            </Stack>
+
+                            {/* Right: doctor avatar / photo */}
+                            <Box
+                                position="absolute"
+                                top="0"
+                                left="50%"
+                                right="0"
+                                bottom="0"
+                                display="flex"
+                                alignItems="center"
+                                justifyContent="center"
+                                overflow="hidden"
+                            >
+                                {nextAppointment.professional.avatar_path ? (
+                                    <Image
+                                        src={nextAppointment.professional.avatar_path}
+                                        alt={nextAppointment.professional.name}
+                                        fit="cover"
+                                        w="full"
+                                        h="121%"
+                                        mt="-10%"
+                                    />
+                                ) : (
+                                    <Flex
+                                        w="36"
+                                        h="36"
+                                        borderRadius="full"
+                                        bg="brand.subtle"
+                                        alignItems="center"
+                                        justifyContent="center"
+                                        fontSize="4xl"
+                                        fontWeight="bold"
+                                        color="brand.solid"
+                                        flexShrink={0}
+                                    >
+                                        {getInitials(nextAppointment.professional.name)}
+                                    </Flex>
+                                )}
+                                {/* Left-to-right gradient overlay */}
+                                <Box
+                                    position="absolute"
+                                    inset="0"
+                                    style={{
+                                        background: 'linear-gradient(to right, white 0%, white 15%, transparent 55%)',
+                                    }}
+                                />
+                            </Box>
                         </Box>
-                        <Flex borderRadius="md" bg="bg.subtle" p="2.5">
-                            <Box as={CheckCircle} w="22px" h="22px" color="fg.muted" />
-                        </Flex>
-                    </Flex>
-
-                    <Flex
-                        borderRadius="lg"
-                        borderWidth="1px"
-                        borderColor="border"
-                        bg="bg.surface"
-                        p="5"
-                        alignItems="center"
-                        justifyContent="space-between"
-                        boxShadow="sm"
-                    >
-                        <Box>
-                            <Text fontSize="xs" fontWeight="semibold" textTransform="uppercase" letterSpacing="wider" color="fg.muted">
-                                Facturas pendientes
-                            </Text>
-                            <Text fontSize="3xl" fontWeight="bold" color="fg" mt="1" lineHeight="none">
-                                {Number(stats.pending_invoices).toLocaleString('es-ES', {
-                                    minimumFractionDigits: 2,
-                                    maximumFractionDigits: 2,
-                                })} €
-                            </Text>
+                    ) : (
+                        <Box
+                            bg="white"
+                            borderRadius="xl"
+                            p="10"
+                            textAlign="center"
+                            borderWidth="1px"
+                            borderColor="border"
+                            maxW="821px"
+                        >
+                            <Box as={CalendarDays} w="10" h="10" mx="auto" mb="3" color="fg.subtle" />
+                            <Text color="fg.muted">No tienes citas próximas programadas.</Text>
                         </Box>
-                        <Flex borderRadius="md" bg="bg.subtle" p="2.5">
-                            <Box as={Receipt} w="22px" h="22px" color="fg.muted" />
-                        </Flex>
-                    </Flex>
-                </Grid>
+                    )}
+                </Stack>
 
-                <Grid templateColumns={{ base: '1fr', lg: 'repeat(3, 1fr)' }} gap="6">
-
-                    <Box gridColumn={{ lg: 'span 2' }}>
-                        <Flex alignItems="center" justifyContent="space-between" mb="4">
-                            <Heading as="h2" fontSize="xl" fontWeight="semibold" color="fg">
+                {/* ── Bottom two-column sections ── */}
+                <Grid
+                    templateColumns={{ base: '1fr', lg: '5fr 6fr' }}
+                    gap={{ base: '10', lg: '12' }}
+                >
+                    {/* Left: Próximas citas */}
+                    <Stack gap="6">
+                        <Flex alignItems="center" justifyContent="space-between">
+                            <Heading
+                                fontSize="2xl"
+                                fontWeight="bold"
+                                color="fg"
+                                letterSpacing="-0.48px"
+                            >
                                 Próximas citas
                             </Heading>
                             <ChakraLink
-                                href="/appointments"
+                                href={AppointmentIndexAction.url()}
                                 fontSize="sm"
-                                fontWeight="medium"
+                                fontWeight="bold"
                                 color="brand.solid"
                                 _hover={{ textDecoration: 'underline' }}
-                                display="flex"
-                                alignItems="center"
-                                gap="1"
                             >
-                                Ver todas <Box as={ArrowRight} w="3.5" h="3.5" />
+                                Ver todos
                             </ChakraLink>
                         </Flex>
 
-                        {upcomingAppointments.length === 0 ? (
-                            <Box
-                                borderRadius="lg"
-                                borderWidth="1px"
-                                borderColor="border"
-                                bg="bg.surface"
-                                p="10"
-                                textAlign="center"
+                        <Stack gap="4">
+                            {otherAppointments.length === 0 ? (
+                                <Box
+                                    bg="bg.surface"
+                                    borderRadius="xl"
+                                    p="6"
+                                    textAlign="center"
+                                    boxShadow="sm"
+                                >
+                                    <Box as={CalendarDays} w="7" h="7" mx="auto" mb="2" color="fg.subtle" />
+                                    <Text fontSize="sm" color="fg.muted">
+                                        Sin más citas próximas.
+                                    </Text>
+                                </Box>
+                            ) : (
+                                otherAppointments.map((apt) => (
+                                    <Box
+                                        key={apt.id}
+                                        bg="bg.surface"
+                                        borderRadius="xl"
+                                        p="6"
+                                        boxShadow="sm"
+                                    >
+                                        <Flex alignItems="flex-start" justifyContent="space-between">
+                                            <Stack gap="1">
+                                                <Heading
+                                                    fontSize="md"
+                                                    fontWeight="bold"
+                                                    color="fg"
+                                                    letterSpacing="-0.36px"
+                                                    lineHeight="short"
+                                                >
+                                                    {apt.professional.name}
+                                                </Heading>
+                                                <Text fontSize="sm" color="fg.muted">
+                                                    {getModalityLabel(apt.modality)}
+                                                </Text>
+                                            </Stack>
+                                            <Box
+                                                bg="brand.subtle"
+                                                color="brand.solid"
+                                                borderRadius="md"
+                                                px="2.5"
+                                                py="1"
+                                                fontSize="2xs"
+                                                fontWeight="bold"
+                                                textTransform="uppercase"
+                                                letterSpacing="wider"
+                                                flexShrink={0}
+                                            >
+                                                {appointmentStatusLabel[apt.status] ?? apt.status}
+                                            </Box>
+                                        </Flex>
+                                        <Text fontSize="xs" color="fg.muted" mt="3">
+                                            {formatDateTime(apt.scheduled_at)}
+                                        </Text>
+                                    </Box>
+                                ))
+                            )}
+                        </Stack>
+                    </Stack>
+
+                    {/* Right: Facturas pendientes */}
+                    <Stack gap="6">
+                        <Flex alignItems="center" justifyContent="space-between">
+                            <Heading
+                                fontSize="2xl"
+                                fontWeight="bold"
+                                color="fg"
+                                letterSpacing="-0.48px"
                             >
-                                <Box as={CalendarDays} w="8" h="8" mx="auto" mb="3" color="fg.subtle" />
-                                <Text fontSize="sm" color="fg.muted">
-                                    No tienes citas próximas programadas.
-                                </Text>
-                            </Box>
-                        ) : (
-                            <Stack gap="3">
-                                {upcomingAppointments.map((appointment, index) => {
-                                    const isNext = index === 0;
-                                    const isOnline = isOnlineModality(appointment.modality);
+                                Facturas pendientes
+                            </Heading>
+                            <ChakraLink
+                                href={InvoiceIndexAction.url()}
+                                fontSize="sm"
+                                fontWeight="bold"
+                                color="brand.solid"
+                                _hover={{ textDecoration: 'underline' }}
+                            >
+                                Ver todos
+                            </ChakraLink>
+                        </Flex>
+
+                        <Stack gap="4">
+                            {recentInvoices.length === 0 ? (
+                                <Box
+                                    bg="bg.surface"
+                                    borderRadius="xl"
+                                    p="6"
+                                    textAlign="center"
+                                    boxShadow="sm"
+                                >
+                                    <Box as={Receipt} w="7" h="7" mx="auto" mb="2" color="fg.subtle" />
+                                    <Text fontSize="sm" color="fg.muted">
+                                        No hay facturas pendientes.
+                                    </Text>
+                                </Box>
+                            ) : (
+                                recentInvoices.map((invoice) => {
+                                    const dueDays = getDueDays(invoice.due_at);
+                                    const isUrgent =
+                                        invoice.status === 'overdue' ||
+                                        (dueDays !== null && dueDays <= 3 && dueDays >= 0);
 
                                     return (
                                         <Flex
-                                            key={appointment.id}
+                                            key={invoice.id}
+                                            bg={isUrgent ? '#ffecec' : 'bg.surface'}
+                                            borderRadius="xl"
+                                            p="6"
                                             alignItems="center"
-                                            gap="4"
-                                            borderRadius="lg"
-                                            borderWidth="1px"
-                                            borderColor={isNext ? 'brand.solid' : 'border'}
-                                            bg="bg.surface"
-                                            p="4"
-                                            boxShadow={isNext ? 'sm' : undefined}
-                                            _hover={isNext ? undefined : { boxShadow: 'sm' }}
-                                            transition="box-shadow 0.2s"
+                                            justifyContent="space-between"
+                                            boxShadow="sm"
                                         >
-                                            <Flex
-                                                w="10"
-                                                h="10"
-                                                borderRadius="full"
-                                                bg="brand.subtle"
-                                                alignItems="center"
-                                                justifyContent="center"
-                                                flexShrink={0}
-                                                fontSize="sm"
-                                                fontWeight="semibold"
-                                                color="brand.solid"
-                                            >
-                                                {getInitials(appointment.professional.name)}
-                                            </Flex>
-
-                                            <Box flex="1" minW={0}>
-                                                <Text fontSize="sm" fontWeight="semibold" color="fg" truncate>
-                                                    {appointment.professional.name}
-                                                </Text>
-                                                <Text fontSize="xs" color="fg.muted" mt="0.5">
-                                                    {appointment.professional.specialty
-                                                        ? `${appointment.professional.specialty} • `
-                                                        : ''}
-                                                    {formatDateTime(appointment.scheduled_at)}
-                                                </Text>
-                                                <Flex flexWrap="wrap" gap="1.5" mt="2">
-                                                    <Badge
-                                                        variant="subtle"
-                                                        colorPalette={isOnline ? 'gray' : 'green'}
-                                                        borderRadius="full"
-                                                        px="2"
-                                                        py="0.5"
-                                                        fontSize="2xs"
-                                                        fontWeight="semibold"
+                                            {/* Left: icon + invoice info */}
+                                            <Flex alignItems="center" gap="5">
+                                                <Flex
+                                                    w="12"
+                                                    h="12"
+                                                    borderRadius="xl"
+                                                    bg="brand.subtle"
+                                                    alignItems="center"
+                                                    justifyContent="center"
+                                                    flexShrink={0}
+                                                >
+                                                    <Box as={Receipt} w="4" h="5" color="brand.solid" />
+                                                </Flex>
+                                                <Stack gap="0.5">
+                                                    <Text
+                                                        fontSize="xs"
+                                                        fontWeight="bold"
+                                                        color="fg.subtle"
                                                         textTransform="uppercase"
                                                         letterSpacing="wider"
                                                     >
-                                                        {getModalityLabel(appointment.modality)}
-                                                    </Badge>
-                                                    {appointment.service_name && (
-                                                        <Badge
-                                                            variant="subtle"
-                                                            colorPalette="gray"
-                                                            borderRadius="full"
-                                                            px="2"
-                                                            py="0.5"
+                                                        {formatInvoiceNumber(invoice.id)}
+                                                    </Text>
+                                                    <Text fontSize="xs" color="fg.muted">
+                                                        {invoice.created_at
+                                                            ? new Intl.DateTimeFormat('es-ES', {
+                                                                  day: 'numeric',
+                                                                  month: 'short',
+                                                                  year: 'numeric',
+                                                              }).format(new Date(invoice.created_at))
+                                                            : '—'}
+                                                    </Text>
+                                                </Stack>
+                                            </Flex>
+
+                                            {/* Right: amount + due label + pay button */}
+                                            <Flex alignItems="center" gap="6">
+                                                <Stack gap="0.5" alignItems="flex-end">
+                                                    <Text fontSize="xl" fontWeight="bold" color="fg">
+                                                        {Number(invoice.amount).toLocaleString('es-ES', {
+                                                            minimumFractionDigits: 2,
+                                                            maximumFractionDigits: 2,
+                                                        })}{' '}
+                                                        €
+                                                    </Text>
+                                                    {dueDays !== null && (
+                                                        <Text
                                                             fontSize="2xs"
-                                                            fontWeight="semibold"
+                                                            fontWeight="bold"
                                                             textTransform="uppercase"
                                                             letterSpacing="wider"
+                                                            color={
+                                                                dueDays <= 0 || invoice.status === 'overdue'
+                                                                    ? 'danger.solid'
+                                                                    : 'fg.subtle'
+                                                            }
                                                         >
-                                                            {appointment.service_name}
-                                                        </Badge>
+                                                            {dueDays <= 0 || invoice.status === 'overdue'
+                                                                ? 'VENCIDA'
+                                                                : `VENCE EN ${dueDays} DÍA${dueDays === 1 ? '' : 'S'}`}
+                                                        </Text>
                                                     )}
-                                                </Flex>
-                                            </Box>
-
-                                            {isNext && (
-                                                <Button asChild variant="primary" size="sm" flexShrink={0}>
-                                                    <ChakraLink href={AppointmentShowAction.url(appointment.id)}>
-                                                        Ver cita
+                                                </Stack>
+                                                <Button asChild variant="primary" size="sm">
+                                                    <ChakraLink href={InvoiceShowAction.url(invoice.id)}>
+                                                        Pagar
                                                     </ChakraLink>
                                                 </Button>
-                                            )}
+                                            </Flex>
                                         </Flex>
                                     );
-                                })}
-                            </Stack>
-                        )}
-                    </Box>
-
-                    <Stack gap="4">
-                        {recentInvoices.length > 0 && (
-                            <Box
-                                borderRadius="lg"
-                                borderWidth="1px"
-                                borderColor="border"
-                                bg="bg.surface"
-                                overflow="hidden"
-                                boxShadow="sm"
-                            >
-                                <Box px="4" py="3" borderBottomWidth="1px" borderColor="border">
-                                    <Text
-                                        fontSize="xs"
-                                        fontWeight="semibold"
-                                        textTransform="uppercase"
-                                        letterSpacing="wider"
-                                        color="fg.muted"
-                                    >
-                                        Facturas recientes
-                                    </Text>
-                                </Box>
-                                {recentInvoices.map((invoice, index) => (
-                                    <Flex
-                                        key={invoice.id}
-                                        alignItems="center"
-                                        justifyContent="space-between"
-                                        px="4"
-                                        py="3"
-                                        borderTopWidth={index > 0 ? '1px' : undefined}
-                                        borderColor="border"
-                                    >
-                                        <Box minW={0}>
-                                            <Text fontSize="sm" fontWeight="medium" color="fg">
-                                                {Number(invoice.amount).toLocaleString('es-ES', {
-                                                    minimumFractionDigits: 2,
-                                                    maximumFractionDigits: 2,
-                                                })} €
-                                            </Text>
-                                            {invoice.due_at && (
-                                                <Text fontSize="xs" color="fg.subtle" mt="0.5">
-                                                    Vence: {invoice.due_at}
-                                                </Text>
-                                            )}
-                                        </Box>
-                                        <Badge
-                                            variant="subtle"
-                                            colorPalette={invoiceStatusColorPalette[invoice.status] ?? 'gray'}
-                                            borderRadius="full"
-                                            px="2"
-                                            py="0.5"
-                                            fontSize="2xs"
-                                            fontWeight="semibold"
-                                            textTransform="uppercase"
-                                            letterSpacing="wider"
-                                        >
-                                            {invoiceStatusLabel[invoice.status] ?? invoice.status}
-                                        </Badge>
-                                    </Flex>
-                                ))}
-                                <Box px="4" py="2.5" borderTopWidth="1px" borderColor="border">
-                                    <ChakraLink
-                                        href="/invoices"
-                                        fontSize="xs"
-                                        fontWeight="medium"
-                                        color="brand.solid"
-                                        _hover={{ textDecoration: 'underline' }}
-                                    >
-                                        Ver todas las facturas
-                                    </ChakraLink>
-                                </Box>
-                            </Box>
-                        )}
-
-                        {nextAppointment && (
-                            <Box
-                                borderRadius="lg"
-                                borderWidth="1px"
-                                borderColor="border"
-                                bg="bg.surface"
-                                p="5"
-                                boxShadow="sm"
-                            >
-                                <Text
-                                    fontSize="xs"
-                                    fontWeight="semibold"
-                                    textTransform="uppercase"
-                                    letterSpacing="wider"
-                                    color="fg.muted"
-                                    mb="3"
-                                >
-                                    Tu próxima cita
-                                </Text>
-                                <Text fontSize="sm" fontWeight="semibold" color="fg">
-                                    {nextAppointment.professional.name}
-                                </Text>
-                                {nextAppointment.professional.specialty && (
-                                    <Text fontSize="xs" color="fg.muted" mt="0.5">
-                                        {nextAppointment.professional.specialty}
-                                    </Text>
-                                )}
-                                <Text fontSize="xs" color="fg.subtle" mt="2" textTransform="capitalize">
-                                    {formatDateTime(nextAppointment.scheduled_at)}
-                                </Text>
-                                <ChakraLink
-                                    href={AppointmentShowAction.url(nextAppointment.id)}
-                                    mt="3"
-                                    display="flex"
-                                    alignItems="center"
-                                    gap="1"
-                                    fontSize="xs"
-                                    fontWeight="medium"
-                                    color="brand.solid"
-                                    _hover={{ textDecoration: 'underline' }}
-                                >
-                                    Ver detalles <Box as={ArrowRight} w="3" h="3" />
-                                </ChakraLink>
-                            </Box>
-                        )}
+                                })
+                            )}
+                        </Stack>
                     </Stack>
-
                 </Grid>
             </Stack>
         </>

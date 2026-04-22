@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -13,6 +14,8 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable implements MustVerifyEmail
 {
     use HasFactory, HasRoles, Notifiable, SoftDeletes, TwoFactorAuthenticatable;
+
+    protected $appends = ['role'];
 
     protected $fillable = [
         'name', 'email', 'password',
@@ -126,6 +129,15 @@ class User extends Authenticatable implements MustVerifyEmail
     public function availabilities()
     {
         return $this->hasMany(Availability::class, 'professional_id');
+    }
+
+    // ==================== ACCESSORS ====================
+
+    protected function role(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->roles->first()?->name ?? 'professional',
+        );
     }
 
     // ==================== MÉTODOS HELPER ====================

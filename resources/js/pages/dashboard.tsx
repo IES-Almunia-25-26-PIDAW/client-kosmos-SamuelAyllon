@@ -1,6 +1,15 @@
-import { Badge, Box, Flex, Grid, Heading, Stack, Text, chakra } from '@chakra-ui/react';
+import {
+    Badge,
+    Box,
+    Flex,
+    Grid,
+    Heading,
+    Stack,
+    Text,
+    chakra,
+} from '@chakra-ui/react';
 import { Head, Link, usePage } from '@inertiajs/react';
-import { ArrowRight, CalendarDays, Receipt } from 'lucide-react';
+import { ArrowRight, CalendarDays, Receipt, TriangleAlert } from 'lucide-react';
 import type { ReactNode } from 'react';
 import AppointmentShowAction from '@/actions/App/Http/Controllers/Appointment/ShowAction';
 import PatientShowAction from '@/actions/App/Http/Controllers/Patient/ShowAction';
@@ -144,159 +153,471 @@ export default function Dashboard({
         <>
             <Head title="Hoy — ClientKosmos" />
 
-            <Stack gap="6" p={{ base: '6', lg: '8' }}>
+            {/* SidebarInset already renders as <main> — no duplicate landmark needed */}
+            <Stack
+                id="main-content"
+                tabIndex={-1}
+                gap="8"
+                pt={{ base: '12', lg: '16' }}
+                px={{ base: '6', lg: '10' }}
+                pb="10"
+                maxW="6xl"
+                mx="auto"
+                w="full"
+            >
 
-                <Box>
-                    <Heading as="h1" fontSize="3xl" fontWeight="bold" color="fg">
-                        {greeting()}, {auth.user.name.split(' ')[0]}
-                    </Heading>
-                    <Text mt="0.5" fontSize="md" color="fg.muted" textTransform="capitalize">
-                        {formatDate()}
-                    </Text>
-                </Box>
-
-                {dailyBriefing && (
-                    <KosmoBriefingComponent
-                        title="Tu día de un vistazo"
-                        content={
-                            <Text fontSize="sm" color="fg.muted">
-                                {typeof dailyBriefing.content === 'object' && 'summary' in dailyBriefing.content
-                                    ? String(dailyBriefing.content.summary)
-                                    : JSON.stringify(dailyBriefing.content)}
+                    {/* ── Page header ── */}
+                    <Box>
+                        <Heading as="h1" fontSize="3xl" fontWeight="bold" color="fg">
+                            {greeting()},{' '}
+                            <Text as="span" color="brand.solid">
+                                {auth.user.name.split(' ')[0]}
                             </Text>
-                        }
-                    />
-                )}
-
-                <Grid templateColumns={{ base: '1fr', lg: 'repeat(3, 1fr)' }} gap="6">
-
-                    <Box gridColumn={{ lg: 'span 2' }}>
-                        <Flex alignItems="center" justifyContent="space-between" mb="4">
-                            <Heading as="h2" fontSize="xl" fontWeight="semibold" color="fg">
-                                Agenda del día
-                            </Heading>
-                            <ChakraLink
-                                href="/appointments"
-                                fontSize="sm"
-                                fontWeight="medium"
-                                color="brand.solid"
-                                _hover={{ textDecoration: 'underline' }}
-                                display="flex"
-                                alignItems="center"
-                                gap="1"
-                            >
-                                Ver todas las citas <Box as={ArrowRight} w="3.5" h="3.5" />
-                            </ChakraLink>
-                        </Flex>
-
-                        {todayAppointments.length === 0 ? (
-                            <Box
-                                borderRadius="lg"
-                                borderWidth="1px"
-                                borderColor="border"
-                                bg="bg.surface"
-                                p="10"
-                                textAlign="center"
-                            >
-                                <Box as={CalendarDays} w="8" h="8" mx="auto" mb="3" color="fg.subtle" />
-                                <Text fontSize="sm" color="fg.muted">
-                                    No hay sesiones programadas para hoy.
-                                </Text>
-                            </Box>
-                        ) : (
-                            <Stack gap="3">
-                                {todayAppointments.map((session, index) => {
-                                    const isNext = index === 0;
-                                    const { time, period } = formatTime(session.scheduled_at);
-                                    const isOnline = isOnlineModality(session.modality);
-
-                                    return (
-                                        <Flex
-                                            key={session.id}
-                                            alignItems="center"
-                                            gap="4"
-                                            borderRadius="lg"
-                                            borderWidth="1px"
-                                            borderColor={isNext ? 'brand.solid' : 'border'}
-                                            bg="bg.surface"
-                                            p="4"
-                                            boxShadow={isNext ? 'sm' : undefined}
-                                            _hover={isNext ? undefined : { boxShadow: 'sm' }}
-                                            transition="box-shadow 0.2s"
-                                        >
-                                            <Box
-                                                w="2.5"
-                                                h="2.5"
-                                                borderRadius="full"
-                                                flexShrink={0}
-                                                bg={isNext ? 'brand.solid' : 'fg.subtle'}
-                                            />
-
-                                            <Box w="14" flexShrink={0} textAlign="center">
-                                                <Text fontSize="sm" fontWeight="semibold" lineHeight="none" color="fg">
-                                                    {time}
-                                                </Text>
-                                                <Text fontSize="xs" color="fg.subtle" mt="0.5">{period}</Text>
-                                            </Box>
-
-                                            <Box flex="1" minW={0}>
-                                                <Text fontSize="sm" fontWeight="semibold" color="fg" truncate>
-                                                    {session.patient.name}
-                                                </Text>
-                                                <Text fontSize="xs" color="fg.muted" mt="0.5">
-                                                    {session.service_name
-                                                        ? `${session.service_name} • Sesión ${session.session_number}/${session.total_sessions}`
-                                                        : `Sesión ${session.session_number}/${session.total_sessions}`}
-                                                </Text>
-                                                <Flex flexWrap="wrap" gap="1.5" mt="2">
-                                                    <Badge
-                                                        variant="subtle"
-                                                        colorPalette={isOnline ? 'gray' : 'green'}
-                                                        borderRadius="full"
-                                                        px="2"
-                                                        py="0.5"
-                                                        fontSize="2xs"
-                                                        fontWeight="semibold"
-                                                        textTransform="uppercase"
-                                                        letterSpacing="wider"
-                                                    >
-                                                        {getModalityLabel(session.modality)}
-                                                    </Badge>
-                                                </Flex>
-                                            </Box>
-
-                                            {isNext ? (
-                                                <Button asChild variant="primary" size="sm" flexShrink={0}>
-                                                    <ChakraLink href={AppointmentShowAction.url(session.id)}>
-                                                        Preparar sesión
-                                                    </ChakraLink>
-                                                </Button>
-                                            ) : (
-                                                <Button asChild variant="outline" size="sm" flexShrink={0}>
-                                                    <ChakraLink href={PatientShowAction.url(session.patient.id)}>
-                                                        Ver ficha
-                                                    </ChakraLink>
-                                                </Button>
-                                            )}
-                                        </Flex>
-                                    );
-                                })}
-                            </Stack>
-                        )}
+                        </Heading>
+                        <Text
+                            mt="0.5"
+                            fontSize="md"
+                            color="fg.muted"
+                            textTransform="capitalize"
+                        >
+                            {formatDate()}
+                        </Text>
                     </Box>
 
-                    <Stack gap="4">
+                    {dailyBriefing && (
+                        <KosmoBriefingComponent
+                            title="Tu día de un vistazo"
+                            content={
+                                <Text fontSize="sm" color="fg.muted">
+                                    {typeof dailyBriefing.content === 'object' &&
+                                    'summary' in dailyBriefing.content
+                                        ? String(dailyBriefing.content.summary)
+                                        : JSON.stringify(dailyBriefing.content)}
+                                </Text>
+                            }
+                        />
+                    )}
 
-                        {allPendingAlerts.length > 0 && (
-                            <Box
-                                borderRadius="lg"
+                    <Grid
+                        templateColumns={{ base: '1fr', lg: 'repeat(3, 1fr)' }}
+                        gap="6"
+                    >
+                        {/* ── Agenda section ── */}
+                        <Box
+                            as="section"
+                            gridColumn={{ lg: 'span 2' }}
+                            aria-labelledby="heading-agenda"
+                        >
+                            <Flex alignItems="center" justifyContent="space-between" mb="4">
+                                <Heading
+                                    id="heading-agenda"
+                                    as="h2"
+                                    fontSize="xl"
+                                    fontWeight="semibold"
+                                    color="fg"
+                                    letterSpacing="-0.2px"
+                                >
+                                    Agenda del día
+                                </Heading>
+                                <ChakraLink
+                                    href="/appointments"
+                                    fontSize="sm"
+                                    fontWeight="medium"
+                                    color="brand.solid"
+                                    _hover={{ textDecoration: 'underline' }}
+                                    display="flex"
+                                    alignItems="center"
+                                    gap="1"
+                                    aria-label="Ver todas las citas del calendario"
+                                >
+                                    Ver todas las citas{' '}
+                                    <Box
+                                        as={ArrowRight}
+                                        w="3.5"
+                                        h="3.5"
+                                        aria-hidden={true}
+                                    />
+                                </ChakraLink>
+                            </Flex>
+
+                            {todayAppointments.length === 0 ? (
+                                <Box
+                                    borderRadius="xl"
+                                    borderWidth="1px"
+                                    borderColor="border"
+                                    bg="bg.surface"
+                                    p="10"
+                                    textAlign="center"
+                                >
+                                    <Box
+                                        as={CalendarDays}
+                                        w="8"
+                                        h="8"
+                                        mx="auto"
+                                        mb="3"
+                                        color="fg.subtle"
+                                        aria-hidden={true}
+                                    />
+                                    <Text fontSize="sm" color="fg.muted">
+                                        No hay sesiones programadas para hoy.
+                                    </Text>
+                                </Box>
+                            ) : (
+                                <Stack gap="3" role="list" aria-label="Sesiones de hoy">
+                                    {todayAppointments.map((session, index) => {
+                                        const isNext = index === 0;
+                                        const { time, period } = formatTime(session.scheduled_at);
+                                        const isOnline = isOnlineModality(session.modality);
+
+                                        return (
+                                            <Flex
+                                                key={session.id}
+                                                role="listitem"
+                                                alignItems="center"
+                                                gap="4"
+                                                borderRadius="xl"
+                                                borderWidth="1px"
+                                                borderLeftWidth={isNext ? '3px' : '1px'}
+                                                borderColor={isNext ? 'brand.solid' : 'border'}
+                                                bg={isNext ? 'bg.surface' : 'bg.surface'}
+                                                p="4"
+                                                boxShadow={isNext ? 'md' : 'sm'}
+                                                _hover={
+                                                    isNext
+                                                        ? undefined
+                                                        : {
+                                                              boxShadow: 'md',
+                                                              transform: 'translateY(-1px)',
+                                                              borderColor: 'border.strong',
+                                                          }
+                                                }
+                                                transition="box-shadow 0.2s, transform 0.2s, border-color 0.2s"
+                                                position="relative"
+                                            >
+                                                {/* Next-session accent dot */}
+                                                <Box
+                                                    w="2.5"
+                                                    h="2.5"
+                                                    borderRadius="full"
+                                                    flexShrink={0}
+                                                    bg={isNext ? 'brand.solid' : 'fg.subtle'}
+                                                    aria-hidden={true}
+                                                />
+
+                                                {/* Time */}
+                                                <Box
+                                                    w="14"
+                                                    flexShrink={0}
+                                                    textAlign="center"
+                                                >
+                                                    <Text
+                                                        fontSize={isNext ? 'md' : 'sm'}
+                                                        fontWeight="semibold"
+                                                        lineHeight="none"
+                                                        color={isNext ? 'brand.solid' : 'fg'}
+                                                    >
+                                                        {time}
+                                                    </Text>
+                                                    <Text fontSize="xs" color="fg.subtle" mt="0.5">
+                                                        {period}
+                                                    </Text>
+                                                </Box>
+
+                                                {/* Patient & session info */}
+                                                <Box flex="1" minW={0}>
+                                                    <Text
+                                                        fontSize="sm"
+                                                        fontWeight="semibold"
+                                                        color="fg"
+                                                        truncate
+                                                        title={session.patient.name}
+                                                    >
+                                                        {session.patient.name}
+                                                    </Text>
+                                                    <Text fontSize="xs" color="fg.muted" mt="0.5">
+                                                        {session.service_name
+                                                            ? `${session.service_name} • Sesión ${session.session_number}/${session.total_sessions}`
+                                                            : `Sesión ${session.session_number}/${session.total_sessions}`}
+                                                    </Text>
+                                                    <Flex flexWrap="wrap" gap="1.5" mt="2">
+                                                        <Badge
+                                                            variant="subtle"
+                                                            colorPalette={
+                                                                isOnline ? 'gray' : 'green'
+                                                            }
+                                                            borderRadius="full"
+                                                            px="2"
+                                                            py="0.5"
+                                                            fontSize="2xs"
+                                                            fontWeight="semibold"
+                                                            textTransform="uppercase"
+                                                            letterSpacing="wider"
+                                                        >
+                                                            {getModalityLabel(session.modality)}
+                                                        </Badge>
+                                                    </Flex>
+                                                </Box>
+
+                                                {/* CTA */}
+                                                {isNext ? (
+                                                    <Button
+                                                        asChild
+                                                        variant="primary"
+                                                        size="sm"
+                                                        flexShrink={0}
+                                                    >
+                                                        <ChakraLink
+                                                            href={AppointmentShowAction.url(
+                                                                session.id,
+                                                            )}
+                                                            aria-label={`Preparar sesión con ${session.patient.name}`}
+                                                        >
+                                                            Preparar sesión
+                                                        </ChakraLink>
+                                                    </Button>
+                                                ) : (
+                                                    <Button
+                                                        asChild
+                                                        variant="outline"
+                                                        size="sm"
+                                                        flexShrink={0}
+                                                    >
+                                                        <ChakraLink
+                                                            href={PatientShowAction.url(
+                                                                session.patient.id,
+                                                            )}
+                                                            aria-label={`Ver ficha de ${session.patient.name}`}
+                                                        >
+                                                            Ver ficha
+                                                        </ChakraLink>
+                                                    </Button>
+                                                )}
+                                            </Flex>
+                                        );
+                                    })}
+                                </Stack>
+                            )}
+                        </Box>
+
+                        {/* ── Right sidebar ── */}
+                        <Stack gap="4">
+
+                            {/* Pending alerts */}
+                            {allPendingAlerts.length > 0 && (
+                                <Box
+                                    as="section"
+                                    aria-labelledby="heading-alerts"
+                                    borderRadius="xl"
+                                    borderWidth="1px"
+                                    borderColor="border"
+                                    bg="bg.surface"
+                                    overflow="hidden"
+                                    boxShadow="sm"
+                                >
+                                    <Box
+                                        px="4"
+                                        py="3"
+                                        borderBottomWidth="1px"
+                                        borderColor="border"
+                                    >
+                                        <Heading
+                                            id="heading-alerts"
+                                            as="h2"
+                                            fontSize="xs"
+                                            fontWeight="semibold"
+                                            textTransform="uppercase"
+                                            letterSpacing="wider"
+                                            color="fg.muted"
+                                        >
+                                            Cobros pendientes
+                                        </Heading>
+                                    </Box>
+
+                                    {/* Live region — announces changes to screen readers */}
+                                    <Box
+                                        role="list"
+                                        aria-live="polite"
+                                        aria-atomic="true"
+                                        aria-label={`${allPendingAlerts.length} alertas de cobro pendientes`}
+                                    >
+                                        {allPendingAlerts.map((alert, index) => (
+                                            <ChakraLink
+                                                key={`${alert.type}-${alert.id}`}
+                                                role="listitem"
+                                                href={PatientShowAction.url(alert.patientId)}
+                                                display="flex"
+                                                alignItems="center"
+                                                justifyContent="space-between"
+                                                px="4"
+                                                py="3"
+                                                borderTopWidth={index > 0 ? '1px' : undefined}
+                                                borderColor="border"
+                                                _hover={{ bg: 'bg.subtle' }}
+                                                transition="background 0.15s"
+                                                aria-label={`${alert.label}: ${alert.name}. Ir al perfil del paciente`}
+                                            >
+                                                <Flex
+                                                    alignItems="flex-start"
+                                                    gap="2.5"
+                                                    minW={0}
+                                                >
+                                                    {/* Status icon — carries semantic meaning via aria-label on the link */}
+                                                    <Box
+                                                        mt="1"
+                                                        flexShrink={0}
+                                                        color={
+                                                            alert.isOverdue
+                                                                ? 'danger.solid'
+                                                                : 'warning.solid'
+                                                        }
+                                                        aria-hidden={true}
+                                                    >
+                                                        <Box
+                                                            as={TriangleAlert}
+                                                            w="3.5"
+                                                            h="3.5"
+                                                        />
+                                                    </Box>
+                                                    <Box minW={0}>
+                                                        <Text
+                                                            fontSize="sm"
+                                                            fontWeight="medium"
+                                                            color="fg"
+                                                            truncate
+                                                            title={alert.name}
+                                                        >
+                                                            {alert.name}
+                                                        </Text>
+                                                        <Text
+                                                            fontSize="2xs"
+                                                            fontWeight="semibold"
+                                                            textTransform="uppercase"
+                                                            letterSpacing="wider"
+                                                            mt="0.5"
+                                                            color={
+                                                                alert.isOverdue
+                                                                    ? 'danger.solid'
+                                                                    : 'warning.solid'
+                                                            }
+                                                        >
+                                                            {alert.label}
+                                                        </Text>
+                                                    </Box>
+                                                </Flex>
+                                                <Box
+                                                    as={ArrowRight}
+                                                    w="4"
+                                                    h="4"
+                                                    flexShrink={0}
+                                                    color="fg.subtle"
+                                                    ml="2"
+                                                    aria-hidden={true}
+                                                />
+                                            </ChakraLink>
+                                        ))}
+                                    </Box>
+
+                                    <Box
+                                        px="4"
+                                        py="2.5"
+                                        borderTopWidth="1px"
+                                        borderColor="border"
+                                    >
+                                        <ChakraLink
+                                            href="/invoices"
+                                            fontSize="xs"
+                                            fontWeight="medium"
+                                            color="brand.solid"
+                                            _hover={{ textDecoration: 'underline' }}
+                                        >
+                                            Ver historial completo de facturas
+                                        </ChakraLink>
+                                    </Box>
+                                </Box>
+                            )}
+
+                            {/* Stat: sessions today */}
+                            <Flex
+                                as="section"
+                                aria-label={`Sesiones hoy: ${stats.sessions_today}`}
+                                borderRadius="xl"
+                                bg="brand.solid"
+                                p="5"
+                                alignItems="center"
+                                justifyContent="space-between"
+                                boxShadow="md"
+                                position="relative"
+                                overflow="hidden"
+                                _hover={{ transform: 'translateY(-1px)', boxShadow: 'lg' }}
+                                transition="transform 0.2s, box-shadow 0.2s"
+                            >
+                                {/* Decorative circle */}
+                                <Box
+                                    position="absolute"
+                                    top="-30%"
+                                    right="-8%"
+                                    w="96px"
+                                    h="96px"
+                                    borderRadius="full"
+                                    bg="white/8"
+                                    pointerEvents="none"
+                                    aria-hidden={true}
+                                />
+                                <Box>
+                                    <Text
+                                        fontSize="xs"
+                                        fontWeight="semibold"
+                                        textTransform="uppercase"
+                                        letterSpacing="wider"
+                                        color="white/70"
+                                    >
+                                        Sesiones hoy
+                                    </Text>
+                                    <Text
+                                        fontSize="3xl"
+                                        fontWeight="bold"
+                                        color="white"
+                                        mt="1"
+                                        lineHeight="none"
+                                        aria-hidden={true}
+                                    >
+                                        {stats.sessions_today.toString().padStart(2, '0')}
+                                    </Text>
+                                </Box>
+                                <Flex
+                                    borderRadius="lg"
+                                    bg="white/15"
+                                    p="2.5"
+                                    aria-hidden={true}
+                                    alignItems="center"
+                                    justifyContent="center"
+                                >
+                                    <Box
+                                        as={CalendarDays}
+                                        w="22px"
+                                        h="22px"
+                                        color="white"
+                                        aria-hidden={true}
+                                    />
+                                </Flex>
+                            </Flex>
+
+                            {/* Stat: pending invoices */}
+                            <Flex
+                                as="section"
+                                aria-label={`Facturas pendientes: ${Number(stats.pending_invoices).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} euros`}
+                                borderRadius="xl"
                                 borderWidth="1px"
                                 borderColor="border"
                                 bg="bg.surface"
-                                overflow="hidden"
+                                p="5"
+                                alignItems="center"
+                                justifyContent="space-between"
                                 boxShadow="sm"
+                                _hover={{ transform: 'translateY(-1px)', boxShadow: 'md' }}
+                                transition="transform 0.2s, box-shadow 0.2s"
                             >
-                                <Box px="4" py="3" borderBottomWidth="1px" borderColor="border">
+                                <Box>
                                     <Text
                                         fontSize="xs"
                                         fontWeight="semibold"
@@ -304,114 +625,50 @@ export default function Dashboard({
                                         letterSpacing="wider"
                                         color="fg.muted"
                                     >
-                                        Cobros pendientes
+                                        Pendientes
                                     </Text>
-                                </Box>
-                                {allPendingAlerts.map((alert, index) => (
-                                    <ChakraLink
-                                        key={`${alert.type}-${alert.id}`}
-                                        href={PatientShowAction.url(alert.patientId)}
-                                        display="flex"
-                                        alignItems="center"
-                                        justifyContent="space-between"
-                                        px="4"
-                                        py="3"
-                                        borderTopWidth={index > 0 ? '1px' : undefined}
-                                        borderColor="border"
-                                        _hover={{ bg: 'bg.subtle' }}
-                                        transition="background 0.2s"
+                                    <Text
+                                        fontSize="3xl"
+                                        fontWeight="bold"
+                                        color="fg"
+                                        mt="1"
+                                        lineHeight="none"
+                                        aria-hidden={true}
                                     >
-                                        <Flex alignItems="flex-start" gap="2.5" minW={0}>
-                                            <Box mt="1" w="2" h="2" borderRadius="full" flexShrink={0} bg="error.solid" />
-                                            <Box minW={0}>
-                                                <Text fontSize="sm" fontWeight="medium" color="fg" truncate>
-                                                    {alert.name}
-                                                </Text>
-                                                <Text
-                                                    fontSize="2xs"
-                                                    fontWeight="semibold"
-                                                    textTransform="uppercase"
-                                                    letterSpacing="wider"
-                                                    mt="0.5"
-                                                    color={alert.isOverdue ? 'error.fg' : 'warning.fg'}
-                                                >
-                                                    {alert.label}
-                                                </Text>
-                                            </Box>
-                                        </Flex>
-                                        <Box as={ArrowRight} w="4" h="4" flexShrink={0} color="fg.subtle" ml="2" />
-                                    </ChakraLink>
-                                ))}
-                                <Box px="4" py="2.5" borderTopWidth="1px" borderColor="border">
-                                    <ChakraLink
-                                        href="/invoices"
-                                        fontSize="xs"
-                                        fontWeight="medium"
-                                        color="brand.solid"
-                                        _hover={{ textDecoration: 'underline' }}
-                                    >
-                                        Ver todo el historial
-                                    </ChakraLink>
-                                </Box>
-                            </Box>
-                        )}
-
-                        <Flex
-                            borderRadius="lg"
-                            bg="brand.solid"
-                            p="5"
-                            alignItems="center"
-                            justifyContent="space-between"
-                            boxShadow="sm"
-                        >
-                            <Box>
-                                <Text fontSize="xs" fontWeight="semibold" textTransform="uppercase" letterSpacing="wider" color="white/70">
-                                    Sesiones hoy
-                                </Text>
-                                <Text fontSize="3xl" fontWeight="bold" color="white" mt="1" lineHeight="none">
-                                    {stats.sessions_today.toString().padStart(2, '0')}
-                                </Text>
-                            </Box>
-                            <Flex borderRadius="md" bg="white/15" p="2.5">
-                                <Box as={CalendarDays} w="22px" h="22px" color="white" />
-                            </Flex>
-                        </Flex>
-
-                        <Flex
-                            borderRadius="lg"
-                            borderWidth="1px"
-                            borderColor="border"
-                            bg="bg.surface"
-                            p="5"
-                            alignItems="center"
-                            justifyContent="space-between"
-                            boxShadow="sm"
-                        >
-                            <Box>
-                                <Text fontSize="xs" fontWeight="semibold" textTransform="uppercase" letterSpacing="wider" color="fg.muted">
-                                    Pendientes
-                                </Text>
-                                <Text fontSize="3xl" fontWeight="bold" color="fg" mt="1" lineHeight="none">
-                                    {Number(stats.pending_invoices).toLocaleString('es-ES', {
-                                        minimumFractionDigits: 2,
-                                        maximumFractionDigits: 2,
-                                    })} €
-                                </Text>
-                                {allPendingAlerts.length > 0 && (
-                                    <Text fontSize="xs" color="fg.subtle" mt="1">
-                                        {allPendingAlerts.length}{' '}
-                                        {allPendingAlerts.length === 1 ? 'factura' : 'facturas'}
+                                        {Number(stats.pending_invoices).toLocaleString('es-ES', {
+                                            minimumFractionDigits: 2,
+                                            maximumFractionDigits: 2,
+                                        })}{' '}
+                                        €
                                     </Text>
-                                )}
-                            </Box>
-                            <Flex borderRadius="md" bg="bg.subtle" p="2.5">
-                                <Box as={Receipt} w="22px" h="22px" color="fg.muted" />
+                                    {allPendingAlerts.length > 0 && (
+                                        <Text fontSize="xs" color="fg.subtle" mt="1">
+                                            {allPendingAlerts.length}{' '}
+                                            {allPendingAlerts.length === 1
+                                                ? 'factura'
+                                                : 'facturas'}
+                                        </Text>
+                                    )}
+                                </Box>
+                                <Flex
+                                    borderRadius="lg"
+                                    bg="bg.subtle"
+                                    p="2.5"
+                                    alignItems="center"
+                                    justifyContent="center"
+                                    aria-hidden={true}
+                                >
+                                    <Box
+                                        as={Receipt}
+                                        w="22px"
+                                        h="22px"
+                                        color="fg.muted"
+                                        aria-hidden={true}
+                                    />
+                                </Flex>
                             </Flex>
-                        </Flex>
-
-                    </Stack>
-
-                </Grid>
+                        </Stack>
+                    </Grid>
             </Stack>
         </>
     );

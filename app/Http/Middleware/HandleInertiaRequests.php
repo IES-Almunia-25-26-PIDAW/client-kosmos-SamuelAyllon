@@ -19,7 +19,7 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'name' => config('app.name'),
-            'auth' => ['user' => $request->user()],
+            'auth' => ['user' => $request->user()?->loadMissing('roles')],
             'isImpersonating' => $request->session()->has('impersonating_id'),
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'flash' => [

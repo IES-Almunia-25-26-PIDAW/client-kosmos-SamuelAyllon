@@ -1,18 +1,32 @@
+import type { ReactNode } from 'react';
 import { AppContent } from '@/components/app-content';
 import { AppShell } from '@/components/app-shell';
 import { AppSidebar } from '@/components/app-sidebar';
-import { AppSidebarHeader } from '@/components/app-sidebar-header';
+import { useSidebar } from '@/components/ui/sidebar';
 import type { AppLayoutProps } from '@/types';
+
+/**
+ * Inner component that must render inside SidebarProvider to access useSidebar.
+ * Controls open/close via mouse hover on the fixed sidebar panel.
+ */
+function SidebarHoverController() {
+    const { setOpen } = useSidebar();
+
+    return (
+        <AppSidebar
+            onMouseEnter={() => setOpen(true)}
+            onMouseLeave={() => setOpen(false)}
+        />
+    );
+}
 
 export default function AppSidebarLayout({
     children,
-    breadcrumbs = [],
 }: AppLayoutProps) {
     return (
         <AppShell variant="sidebar">
-            <AppSidebar />
+            <SidebarHoverController />
             <AppContent variant="sidebar" overflowX="hidden">
-                <AppSidebarHeader breadcrumbs={breadcrumbs} />
                 {children}
             </AppContent>
         </AppShell>

@@ -1,7 +1,7 @@
+import { Box, Flex, Spinner, Text } from '@chakra-ui/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import { JitsiMeeting } from '@jitsi/react-sdk';
 import type { IJitsiMeetExternalApi } from '@jitsi/react-sdk/lib/types';
-import { Head, router, usePage } from '@inertiajs/react';
-import { Box, Flex, Spinner, Text } from '@chakra-ui/react';
 import type { ReactNode } from 'react';
 import type { Auth } from '@/types';
 
