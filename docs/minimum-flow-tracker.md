@@ -13,11 +13,11 @@ Entregar un flujo mínimo viable donde un paciente pueda reservar, asistir y cer
 
 ## 2. Estado global
 
-- **Paciente:** 5 ✅ · 1 🟡 · 1 ❌ — 7 pasos
-- **Profesional:** 4 ✅ · 4 🟡 · 1 ❌ — 9 pasos
+- **Paciente:** 6 ✅ · 1 🟡 · 0 ❌ — 7 pasos
+- **Profesional:** 5 ✅ · 4 🟡 · 0 ❌ — 9 pasos
 - **Capacidades técnicas:** 2 ✅ · 5 ❌
 
-Resumen: aproximadamente **9/15** pasos completos, **5/15** parciales, **1/15** falta por completo.
+Resumen: aproximadamente **11/16** pasos completos, **5/16** parciales, **0/16** falta por completo.
 
 ---
 
@@ -30,8 +30,8 @@ Resumen: aproximadamente **9/15** pasos completos, **5/15** parciales, **1/15** 
 | P3 | Cita visible en home | ✅ | [resources/js/pages/patient/dashboard.tsx](../resources/js/pages/patient/dashboard.tsx) |
 | P4 | Sala de espera paciente | ✅ | [patient/appointments/waiting.tsx](../resources/js/pages/patient/appointments/waiting.tsx) + [Portal\Appointment\WaitingShowAction](../app/Http/Controllers/Portal/Appointment/WaitingShowAction.php); `JoinCallAction` ahora redirige a `patient.appointments.waiting` |
 | P5 | Videollamada + transcripción automática | 🟡 | Jitsi OK ([resources/js/pages/call/room.tsx](../resources/js/pages/call/room.tsx)). Transcripción **no dispatched** — `@todo Groq Whisper` en [app/Http/Controllers/Appointment/TranscribeAction.php](../app/Http/Controllers/Appointment/TranscribeAction.php) |
-| P6 | Pantalla de cierre (mensaje + aviso factura/acuerdos) | ❌ | No existe página post-session para paciente |
-| P7 | Redirect automático a home | 🟡 | Hoy redirige a `patient.appointments.show`, no al dashboard |
+| P6 | Pantalla de cierre (mensaje + aviso factura/acuerdos) | ✅ | [patient/appointments/post-session.tsx](../resources/js/pages/patient/appointments/post-session.tsx) + [Portal\Appointment\PostSessionShowAction](../app/Http/Controllers/Portal/Appointment/PostSessionShowAction.php); `CallShowRoomAction` redirige aquí al finalizar. Aviso factura + acuerdos. |
+| P7 | Redirect automático a home | ✅ | Countdown 15s en `post-session.tsx` → `patient.dashboard` |
 
 ## 4. Flujo Profesional
 
@@ -45,8 +45,8 @@ Resumen: aproximadamente **9/15** pasos completos, **5/15** parciales, **1/15** 
 | F6a | Notas + resumen IA automático | 🟡 | UI OK ([resources/js/pages/professional/patients/post-session.tsx](../resources/js/pages/professional/patients/post-session.tsx)). Resumen **no dispatched** — `@todo Llama 3.3` en [app/Http/Controllers/Appointment/SummarizeAction.php](../app/Http/Controllers/Appointment/SummarizeAction.php) |
 | F6b | Revisar plantilla de factura (requisitos legales PSI) | 🟡 | `GenerateInvoiceAction` crea draft vía `BillingService`. **Falta pantalla de review** y validación de campos legales (datos fiscales, IVA exento art. 20.1.3º LIVA, número secuencial, etc.) |
 | F6c | Confirmar cierre | 🟡 | `EndCallAction` marca `completed` pero no existe wizard explícito de 3 pasos |
-| F7 | Pantalla de éxito (aviso envío a paciente) | ❌ | No existe |
-| F8 | Redirect automático al dashboard | 🟡 | Redirige a detalle de paciente, no al dashboard |
+| F7 | Pantalla de éxito (aviso envío a paciente) | ✅ | [professional/appointments/closing-success.tsx](../resources/js/pages/professional/appointments/closing-success.tsx) + [Appointment\ClosingSuccessAction](../app/Http/Controllers/Appointment/ClosingSuccessAction.php); `CallShowRoomAction` redirige aquí al finalizar. |
+| F8 | Redirect automático al dashboard | ✅ | Countdown 15s en `closing-success.tsx` → `professional.dashboard` |
 
 ## 5. Capacidades técnicas transversales
 
@@ -69,14 +69,14 @@ Resumen: aproximadamente **9/15** pasos completos, **5/15** parciales, **1/15** 
 - [x] Página `patient/appointments/waiting.tsx` + `JoinCallAction` → waiting room (P4) — 2026-04-22
 - [ ] `app/Jobs/TranscribeSessionJob.php` (Groq Whisper) y dispatch desde `TranscribeAction` (P5/F5)
 - [ ] `app/Jobs/SummarizeSessionJob.php` y dispatch desde `SummarizeAction` (F6a)
-- [ ] Página `patient/appointments/post-session.tsx` (mensaje motivador + aviso factura/acuerdos) (P6)
-- [ ] Página `professional/appointments/closing-success.tsx` (F7)
+- [x] Página `patient/appointments/post-session.tsx` (mensaje motivador + aviso factura/acuerdos) (P6) — 2026-04-22
+- [x] Página `professional/appointments/closing-success.tsx` (F7) — 2026-04-22
 - [ ] Jobs `SendInvoiceEmailJob` + `SendAgreementsEmailJob` (factura + acuerdos al paciente)
 
 ### P1 — Calidad del flujo
 - [ ] Wizard explícito de 3 pasos de cierre (notas → factura → confirmación) (F6)
 - [ ] Review UI de factura con validación legal PSI (datos fiscales, IVA exento art. 20.1.3º LIVA, numeración secuencial)
-- [ ] Redirects finales: paciente → dashboard (P7); profesional → dashboard (F8)
+- [x] Redirects finales: paciente → dashboard (P7); profesional → dashboard (F8) — 2026-04-22 (countdown 15s en ambas pantallas de cierre)
 
 ### P2 — Mejoras
 - [ ] Skeletons/Deferred props en listados de reserva y dashboard
@@ -98,3 +98,4 @@ Resumen: aproximadamente **9/15** pasos completos, **5/15** parciales, **1/15** 
 |-------|-------------|--------|----|
 | 2026-04-22 | Samuel Ayllón | Creación del tracker | — |
 | 2026-04-22 | Claude (Opus 4.7) | P2 completo (book + appointments index + modal slots) y P4 completo (waiting paciente) | — |
+| 2026-04-22 | Claude (Opus 4.7) | Fase A — P6 + F7 + redirects P7/F8: pantallas de cierre con countdown y Pest tests (6/6 passing) | — |

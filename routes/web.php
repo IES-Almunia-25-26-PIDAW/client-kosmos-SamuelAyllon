@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\Workspaces\ShowAction as AdminWorkspaceShowAction
 use App\Http\Controllers\Agreement\DestroyAction as AgreementDestroyAction;
 use App\Http\Controllers\Agreement\StoreAction as AgreementStoreAction;
 use App\Http\Controllers\Agreement\UpdateAction as AgreementUpdateAction;
+use App\Http\Controllers\Appointment\ClosingSuccessAction;
 use App\Http\Controllers\Appointment\DestroyAction as AppointmentDestroyAction;
 use App\Http\Controllers\Appointment\EndCallAction;
 use App\Http\Controllers\Appointment\GenerateInvoiceAction;
@@ -66,6 +67,7 @@ use App\Http\Controllers\Portal\Appointment\BookAction as PortalAppointmentBookA
 use App\Http\Controllers\Portal\Appointment\CancelAction as PortalAppointmentCancelAction;
 use App\Http\Controllers\Portal\Appointment\IndexAction as PortalAppointmentIndexAction;
 use App\Http\Controllers\Portal\Appointment\JoinCallAction as PortalAppointmentJoinCallAction;
+use App\Http\Controllers\Portal\Appointment\PostSessionShowAction as PortalAppointmentPostSessionShowAction;
 use App\Http\Controllers\Portal\Appointment\ShowAction as PortalAppointmentShowAction;
 use App\Http\Controllers\Portal\Appointment\StoreAction as PortalAppointmentStoreAction;
 use App\Http\Controllers\Portal\Appointment\WaitingShowAction as PortalAppointmentWaitingShowAction;
@@ -179,6 +181,7 @@ Route::middleware(['auth', 'verified', 'professional'])
         Route::post('/appointments', AppointmentStoreAction::class)->name('appointments.store');
         Route::get('/appointments/{appointment}', AppointmentShowAction::class)->name('appointments.show');
         Route::get('/appointments/{appointment}/waiting', WaitingShowAction::class)->name('appointments.waiting');
+        Route::get('/appointments/{appointment}/closing-success', ClosingSuccessAction::class)->name('appointments.closing-success');
         Route::post('/appointments/{appointment}/join-waiting', JoinWaitingRoomAction::class)->name('appointments.join-waiting');
         Route::match(['put', 'patch'], '/appointments/{appointment}', AppointmentUpdateAction::class)->name('appointments.update');
         Route::patch('/appointments/{appointment}/status', UpdateStatusAction::class)->name('appointments.status');
@@ -271,6 +274,7 @@ Route::middleware(['auth', 'verified'])
         Route::post('/appointments/{appointment}/cancel', PortalAppointmentCancelAction::class)->name('appointments.cancel');
         Route::get('/appointments/{appointment}/join', PortalAppointmentJoinCallAction::class)->name('appointments.join');
         Route::get('/appointments/{appointment}/waiting', PortalAppointmentWaitingShowAction::class)->name('appointments.waiting');
+        Route::get('/appointments/{appointment}/post-session', PortalAppointmentPostSessionShowAction::class)->name('appointments.post-session');
 
         Route::get('/invoices', PortalInvoiceIndexAction::class)->name('invoices.index');
         Route::get('/invoices/{invoice}', PortalInvoiceShowAction::class)->name('invoices.show');
