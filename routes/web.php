@@ -68,6 +68,7 @@ use App\Http\Controllers\Portal\Appointment\CancelAction as PortalAppointmentCan
 use App\Http\Controllers\Portal\Appointment\IndexAction as PortalAppointmentIndexAction;
 use App\Http\Controllers\Portal\Appointment\JoinCallAction as PortalAppointmentJoinCallAction;
 use App\Http\Controllers\Portal\Appointment\PostSessionShowAction as PortalAppointmentPostSessionShowAction;
+use App\Http\Controllers\Portal\Appointment\RecordingConsentAction as PortalAppointmentRecordingConsentAction;
 use App\Http\Controllers\Portal\Appointment\ShowAction as PortalAppointmentShowAction;
 use App\Http\Controllers\Portal\Appointment\StoreAction as PortalAppointmentStoreAction;
 use App\Http\Controllers\Portal\Appointment\WaitingShowAction as PortalAppointmentWaitingShowAction;
@@ -187,7 +188,6 @@ Route::middleware(['auth', 'verified', 'professional'])
         Route::patch('/appointments/{appointment}/status', UpdateStatusAction::class)->name('appointments.status');
         Route::post('/appointments/{appointment}/start-call', StartCallAction::class)->name('appointments.start-call');
         Route::post('/appointments/{appointment}/end-call', EndCallAction::class)->name('appointments.end-call');
-        Route::post('/appointments/{appointment}/transcribe', TranscribeAction::class)->name('appointments.transcribe');
         Route::post('/appointments/{appointment}/summarize', SummarizeAction::class)->name('appointments.summarize');
         Route::post('/appointments/{appointment}/generate-invoice', GenerateInvoiceAction::class)->name('appointments.generate-invoice');
         Route::delete('/appointments/{appointment}', AppointmentDestroyAction::class)->name('appointments.destroy');
@@ -274,6 +274,7 @@ Route::middleware(['auth', 'verified'])
         Route::post('/appointments/{appointment}/cancel', PortalAppointmentCancelAction::class)->name('appointments.cancel');
         Route::get('/appointments/{appointment}/join', PortalAppointmentJoinCallAction::class)->name('appointments.join');
         Route::get('/appointments/{appointment}/waiting', PortalAppointmentWaitingShowAction::class)->name('appointments.waiting');
+        Route::post('/appointments/{appointment}/recording-consent', PortalAppointmentRecordingConsentAction::class)->name('appointments.recording-consent');
         Route::get('/appointments/{appointment}/post-session', PortalAppointmentPostSessionShowAction::class)->name('appointments.post-session');
 
         Route::get('/invoices', PortalInvoiceIndexAction::class)->name('invoices.index');
@@ -298,6 +299,9 @@ Route::middleware(['auth', 'verified'])
         Route::get('/call/{roomId}', CallShowRoomAction::class)
             ->name('call.room')
             ->where('roomId', '[a-z0-9-]+');
+
+        Route::post('/appointments/{appointment}/transcribe', TranscribeAction::class)
+            ->name('appointments.transcribe');
     });
 
 require __DIR__.'/settings.php';

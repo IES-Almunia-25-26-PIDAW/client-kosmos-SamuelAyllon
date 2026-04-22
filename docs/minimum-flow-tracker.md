@@ -29,7 +29,7 @@ Resumen: aproximadamente **11/16** pasos completos, **5/16** parciales, **0/16**
 | P2 | Listar profesionales y reservar hoy | ✅ | Listado + modal de slots ([patient/professionals/index.tsx](../resources/js/pages/patient/professionals/index.tsx)), página de resumen ([patient/appointments/book.tsx](../resources/js/pages/patient/appointments/book.tsx)), lista ([patient/appointments/index.tsx](../resources/js/pages/patient/appointments/index.tsx)). Slots calculados en [AvailabilityService](../app/Services/AvailabilityService.php) |
 | P3 | Cita visible en home | ✅ | [resources/js/pages/patient/dashboard.tsx](../resources/js/pages/patient/dashboard.tsx) |
 | P4 | Sala de espera paciente | ✅ | [patient/appointments/waiting.tsx](../resources/js/pages/patient/appointments/waiting.tsx) + [Portal\Appointment\WaitingShowAction](../app/Http/Controllers/Portal/Appointment/WaitingShowAction.php); `JoinCallAction` ahora redirige a `patient.appointments.waiting` |
-| P5 | Videollamada + transcripción automática | 🟡 | Jitsi OK ([resources/js/pages/call/room.tsx](../resources/js/pages/call/room.tsx)). Transcripción **no dispatched** — `@todo Groq Whisper` en [app/Http/Controllers/Appointment/TranscribeAction.php](../app/Http/Controllers/Appointment/TranscribeAction.php) |
+| P5 | Videollamada + transcripción automática | 🟡 | Jitsi OK ([resources/js/pages/call/room.tsx](../resources/js/pages/call/room.tsx)). Backend de transcripción chunked listo: `TranscribeChunkJob` dispatch desde `TranscribeAction` (Groq Whisper `whisper-large-v3-turbo`), tabla `transcription_segments`, consentimiento paciente (ADR-0008). **Falta**: Reverb broadcast (ADR-0009) + captura `MediaRecorder` en frontend + modal de consentimiento. |
 | P6 | Pantalla de cierre (mensaje + aviso factura/acuerdos) | ✅ | [patient/appointments/post-session.tsx](../resources/js/pages/patient/appointments/post-session.tsx) + [Portal\Appointment\PostSessionShowAction](../app/Http/Controllers/Portal/Appointment/PostSessionShowAction.php); `CallShowRoomAction` redirige aquí al finalizar. Aviso factura + acuerdos. |
 | P7 | Redirect automático a home | ✅ | Countdown 15s en `post-session.tsx` → `patient.dashboard` |
 
@@ -41,7 +41,7 @@ Resumen: aproximadamente **11/16** pasos completos, **5/16** parciales, **0/16**
 | F2 | Dashboard con citas de hoy | ✅ | [resources/js/pages/professional/dashboard.tsx](../resources/js/pages/professional/dashboard.tsx) |
 | F3 | Pre-sesión: contexto + recursos | ✅ | [resources/js/pages/professional/patients/pre-session.tsx](../resources/js/pages/professional/patients/pre-session.tsx), `PatientPreSessionAction` |
 | F4 | Sala de espera | ✅ | [app/Http/Controllers/Appointment/WaitingShowAction.php](../app/Http/Controllers/Appointment/WaitingShowAction.php) |
-| F5 | Video + transcripción al entrar paciente | 🟡 | Jitsi OK; transcripción pendiente (mismo `@todo` que P5) |
+| F5 | Video + transcripción al entrar paciente | 🟡 | Jitsi OK; backend de transcripción listo (ver P5). Falta UI live-transcript lateral + Reverb broadcast. |
 | F6a | Notas + resumen IA automático | 🟡 | UI OK ([resources/js/pages/professional/patients/post-session.tsx](../resources/js/pages/professional/patients/post-session.tsx)). Resumen **no dispatched** — `@todo Llama 3.3` en [app/Http/Controllers/Appointment/SummarizeAction.php](../app/Http/Controllers/Appointment/SummarizeAction.php) |
 | F6b | Revisar plantilla de factura (requisitos legales PSI) | 🟡 | `GenerateInvoiceAction` crea draft vía `BillingService`. **Falta pantalla de review** y validación de campos legales (datos fiscales, IVA exento art. 20.1.3º LIVA, número secuencial, etc.) |
 | F6c | Confirmar cierre | 🟡 | `EndCallAction` marca `completed` pero no existe wizard explícito de 3 pasos |
@@ -53,7 +53,7 @@ Resumen: aproximadamente **11/16** pasos completos, **5/16** parciales, **0/16**
 | Capacidad | Estado | Notas |
 |-----------|--------|-------|
 | Jitsi video | ✅ | `@jitsi/react-sdk` 1.4.4 |
-| Transcripción (Groq Whisper) | ❌ | Config en `config/services.php`; job no implementado |
+| Transcripción (Groq Whisper) | 🟡 | `TranscribeChunkJob` + `TranscribeAction` + tabla `transcription_segments` implementados (ADR-0008). Pendiente: broadcast en vivo al profesional (Reverb) y captura de audio en el cliente. |
 | Resumen IA (Llama/OpenAI) | ❌ | `openai-php/client` disponible; job no implementado |
 | Factura (generación draft) | ✅ | `BillingService`, tablas `invoices` / `invoice_items` |
 | Envío email factura (Gmail API) | ❌ | `@todo` en [app/Http/Controllers/Invoice/SendAction.php](../app/Http/Controllers/Invoice/SendAction.php) |
@@ -67,7 +67,7 @@ Resumen: aproximadamente **11/16** pasos completos, **5/16** parciales, **0/16**
 ### P0 — Bloquea flujo end-to-end
 - [x] Páginas Inertia `patient/appointments/book.tsx` e `index.tsx` (P2) — 2026-04-22
 - [x] Página `patient/appointments/waiting.tsx` + `JoinCallAction` → waiting room (P4) — 2026-04-22
-- [ ] `app/Jobs/TranscribeSessionJob.php` (Groq Whisper) y dispatch desde `TranscribeAction` (P5/F5)
+- [~] `app/Jobs/TranscribeChunkJob.php` (Groq Whisper) y dispatch desde `TranscribeAction` (P5/F5) — 2026-04-22 backend listo; falta Reverb + frontend
 - [ ] `app/Jobs/SummarizeSessionJob.php` y dispatch desde `SummarizeAction` (F6a)
 - [x] Página `patient/appointments/post-session.tsx` (mensaje motivador + aviso factura/acuerdos) (P6) — 2026-04-22
 - [x] Página `professional/appointments/closing-success.tsx` (F7) — 2026-04-22
@@ -99,3 +99,4 @@ Resumen: aproximadamente **11/16** pasos completos, **5/16** parciales, **0/16**
 | 2026-04-22 | Samuel Ayllón | Creación del tracker | — |
 | 2026-04-22 | Claude (Opus 4.7) | P2 completo (book + appointments index + modal slots) y P4 completo (waiting paciente) | — |
 | 2026-04-22 | Claude (Opus 4.7) | Fase A — P6 + F7 + redirects P7/F8: pantallas de cierre con countdown y Pest tests (6/6 passing) | — |
+| 2026-04-22 | Claude (Opus 4.7) | Sprint 1 commit 1 — Backend transcripción chunked: ADR-0008, `transcription_segments`, `TranscribeChunkJob` (Groq Whisper), `RecordingConsentAction`, rutas compartidas y Pest tests (11/11 passing) | — |
