@@ -122,7 +122,7 @@ it('devuelve 403 si la cita terminó hace más de 30 minutos', function () {
 
 // ─── Portal: paciente une llamada ─────────────────────────────────────────────
 
-it('el paciente que une la llamada recibe patient_joined_at y redirige a la sala', function () {
+it('el paciente que une la llamada recibe patient_joined_at y redirige a la sala de espera', function () {
     $appointment = makeActiveAppointment([
         'patient_joined_at' => null,
     ]);
@@ -130,7 +130,7 @@ it('el paciente que une la llamada recibe patient_joined_at y redirige a la sala
 
     $this->actingAs($patient)
         ->get(route('patient.appointments.join', $appointment))
-        ->assertRedirect(route('call.room', ['roomId' => $appointment->meeting_room_id]));
+        ->assertRedirect(route('patient.appointments.waiting', $appointment));
 
     expect($appointment->fresh()->patient_joined_at)->not->toBeNull();
 });

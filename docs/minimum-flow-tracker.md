@@ -13,11 +13,11 @@ Entregar un flujo mínimo viable donde un paciente pueda reservar, asistir y cer
 
 ## 2. Estado global
 
-- **Paciente:** 3 ✅ · 2 🟡 · 2 ❌ — 7 pasos
-- **Profesional:** 4 ✅ · 4 🟡 · 1 ❌ — 8 pasos… wait
+- **Paciente:** 5 ✅ · 1 🟡 · 1 ❌ — 7 pasos
+- **Profesional:** 4 ✅ · 4 🟡 · 1 ❌ — 9 pasos
 - **Capacidades técnicas:** 2 ✅ · 5 ❌
 
-Resumen: aproximadamente **7/15** pasos completos, **5/15** parciales, **3/15** faltan por completo.
+Resumen: aproximadamente **9/15** pasos completos, **5/15** parciales, **1/15** falta por completo.
 
 ---
 
@@ -26,9 +26,9 @@ Resumen: aproximadamente **7/15** pasos completos, **5/15** parciales, **3/15** 
 | # | Paso | Estado | Archivos / Notas |
 |---|------|--------|------------------|
 | P1 | Home sin citas (empty state) | ✅ | [resources/js/pages/patient/dashboard.tsx](../resources/js/pages/patient/dashboard.tsx), [app/Http/Controllers/Portal/Dashboard/IndexAction.php](../app/Http/Controllers/Portal/Dashboard/IndexAction.php) |
-| P2 | Listar profesionales y reservar hoy | 🟡 | Listado OK ([resources/js/pages/patient/professionals/index.tsx](../resources/js/pages/patient/professionals/index.tsx)). **Faltan páginas Inertia** `patient/appointments/book` e `index` (controladores renderizan pero el `.tsx` no existe) |
+| P2 | Listar profesionales y reservar hoy | ✅ | Listado + modal de slots ([patient/professionals/index.tsx](../resources/js/pages/patient/professionals/index.tsx)), página de resumen ([patient/appointments/book.tsx](../resources/js/pages/patient/appointments/book.tsx)), lista ([patient/appointments/index.tsx](../resources/js/pages/patient/appointments/index.tsx)). Slots calculados en [AvailabilityService](../app/Services/AvailabilityService.php) |
 | P3 | Cita visible en home | ✅ | [resources/js/pages/patient/dashboard.tsx](../resources/js/pages/patient/dashboard.tsx) |
-| P4 | Sala de espera paciente | ❌ | Solo existe la del profesional. `JoinCallAction` redirige directo a la call |
+| P4 | Sala de espera paciente | ✅ | [patient/appointments/waiting.tsx](../resources/js/pages/patient/appointments/waiting.tsx) + [Portal\Appointment\WaitingShowAction](../app/Http/Controllers/Portal/Appointment/WaitingShowAction.php); `JoinCallAction` ahora redirige a `patient.appointments.waiting` |
 | P5 | Videollamada + transcripción automática | 🟡 | Jitsi OK ([resources/js/pages/call/room.tsx](../resources/js/pages/call/room.tsx)). Transcripción **no dispatched** — `@todo Groq Whisper` en [app/Http/Controllers/Appointment/TranscribeAction.php](../app/Http/Controllers/Appointment/TranscribeAction.php) |
 | P6 | Pantalla de cierre (mensaje + aviso factura/acuerdos) | ❌ | No existe página post-session para paciente |
 | P7 | Redirect automático a home | 🟡 | Hoy redirige a `patient.appointments.show`, no al dashboard |
@@ -65,8 +65,8 @@ Resumen: aproximadamente **7/15** pasos completos, **5/15** parciales, **3/15** 
 ## 6. Backlog priorizado hacia 2026-05-14
 
 ### P0 — Bloquea flujo end-to-end
-- [ ] Páginas Inertia `patient/appointments/book.tsx` e `index.tsx` (P2)
-- [ ] Página `patient/appointments/waiting.tsx` + `JoinCallAction` → waiting room (P4)
+- [x] Páginas Inertia `patient/appointments/book.tsx` e `index.tsx` (P2) — 2026-04-22
+- [x] Página `patient/appointments/waiting.tsx` + `JoinCallAction` → waiting room (P4) — 2026-04-22
 - [ ] `app/Jobs/TranscribeSessionJob.php` (Groq Whisper) y dispatch desde `TranscribeAction` (P5/F5)
 - [ ] `app/Jobs/SummarizeSessionJob.php` y dispatch desde `SummarizeAction` (F6a)
 - [ ] Página `patient/appointments/post-session.tsx` (mensaje motivador + aviso factura/acuerdos) (P6)
@@ -97,3 +97,4 @@ Resumen: aproximadamente **7/15** pasos completos, **5/15** parciales, **3/15** 
 | Fecha | Responsable | Cambio | PR |
 |-------|-------------|--------|----|
 | 2026-04-22 | Samuel Ayllón | Creación del tracker | — |
+| 2026-04-22 | Claude (Opus 4.7) | P2 completo (book + appointments index + modal slots) y P4 completo (waiting paciente) | — |

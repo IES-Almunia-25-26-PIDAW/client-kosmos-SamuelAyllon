@@ -29,6 +29,6 @@ class JoinCallAction extends Controller
             $appointment->update(['patient_joined_at' => now()]);
         }
 
-        return redirect()->route('call.room', ['roomId' => $appointment->meeting_room_id]);
+        return redirect()->route('patient.appointments.waiting', $appointment);
     }
 }
