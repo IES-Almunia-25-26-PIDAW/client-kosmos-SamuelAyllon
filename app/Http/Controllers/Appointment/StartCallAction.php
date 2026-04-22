@@ -18,19 +18,18 @@ class StartCallAction extends Controller
             'Solo se puede iniciar una llamada en citas confirmadas.'
         );
 
-        // @todo Integrate with video provider (Daily.co, Whereby, etc.)
-        $roomId  = 'room-' . Str::uuid();
-        $meetUrl = config('app.url') . '/call/' . $roomId;
+        $roomId = 'kosmos-'.Str::uuid();
+        $meetUrl = route('call.room', ['roomId' => $roomId]);
 
         $appointment->update([
-            'status'          => 'in_progress',
+            'status' => 'in_progress',
             'meeting_room_id' => $roomId,
-            'meeting_url'     => $meetUrl,
+            'meeting_url' => $meetUrl,
         ]);
 
         return response()->json([
             'meeting_url' => $meetUrl,
-            'room_id'     => $roomId,
+            'room_id' => $roomId,
         ]);
     }
 }

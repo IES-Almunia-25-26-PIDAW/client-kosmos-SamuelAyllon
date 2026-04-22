@@ -24,6 +24,7 @@ use App\Http\Controllers\Appointment\TranscribeAction;
 use App\Http\Controllers\Appointment\UpdateAction as AppointmentUpdateAction;
 use App\Http\Controllers\Appointment\UpdateStatusAction;
 use App\Http\Controllers\Appointment\WaitingShowAction;
+use App\Http\Controllers\Call\ShowRoomAction as CallShowRoomAction;
 use App\Http\Controllers\CollaborationAgreement\DestroyAction as CollaborationDestroyAction;
 use App\Http\Controllers\CollaborationAgreement\IndexAction as CollaborationIndexAction;
 use App\Http\Controllers\CollaborationAgreement\StoreAction as CollaborationStoreAction;
@@ -263,6 +264,14 @@ Route::middleware(['auth', 'verified'])
 
         Route::get('/profile', PortalProfileShowAction::class)->name('profile.show');
         Route::match(['put', 'patch'], '/profile', PortalProfileUpdateAction::class)->name('profile.update');
+    });
+
+// ─── Video call room (accesible por profesional y paciente autenticados) ──────
+Route::middleware(['auth', 'verified'])
+    ->group(function () {
+        Route::get('/call/{roomId}', CallShowRoomAction::class)
+            ->name('call.room')
+            ->where('roomId', '[a-z0-9-]+');
     });
 
 require __DIR__.'/settings.php';
