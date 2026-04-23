@@ -26,6 +26,7 @@ class UpdateStatusAction extends Controller
         ]);
 
         $newStatus = $request->status;
+        /** @phpstan-ignore nullCoalesce.offset */
         $allowed = self::ALLOWED_TRANSITIONS[$appointment->status] ?? [];
 
         if (! in_array($newStatus, $allowed)) {

@@ -4,8 +4,18 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @property \Illuminate\Support\Carbon|null $issued_at
+ * @property \Illuminate\Support\Carbon|null $due_at
+ * @property \Illuminate\Support\Carbon|null $paid_at
+ * @property-read \App\Models\User|null $patient
+ * @property-read \App\Models\User|null $professional
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\InvoiceItem> $items
+ */
 class Invoice extends Model
 {
     use HasFactory, SoftDeletes;
@@ -30,22 +40,22 @@ class Invoice extends Model
         ];
     }
 
-    public function workspace()
+    public function workspace(): BelongsTo
     {
         return $this->belongsTo(Workspace::class);
     }
 
-    public function patient()
+    public function patient(): BelongsTo
     {
         return $this->belongsTo(User::class, 'patient_id');
     }
 
-    public function professional()
+    public function professional(): BelongsTo
     {
         return $this->belongsTo(User::class, 'professional_id');
     }
 
-    public function items()
+    public function items(): HasMany
     {
         return $this->hasMany(InvoiceItem::class);
     }

@@ -11,6 +11,11 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Spatie\Permission\Traits\HasRoles;
 
+/**
+ * @property string $name
+ * @property-read \App\Models\PatientProfile|null $patientProfile
+ * @property-read \App\Models\ProfessionalProfile|null $professionalProfile
+ */
 class User extends Authenticatable implements MustVerifyEmail
 {
     use HasFactory, HasRoles, Notifiable, SoftDeletes, TwoFactorAuthenticatable;
@@ -136,6 +141,7 @@ class User extends Authenticatable implements MustVerifyEmail
     protected function role(): Attribute
     {
         return Attribute::make(
+            /** @phpstan-ignore nullsafe.neverNull */
             get: fn () => $this->roles->first()?->name ?? 'professional',
         );
     }
@@ -169,6 +175,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function currentWorkspaceId(): ?int
     {
+        /** @phpstan-ignore nullsafe.neverNull */
         return session('current_workspace_id')
             ?? $this->workspaces()->first()?->id
             ?? $this->createdWorkspaces()->first()?->id;

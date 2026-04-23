@@ -40,7 +40,7 @@ class IndexAction extends Controller
             ->whereNotIn('status', ['cancelled'])
             ->orderBy('starts_at')
             ->get()
-            ->map(function ($appointment) use ($user, $patientProfileMap) {
+            ->map(function (Appointment $appointment) use ($user, $patientProfileMap) {
                 $sessionNumber = Appointment::where('professional_id', $user->id)
                     ->where('patient_id', $appointment->patient_id)
                     ->where('status', 'completed')
@@ -77,7 +77,7 @@ class IndexAction extends Controller
             ->orderBy('due_at')
             ->take(5)
             ->get()
-            ->map(fn ($invoice) => [
+            ->map(fn (Invoice $invoice) => [
                 'id' => $invoice->id,
                 'patient_id' => $invoice->patient_id,
                 'patient_name' => $invoice->patient?->name ?? 'Paciente',
@@ -96,7 +96,7 @@ class IndexAction extends Controller
                 ->where('is_active', true)
                 ->with('user:id,name')
                 ->get(['id', 'user_id'])
-                ->map(fn ($p) => [
+                ->map(fn (PatientProfile $p) => [
                     'id' => $p->id,
                     'project_name' => $p->user?->name ?? 'Paciente',
                     'payment_status' => 'pending',
@@ -109,7 +109,7 @@ class IndexAction extends Controller
                 ->where('is_active', true)
                 ->with('user:id,name')
                 ->get(['id', 'user_id'])
-                ->map(fn ($p) => [
+                ->map(fn (PatientProfile $p) => [
                     'id' => $p->id,
                     'project_name' => $p->user?->name ?? 'Paciente',
                 ]),

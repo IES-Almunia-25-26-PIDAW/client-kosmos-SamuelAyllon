@@ -4,8 +4,33 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @property int $id
+ * @property int $workspace_id
+ * @property int $patient_id
+ * @property int $professional_id
+ * @property int|null $service_id
+ * @property \Illuminate\Support\Carbon $starts_at
+ * @property \Illuminate\Support\Carbon $ends_at
+ * @property \Illuminate\Support\Carbon|null $patient_joined_at
+ * @property \Illuminate\Support\Carbon|null $professional_joined_at
+ * @property string $status
+ * @property string|null $modality
+ * @property string|null $meeting_room_id
+ * @property string|null $meeting_url
+ * @property int|null $cancelled_by
+ * @property string|null $cancellation_reason
+ * @property string|null $notes
+ * @property-read \App\Models\User|null $patient
+ * @property-read \App\Models\User|null $professional
+ * @property-read \App\Models\Service|null $service
+ * @property-read \App\Models\SessionRecording|null $sessionRecording
+ */
 class Appointment extends Model
 {
     use HasFactory, SoftDeletes;
@@ -28,52 +53,52 @@ class Appointment extends Model
         ];
     }
 
-    public function workspace()
+    public function workspace(): BelongsTo
     {
         return $this->belongsTo(Workspace::class);
     }
 
-    public function patient()
+    public function patient(): BelongsTo
     {
         return $this->belongsTo(User::class, 'patient_id');
     }
 
-    public function professional()
+    public function professional(): BelongsTo
     {
         return $this->belongsTo(User::class, 'professional_id');
     }
 
-    public function service()
+    public function service(): BelongsTo
     {
         return $this->belongsTo(Service::class);
     }
 
-    public function sessionRecording()
+    public function sessionRecording(): HasOne
     {
         return $this->hasOne(SessionRecording::class);
     }
 
-    public function invoiceItems()
+    public function invoiceItems(): HasMany
     {
         return $this->hasMany(InvoiceItem::class);
     }
 
-    public function cancelledBy()
+    public function cancelledBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'cancelled_by');
     }
 
-    public function notes()
+    public function notes(): HasMany
     {
         return $this->hasMany(Note::class);
     }
 
-    public function agreements()
+    public function agreements(): HasMany
     {
         return $this->hasMany(Agreement::class);
     }
 
-    public function kosmoBriefings()
+    public function kosmoBriefings(): HasMany
     {
         return $this->hasMany(KosmoBriefing::class);
     }

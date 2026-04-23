@@ -36,7 +36,7 @@ class IndexAction extends Controller
                 ->sum('total'),
         ];
 
-        $payments = $invoices->through(fn ($invoice) => [
+        $payments = $invoices->through(fn (Invoice $invoice) => [
             'id' => $invoice->id,
             'patient_id' => $invoice->patient_id,
             'user_id' => $invoice->professional_id,

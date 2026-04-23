@@ -6,12 +6,22 @@ use App\Models\Concerns\BelongsToWorkspace;
 use Database\Factories\PatientProfileFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @property-read \App\Models\User $user
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Appointment> $appointments
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Invoice> $invoices
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\ConsentForm> $consentForms
+ */
 class PatientProfile extends Model
 {
     use BelongsToWorkspace, HasFactory, SoftDeletes;
 
+    /** @phpstan-ignore new.static */
     protected static function newFactory(): PatientProfileFactory
     {
         return PatientProfileFactory::new();
@@ -34,64 +44,64 @@ class PatientProfile extends Model
         ];
     }
 
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function professional()
+    public function professional(): BelongsTo
     {
         return $this->belongsTo(User::class, 'professional_id');
     }
 
-    public function appointments()
+    public function appointments(): HasMany
     {
         return $this->hasMany(Appointment::class, 'patient_id', 'user_id');
     }
 
-    public function notes()
+    public function notes(): HasMany
     {
         return $this->hasMany(Note::class, 'patient_id');
     }
 
-    public function agreements()
+    public function agreements(): HasMany
     {
         return $this->hasMany(Agreement::class, 'patient_id');
     }
 
-    public function invoices()
+    public function invoices(): HasMany
     {
         return $this->hasMany(Invoice::class, 'patient_id', 'user_id');
     }
 
-    public function documents()
+    public function documents(): HasMany
     {
         return $this->hasMany(Document::class, 'patient_id');
     }
 
-    public function consentForms()
+    public function consentForms(): HasMany
     {
         return $this->hasMany(ConsentForm::class, 'patient_id');
     }
 
-    public function kosmoBriefings()
+    public function kosmoBriefings(): HasMany
     {
         return $this->hasMany(KosmoBriefing::class, 'patient_id');
     }
 
-    public function caseAssignments()
+    public function caseAssignments(): HasMany
     {
         return $this->hasMany(CaseAssignment::class, 'patient_id', 'user_id');
     }
 
-    public function professionals()
+    public function professionals(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'case_assignments', 'patient_id', 'professional_id', 'user_id')
             ->withPivot(['workspace_id', 'is_primary', 'role', 'status', 'started_at', 'ended_at', 'notes'])
             ->withTimestamps();
     }
 
-    public function referrals()
+    public function referrals(): HasMany
     {
         return $this->hasMany(Referral::class, 'patient_id');
     }
