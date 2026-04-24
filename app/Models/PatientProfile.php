@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 /**
  * @property-read \App\Models\User $user
@@ -19,7 +21,15 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class PatientProfile extends Model
 {
-    use BelongsToWorkspace, HasFactory, SoftDeletes;
+    use BelongsToWorkspace, HasFactory, LogsActivity, SoftDeletes;
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['status', 'is_active', 'first_session_at', 'last_session_at'])
+            ->logOnlyDirty()
+            ->dontLogEmptyChanges();
+    }
 
     /** @phpstan-ignore new.static */
     protected static function newFactory(): PatientProfileFactory
@@ -41,6 +51,9 @@ class PatientProfile extends Model
             'is_active' => 'boolean',
             'first_session_at' => 'datetime',
             'last_session_at' => 'datetime',
+            'clinical_notes' => 'encrypted',
+            'diagnosis' => 'encrypted',
+            'treatment_plan' => 'encrypted',
         ];
     }
 

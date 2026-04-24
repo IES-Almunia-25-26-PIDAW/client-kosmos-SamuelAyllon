@@ -15,9 +15,13 @@ class Note extends Model
         'content', 'type', 'is_ai_generated',
     ];
 
-    protected $casts = [
-        'is_ai_generated' => 'boolean',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'is_ai_generated' => 'boolean',
+            'content' => 'encrypted',
+        ];
+    }
 
     public function patient()
     {

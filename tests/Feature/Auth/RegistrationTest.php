@@ -59,6 +59,10 @@ class RegistrationTest extends TestCase
             'password_confirmation' => 'Password1!',
             'phone' => '+34600000000',
             'date_of_birth' => '1990-05-15',
+            'consent_privacy_policy' => '1',
+            'consent_terms_of_service' => '1',
+            'consent_health_data' => '1',
+            'consent_recording_global' => '1',
         ]);
 
         $this->assertAuthenticated();

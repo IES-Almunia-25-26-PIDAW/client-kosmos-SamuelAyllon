@@ -21,6 +21,7 @@ class TranscriptionSegment extends Model
             'position' => 'integer',
             'started_at_ms' => 'integer',
             'ended_at_ms' => 'integer',
+            'text' => 'encrypted',
         ];
     }
 

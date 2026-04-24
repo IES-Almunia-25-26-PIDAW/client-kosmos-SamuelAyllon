@@ -14,7 +14,7 @@ return new class extends Migration
             $table->string('audio_path')->nullable();
             $table->longText('transcription')->nullable();
             $table->text('ai_summary')->nullable();
-            $table->enum('transcription_status', ['pending', 'processing', 'completed', 'failed'])
+            $table->enum('transcription_status', ['pending', 'processing', 'completed', 'failed', 'rejected_no_consent'])
                 ->default('pending');
             $table->timestamp('summarized_at')->nullable();
             $table->string('language', 10)->default('es');

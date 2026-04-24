@@ -92,6 +92,10 @@ export default function Register() {
         specialties: [] as string[],
         bio: '',
         date_of_birth: '',
+        consent_privacy_policy: false,
+        consent_terms_of_service: false,
+        consent_health_data: false,
+        consent_recording_global: false,
     });
 
     function selectType(type: UserType) {
@@ -682,6 +686,61 @@ export default function Register() {
                             <InputError message={errors.password_confirmation} />
                         </Stack>
 
+                        {/* Consentimientos RGPD — solo paciente */}
+                        {userType === 'patient' && (
+                            <Stack gap="3">
+                                <Text
+                                    fontSize="11px"
+                                    fontWeight="semibold"
+                                    letterSpacing="widest"
+                                    textTransform="uppercase"
+                                    color="fg.muted"
+                                >
+                                    Consentimientos obligatorios
+                                </Text>
+
+                                {[
+                                    {
+                                        field: 'consent_privacy_policy' as const,
+                                        label: 'He leído y acepto la política de privacidad.',
+                                    },
+                                    {
+                                        field: 'consent_terms_of_service' as const,
+                                        label: 'He leído y acepto los términos del servicio.',
+                                    },
+                                    {
+                                        field: 'consent_health_data' as const,
+                                        label: 'Consiento el tratamiento de mis datos de salud para la finalidad terapéutica indicada. (RGPD Art. 9.2.h)',
+                                    },
+                                    {
+                                        field: 'consent_recording_global' as const,
+                                        label: 'Autorizo la grabación de audio de mis sesiones y su procesamiento automatizado por la IA de ClientKosmos para generar resúmenes clínicos destinados exclusivamente a mi profesional. (RGPD Art. 22)',
+                                    },
+                                ].map(({ field, label }) => (
+                                    <Flex key={field} gap="3" alignItems="flex-start">
+                                        <input
+                                            type="checkbox"
+                                            id={field}
+                                            checked={data[field] as boolean}
+                                            onChange={(e) => setData(field, e.target.checked)}
+                                            style={{ marginTop: 3, flexShrink: 0, accentColor: 'var(--chakra-colors-brand-solid)' }}
+                                        />
+                                        <Label htmlFor={field}>
+                                            <Text as="span" fontSize="xs" color="fg.muted" lineHeight="tall">
+                                                {label}
+                                            </Text>
+                                        </Label>
+                                    </Flex>
+                                ))}
+
+                                {(errors.consent_privacy_policy || errors.consent_terms_of_service || errors.consent_health_data || errors.consent_recording_global) && (
+                                    <Text fontSize="xs" color="red.500">
+                                        Debes aceptar todos los consentimientos obligatorios para registrarte.
+                                    </Text>
+                                )}
+                            </Stack>
+                        )}
+
                         {/* Submit Button */}
                         <ChakraButton
                             type="submit"
@@ -690,7 +749,14 @@ export default function Register() {
                             borderRadius="full"
                             fontSize="lg"
                             fontWeight="bold"
-                            disabled={processing}
+                            disabled={
+                                processing ||
+                                (userType === 'patient' &&
+                                    (!data.consent_privacy_policy ||
+                                        !data.consent_terms_of_service ||
+                                        !data.consent_health_data ||
+                                        !data.consent_recording_global))
+                            }
                             color="rgba(255,255,255,0.97)"
                             variant="plain"
                             style={{

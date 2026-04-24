@@ -3,13 +3,18 @@
 namespace App\Providers;
 
 use App\Http\Responses\LoginResponse;
+use App\Models\Document;
 use App\Models\Invoice;
 use App\Models\PatientProfile;
+use App\Models\SessionRecording;
 use App\Models\User;
 use App\Observers\PatientObserver;
 use App\Observers\PaymentObserver;
 use App\Policies\AdminPolicy;
+use App\Policies\DocumentPolicy;
 use App\Policies\PatientPolicy;
+use App\Policies\PaymentPolicy;
+use App\Policies\SessionRecordingPolicy;
 use Carbon\CarbonImmutable;
 use GuzzleHttp\Client as GuzzleClient;
 use Illuminate\Support\Facades\Date;
@@ -61,6 +66,9 @@ class AppServiceProvider extends ServiceProvider
 
         Gate::policy(User::class, AdminPolicy::class);
         Gate::policy(PatientProfile::class, PatientPolicy::class);
+        Gate::policy(Invoice::class, PaymentPolicy::class);
+        Gate::policy(Document::class, DocumentPolicy::class);
+        Gate::policy(SessionRecording::class, SessionRecordingPolicy::class);
     }
 
     /**

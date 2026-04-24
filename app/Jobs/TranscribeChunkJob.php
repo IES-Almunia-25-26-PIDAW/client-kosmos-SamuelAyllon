@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Events\TranscriptionSegmentCreated;
 use App\Models\SessionRecording;
 use App\Models\TranscriptionSegment;
+use App\Services\RgpdService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Http;
@@ -28,8 +29,30 @@ class TranscribeChunkJob implements ShouldQueue
         public string $chunkPath,
     ) {}
 
-    public function handle(): void
+    public function handle(RgpdService $rgpdService): void
     {
+        $recording = SessionRecording::with('appointment.patient')->find($this->sessionRecordingId);
+
+        if ($recording === null) {
+            Log::warning('TranscribeChunkJob: recording not found', ['id' => $this->sessionRecordingId]);
+            Storage::disk('local')->delete($this->chunkPath);
+
+            return;
+        }
+
+        $patient = $recording->appointment?->patient;
+
+        if ($patient !== null && ! $rgpdService->hasActiveRecordingConsent($patient)) {
+            Storage::disk('local')->delete($this->chunkPath);
+            Log::info('TranscribeChunkJob: skipped — no active recording consent', [
+                'session_recording_id' => $this->sessionRecordingId,
+                'patient_id' => $patient->id,
+            ]);
+            $recording->update(['transcription_status' => 'rejected_no_consent']);
+
+            return;
+        }
+
         $disk = Storage::disk('local');
 
         if (! $disk->exists($this->chunkPath)) {
@@ -80,7 +103,7 @@ class TranscribeChunkJob implements ShouldQueue
             ],
         );
 
-        $appointmentId = SessionRecording::whereKey($this->sessionRecordingId)->value('appointment_id');
+        $appointmentId = $recording->appointment_id;
 
         if ($appointmentId !== null) {
             event(TranscriptionSegmentCreated::fromSegment($segment, (int) $appointmentId));

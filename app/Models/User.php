@@ -44,6 +44,8 @@ class User extends Authenticatable implements MustVerifyEmail
             'tutorial_completed_at' => 'datetime',
             'date_of_birth' => 'date',
             'password' => 'hashed',
+            'google_refresh_token' => 'encrypted',
+            'gdrive_refresh_token' => 'encrypted',
         ];
     }
 

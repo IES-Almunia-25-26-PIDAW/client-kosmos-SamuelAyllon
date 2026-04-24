@@ -5,6 +5,8 @@ namespace App\Actions\Fortify;
 use App\Concerns\PasswordValidationRules;
 use App\Concerns\ProfileValidationRules;
 use App\Models\User;
+use App\Services\RgpdService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
@@ -12,6 +14,8 @@ use Laravel\Fortify\Contracts\CreatesNewUsers;
 class CreateNewUser implements CreatesNewUsers
 {
     use PasswordValidationRules, ProfileValidationRules;
+
+    public function __construct(private readonly RgpdService $rgpdService) {}
 
     /**
      * Validate and create a newly registered user.
@@ -40,6 +44,10 @@ class CreateNewUser implements CreatesNewUsers
         } else {
             $rules += [
                 'date_of_birth' => ['nullable', 'date', 'before:today'],
+                'consent_privacy_policy' => ['required', 'accepted'],
+                'consent_terms_of_service' => ['required', 'accepted'],
+                'consent_health_data' => ['required', 'accepted'],
+                'consent_recording_global' => ['required', 'accepted'],
             ];
         }
 
@@ -64,6 +72,9 @@ class CreateNewUser implements CreatesNewUsers
         } else {
             $user->assignRole('patient');
             $user->patientProfile()->create([]);
+
+            $request = app(Request::class);
+            $this->rgpdService->storeRegistrationConsents($user, $request);
         }
 
         return $user;

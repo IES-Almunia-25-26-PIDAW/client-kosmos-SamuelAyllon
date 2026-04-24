@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 /**
  * @property \Illuminate\Support\Carbon|null $issued_at
@@ -18,7 +20,15 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Invoice extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, LogsActivity, SoftDeletes;
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['invoice_number', 'status', 'total', 'paid_at', 'payment_method'])
+            ->logOnlyDirty()
+            ->dontLogEmptyChanges();
+    }
 
     protected $fillable = [
         'workspace_id', 'patient_id', 'professional_id', 'invoice_number',
@@ -30,13 +40,13 @@ class Invoice extends Model
     protected function casts(): array
     {
         return [
-            'issued_at'  => 'datetime',
-            'due_at'     => 'date',
-            'paid_at'    => 'datetime',
-            'subtotal'   => 'decimal:2',
-            'tax_rate'   => 'decimal:2',
+            'issued_at' => 'datetime',
+            'due_at' => 'date',
+            'paid_at' => 'datetime',
+            'subtotal' => 'decimal:2',
+            'tax_rate' => 'decimal:2',
             'tax_amount' => 'decimal:2',
-            'total'      => 'decimal:2',
+            'total' => 'decimal:2',
         ];
     }
 

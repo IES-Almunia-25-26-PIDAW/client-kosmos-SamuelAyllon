@@ -40,7 +40,7 @@ it('calls Groq Whisper and persists the transcription segment', function () {
         startedAtMs: 0,
         endedAtMs: 8000,
         chunkPath: $chunkPath,
-    ))->handle();
+    ))->handle(app(\App\Services\RgpdService::class));
 
     $segment = TranscriptionSegment::where('session_recording_id', $recording->id)->first();
 
@@ -85,7 +85,7 @@ it('does not persist a segment when Whisper returns empty text', function () {
         startedAtMs: 0,
         endedAtMs: 8000,
         chunkPath: $chunkPath,
-    ))->handle();
+    ))->handle(app(\App\Services\RgpdService::class));
 
     expect(TranscriptionSegment::count())->toBe(0);
     expect(Storage::disk('local')->exists($chunkPath))->toBeFalse();
@@ -118,5 +118,5 @@ it('throws when Groq Whisper returns a failure', function () {
         startedAtMs: 0,
         endedAtMs: 8000,
         chunkPath: $chunkPath,
-    ))->handle())->toThrow(RuntimeException::class);
+    ))->handle(app(\App\Services\RgpdService::class)))->toThrow(RuntimeException::class);
 });

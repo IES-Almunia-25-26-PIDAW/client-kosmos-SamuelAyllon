@@ -1,8 +1,10 @@
 <?php
 
 use App\Models\CaseAssignment;
+use App\Models\ConsentForm;
 use App\Models\PatientProfile;
 use App\Models\User;
+use App\Services\RgpdService;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Role;
@@ -75,9 +77,9 @@ function createProfessional(): User
 }
 
 /**
- * Crea un usuario paciente con tutorial completado.
+ * Crea un usuario paciente con tutorial completado, PatientProfile y consentimiento de grabación.
  */
-function createPatient(): User
+function createPatient(bool $withRecordingConsent = true): User
 {
     ensureRolesExist();
 
@@ -85,6 +87,22 @@ function createPatient(): User
         'tutorial_completed_at' => now(),
     ]);
     $user->assignRole('patient');
+
+    $profile = PatientProfile::factory()->create(['user_id' => $user->id]);
+
+    if ($withRecordingConsent) {
+        ConsentForm::create([
+            'patient_id' => $profile->id,
+            'user_id' => $user->id,
+            'consent_type' => RgpdService::CONSENT_RECORDING_GLOBAL,
+            'template_version' => '1.0',
+            'content_snapshot' => 'Autorizo la grabación de audio de mis sesiones.',
+            'status' => 'signed',
+            'signed_at' => now(),
+            'signed_ip' => '127.0.0.1',
+            'signature_data' => 'checkbox_registration',
+        ]);
+    }
 
     return $user;
 }

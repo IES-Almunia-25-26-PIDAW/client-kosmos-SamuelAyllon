@@ -9,7 +9,7 @@ class PaymentPolicy
 {
     public function viewAny(User $user): bool
     {
-        return true;
+        return $user->isAdmin() || $user->isProfessional();
     }
 
     public function view(User $user, Invoice $invoice): bool
@@ -19,7 +19,7 @@ class PaymentPolicy
 
     public function create(User $user): bool
     {
-        return true;
+        return $user->isProfessional();
     }
 
     public function update(User $user, Invoice $invoice): bool
