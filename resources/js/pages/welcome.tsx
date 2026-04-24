@@ -101,7 +101,7 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
                                         <Button asChild className="glow-primary" display={{ base: 'none', sm: 'inline-flex' }}>
                                             <Link href={register()}>
                                                 <Flex alignItems="center" gap="2">
-                                                    <span>Empezar gratis</span>
+                                                    <span>Empezar ya</span>
                                                     <Icon as={Sparkles} boxSize="4" />
                                                 </Flex>
                                             </Link>
