@@ -25,6 +25,8 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
+import type { Auth, NavItem } from '@/types';
+import AppLogo from './app-logo';
 import { dashboard as portalDashboard } from '@/routes/patient';
 import { index as portalAppointmentsIndex } from '@/routes/patient/appointments';
 import { index as portalConsentFormsIndex } from '@/routes/patient/consent-forms';
@@ -37,8 +39,6 @@ import { index as messagesIndex } from '@/routes/professional/messages';
 import { index as patientsIndex } from '@/routes/professional/patients';
 import { index as scheduleIndex } from '@/routes/professional/schedule';
 import { index as teamIndex } from '@/routes/professional/workspace/team';
-import type { Auth, NavItem } from '@/types';
-import AppLogo from './app-logo';
 
 const footerNavItems: NavItem[] = [
     {

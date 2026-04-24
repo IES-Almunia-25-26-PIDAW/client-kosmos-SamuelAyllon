@@ -2,13 +2,13 @@ import { Box, Flex, Heading, Stack, Table, Text, chakra } from '@chakra-ui/react
 import { Head, router, usePage } from '@inertiajs/react';
 import { Plus, Search, Trash2, Users } from 'lucide-react';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import DashboardIndexAction from '@/actions/App/Http/Controllers/Admin/DashboardIndexAction';
 import CreateAction from '@/actions/App/Http/Controllers/Admin/Users/CreateAction';
 import DestroyAction from '@/actions/App/Http/Controllers/Admin/Users/DestroyAction';
 import ShowAction from '@/actions/App/Http/Controllers/Admin/Users/ShowAction';
 import { Button } from '@/components/ui/button';
 import AdminLayout from '@/layouts/admin-layout';
 import type { Auth } from '@/types';
+import DashboardIndexAction from '@/actions/App/Http/Controllers/Admin/DashboardIndexAction';
 
 interface UserRow {
     id: number;

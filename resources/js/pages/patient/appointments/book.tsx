@@ -3,9 +3,9 @@ import { Head, Link, useForm } from '@inertiajs/react';
 import { ArrowLeft, CalendarDays, Clock, Euro, Video } from 'lucide-react';
 import type { FormEvent, ReactNode } from 'react';
 import AppointmentStoreAction from '@/actions/App/Http/Controllers/Portal/Appointment/StoreAction';
-import ProfessionalIndexAction from '@/actions/App/Http/Controllers/Portal/Professional/IndexAction';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
+import ProfessionalIndexAction from '@/actions/App/Http/Controllers/Portal/Professional/IndexAction';
 
 const ChakraLink = chakra(Link);
 const ChakraImg = chakra('img');

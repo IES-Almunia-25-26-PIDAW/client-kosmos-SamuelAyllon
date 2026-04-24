@@ -31,10 +31,10 @@ import { UserMenuContent } from '@/components/user-menu-content';
 import { useCurrentUrl } from '@/hooks/use-current-url';
 import { useInitials } from '@/hooks/use-initials';
 import { toUrl } from '@/lib/utils';
-import { dashboard } from '@/routes/professional';
 import type { BreadcrumbItem, NavItem } from '@/types';
 import AppLogo from './app-logo';
 import logo from '@/assets/logo.png';
+import { dashboard } from '@/routes/professional';
 
 const ChakraLink = chakra(Link);
 

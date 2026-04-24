@@ -2,12 +2,12 @@ import { Box, Flex, Grid, Heading, Stack, Text, chakra } from '@chakra-ui/react'
 import { Form, Head, Link } from '@inertiajs/react';
 import { ArrowLeft, BookOpen, FileText, Folder, MessageSquare, Paperclip, Play } from 'lucide-react';
 import type { ReactNode } from 'react';
-import JoinWaitingRoomAction from '@/actions/App/Http/Controllers/Appointment/JoinWaitingRoomAction';
 import DashboardIndexAction from '@/actions/App/Http/Controllers/Dashboard/IndexAction';
 import PatientShowAction from '@/actions/App/Http/Controllers/Patient/ShowAction';
 import { EmptyState } from '@/components/empty-state';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
+import JoinWaitingRoomAction from '@/actions/App/Http/Controllers/Appointment/JoinWaitingRoomAction';
 
 const ChakraLink = chakra(Link);
 

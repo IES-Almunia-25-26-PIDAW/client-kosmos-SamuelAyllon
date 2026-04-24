@@ -3,13 +3,13 @@ import { Head, router, useForm } from '@inertiajs/react';
 import { ChevronLeft, ChevronRight, Plus, Trash2 } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useState } from 'react';
-import DestroyAction from '@/actions/App/Http/Controllers/Appointment/DestroyAction';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
+import DestroyAction from '@/actions/App/Http/Controllers/Appointment/DestroyAction';
 import schedule from '@/routes/professional/schedule';
 import availability from '@/routes/professional/schedule/availability';
 

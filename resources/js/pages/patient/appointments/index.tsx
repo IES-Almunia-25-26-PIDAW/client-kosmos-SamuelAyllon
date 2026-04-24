@@ -3,9 +3,9 @@ import { Head, Link } from '@inertiajs/react';
 import { CalendarDays, Clock, Video } from 'lucide-react';
 import type { ReactNode } from 'react';
 import AppointmentShowAction from '@/actions/App/Http/Controllers/Portal/Appointment/ShowAction';
-import ProfessionalIndexAction from '@/actions/App/Http/Controllers/Portal/Professional/IndexAction';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
+import ProfessionalIndexAction from '@/actions/App/Http/Controllers/Portal/Professional/IndexAction';
 
 const ChakraLink = chakra(Link);
 

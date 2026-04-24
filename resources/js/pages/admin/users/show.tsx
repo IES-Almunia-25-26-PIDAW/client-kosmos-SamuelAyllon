@@ -2,11 +2,11 @@ import { Box, Flex, Grid, Heading, Stack, Text, chakra } from '@chakra-ui/react'
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { ArrowLeft, Trash2 } from 'lucide-react';
 import type { ReactNode } from 'react';
-import DashboardIndexAction from '@/actions/App/Http/Controllers/Admin/DashboardIndexAction';
 import { KPICard } from '@/components/patient/kpi-card';
 import { Button } from '@/components/ui/button';
 import AdminLayout from '@/layouts/admin-layout';
 import type { Auth } from '@/types';
+import DashboardIndexAction from '@/actions/App/Http/Controllers/Admin/DashboardIndexAction';
 
 const ChakraLink = chakra(Link);
 
