@@ -275,9 +275,9 @@ export default function AppointmentShow({ appointment, lastClinicalNote }: Props
                                         <Text fontSize="md" fontStyle="italic" color="fg" lineHeight="relaxed" whiteSpace="pre-wrap">
                                             {lastClinicalNote.content}
                                         </Text>
-                                        {patient && (
+                                        {patient?.patient_profile && (
                                             <ChakraLink
-                                                href={PatientShowAction.url(patient.id)}
+                                                href={PatientShowAction.url(patient.patient_profile?.id)}
                                                 mt="3"
                                                 display="inline-flex"
                                                 alignItems="center"

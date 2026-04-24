@@ -3,6 +3,7 @@ import { Link } from '@inertiajs/react';
 import React from 'react';
 import { StatusBadge } from '@/components/ui/status-badge';
 import type { Patient, PatientStatus } from '@/types';
+import PatientShowAction from '@/actions/App/Http/Controllers/Patient/ShowAction';
 
 interface PatientCardProps {
     patient: Patient;
@@ -15,7 +16,7 @@ export const PatientCard: React.FC<PatientCardProps> = ({ patient }) => {
         <Box
             as={Link}
             // @ts-expect-error — Inertia Link props are forwarded via `as`
-            href={`/patients/${patient.id}`}
+            href={PatientShowAction.url(patient.patient_profile.id)}
             display="block"
             borderRadius="lg"
             borderWidth="1px"

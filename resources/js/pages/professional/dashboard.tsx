@@ -3,11 +3,13 @@ import { Head, Link, usePage } from '@inertiajs/react';
 import { ArrowRight, CalendarDays, Receipt } from 'lucide-react';
 import type { ReactNode } from 'react';
 import AppointmentShowAction from '@/actions/App/Http/Controllers/Appointment/ShowAction';
+import professionalAppointmentsIndex from '@/actions/App/Http/Controllers/Appointment/IndexAction';
 import PatientShowAction from '@/actions/App/Http/Controllers/Patient/ShowAction';
 import { KosmoBriefing as KosmoBriefingComponent } from '@/components/kosmo/kosmo-briefing';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 import type { Auth, KosmoBriefing } from '@/types';
+
 
 const ChakraLink = chakra(Link);
 
@@ -176,7 +178,7 @@ export default function ProfessionalDashboard({
                                 Agenda del día
                             </Heading>
                             <ChakraLink
-                                href="/appointments"
+                                href={professionalAppointmentsIndex.url()}
                                 fontSize="sm"
                                 fontWeight="medium"
                                 color="brand.solid"
