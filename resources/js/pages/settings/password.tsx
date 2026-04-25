@@ -1,6 +1,8 @@
+import { Box, Flex, Heading, Stack, Text } from '@chakra-ui/react';
 import { Transition } from '@headlessui/react';
 import { Form, Head } from '@inertiajs/react';
-import { Lock, KeyRound, CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, KeyRound, Lock } from 'lucide-react';
+import type { ReactNode } from 'react';
 import { useRef } from 'react';
 import PasswordActions from '@/actions/App/Http/Controllers/Settings/Password';
 import InputError from '@/components/input-error';
@@ -14,10 +16,7 @@ import { edit } from '@/routes/user-password';
 import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Ajustes de contraseña',
-        href: edit().url,
-    },
+    { title: 'Ajustes de contraseña', href: edit().url },
 ];
 
 export default function Password() {
@@ -25,51 +24,49 @@ export default function Password() {
     const currentPasswordInput = useRef<HTMLInputElement>(null);
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <>
             <Head title="Ajustes de contraseña" />
 
-            <h1 className="sr-only">Ajustes de Contraseña</h1>
+            <Heading as="h1" srOnly>Ajustes de Contraseña</Heading>
 
             <SettingsLayout>
-                <Card className="shadow-sm">
-                    <CardHeader className="border-b bg-muted/30 pb-4">
-                        <div className="flex items-center gap-2">
-                            <Lock className="h-5 w-5 text-primary" />
-                            <CardTitle className="text-base font-semibold">Actualizar contraseña</CardTitle>
-                        </div>
+                <Card>
+                    <CardHeader>
+                        <Flex alignItems="center" gap="2">
+                            <Box as={Lock} h="5" w="5" color="brand.solid" />
+                            <CardTitle>
+                                <Text as="span" fontSize="md" fontWeight="semibold">Actualizar contraseña</Text>
+                            </CardTitle>
+                        </Flex>
                         <CardDescription>
                             Utiliza una contraseña larga y segura para proteger tu cuenta
                         </CardDescription>
                     </CardHeader>
-                    <CardContent className="pt-6">
+                    <CardContent>
                         <Form
-                            {...PasswordActions.UpdateAction.form()}
-                            options={{
-                                preserveScroll: true,
-                            }}
-                            resetOnError={[
-                                'password',
-                                'password_confirmation',
-                                'current_password',
-                            ]}
+                            action={PasswordActions.UpdateAction.url()}
+                            method="put"
+                            options={{ preserveScroll: true }}
+                            resetOnError={['password', 'password_confirmation', 'current_password']}
                             resetOnSuccess
                             onError={(errors) => {
                                 if (errors.password) {
                                     passwordInput.current?.focus();
                                 }
-
                                 if (errors.current_password) {
                                     currentPasswordInput.current?.focus();
                                 }
                             }}
-                            className="space-y-6"
+                            style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}
                         >
                             {({ errors, processing, recentlySuccessful }) => (
                                 <>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="current_password" className="flex items-center gap-2 text-sm font-medium">
-                                            <KeyRound className="h-4 w-4 text-muted-foreground" />
-                                            Contraseña actual
+                                    <Stack gap="2">
+                                        <Label htmlFor="current_password">
+                                            <Flex alignItems="center" gap="2" fontSize="sm" fontWeight="medium">
+                                                <Box as={KeyRound} h="4" w="4" color="fg.muted" />
+                                                Contraseña actual
+                                            </Flex>
                                         </Label>
                                         <Input
                                             id="current_password"
@@ -79,15 +76,15 @@ export default function Password() {
                                             autoComplete="current-password"
                                             placeholder="Tu contraseña actual"
                                         />
-                                        <InputError
-                                            message={errors.current_password}
-                                        />
-                                    </div>
+                                        <InputError message={errors.current_password} />
+                                    </Stack>
 
-                                    <div className="space-y-2">
-                                        <Label htmlFor="password" className="flex items-center gap-2 text-sm font-medium">
-                                            <Lock className="h-4 w-4 text-muted-foreground" />
-                                            Nueva contraseña
+                                    <Stack gap="2">
+                                        <Label htmlFor="password">
+                                            <Flex alignItems="center" gap="2" fontSize="sm" fontWeight="medium">
+                                                <Box as={Lock} h="4" w="4" color="fg.muted" />
+                                                Nueva contraseña
+                                            </Flex>
                                         </Label>
                                         <Input
                                             id="password"
@@ -98,12 +95,14 @@ export default function Password() {
                                             placeholder="Tu nueva contraseña"
                                         />
                                         <InputError message={errors.password} />
-                                    </div>
+                                    </Stack>
 
-                                    <div className="space-y-2">
-                                        <Label htmlFor="password_confirmation" className="flex items-center gap-2 text-sm font-medium">
-                                            <Lock className="h-4 w-4 text-muted-foreground" />
-                                            Confirmar contraseña
+                                    <Stack gap="2">
+                                        <Label htmlFor="password_confirmation">
+                                            <Flex alignItems="center" gap="2" fontSize="sm" fontWeight="medium">
+                                                <Box as={Lock} h="4" w="4" color="fg.muted" />
+                                                Confirmar contraseña
+                                            </Flex>
                                         </Label>
                                         <Input
                                             id="password_confirmation"
@@ -112,22 +111,21 @@ export default function Password() {
                                             autoComplete="new-password"
                                             placeholder="Confirma tu nueva contraseña"
                                         />
-                                        <InputError
-                                            message={errors.password_confirmation}
-                                        />
-                                    </div>
+                                        <InputError message={errors.password_confirmation} />
+                                    </Stack>
 
-                                    <div className="flex items-center gap-4 border-t pt-6">
+                                    <Flex alignItems="center" gap="4" borderTopWidth="1px" borderColor="border" pt="6">
                                         <Button
+                                            type="submit"
                                             disabled={processing}
                                             data-test="update-password-button"
-                                            className="min-w-[140px]"
+                                            minW="140px"
                                         >
                                             {processing ? (
-                                                <span className="flex items-center gap-2">
-                                                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                                                <Flex alignItems="center" gap="2">
+                                                    <Box h="4" w="4" borderRadius="full" borderWidth="2px" borderColor="currentColor" borderTopColor="transparent" css={{ animation: 'spin 1s linear infinite' }} />
                                                     Guardando...
-                                                </span>
+                                                </Flex>
                                             ) : (
                                                 'Guardar contraseña'
                                             )}
@@ -140,18 +138,22 @@ export default function Password() {
                                             leave="transition ease-in-out"
                                             leaveTo="opacity-0"
                                         >
-                                            <p className="flex items-center gap-1.5 text-sm text-green-600">
-                                                <CheckCircle2 className="h-4 w-4" />
+                                            <Flex alignItems="center" gap="1.5" fontSize="sm" color="success.fg">
+                                                <Box as={CheckCircle2} h="4" w="4" />
                                                 Guardado
-                                            </p>
+                                            </Flex>
                                         </Transition>
-                                    </div>
+                                    </Flex>
                                 </>
                             )}
                         </Form>
                     </CardContent>
                 </Card>
             </SettingsLayout>
-        </AppLayout>
+        </>
     );
 }
+
+Password.layout = (page: ReactNode) => (
+    <AppLayout breadcrumbs={breadcrumbs}>{page}</AppLayout>
+);

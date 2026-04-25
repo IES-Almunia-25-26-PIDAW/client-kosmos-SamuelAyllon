@@ -1,11 +1,11 @@
-import { Sparkles } from 'lucide-react';
+import { Sparkles, type LucideProps } from 'lucide-react';
 import * as React from 'react';
 
-export type KosmoIconProps = React.SVGProps<SVGSVGElement>;
+export type KosmoIconProps = Omit<LucideProps, 'ref'>;
 
 const KosmoIcon = React.forwardRef<SVGSVGElement, KosmoIconProps>(
-  ({ className = 'w-5 h-5', ...props }, ref) => (
-    <Sparkles ref={ref} className={`text-[var(--color-kosmo)] ${className}`} {...props} />
+  ({ size = 20, color = 'var(--ck-colors-kosmo-fg)', ...props }, ref) => (
+    <Sparkles ref={ref} size={size} color={color} {...props} />
   )
 );
 KosmoIcon.displayName = 'KosmoIcon';

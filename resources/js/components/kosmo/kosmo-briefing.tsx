@@ -1,8 +1,11 @@
-import React, { HTMLAttributes, ReactNode } from 'react';
-import { Sparkles, X } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Box, Flex, Text, chakra, type BoxProps } from '@chakra-ui/react';
 
-export interface KosmoBriefingProps extends Omit<HTMLAttributes<HTMLDivElement>, 'content'> {
+const ChakraButton = chakra('button');
+import { Sparkles, X } from 'lucide-react';
+import type { ReactNode } from 'react';
+import React from 'react';
+
+export interface KosmoBriefingProps extends Omit<BoxProps, 'content'> {
     title?: string;
     content?: ReactNode;
     actions?: React.ReactNode;
@@ -11,7 +14,7 @@ export interface KosmoBriefingProps extends Omit<HTMLAttributes<HTMLDivElement>,
 }
 
 export const KosmoBriefing = React.forwardRef<HTMLDivElement, KosmoBriefingProps>(
-    ({ title, content, actions, onDismiss, isDismissible = !!onDismiss, className, ...divProps }, ref) => {
+    ({ title, content, actions, onDismiss, isDismissible = !!onDismiss, ...boxProps }, ref) => {
         const [dismissed, setDismissed] = React.useState(false);
 
         const handleDismiss = () => {
@@ -22,47 +25,62 @@ export const KosmoBriefing = React.forwardRef<HTMLDivElement, KosmoBriefingProps
         if (dismissed) return null;
 
         return (
-            <div
+            <Box
                 ref={ref}
-                className={cn(
-                    'rounded-[var(--radius-lg)] border border-[var(--color-kosmo-border)] bg-[var(--color-kosmo-surface)] p-4',
-                    className
-                )}
-                {...divProps}
+                borderRadius="lg"
+                borderWidth="1px"
+                borderColor="kosmo.emphasized"
+                bg="kosmo.muted"
+                p="4"
+                {...boxProps}
             >
-                <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-start gap-3 flex-1">
-                        <Sparkles size={18} className="text-[var(--color-kosmo)] shrink-0 mt-0.5" />
-                        <div className="flex-1 min-w-0">
+                <Flex align="start" justify="space-between" gap="3">
+                    <Flex align="start" gap="3" flex="1">
+                        <Sparkles
+                            size={18}
+                            color="var(--ck-colors-kosmo-fg)"
+                            style={{ flexShrink: 0, marginTop: '2px' }}
+                        />
+                        <Box flex="1" minW="0">
                             {title && (
-                                <h3 className="text-label text-[var(--color-text)] mb-1">
+                                <Text fontSize="sm" fontWeight="medium" color="fg.DEFAULT" mb="1">
                                     {title}
-                                </h3>
+                                </Text>
                             )}
                             {content && (
-                                <div className="text-sm text-[var(--color-text-secondary)]">
+                                <Box fontSize="sm" color="fg.muted">
                                     {content}
-                                </div>
+                                </Box>
                             )}
-                        </div>
-                    </div>
+                        </Box>
+                    </Flex>
                     {isDismissible && (
-                        <button
+                        <ChakraButton
+                            type="button"
                             onClick={handleDismiss}
-                            className="p-1 hover:bg-[var(--color-kosmo-border)] rounded-[var(--radius-sm)] transition-colors shrink-0"
+                            display="inline-flex"
+                            alignItems="center"
+                            justifyContent="center"
+                            p="1"
+                            bg="transparent"
+                            border="none"
+                            borderRadius="sm"
+                            cursor="pointer"
+                            flexShrink={0}
+                            _hover={{ bg: 'kosmo.emphasized' }}
+                            css={{ transition: 'background-color 200ms ease' }}
                             aria-label="Descartar"
                         >
-                            <X size={14} className="text-[var(--color-text-secondary)]" />
-                        </button>
+                            <X size={14} color="var(--ck-colors-fg-muted)" />
+                        </ChakraButton>
                     )}
-                </div>
-
+                </Flex>
                 {actions && (
-                    <div className="mt-3 flex gap-2">
+                    <Flex mt="3" gap="2">
                         {actions}
-                    </div>
+                    </Flex>
                 )}
-            </div>
+            </Box>
         );
     }
 );

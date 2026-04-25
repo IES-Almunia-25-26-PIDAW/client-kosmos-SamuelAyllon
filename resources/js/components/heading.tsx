@@ -1,3 +1,5 @@
+import { Box, Heading as ChakraHeading, Text } from '@chakra-ui/react';
+
 export default function Heading({
     title,
     description,
@@ -7,20 +9,25 @@ export default function Heading({
     description?: string;
     variant?: 'default' | 'small';
 }) {
+    const isSmall = variant === 'small';
+
     return (
-        <header className={variant === 'small' ? '' : 'mb-8 space-y-0.5'}>
-            <h2
-                className={
-                    variant === 'small'
-                        ? 'mb-0.5 text-base font-medium'
-                        : 'text-2xl font-extrabold leading-[1.2] tracking-tight'
-                }
+        <Box as="header" mb={isSmall ? undefined : '8'} spaceY={isSmall ? undefined : '0.5'}>
+            <ChakraHeading
+                as="h2"
+                mb={isSmall ? '0.5' : undefined}
+                fontSize={isSmall ? 'md' : '2xl'}
+                fontWeight={isSmall ? 'medium' : 'extrabold'}
+                lineHeight={isSmall ? undefined : '1.2'}
+                letterSpacing={isSmall ? undefined : 'tight'}
             >
                 {title}
-            </h2>
+            </ChakraHeading>
             {description && (
-                <p className="text-sm text-muted-foreground">{description}</p>
+                <Text fontSize="sm" color="fg.muted">
+                    {description}
+                </Text>
             )}
-        </header>
+        </Box>
     );
 }

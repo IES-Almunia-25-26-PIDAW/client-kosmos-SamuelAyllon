@@ -4,12 +4,12 @@ namespace App\Http\Controllers\Document;
 
 use App\Http\Controllers\Controller;
 use App\Models\Document;
-use App\Models\Patient;
+use App\Models\PatientProfile;
 use Illuminate\Http\RedirectResponse;
 
 class DestroyAction extends Controller
 {
-    public function __invoke(Patient $patient, Document $document): RedirectResponse
+    public function __invoke(PatientProfile $patient, Document $document): RedirectResponse
     {
         $this->authorize('view', $patient);
 

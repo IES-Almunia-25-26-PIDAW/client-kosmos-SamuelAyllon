@@ -16,7 +16,7 @@ class StoreNoteRequest extends FormRequest
         return [
             'content'               => ['required', 'string', 'min:1'],
             'type'                  => ['required', 'in:quick_note,session_note,observation,followup'],
-            'consulting_session_id' => ['nullable', 'exists:consulting_sessions,id'],
+            'appointment_id' => ['nullable', 'exists:appointments,id'],
         ];
     }
 }

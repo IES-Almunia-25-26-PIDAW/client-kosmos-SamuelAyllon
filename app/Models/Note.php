@@ -11,17 +11,21 @@ class Note extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'patient_id', 'user_id', 'consulting_session_id',
+        'patient_id', 'user_id', 'appointment_id',
         'content', 'type', 'is_ai_generated',
     ];
 
-    protected $casts = [
-        'is_ai_generated' => 'boolean',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'is_ai_generated' => 'boolean',
+            'content' => 'encrypted',
+        ];
+    }
 
     public function patient()
     {
-        return $this->belongsTo(Patient::class);
+        return $this->belongsTo(PatientProfile::class, 'patient_id');
     }
 
     public function user()
@@ -29,8 +33,8 @@ class Note extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function session()
+    public function appointment()
     {
-        return $this->belongsTo(ConsultingSession::class, 'consulting_session_id');
+        return $this->belongsTo(Appointment::class);
     }
 }

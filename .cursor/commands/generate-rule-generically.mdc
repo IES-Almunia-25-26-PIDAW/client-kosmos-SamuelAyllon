@@ -1,8 +1,0 @@
----
-description: Genera Cursor Rules genéricas analizando cualquier archivo
-globs: 
----
-
-/Generate Cursor Rules
-I want to generate a cursor rule generically for any file type from this file: {{path}}
-Please analyze @{{path}} carefully, identify all conventions (naming, structure, patterns, best practices), and outline them. Output as one rule file only, with appropriate globs for similar files.

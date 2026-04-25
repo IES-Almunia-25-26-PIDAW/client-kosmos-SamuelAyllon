@@ -1,51 +1,89 @@
-import React from 'react';
+import { Box, Flex, Image, Text } from '@chakra-ui/react';
 import { Link } from '@inertiajs/react';
+import React from 'react';
+import PatientShowAction from '@/actions/App/Http/Controllers/Patient/ShowAction';
 import { StatusBadge } from '@/components/ui/status-badge';
 import type { Patient, PatientStatus } from '@/types';
 
 interface PatientCardProps {
     patient: Patient;
-    className?: string;
 }
 
-export const PatientCard: React.FC<PatientCardProps> = ({ patient, className = '' }) => {
+export const PatientCard: React.FC<PatientCardProps> = ({ patient }) => {
     const statuses: PatientStatus[] = patient.statuses ?? [];
 
     return (
-        <Link
-            href={`/patients/${patient.id}`}
-            className={`block rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] hover:-translate-y-0.5 transition-all duration-[var(--duration-normal)] cursor-pointer ${className}`}
+        <Box
+            as={Link}
+            // @ts-expect-error — Inertia Link props are forwarded via `as`
+            href={PatientShowAction.url(patient.patient_profile.id)}
+            display="block"
+            borderRadius="lg"
+            borderWidth="1px"
+            borderColor="border"
+            bg="bg.surface"
+            p="4"
+            shadow="sm"
+            cursor="pointer"
+            transition="all 200ms"
+            _hover={{ shadow: 'md', transform: 'translateY(-2px)' }}
         >
-            <div className="flex items-center gap-3 mb-3">
+            <Flex align="center" gap="3" mb="3">
                 {patient.avatar_path ? (
-                    <img src={patient.avatar_path} alt={patient.project_name} className="h-10 w-10 rounded-full object-cover shrink-0" />
+                    <Image
+                        src={patient.avatar_path}
+                        alt={patient.project_name}
+                        h="10"
+                        w="10"
+                        rounded="full"
+                        objectFit="cover"
+                        flexShrink={0}
+                    />
                 ) : (
-                    <div className="h-10 w-10 rounded-full bg-[var(--color-primary-subtle)] flex items-center justify-center shrink-0 text-[var(--color-primary)] font-semibold text-sm">
-                        {patient.project_name.substring(0, 2).toUpperCase()}
-                    </div>
+                    <Flex
+                        h="10"
+                        w="10"
+                        rounded="full"
+                        bg="brand.subtle"
+                        align="center"
+                        justify="center"
+                        flexShrink={0}
+                        color="brand.fg"
+                        fontWeight="semibold"
+                        fontSize="sm"
+                    >
+                        {patient.project_name?.substring(0, 2).toUpperCase() ?? '?'}
+                    </Flex>
                 )}
-                <div className="flex-1 min-w-0">
-                    <h3 className="text-label text-[var(--color-text)] truncate">{patient.project_name}</h3>
+                <Box flex="1" minW="0">
+                    <Text fontSize="sm" fontWeight="medium" color="fg" truncate>
+                        {patient.project_name}
+                    </Text>
                     {patient.brand_tone && (
-                        <p className="text-xs text-[var(--color-text-muted)] truncate">{patient.brand_tone}</p>
+                        <Text fontSize="xs" color="fg.subtle" truncate>
+                            {patient.brand_tone}
+                        </Text>
                     )}
-                </div>
-            </div>
+                </Box>
+            </Flex>
 
             {statuses.length > 0 && (
-                <div className="flex flex-wrap gap-1.5">
+                <Flex wrap="wrap" gap="1.5">
                     {statuses.map((s) => (
                         <StatusBadge key={s} status={s} variant="subtle" />
                     ))}
-                </div>
+                </Flex>
             )}
 
             {patient.next_deadline && (
-                <p className="text-xs text-[var(--color-text-secondary)] mt-2">
-                    Próxima sesión: {new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'short' }).format(new Date(patient.next_deadline))}
-                </p>
+                <Text fontSize="xs" color="fg.muted" mt="2">
+                    Próxima sesión:{' '}
+                    {new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'short' }).format(
+                        new Date(patient.next_deadline),
+                    )}
+                </Text>
             )}
-        </Link>
+        </Box>
     );
 };
 

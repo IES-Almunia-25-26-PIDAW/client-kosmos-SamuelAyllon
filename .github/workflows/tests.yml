@@ -38,7 +38,7 @@ jobs:
           node-version: '22'
 
       - name: Install Node Dependencies
-        run: npm ci
+        run: npm ci --include=dev
 
       - name: Install Dependencies
         run: composer install --no-interaction --prefer-dist --optimize-autoloader
@@ -60,6 +60,9 @@ jobs:
 
       - name: Build Assets
         run: npm run build
+
+      - name: Static Analysis
+        run: composer analyse
 
       - name: Tests
         run: ./vendor/bin/pest

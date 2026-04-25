@@ -1,36 +1,43 @@
+import { Box, Text, type BoxProps } from '@chakra-ui/react';
 import * as React from 'react';
 
-export interface FormFieldProps extends React.HTMLAttributes<HTMLDivElement> {
-  label?: string;
-  required?: boolean;
-  error?: string;
-  description?: string;
-  children: React.ReactNode;
+export interface FormFieldProps extends Omit<BoxProps, 'title'> {
+    label?: string;
+    required?: boolean;
+    error?: string;
+    description?: string;
+    children: React.ReactNode;
 }
 
 const FormField = React.forwardRef<HTMLDivElement, FormFieldProps>(
-  ({ className = '', label, required, error, description, children, ...props }, ref) => (
-    <div ref={ref} className={`space-y-2 ${className}`} {...props}>
-      {label && (
-        <label className="block text-sm font-medium text-[var(--color-foreground)]">
-          {label}
-          {required && <span className="text-[var(--color-error)] ml-1">*</span>}
-        </label>
-      )}
-      
-      <div>
-        {children}
-      </div>
+    ({ label, required, error, description, children, ...boxProps }, ref) => (
+        <Box ref={ref} spaceY="2" {...boxProps}>
+            {label && (
+                <Text as="label" display="block" fontSize="sm" fontWeight="medium" color="fg">
+                    {label}
+                    {required && (
+                        <Text as="span" color="danger.fg" ml="1">
+                            *
+                        </Text>
+                    )}
+                </Text>
+            )}
 
-      {description && !error && (
-        <p className="text-xs text-[var(--color-text-secondary)]">{description}</p>
-      )}
+            <Box>{children}</Box>
 
-      {error && (
-        <p className="text-xs text-[var(--color-error)]">{error}</p>
-      )}
-    </div>
-  )
+            {description && !error && (
+                <Text fontSize="xs" color="fg.muted">
+                    {description}
+                </Text>
+            )}
+
+            {error && (
+                <Text fontSize="xs" color="danger.fg">
+                    {error}
+                </Text>
+            )}
+        </Box>
+    ),
 );
 FormField.displayName = 'FormField';
 

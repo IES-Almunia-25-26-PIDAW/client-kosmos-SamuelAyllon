@@ -4,22 +4,22 @@ namespace App\Http\Controllers\Patient;
 
 use App\Http\Controllers\Controller;
 use App\Models\KosmoBriefing;
-use App\Models\Patient;
+use App\Models\PatientProfile;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class PreSessionAction extends Controller
 {
-    public function __invoke(Patient $patient): Response
+    public function __invoke(PatientProfile $patient): Response
     {
         $this->authorize('view', $patient);
 
         $context = [
-            'lastSessions'   => $patient->sessions()->orderByDesc('scheduled_at')->limit(3)->get(),
-            'recentNotes'    => $patient->notes()->orderByDesc('created_at')->limit(5)->get(),
+            'lastAppointments' => $patient->appointments()->orderByDesc('starts_at')->limit(3)->get(),
+            'recentNotes' => $patient->notes()->orderByDesc('created_at')->limit(5)->get(),
             'openAgreements' => $patient->agreements()->where('is_completed', false)->get(),
-            'lastPayment'    => $patient->payments()->orderByDesc('due_date')->first(),
-            'validConsent'   => $patient->consentForms()->where('status', 'signed')->first(),
+            'lastInvoice' => $patient->invoices()->orderByDesc('due_at')->first(),
+            'validConsent' => $patient->consentForms()->where('status', 'signed')->first(),
         ];
 
         $briefing = KosmoBriefing::where('patient_id', $patient->id)
@@ -27,9 +27,9 @@ class PreSessionAction extends Controller
             ->latest()
             ->first();
 
-        return Inertia::render('patients/pre-session', [
-            'patient'  => $patient,
-            'context'  => $context,
+        return Inertia::render('professional/patients/pre-session', [
+            'patient' => $patient,
+            'context' => $context,
             'briefing' => $briefing,
         ]);
     }

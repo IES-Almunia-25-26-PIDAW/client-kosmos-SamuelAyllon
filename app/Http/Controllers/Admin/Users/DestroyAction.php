@@ -16,7 +16,7 @@ class DestroyAction extends Controller
 
         $user->delete();
 
-        return redirect()->route('admin.users.index')
+        return redirect()->route('admin.dashboard')
             ->with('success', "Usuario {$user->name} eliminado correctamente.");
     }
 }

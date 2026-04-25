@@ -74,8 +74,8 @@ it('admin can create a new professional user', function () {
 
     $this->actingAs($admin)
         ->post(route('admin.users.store'), [
-            'name'     => 'Nuevo Profesional',
-            'email'    => 'nuevo@clientkosmos.test',
+            'name' => 'Nuevo Profesional',
+            'email' => 'nuevo@clientkosmos.test',
             'password' => 'password123',
         ])
         ->assertRedirect();
@@ -91,7 +91,7 @@ it('admin can delete a user', function () {
 
     $this->actingAs($admin)
         ->delete(route('admin.users.destroy', $professional))
-        ->assertRedirect(route('admin.users.index'));
+        ->assertRedirect(route('admin.dashboard'));
 
     $this->assertSoftDeleted('users', ['id' => $professional->id]);
 });
@@ -104,4 +104,71 @@ it('admin cannot delete themselves', function () {
         ->assertSessionHasErrors('delete');
 
     $this->assertNotSoftDeleted('users', ['id' => $admin->id]);
+});
+
+// ── Verificación de profesionales ─────────────────────────────────────────────
+
+it('admin can verify a professional', function () {
+    $admin = createAdmin();
+    $professional = createProfessional();
+    \App\Models\ProfessionalProfile::factory()->for($professional)->create(['verification_status' => 'pending']);
+
+    $this->actingAs($admin)
+        ->patch(route('admin.users.verify', $professional), ['status' => 'verified'])
+        ->assertRedirect();
+
+    $this->assertDatabaseHas('professional_profiles', [
+        'user_id' => $professional->id,
+        'verification_status' => 'verified',
+    ]);
+    expect(\App\Models\ProfessionalProfile::where('user_id', $professional->id)->first()->verified_at)->not->toBeNull();
+});
+
+it('admin can reject a professional', function () {
+    $admin = createAdmin();
+    $professional = createProfessional();
+    \App\Models\ProfessionalProfile::factory()->for($professional)->create(['verification_status' => 'pending']);
+
+    $this->actingAs($admin)
+        ->patch(route('admin.users.verify', $professional), ['status' => 'rejected'])
+        ->assertRedirect();
+
+    $this->assertDatabaseHas('professional_profiles', [
+        'user_id' => $professional->id,
+        'verification_status' => 'rejected',
+    ]);
+    expect(\App\Models\ProfessionalProfile::where('user_id', $professional->id)->first()->verified_at)->toBeNull();
+});
+
+it('non-admin cannot verify a professional', function () {
+    $professional = createProfessional();
+    $other = createProfessional();
+    \App\Models\ProfessionalProfile::factory()->for($other)->create();
+
+    $this->actingAs($professional)
+        ->patch(route('admin.users.verify', $other), ['status' => 'verified'])
+        ->assertForbidden();
+});
+
+it('verify returns 422 if user has no professional profile', function () {
+    $admin = createAdmin();
+    $user = \App\Models\User::factory()->create();
+
+    $this->actingAs($admin)
+        ->patch(route('admin.users.verify', $user), ['status' => 'verified'])
+        ->assertStatus(422);
+});
+
+it('show page includes professional_profile data', function () {
+    $admin = createAdmin();
+    $professional = createProfessional();
+    \App\Models\ProfessionalProfile::factory()->for($professional)->create(['verification_status' => 'pending']);
+
+    $this->actingAs($admin)
+        ->get(route('admin.users.show', $professional))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('admin/users/show')
+            ->has('user.professional_profile')
+        );
 });

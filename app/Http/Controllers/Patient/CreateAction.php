@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Patient;
 
 use App\Http\Controllers\Controller;
-use App\Models\Patient;
+use App\Models\PatientProfile;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -11,8 +11,8 @@ class CreateAction extends Controller
 {
     public function __invoke(): Response
     {
-        $this->authorize('create', Patient::class);
+        $this->authorize('create', PatientProfile::class);
 
-        return Inertia::render('patients/create');
+        return Inertia::render('professional/patients/create');
     }
 }

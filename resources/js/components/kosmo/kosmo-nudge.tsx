@@ -1,8 +1,11 @@
+import { Box, Flex, chakra, type FlexProps } from '@chakra-ui/react';
+
+const ChakraButton = chakra('button');
 import { X } from 'lucide-react';
 import * as React from 'react';
 import { KosmoIcon } from './kosmo-icon';
 
-export interface KosmoNudgeProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface KosmoNudgeProps extends Omit<FlexProps, 'children'> {
   message: React.ReactNode;
   onDismiss?: () => void;
   action?: {
@@ -12,32 +15,61 @@ export interface KosmoNudgeProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const KosmoNudge = React.forwardRef<HTMLDivElement, KosmoNudgeProps>(
-  ({ className = '', message, onDismiss, action, ...props }, ref) => (
-    <div
+  ({ message, onDismiss, action, ...props }, ref) => (
+    <Flex
       ref={ref}
-      className={`inline-flex items-center gap-2 px-3 py-2 rounded-md bg-[var(--color-kosmo-surface)] border border-[var(--color-kosmo-border)] text-sm text-[var(--color-text-secondary)] ${className}`}
+      display="inline-flex"
+      alignItems="center"
+      gap="2"
+      px="3"
+      py="2"
+      borderRadius="md"
+      bg="kosmo.muted"
+      borderWidth="1px"
+      borderColor="kosmo.emphasized"
+      fontSize="sm"
+      color="fg.muted"
       {...props}
     >
-      <KosmoIcon className="w-4 h-4 flex-shrink-0" />
-      <span className="flex-1">{message}</span>
+      <KosmoIcon size={16} style={{ flexShrink: 0 }} />
+      <Box flex="1">{message}</Box>
       {action && (
-        <button
+        <ChakraButton
+          type="button"
           onClick={action.onClick}
-          className="flex-shrink-0 ml-2 font-medium text-[var(--color-kosmo)] hover:underline"
+          flexShrink={0}
+          ml="2"
+          fontWeight="medium"
+          color="kosmo.fg"
+          bg="transparent"
+          border="none"
+          cursor="pointer"
+          _hover={{ textDecoration: 'underline' }}
         >
           {action.label}
-        </button>
+        </ChakraButton>
       )}
       {onDismiss && (
-        <button
+        <ChakraButton
+          type="button"
           onClick={onDismiss}
-          className="flex-shrink-0 p-0.5 hover:bg-[var(--color-kosmo-border)] rounded transition-colors"
+          flexShrink={0}
+          p="0.5"
+          borderRadius="sm"
+          bg="transparent"
+          border="none"
+          cursor="pointer"
+          display="inline-flex"
+          alignItems="center"
+          justifyContent="center"
+          _hover={{ bg: 'kosmo.emphasized' }}
+          css={{ transition: 'background-color 200ms ease' }}
           aria-label="Dismiss"
         >
-          <X className="w-3 h-3" />
-        </button>
+          <X size={12} />
+        </ChakraButton>
       )}
-    </div>
+    </Flex>
   )
 );
 KosmoNudge.displayName = 'KosmoNudge';

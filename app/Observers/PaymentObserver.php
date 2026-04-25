@@ -2,17 +2,27 @@
 
 namespace App\Observers;
 
-use App\Models\Payment;
+use App\Models\Invoice;
+use Illuminate\Support\Facades\Log;
 
 class PaymentObserver
 {
-    public function saved(Payment $payment): void
+    public function saved(Invoice $invoice): void
     {
-        $latestStatus = $payment->patient
-            ->payments()
-            ->orderByDesc('due_date')
-            ->value('status') ?? 'paid';
+        if (! $invoice->wasChanged('status')) {
+            return;
+        }
 
-        $payment->patient->updateQuietly(['payment_status' => $latestStatus]);
+        if ($invoice->status === 'paid' && $invoice->paid_at === null) {
+            $invoice->withoutEvents(fn () => $invoice->update(['paid_at' => now()]));
+        }
+
+        if ($invoice->status === 'overdue') {
+            Log::info('Invoice marked as overdue', [
+                'invoice_id' => $invoice->id,
+                'invoice_number' => $invoice->invoice_number,
+                'due_at' => $invoice->due_at,
+            ]);
+        }
     }
 }

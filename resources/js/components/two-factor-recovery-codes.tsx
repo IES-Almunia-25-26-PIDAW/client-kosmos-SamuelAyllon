@@ -1,3 +1,4 @@
+import { Box, Flex, Grid, Stack, Text } from '@chakra-ui/react';
 import { Form } from '@inertiajs/react';
 import { Eye, EyeOff, LockKeyhole, RefreshCw } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -55,9 +56,11 @@ export default function TwoFactorRecoveryCodes({
     return (
         <Card>
             <CardHeader>
-                <CardTitle className="flex gap-3">
-                    <LockKeyhole className="size-4" aria-hidden="true" />
-                    2FA Recovery Codes
+                <CardTitle>
+                    <Flex gap="3" alignItems="center">
+                        <LockKeyhole size={16} aria-hidden="true" />
+                        2FA Recovery Codes
+                    </Flex>
                 </CardTitle>
                 <CardDescription>
                     Recovery codes let you regain access if you lose your 2FA
@@ -65,15 +68,21 @@ export default function TwoFactorRecoveryCodes({
                 </CardDescription>
             </CardHeader>
             <CardContent>
-                <div className="flex flex-col gap-3 select-none sm:flex-row sm:items-center sm:justify-between">
+                <Flex
+                    direction={{ base: 'column', sm: 'row' }}
+                    align={{ base: 'stretch', sm: 'center' }}
+                    justify="space-between"
+                    gap="3"
+                    userSelect="none"
+                >
                     <Button
                         onClick={toggleCodesVisibility}
-                        className="w-fit"
+                        w="fit-content"
                         aria-expanded={codesAreVisible}
                         aria-controls="recovery-codes-section"
                     >
                         <RecoveryCodeIconComponent
-                            className="size-4"
+                            size={16}
                             aria-hidden="true"
                         />
                         {codesAreVisible ? 'Hide' : 'View'} Recovery Codes
@@ -92,72 +101,78 @@ export default function TwoFactorRecoveryCodes({
                                     disabled={processing}
                                     aria-describedby="regenerate-warning"
                                 >
-                                    <RefreshCw /> Regenerate Codes
+                                    <RefreshCw size={16} /> Regenerate Codes
                                 </Button>
                             )}
                         </Form>
                     )}
-                </div>
-                <div
+                </Flex>
+                <Box
                     id="recovery-codes-section"
-                    className={`relative overflow-hidden transition-all duration-300 ${codesAreVisible ? 'h-auto opacity-100' : 'h-0 opacity-0'}`}
+                    position="relative"
+                    overflow="hidden"
+                    height={codesAreVisible ? 'auto' : '0'}
+                    opacity={codesAreVisible ? 1 : 0}
+                    css={{ transition: 'all 300ms ease' }}
                     aria-hidden={!codesAreVisible}
                 >
-                    <div className="mt-3 space-y-3">
+                    <Stack gap="3" mt="3">
                         {errors?.length ? (
                             <AlertError errors={errors} />
                         ) : (
                             <>
-                                <div
+                                <Grid
                                     ref={codesSectionRef}
-                                    className="grid gap-1 rounded-lg bg-muted p-4 font-mono text-sm"
+                                    gap="1"
+                                    borderRadius="lg"
+                                    bg="bg.muted"
+                                    p="4"
+                                    fontFamily="mono"
+                                    fontSize="sm"
                                     role="list"
                                     aria-label="Recovery codes"
                                 >
                                     {recoveryCodesList.length ? (
                                         recoveryCodesList.map((code, index) => (
-                                            <div
+                                            <Box
                                                 key={index}
                                                 role="listitem"
-                                                className="select-text"
+                                                userSelect="text"
                                             >
                                                 {code}
-                                            </div>
+                                            </Box>
                                         ))
                                     ) : (
-                                        <div
-                                            className="space-y-2"
-                                            aria-label="Loading recovery codes"
-                                        >
-                                            {Array.from(
-                                                { length: 8 },
-                                                (_, index) => (
-                                                    <div
-                                                        key={index}
-                                                        className="h-4 animate-pulse rounded bg-muted-foreground/20"
-                                                        aria-hidden="true"
-                                                    />
-                                                ),
-                                            )}
-                                        </div>
+                                        <Stack gap="2" aria-label="Loading recovery codes">
+                                            {Array.from({ length: 8 }, (_, index) => (
+                                                <Box
+                                                    key={index}
+                                                    h="4"
+                                                    borderRadius="sm"
+                                                    bg="fg.muted/20"
+                                                    css={{ animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' }}
+                                                    aria-hidden="true"
+                                                />
+                                            ))}
+                                        </Stack>
                                     )}
-                                </div>
+                                </Grid>
 
-                                <div className="text-xs text-muted-foreground select-none">
-                                    <p id="regenerate-warning">
+                                <Text fontSize="xs" color="fg.muted" userSelect="none">
+                                    <Box as="span" id="regenerate-warning">
                                         Each recovery code can be used once to
                                         access your account and will be removed
                                         after use. If you need more, click{' '}
-                                        <span className="font-bold">
+                                        <Box as="span" fontWeight="bold">
                                             Regenerate Codes
-                                        </span>{' '}
+                                        </Box>{' '}
                                         above.
-                                    </p>
-                                </div>
+                                    </Box>
+                                </Text>
                             </>
                         )}
-                    </div>
-                </div>
+                    </Stack>
+                </Box>
             </CardContent>
         </Card>
     );

@@ -1,13 +1,14 @@
+import { Box, Button as ChakraButton, Flex, Heading, Stack, Text } from '@chakra-ui/react';
 import { Form, Head } from '@inertiajs/react';
-import { LogIn, Mail, Lock, CheckCircle2 } from 'lucide-react';
+import { AtSign, CheckCircle2, Lock } from 'lucide-react';
+import type { ReactNode } from 'react';
 import InputError from '@/components/input-error';
 import TextLink from '@/components/text-link';
-import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
-import AuthLayout from '@/layouts/auth-layout';
+import AuthSplitLayout from '@/layouts/auth/auth-split-layout';
 import { register } from '@/routes';
 import { store } from '@/routes/login';
 import { request } from '@/routes/password';
@@ -18,39 +19,58 @@ type Props = {
     canRegister: boolean;
 };
 
-export default function Login({
-    status,
-    canResetPassword,
-    canRegister,
-}: Props) {
+export default function Login({ status, canResetPassword, canRegister }: Props) {
     return (
-        <AuthLayout
-            title="Iniciar sesión"
-            description="Introduce tu email y contraseña para acceder"
-        >
+        <>
             <Head title="Iniciar sesión" />
 
+            <Heading
+                as="h1"
+                fontFamily="heading"
+                fontWeight="extrabold"
+                fontSize="4xl"
+                letterSpacing="-0.025em"
+                color="fg"
+                mb="2"
+            >
+                ClientKosmos
+            </Heading>
+
             {status && (
-                <div className="flex items-center gap-3 rounded-xl bg-green-500/10 border-2 border-green-500/20 px-4 py-3 mb-6">
-                    <div className="h-8 w-8 rounded-lg bg-green-500/20 flex items-center justify-center">
-                        <CheckCircle2 className="h-4 w-4 text-green-600" />
-                    </div>
-                    <span className="text-sm font-medium text-green-700 dark:text-green-400">{status}</span>
-                </div>
+                <Flex
+                    alignItems="center"
+                    gap="3"
+                    borderRadius="xl"
+                    borderWidth="2px"
+                    borderColor="success.subtle"
+                    bg="success.subtle"
+                    px="4"
+                    py="3"
+                >
+                    <Flex h="8" w="8" alignItems="center" justifyContent="center" borderRadius="lg" bg="success.subtle">
+                        <Box as={CheckCircle2} h="4" w="4" color="success.fg" />
+                    </Flex>
+                    <Text fontSize="sm" fontWeight="medium" color="success.fg">{status}</Text>
+                </Flex>
             )}
 
             <Form
-                {...store.form()}
+                action={store.url()}
+                method="post"
                 resetOnSuccess={['password']}
-                className="flex flex-col gap-6"
+                style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}
             >
                 {({ processing, errors }) => (
                     <>
-                        <div className="grid gap-5">
-                            <div className="grid gap-2">
-                                <Label htmlFor="email" className="text-sm font-semibold">Correo electrónico</Label>
-                                <div className="relative">
-                                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Stack gap="6">
+                            <Stack gap="2">
+                                <Label htmlFor="email">
+                                    <Text as="span" fontSize="11px" fontWeight="semibold" letterSpacing="widest" textTransform="uppercase" color="fg.muted">
+                                        Email
+                                    </Text>
+                                </Label>
+                                <Box position="relative">
+                                    <Box as={AtSign} position="absolute" left="4" top="50%" transform="translateY(-50%)" h="4" w="4" color="fg.muted" opacity={0.6} zIndex={1} />
                                     <Input
                                         id="email"
                                         type="email"
@@ -59,28 +79,34 @@ export default function Login({
                                         autoFocus
                                         tabIndex={1}
                                         autoComplete="email"
-                                        placeholder="email@ejemplo.com"
-                                        className="pl-10 h-11 border-2 rounded-xl transition-all focus:ring-2 focus:ring-primary/20"
+                                        placeholder="dr.aris@kosmos.com"
+                                        borderRadius="full"
+                                        bg="bg.subtle"
+                                        borderWidth="0"
+                                        pl="10"
+                                        h="14"
                                     />
-                                </div>
+                                </Box>
                                 <InputError message={errors.email} />
-                            </div>
+                            </Stack>
 
-                            <div className="grid gap-2">
-                                <div className="flex items-center justify-between">
-                                    <Label htmlFor="password" className="text-sm font-semibold">Contraseña</Label>
+                            <Stack gap="2">
+                                <Flex alignItems="center" justifyContent="space-between">
+                                    <Label htmlFor="password">
+                                        <Text as="span" fontSize="11px" fontWeight="semibold" letterSpacing="widest" textTransform="uppercase" color="fg.muted">
+                                            Contraseña
+                                        </Text>
+                                    </Label>
                                     {canResetPassword && (
-                                        <TextLink
-                                            href={request()}
-                                            className="text-xs text-primary hover:underline font-medium"
-                                            tabIndex={5}
-                                        >
-                                            ¿Olvidaste tu contraseña?
+                                        <TextLink href={request()} tabIndex={5}>
+                                            <Text as="span" fontSize="xs" fontWeight="semibold" color="brand.solid">
+                                                ¿Has olvidado tu contraseña?
+                                            </Text>
                                         </TextLink>
                                     )}
-                                </div>
-                                <div className="relative">
-                                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                </Flex>
+                                <Box position="relative">
+                                    <Box as={Lock} position="absolute" left="4" top="50%" transform="translateY(-50%)" h="4" w="4" color="fg.muted" opacity={0.6} zIndex={1} />
                                     <Input
                                         id="password"
                                         type="password"
@@ -88,46 +114,62 @@ export default function Login({
                                         required
                                         tabIndex={2}
                                         autoComplete="current-password"
-                                        placeholder="Tu contraseña"
-                                        className="pl-10 h-11 border-2 rounded-xl transition-all focus:ring-2 focus:ring-primary/20"
+                                        placeholder="••••••••••"
+                                        borderRadius="full"
+                                        bg="bg.subtle"
+                                        borderWidth="0"
+                                        pl="10"
+                                        h="14"
                                     />
-                                </div>
+                                </Box>
                                 <InputError message={errors.password} />
-                            </div>
+                            </Stack>
 
-                            <div className="flex items-center space-x-3">
-                                <Checkbox
-                                    id="remember"
-                                    name="remember"
-                                    tabIndex={3}
-                                    className="border-2 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                                />
-                                <Label htmlFor="remember" className="text-sm cursor-pointer">Recordarme</Label>
-                            </div>
+                            <Flex alignItems="center" gap="3" px="1" py="2">
+                                <Checkbox id="remember" name="remember" tabIndex={3} />
+                                <Label htmlFor="remember">
+                                    <Text as="span" cursor="pointer" fontSize="sm" color="fg.muted">
+                                        Mantener sesión activa
+                                    </Text>
+                                </Label>
+                            </Flex>
 
-                            <Button
+                            <ChakraButton
                                 type="submit"
-                                className="mt-2 w-full h-11 text-base font-semibold rounded-xl shadow-lg shadow-primary/25 transition-all hover:shadow-xl hover:shadow-primary/30"
+                                w="full"
+                                h="14"
+                                borderRadius="full"
+                                fontSize="lg"
+                                fontWeight="bold"
                                 tabIndex={4}
                                 disabled={processing}
+                                color="rgba(255,255,255,0.97)"
+                                variant="plain"
+                                style={{
+                                    background: 'linear-gradient(176.70deg, rgb(95, 207, 192) 58.675%, rgba(0, 97, 86, 0.41) 141.22%)',
+                                    boxShadow: '0px 10px 15px -3px rgba(0,97,86,0.1), 0px 4px 6px -4px rgba(0,97,86,0.1)',
+                                }}
                                 data-test="login-button"
                             >
-                                {processing ? <Spinner /> : <LogIn className="h-4 w-4 mr-2" />}
-                                Iniciar sesión
-                            </Button>
-                        </div>
+                                {processing ? <Spinner /> : 'Iniciar sesión'}
+                            </ChakraButton>
+                        </Stack>
 
                         {canRegister && (
-                            <div className="text-center text-sm text-muted-foreground pt-2">
-                                ¿No tienes una cuenta?{' '}
-                                <TextLink href={register()} tabIndex={5} className="text-primary font-semibold hover:underline">
-                                    Regístrate
+                            <Text textAlign="center" fontSize="sm" color="fg.muted">
+                                ¿No tienes cuenta?{' '}
+                                <TextLink href={register()} tabIndex={6}>
+                                    <Text as="span" fontWeight="semibold" color="brand.solid">
+                                        Regístrate aquí
+                                    </Text>
                                 </TextLink>
-                            </div>
+                            </Text>
                         )}
                     </>
                 )}
             </Form>
-        </AuthLayout>
+        </>
     );
 }
+
+Login.layout = (page: ReactNode) => <AuthSplitLayout>{page}</AuthSplitLayout>;

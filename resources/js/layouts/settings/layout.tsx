@@ -1,100 +1,95 @@
+import { Box, Flex, Heading, Stack, Text, chakra } from '@chakra-ui/react';
 import { Link } from '@inertiajs/react';
-import { User, Lock, Shield, Palette, Settings } from 'lucide-react';
+import { Lock, Palette, Settings, Shield, User } from 'lucide-react';
 import type { PropsWithChildren } from 'react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { useCurrentUrl } from '@/hooks/use-current-url';
-import { cn, toUrl } from '@/lib/utils';
+import { toUrl } from '@/lib/utils';
 import { edit as editAppearance } from '@/routes/appearance';
 import { edit } from '@/routes/profile';
 import { show } from '@/routes/two-factor';
 import { edit as editPassword } from '@/routes/user-password';
 import type { NavItem } from '@/types';
 
+const ChakraLink = chakra(Link);
+
 const sidebarNavItems: NavItem[] = [
-    {
-        title: 'Perfil',
-        href: edit(),
-        icon: User,
-    },
-    {
-        title: 'Contraseña',
-        href: editPassword(),
-        icon: Lock,
-    },
-    {
-        title: 'Autenticación 2FA',
-        href: show(),
-        icon: Shield,
-    },
-    {
-        title: 'Apariencia',
-        href: editAppearance(),
-        icon: Palette,
-    },
+    { title: 'Perfil', href: edit(), icon: User },
+    { title: 'Contraseña', href: editPassword(), icon: Lock },
+    { title: 'Autenticación 2FA', href: show(), icon: Shield },
+    { title: 'Apariencia', href: editAppearance(), icon: Palette },
 ];
 
 export default function SettingsLayout({ children }: PropsWithChildren) {
     const { isCurrentUrl } = useCurrentUrl();
 
-    // When server-side rendering, we only render the layout on the client...
     if (typeof window === 'undefined') {
         return null;
     }
 
     return (
-        <div className="px-4 py-6 md:px-6">
-            {/* Header con icono */}
-            <div className="mb-8 flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
-                    <Settings className="h-6 w-6 text-primary" />
-                </div>
-                <div>
-                    <h1 className="text-2xl font-bold tracking-tight">Ajustes</h1>
-                    <p className="text-sm text-muted-foreground">Gestiona tu perfil y configuración de cuenta</p>
-                </div>
-            </div>
+        <Box px={{ base: '4', md: '6' }} py="6">
+            <Flex mb="8" alignItems="center" gap="3">
+                <Flex h="12" w="12" alignItems="center" justifyContent="center" borderRadius="xl" bg="brand.subtle">
+                    <Box as={Settings} h="6" w="6" color="brand.solid" />
+                </Flex>
+                <Box>
+                    <Heading as="h1" fontSize="2xl" fontWeight="bold" letterSpacing="tight">
+                        Ajustes
+                    </Heading>
+                    <Text fontSize="sm" color="fg.muted">
+                        Gestiona tu perfil y configuración de cuenta
+                    </Text>
+                </Box>
+            </Flex>
 
-            <div className="flex flex-col lg:flex-row lg:gap-8">
-                {/* Sidebar de navegación */}
-                <aside className="w-full lg:w-56 shrink-0">
-                    <nav
-                        className="flex flex-row lg:flex-col gap-1 overflow-x-auto pb-2 lg:pb-0"
+            <Flex direction={{ base: 'column', lg: 'row' }} gap={{ lg: '8' }}>
+                <Box as="aside" w={{ base: 'full', lg: '56' }} flexShrink={0}>
+                    <Flex
+                        as="nav"
+                        direction={{ base: 'row', lg: 'column' }}
+                        gap="1"
+                        overflowX={{ base: 'auto', lg: 'visible' }}
+                        pb={{ base: '2', lg: '0' }}
                         aria-label="Ajustes"
                     >
-                        {sidebarNavItems.map((item, index) => (
-                            <Button
-                                key={`${toUrl(item.href)}-${index}`}
-                                size="sm"
-                                variant="ghost"
-                                asChild
-                                className={cn(
-                                    'w-full justify-start gap-2 whitespace-nowrap',
-                                    isCurrentUrl(item.href) 
-                                        ? 'bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary' 
-                                        : ''
-                                )}
-                            >
-                                <Link href={item.href}>
-                                    {item.icon && (
-                                        <item.icon className="h-4 w-4" />
-                                    )}
-                                    {item.title}
-                                </Link>
-                            </Button>
-                        ))}
-                    </nav>
-                </aside>
+                        {sidebarNavItems.map((item, index) => {
+                            const active = isCurrentUrl(item.href);
+                            return (
+                                <Button
+                                    key={`${toUrl(item.href)}-${index}`}
+                                    size="sm"
+                                    variant="ghost"
+                                    asChild
+                                    w="full"
+                                    justifyContent="flex-start"
+                                    gap="2"
+                                    whiteSpace="nowrap"
+                                    bg={active ? 'brand.subtle' : undefined}
+                                    color={active ? 'brand.solid' : undefined}
+                                    _hover={active ? { bg: 'brand.subtle', color: 'brand.solid' } : undefined}
+                                >
+                                    <ChakraLink href={item.href} display="flex" alignItems="center" gap="2">
+                                        {item.icon && <Box as={item.icon} h="4" w="4" />}
+                                        {item.title}
+                                    </ChakraLink>
+                                </Button>
+                            );
+                        })}
+                    </Flex>
+                </Box>
 
-                <Separator className="my-6 lg:hidden" />
+                <Box display={{ lg: 'none' }}>
+                    <Separator />
+                </Box>
 
-                {/* Contenido principal */}
-                <div className="flex-1 min-w-0">
-                    <section className="max-w-2xl space-y-8">
+                <Box flex="1" minW={0}>
+                    <Stack as="section" maxW="2xl" gap="8">
                         {children}
-                    </section>
-                </div>
-            </div>
-        </div>
+                    </Stack>
+                </Box>
+            </Flex>
+        </Box>
     );
 }

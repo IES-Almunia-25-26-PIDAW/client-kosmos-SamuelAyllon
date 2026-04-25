@@ -1,5 +1,7 @@
+import { Box, Flex, Heading, Stack, Text } from '@chakra-ui/react';
 import { Form, Head } from '@inertiajs/react';
-import { ShieldBan, ShieldCheck, Shield, Smartphone } from 'lucide-react';
+import { Shield, ShieldBan, ShieldCheck, Smartphone } from 'lucide-react';
+import type { ReactNode } from 'react';
 import { useState } from 'react';
 import TwoFactorRecoveryCodes from '@/components/two-factor-recovery-codes';
 import TwoFactorSetupModal from '@/components/two-factor-setup-modal';
@@ -18,10 +20,7 @@ type Props = {
 };
 
 const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Autenticación de dos factores',
-        href: show.url(),
-    },
+    { title: 'Autenticación de dos factores', href: show.url() },
 ];
 
 export default function TwoFactor({
@@ -41,47 +40,47 @@ export default function TwoFactor({
     const [showSetupModal, setShowSetupModal] = useState<boolean>(false);
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <>
             <Head title="Autenticación de dos factores" />
 
-            <h1 className="sr-only">Ajustes de Autenticación de Dos Factores</h1>
+            <Heading as="h1" srOnly>Ajustes de Autenticación de Dos Factores</Heading>
 
             <SettingsLayout>
-                <Card className="shadow-sm">
-                    <CardHeader className="border-b bg-muted/30 pb-4">
-                        <div className="flex items-center gap-2">
-                            <Shield className="h-5 w-5 text-primary" />
-                            <CardTitle className="text-base font-semibold">Autenticación de dos factores</CardTitle>
-                        </div>
+                <Card>
+                    <CardHeader>
+                        <Flex alignItems="center" gap="2">
+                            <Box as={Shield} h="5" w="5" color="brand.solid" />
+                            <CardTitle>
+                                <Text as="span" fontSize="md" fontWeight="semibold">Autenticación de dos factores</Text>
+                            </CardTitle>
+                        </Flex>
                         <CardDescription>
                             Añade una capa extra de seguridad a tu cuenta
                         </CardDescription>
                     </CardHeader>
-                    <CardContent className="pt-6">
+                    <CardContent>
                         {twoFactorEnabled ? (
-                            <div className="space-y-6">
-                                {/* Estado habilitado */}
-                                <div className="flex items-start gap-4 rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-900/50 dark:bg-green-900/20">
-                                    <ShieldCheck className="h-6 w-6 text-green-600 dark:text-green-400 shrink-0 mt-0.5" />
-                                    <div className="space-y-1">
-                                        <div className="flex items-center gap-2">
-                                            <span className="font-medium text-green-800 dark:text-green-200">2FA Activado</span>
-                                            <Badge variant="default" className="bg-green-600">Activo</Badge>
-                                        </div>
-                                        <p className="text-sm text-green-700 dark:text-green-300">
+                            <Stack gap="6">
+                                <Flex alignItems="flex-start" gap="4" borderRadius="lg" borderWidth="1px" borderColor="success.subtle" bg="success.subtle" p="4">
+                                    <Box as={ShieldCheck} h="6" w="6" color="success.fg" flexShrink={0} mt="0.5" />
+                                    <Stack gap="1">
+                                        <Flex alignItems="center" gap="2">
+                                            <Text fontWeight="medium" color="success.fg">2FA Activado</Text>
+                                            <Badge variant="default" bg="success.solid">Activo</Badge>
+                                        </Flex>
+                                        <Text fontSize="sm" color="success.fg">
                                             Tu cuenta está protegida con autenticación de dos factores. Necesitarás un código de tu aplicación autenticadora al iniciar sesión.
-                                        </p>
-                                    </div>
-                                </div>
+                                        </Text>
+                                    </Stack>
+                                </Flex>
 
-                                {/* Info de aplicación */}
-                                <div className="flex items-start gap-3 rounded-lg border bg-muted/30 p-4">
-                                    <Smartphone className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
-                                    <div className="text-sm text-muted-foreground">
-                                        <p className="font-medium text-foreground mb-1">¿Cómo funciona?</p>
-                                        <p>Cuando inicies sesión, se te pedirá un código de 6 dígitos que puedes obtener de tu aplicación autenticadora (Google Authenticator, Authy, etc.).</p>
-                                    </div>
-                                </div>
+                                <Flex alignItems="flex-start" gap="3" borderRadius="lg" borderWidth="1px" borderColor="border" bg="bg.muted" p="4">
+                                    <Box as={Smartphone} h="5" w="5" color="fg.muted" flexShrink={0} mt="0.5" />
+                                    <Box fontSize="sm" color="fg.muted">
+                                        <Text fontWeight="medium" color="fg" mb="1">¿Cómo funciona?</Text>
+                                        <Text>Cuando inicies sesión, se te pedirá un código de 6 dígitos que puedes obtener de tu aplicación autenticadora (Google Authenticator, Authy, etc.).</Text>
+                                    </Box>
+                                </Flex>
 
                                 <TwoFactorRecoveryCodes
                                     recoveryCodesList={recoveryCodesList}
@@ -89,95 +88,86 @@ export default function TwoFactor({
                                     errors={errors}
                                 />
 
-                                <div className="border-t pt-6">
-                                    <Form {...disable.form()}>
+                                <Box borderTopWidth="1px" borderColor="border" pt="6">
+                                    <Form action={disable.url()} method="delete">
                                         {({ processing }) => (
                                             <Button
                                                 variant="destructive"
                                                 type="submit"
                                                 disabled={processing}
-                                                className="gap-2"
+                                                gap="2"
                                             >
                                                 {processing ? (
-                                                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                                                    <Box h="4" w="4" borderRadius="full" borderWidth="2px" borderColor="currentColor" borderTopColor="transparent" css={{ animation: 'spin 1s linear infinite' }} />
                                                 ) : (
-                                                    <ShieldBan className="h-4 w-4" />
+                                                    <Box as={ShieldBan} h="4" w="4" />
                                                 )}
                                                 Desactivar 2FA
                                             </Button>
                                         )}
                                     </Form>
-                                </div>
-                            </div>
+                                </Box>
+                            </Stack>
                         ) : (
-                            <div className="space-y-6">
-                                {/* Estado deshabilitado */}
-                                <div className="flex items-start gap-4 rounded-lg border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-900/50 dark:bg-yellow-900/20">
-                                    <ShieldBan className="h-6 w-6 text-yellow-600 dark:text-yellow-400 shrink-0 mt-0.5" />
-                                    <div className="space-y-1">
-                                        <div className="flex items-center gap-2">
-                                            <span className="font-medium text-yellow-800 dark:text-yellow-200">2FA Desactivado</span>
+                            <Stack gap="6">
+                                <Flex alignItems="flex-start" gap="4" borderRadius="lg" borderWidth="1px" borderColor="warning.subtle" bg="warning.subtle" p="4">
+                                    <Box as={ShieldBan} h="6" w="6" color="warning.fg" flexShrink={0} mt="0.5" />
+                                    <Stack gap="1">
+                                        <Flex alignItems="center" gap="2">
+                                            <Text fontWeight="medium" color="warning.fg">2FA Desactivado</Text>
                                             <Badge variant="destructive">Inactivo</Badge>
-                                        </div>
-                                        <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                                        </Flex>
+                                        <Text fontSize="sm" color="warning.fg">
                                             Tu cuenta no tiene autenticación de dos factores. Te recomendamos activarla para mayor seguridad.
-                                        </p>
-                                    </div>
-                                </div>
+                                        </Text>
+                                    </Stack>
+                                </Flex>
 
-                                {/* Beneficios */}
-                                <div className="space-y-3">
-                                    <p className="text-sm font-medium">Beneficios de activar 2FA:</p>
-                                    <ul className="space-y-2 text-sm text-muted-foreground">
-                                        <li className="flex items-center gap-2">
-                                            <ShieldCheck className="h-4 w-4 text-green-500" />
+                                <Stack gap="3">
+                                    <Text fontSize="sm" fontWeight="medium">Beneficios de activar 2FA:</Text>
+                                    <Stack as="ul" gap="2" fontSize="sm" color="fg.muted" listStyleType="none">
+                                        <Flex as="li" alignItems="center" gap="2">
+                                            <Box as={ShieldCheck} h="4" w="4" color="success.fg" />
                                             Protección adicional contra accesos no autorizados
-                                        </li>
-                                        <li className="flex items-center gap-2">
-                                            <ShieldCheck className="h-4 w-4 text-green-500" />
+                                        </Flex>
+                                        <Flex as="li" alignItems="center" gap="2">
+                                            <Box as={ShieldCheck} h="4" w="4" color="success.fg" />
                                             Seguridad incluso si tu contraseña es comprometida
-                                        </li>
-                                        <li className="flex items-center gap-2">
-                                            <ShieldCheck className="h-4 w-4 text-green-500" />
+                                        </Flex>
+                                        <Flex as="li" alignItems="center" gap="2">
+                                            <Box as={ShieldCheck} h="4" w="4" color="success.fg" />
                                             Códigos de recuperación para emergencias
-                                        </li>
-                                    </ul>
-                                </div>
+                                        </Flex>
+                                    </Stack>
+                                </Stack>
 
-                                <div className="border-t pt-6">
+                                <Box borderTopWidth="1px" borderColor="border" pt="6">
                                     {hasSetupData ? (
-                                        <Button
-                                            onClick={() => setShowSetupModal(true)}
-                                            className="gap-2"
-                                        >
-                                            <ShieldCheck className="h-4 w-4" />
+                                        <Button onClick={() => setShowSetupModal(true)} gap="2">
+                                            <Box as={ShieldCheck} h="4" w="4" />
                                             Continuar configuración
                                         </Button>
                                     ) : (
                                         <Form
-                                            {...enable.form()}
-                                            onSuccess={() =>
-                                                setShowSetupModal(true)
-                                            }
+                                            action={enable.url()}
+                                            method="post"
+                                            onSuccess={() => setShowSetupModal(true)}
                                         >
                                             {({ processing }) => (
                                                 <Button
                                                     type="submit"
                                                     disabled={processing}
-                                                    className="gap-2"
+                                                    loading={processing}
+                                                    gap="2"
                                                 >
-                                                    {processing ? (
-                                                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                                                    ) : (
-                                                        <ShieldCheck className="h-4 w-4" />
-                                                    )}
+                                                    <Box as={ShieldCheck} h="4" w="4" />
                                                     Activar 2FA
                                                 </Button>
                                             )}
                                         </Form>
                                     )}
-                                </div>
-                            </div>
+                                </Box>
+                            </Stack>
                         )}
 
                         <TwoFactorSetupModal
@@ -194,6 +184,10 @@ export default function TwoFactor({
                     </CardContent>
                 </Card>
             </SettingsLayout>
-        </AppLayout>
+        </>
     );
 }
+
+TwoFactor.layout = (page: ReactNode) => (
+    <AppLayout breadcrumbs={breadcrumbs}>{page}</AppLayout>
+);

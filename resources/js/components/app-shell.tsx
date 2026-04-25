@@ -1,3 +1,4 @@
+import { Flex } from '@chakra-ui/react';
 import { usePage } from '@inertiajs/react';
 import type { ReactNode } from 'react';
 import { SidebarProvider } from '@/components/ui/sidebar';
@@ -12,7 +13,9 @@ export function AppShell({ children, variant = 'header' }: Props) {
 
     if (variant === 'header') {
         return (
-            <div className="flex min-h-screen w-full flex-col">{children}</div>
+            <Flex direction="column" minH="100vh" w="full">
+                {children}
+            </Flex>
         );
     }
 

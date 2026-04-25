@@ -1,6 +1,8 @@
+import { Box, Button as ChakraButton, Flex, Stack, Text } from '@chakra-ui/react';
 import { Form, Head } from '@inertiajs/react';
 import { REGEXP_ONLY_DIGITS } from 'input-otp';
-import { KeyRound, ShieldCheck, ArrowRight } from 'lucide-react';
+import { ArrowRight, KeyRound, ShieldCheck } from 'lucide-react';
+import type { ReactNode } from 'react';
 import { useMemo, useState } from 'react';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
@@ -14,6 +16,9 @@ import { Spinner } from '@/components/ui/spinner';
 import { OTP_MAX_LENGTH } from '@/hooks/use-two-factor-auth';
 import AuthLayout from '@/layouts/auth-layout';
 import { store } from '@/routes/two-factor/login';
+
+const layoutTitle = 'Código de autenticación';
+const layoutDescription = 'Introduce el código de 6 dígitos de tu aplicación de autenticación.';
 
 export default function TwoFactorChallenge() {
     const [showRecoveryInput, setShowRecoveryInput] = useState<boolean>(false);
@@ -53,45 +58,43 @@ export default function TwoFactorChallenge() {
     const IconComponent = authConfigContent.icon;
 
     return (
-        <AuthLayout
-            title={authConfigContent.title}
-            description={authConfigContent.description}
-        >
+        <>
             <Head title="Autenticación en dos pasos" />
 
-            <div className="flex justify-center mb-6">
-                <div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center">
-                    <IconComponent className="h-8 w-8 text-primary" />
-                </div>
-            </div>
+            <Flex justifyContent="center" mb="6">
+                <Flex h="16" w="16" borderRadius="2xl" bg="brand.subtle" alignItems="center" justifyContent="center">
+                    <Box as={IconComponent} h="8" w="8" color="brand.solid" />
+                </Flex>
+            </Flex>
 
-            <div className="space-y-6">
+            <Stack gap="6">
                 <Form
-                    {...store.form()}
-                    className="space-y-5"
+                    action={store.url()}
+                    method="post"
                     resetOnError
                     resetOnSuccess={!showRecoveryInput}
+                    style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}
                 >
                     {({ errors, processing, clearErrors }) => (
                         <>
                             {showRecoveryInput ? (
-                                <div className="space-y-2">
-                                    <div className="relative">
-                                        <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                <Stack gap="2">
+                                    <Box position="relative">
+                                        <Box as={KeyRound} position="absolute" left="3" top="50%" transform="translateY(-50%)" h="4" w="4" color="fg.muted" />
                                         <Input
                                             name="recovery_code"
                                             type="text"
                                             placeholder="XXXX-XXXX-XXXX"
                                             autoFocus={showRecoveryInput}
                                             required
-                                            className="pl-10 h-11 border-2 rounded-xl transition-all focus:ring-2 focus:ring-primary/20 font-mono text-center tracking-wider"
+                                            style={{ paddingLeft: '2.5rem', fontFamily: 'var(--font-mono)', textAlign: 'center', letterSpacing: '0.05em' }}
                                         />
-                                    </div>
+                                    </Box>
                                     <InputError message={errors.recovery_code} />
-                                </div>
+                                </Stack>
                             ) : (
-                                <div className="flex flex-col items-center justify-center space-y-3 text-center">
-                                    <div className="flex w-full items-center justify-center">
+                                <Flex direction="column" alignItems="center" justifyContent="center" gap="3" textAlign="center">
+                                    <Flex w="full" alignItems="center" justifyContent="center">
                                         <InputOTP
                                             name="code"
                                             maxLength={OTP_MAX_LENGTH}
@@ -100,49 +103,63 @@ export default function TwoFactorChallenge() {
                                             disabled={processing}
                                             pattern={REGEXP_ONLY_DIGITS}
                                         >
-                                            <InputOTPGroup className="gap-2">
+                                            <InputOTPGroup>
                                                 {Array.from(
                                                     { length: OTP_MAX_LENGTH },
                                                     (_, index) => (
                                                         <InputOTPSlot
                                                             key={index}
                                                             index={index}
-                                                            className="h-12 w-12 border-2 rounded-xl text-lg font-semibold"
                                                         />
                                                     ),
                                                 )}
                                             </InputOTPGroup>
                                         </InputOTP>
-                                    </div>
+                                    </Flex>
                                     <InputError message={errors.code} />
-                                </div>
+                                </Flex>
                             )}
 
                             <Button
                                 type="submit"
-                                className="w-full h-11 text-base font-semibold rounded-xl shadow-lg shadow-primary/25 transition-all hover:shadow-xl hover:shadow-primary/30"
+                                w="full"
+                                h="11"
+                                fontSize="md"
+                                fontWeight="semibold"
+                                borderRadius="xl"
                                 disabled={processing}
                             >
-                                {processing ? <Spinner /> : <ArrowRight className="h-4 w-4 mr-2" />}
+                                {processing ? <Spinner /> : <Box as={ArrowRight} h="4" w="4" mr="2" />}
                                 Continuar
                             </Button>
 
-                            <div className="text-center text-sm text-muted-foreground">
-                                <span>O puedes </span>
-                                <button
+                            <Text textAlign="center" fontSize="sm" color="fg.muted">
+                                <Text as="span">O puedes </Text>
+                                <ChakraButton
                                     type="button"
-                                    className="cursor-pointer text-primary font-semibold underline underline-offset-4 transition-colors duration-300 ease-out hover:text-primary/80"
-                                    onClick={() =>
-                                        toggleRecoveryMode(clearErrors)
-                                    }
+                                    variant="plain"
+                                    cursor="pointer"
+                                    color="brand.solid"
+                                    fontWeight="semibold"
+                                    textDecoration="underline"
+                                    textUnderlineOffset="4px"
+                                    p="0"
+                                    h="auto"
+                                    minW="0"
+                                    _hover={{ color: 'brand.emphasized' }}
+                                    onClick={() => toggleRecoveryMode(clearErrors)}
                                 >
                                     {authConfigContent.toggleText}
-                                </button>
-                            </div>
+                                </ChakraButton>
+                            </Text>
                         </>
                     )}
                 </Form>
-            </div>
-        </AuthLayout>
+            </Stack>
+        </>
     );
 }
+
+TwoFactorChallenge.layout = (page: ReactNode) => (
+    <AuthLayout title={layoutTitle} description={layoutDescription}>{page}</AuthLayout>
+);

@@ -2,7 +2,7 @@ export type User = {
     id: number;
     name: string;
     email: string;
-    role: 'professional' | 'admin';
+    role: 'professional' | 'admin' | 'patient';
     practice_name: string | null;
     specialty: string | null;
     city: string | null;

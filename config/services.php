@@ -36,10 +36,16 @@ return [
     ],
 
     'groq' => [
-        'api_key'   => env('GROQ_API_KEY'),
-        'base_url'  => env('GROQ_BASE_URL', 'https://api.groq.com/openai/v1'),
-        'model'     => env('GROQ_MODEL', 'llama-3.3-70b-versatile'),
+        'api_key' => env('GROQ_API_KEY'),
+        'base_url' => env('GROQ_BASE_URL', 'https://api.groq.com/openai/v1'),
+        'model' => env('GROQ_MODEL', 'llama-3.3-70b-versatile'),
         'ca_bundle' => env('GROQ_CA_BUNDLE'),
+    ],
+
+    'google' => [
+        'client_id' => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'redirect_uri' => env('GOOGLE_REDIRECT_URI'),
     ],
 
 ];

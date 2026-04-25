@@ -1,16 +1,16 @@
-import { Loader2Icon } from "lucide-react"
+import { Spinner as ChakraSpinner, type SpinnerProps } from '@chakra-ui/react';
 
-import { cn } from "@/lib/utils"
-
-function Spinner({ className, ...props }: React.ComponentProps<"svg">) {
-  return (
-    <Loader2Icon
-      role="status"
-      aria-label="Loading"
-      className={cn("size-4 animate-spin", className)}
-      {...props}
-    />
-  )
+function Spinner(props: SpinnerProps) {
+    return (
+        <ChakraSpinner
+            data-slot="spinner"
+            role="status"
+            aria-label="Loading"
+            size="sm"
+            color="brand.solid"
+            {...props}
+        />
+    );
 }
 
-export { Spinner }
+export { Spinner };

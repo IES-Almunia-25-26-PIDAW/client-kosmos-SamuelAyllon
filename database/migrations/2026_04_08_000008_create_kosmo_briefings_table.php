@@ -11,8 +11,8 @@ return new class extends Migration
         Schema::create('kosmo_briefings', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('patient_id')->nullable()->constrained()->nullOnDelete();
-            $table->foreignId('consulting_session_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('patient_id')->nullable()->constrained('patient_profiles')->nullOnDelete();
+            $table->foreignId('appointment_id')->nullable()->constrained()->nullOnDelete();
             $table->enum('type', ['daily', 'pre_session', 'post_session', 'weekly', 'nudge']);
             $table->json('content');
             $table->boolean('is_read')->default(false);

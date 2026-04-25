@@ -1,3 +1,7 @@
+import { Box, Flex, Stack, Text, chakra } from '@chakra-ui/react';
+
+const ChakraButton = chakra('button');
+const ChakraInput = chakra('input');
 import { Form } from '@inertiajs/react';
 import { REGEXP_ONLY_DIGITS } from 'input-otp';
 import { Check, Copy, ScanLine } from 'lucide-react';
@@ -25,27 +29,50 @@ import { Spinner } from './ui/spinner';
 
 function GridScanIcon() {
     return (
-        <div className="mb-3 rounded-full border border-border bg-card p-0.5 shadow-sm">
-            <div className="relative overflow-hidden rounded-full border border-border bg-muted p-2.5">
-                <div className="absolute inset-0 grid grid-cols-5 opacity-50">
+        <Box
+            mb="3"
+            borderRadius="full"
+            borderWidth="1px"
+            borderColor="border"
+            bg="card"
+            p="0.5"
+            shadow="sm"
+        >
+            <Box
+                position="relative"
+                overflow="hidden"
+                borderRadius="full"
+                borderWidth="1px"
+                borderColor="border"
+                bg="bg.muted"
+                p="2.5"
+            >
+                <Box position="absolute" inset="0" display="grid" gridTemplateColumns="repeat(5, 1fr)" opacity={0.5}>
                     {Array.from({ length: 5 }, (_, i) => (
-                        <div
+                        <Box
                             key={`col-${i + 1}`}
-                            className="border-r border-border last:border-r-0"
+                            borderRightWidth="1px"
+                            borderColor="border"
+                            _last={{ borderRightWidth: 0 }}
                         />
                     ))}
-                </div>
-                <div className="absolute inset-0 grid grid-rows-5 opacity-50">
+                </Box>
+                <Box position="absolute" inset="0" display="grid" gridTemplateRows="repeat(5, 1fr)" opacity={0.5}>
                     {Array.from({ length: 5 }, (_, i) => (
-                        <div
+                        <Box
                             key={`row-${i + 1}`}
-                            className="border-b border-border last:border-b-0"
+                            borderBottomWidth="1px"
+                            borderColor="border"
+                            _last={{ borderBottomWidth: 0 }}
                         />
                     ))}
-                </div>
-                <ScanLine className="relative z-20 size-6 text-foreground" />
-            </div>
-        </div>
+                </Box>
+                <ScanLine
+                    size={24}
+                    style={{ position: 'relative', zIndex: 20, color: 'var(--ck-colors-fg)' }}
+                />
+            </Box>
+        </Box>
     );
 }
 
@@ -72,15 +99,32 @@ function TwoFactorSetupStep({
                 <AlertError errors={errors} />
             ) : (
                 <>
-                    <div className="mx-auto flex max-w-md overflow-hidden">
-                        <div className="mx-auto aspect-square w-64 rounded-lg border border-border">
-                            <div className="z-10 flex h-full w-full items-center justify-center p-5">
+                    <Flex mx="auto" maxW="md" overflow="hidden">
+                        <Box
+                            mx="auto"
+                            aspectRatio="1"
+                            w="64"
+                            borderRadius="lg"
+                            borderWidth="1px"
+                            borderColor="border"
+                        >
+                            <Flex
+                                zIndex="10"
+                                h="full"
+                                w="full"
+                                alignItems="center"
+                                justifyContent="center"
+                                p="5"
+                            >
                                 {qrCodeSvg ? (
-                                    <div
-                                        className="aspect-square w-full rounded-lg bg-white p-2 [&_svg]:size-full"
-                                        dangerouslySetInnerHTML={{
-                                            __html: qrCodeSvg,
-                                        }}
+                                    <Box
+                                        aspectRatio="1"
+                                        w="full"
+                                        borderRadius="lg"
+                                        bg="white"
+                                        p="2"
+                                        css={{ '& svg': { width: '100%', height: '100%' } }}
+                                        dangerouslySetInnerHTML={{ __html: qrCodeSvg }}
                                         style={{
                                             filter:
                                                 resolvedAppearance === 'dark'
@@ -91,47 +135,65 @@ function TwoFactorSetupStep({
                                 ) : (
                                     <Spinner />
                                 )}
-                            </div>
-                        </div>
-                    </div>
+                            </Flex>
+                        </Box>
+                    </Flex>
 
-                    <div className="flex w-full space-x-5">
-                        <Button className="w-full" onClick={onNextStep}>
+                    <Flex w="full" gap="5">
+                        <Button w="full" onClick={onNextStep}>
                             {buttonText}
                         </Button>
-                    </div>
+                    </Flex>
 
-                    <div className="relative flex w-full items-center justify-center">
-                        <div className="absolute inset-0 top-1/2 h-px w-full bg-border" />
-                        <span className="relative bg-card px-2 py-1">
+                    <Flex position="relative" w="full" alignItems="center" justifyContent="center">
+                        <Box position="absolute" inset="0" top="50%" h="px" w="full" bg="border" />
+                        <Text as="span" position="relative" bg="card" px="2" py="1">
                             or, enter the code manually
-                        </span>
-                    </div>
+                        </Text>
+                    </Flex>
 
-                    <div className="flex w-full space-x-2">
-                        <div className="flex w-full items-stretch overflow-hidden rounded-xl border border-border">
+                    <Flex w="full" gap="2">
+                        <Flex
+                            w="full"
+                            alignItems="stretch"
+                            overflow="hidden"
+                            borderRadius="xl"
+                            borderWidth="1px"
+                            borderColor="border"
+                        >
                             {!manualSetupKey ? (
-                                <div className="flex h-full w-full items-center justify-center bg-muted p-3">
+                                <Flex h="full" w="full" alignItems="center" justifyContent="center" bg="bg.muted" p="3">
                                     <Spinner />
-                                </div>
+                                </Flex>
                             ) : (
                                 <>
-                                    <input
+                                    <ChakraInput
                                         type="text"
                                         readOnly
                                         value={manualSetupKey}
-                                        className="h-full w-full bg-background p-3 text-foreground outline-none"
+                                        h="full"
+                                        w="full"
+                                        bg="bg"
+                                        p="3"
+                                        color="fg"
+                                        outline="none"
                                     />
-                                    <button
+                                    <ChakraButton
+                                        type="button"
                                         onClick={() => copy(manualSetupKey)}
-                                        className="border-l border-border px-3 hover:bg-muted"
+                                        borderLeftWidth="1px"
+                                        borderColor="border"
+                                        px="3"
+                                        bg="transparent"
+                                        cursor="pointer"
+                                        _hover={{ bg: 'bg.muted' }}
                                     >
-                                        <IconComponent className="w-4" />
-                                    </button>
+                                        <IconComponent size={16} />
+                                    </ChakraButton>
                                 </>
                             )}
-                        </div>
-                    </div>
+                        </Flex>
+                    </Flex>
                 </>
             )}
         </>
@@ -168,12 +230,9 @@ function TwoFactorVerificationStep({
                 processing: boolean;
                 errors?: { confirmTwoFactorAuthentication?: { code?: string } };
             }) => (
-                <>
-                    <div
-                        ref={pinInputContainerRef}
-                        className="relative w-full space-y-3"
-                    >
-                        <div className="flex w-full flex-col items-center space-y-3 py-2">
+                <Box ref={pinInputContainerRef} position="relative" w="full">
+                    <Stack gap="3">
+                        <Stack gap="3" w="full" alignItems="center" py="2">
                             <InputOTP
                                 id="otp"
                                 name="code"
@@ -195,17 +254,15 @@ function TwoFactorVerificationStep({
                                 </InputOTPGroup>
                             </InputOTP>
                             <InputError
-                                message={
-                                    errors?.confirmTwoFactorAuthentication?.code
-                                }
+                                message={errors?.confirmTwoFactorAuthentication?.code}
                             />
-                        </div>
+                        </Stack>
 
-                        <div className="flex w-full space-x-5">
+                        <Flex w="full" gap="5">
                             <Button
                                 type="button"
                                 variant="outline"
-                                className="flex-1"
+                                flex="1"
                                 onClick={onBack}
                                 disabled={processing}
                             >
@@ -213,16 +270,14 @@ function TwoFactorVerificationStep({
                             </Button>
                             <Button
                                 type="submit"
-                                className="flex-1"
-                                disabled={
-                                    processing || code.length < OTP_MAX_LENGTH
-                                }
+                                flex="1"
+                                disabled={processing || code.length < OTP_MAX_LENGTH}
                             >
                                 Confirm
                             </Button>
-                        </div>
-                    </div>
-                </>
+                        </Flex>
+                    </Stack>
+                </Box>
             )}
         </Form>
     );
@@ -316,16 +371,18 @@ export default function TwoFactorSetupModal({
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-            <DialogContent className="sm:max-w-md">
-                <DialogHeader className="flex items-center justify-center">
-                    <GridScanIcon />
-                    <DialogTitle>{modalConfig.title}</DialogTitle>
-                    <DialogDescription className="text-center">
-                        {modalConfig.description}
-                    </DialogDescription>
+            <DialogContent maxW={{ sm: 'md' }}>
+                <DialogHeader>
+                    <Flex direction="column" alignItems="center" justifyContent="center">
+                        <GridScanIcon />
+                        <DialogTitle>{modalConfig.title}</DialogTitle>
+                        <DialogDescription textAlign="center">
+                            {modalConfig.description}
+                        </DialogDescription>
+                    </Flex>
                 </DialogHeader>
 
-                <div className="flex flex-col items-center space-y-5">
+                <Stack alignItems="center" gap="5">
                     {showVerificationStep ? (
                         <TwoFactorVerificationStep
                             onClose={onClose}
@@ -340,7 +397,7 @@ export default function TwoFactorSetupModal({
                             errors={errors}
                         />
                     )}
-                </div>
+                </Stack>
             </DialogContent>
         </Dialog>
     );

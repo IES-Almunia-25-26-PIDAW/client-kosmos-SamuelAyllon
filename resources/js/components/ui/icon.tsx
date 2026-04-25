@@ -1,14 +1,14 @@
+import { Icon as ChakraIcon, type IconProps as ChakraIconProps } from '@chakra-ui/react';
 import type { LucideIcon } from 'lucide-react';
 
-interface IconProps {
+interface IconProps extends Omit<ChakraIconProps, 'as'> {
     iconNode?: LucideIcon | null;
-    className?: string;
 }
 
-export function Icon({ iconNode: IconComponent, className }: IconProps) {
+export function Icon({ iconNode: IconComponent, ...props }: IconProps) {
     if (!IconComponent) {
         return null;
     }
 
-    return <IconComponent className={className} />;
+    return <ChakraIcon as={IconComponent} {...props} />;
 }

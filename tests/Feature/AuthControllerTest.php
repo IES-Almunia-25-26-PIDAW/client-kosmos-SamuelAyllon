@@ -4,13 +4,13 @@ use App\Models\User;
 
 // ── Login con rol válido ──────────────────────────────────────────────────────
 
-it('admin can log in and is redirected to admin users index', function () {
+it('admin can log in and is redirected to admin dashboard', function () {
     $user = createAdmin();
 
     $this->post('/login', [
-        'email'    => $user->email,
+        'email' => $user->email,
         'password' => 'password',
-    ])->assertRedirect(route('admin.users.index'));
+    ])->assertRedirect(route('admin.dashboard'));
 
     $this->assertAuthenticatedAs($user);
 });
@@ -19,9 +19,9 @@ it('professional can log in and is redirected to dashboard', function () {
     $user = createProfessional();
 
     $this->post('/login', [
-        'email'    => $user->email,
+        'email' => $user->email,
         'password' => 'password',
-    ])->assertRedirect(route('dashboard'));
+    ])->assertRedirect(route('professional.dashboard'));
 
     $this->assertAuthenticatedAs($user);
 });
@@ -32,9 +32,9 @@ it('professional without completed tutorial is redirected to onboarding', functi
     $user->assignRole('professional');
 
     $this->post('/login', [
-        'email'    => $user->email,
+        'email' => $user->email,
         'password' => 'password',
-    ])->assertRedirect(route('onboarding'));
+    ])->assertRedirect(route('professional.onboarding'));
 
     $this->assertAuthenticatedAs($user);
 });
@@ -45,7 +45,7 @@ it('user without any role cannot log in', function () {
     $user = User::factory()->create();
 
     $this->post('/login', [
-        'email'    => $user->email,
+        'email' => $user->email,
         'password' => 'password',
     ])->assertSessionHasErrors('email');
 
@@ -56,7 +56,7 @@ it('login fails with wrong password', function () {
     $user = createProfessional();
 
     $this->post('/login', [
-        'email'    => $user->email,
+        'email' => $user->email,
         'password' => 'wrong-password',
     ])->assertSessionHasErrors('email');
 
@@ -65,7 +65,7 @@ it('login fails with wrong password', function () {
 
 it('login fails with non-existent email', function () {
     $this->post('/login', [
-        'email'    => 'noexiste@clientkosmos.test',
+        'email' => 'noexiste@clientkosmos.test',
         'password' => 'password',
     ])->assertSessionHasErrors('email');
 

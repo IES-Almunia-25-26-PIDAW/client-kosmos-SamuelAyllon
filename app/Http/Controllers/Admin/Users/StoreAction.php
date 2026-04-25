@@ -22,7 +22,6 @@ class StoreAction extends Controller
             'name'              => $validated['name'],
             'email'             => $validated['email'],
             'password'          => Hash::make($validated['password']),
-            'role'              => 'professional',
             'email_verified_at' => now(),
         ]);
 

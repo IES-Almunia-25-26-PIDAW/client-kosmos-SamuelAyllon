@@ -1,6 +1,8 @@
+import { Box, Flex, Heading, Icon, Stack, Text, chakra } from '@chakra-ui/react';
 import { Head, useForm } from '@inertiajs/react';
-import { useState } from 'react';
 import { Sparkles } from 'lucide-react';
+import { useState } from 'react';
+import OnboardingStoreAction from '@/actions/App/Http/Controllers/Onboarding/StoreAction';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -17,7 +19,6 @@ interface FormData {
         brand_tone: string;
         next_deadline: string;
     };
-    [key: string]: unknown;
 }
 
 const specialties = [
@@ -45,173 +46,213 @@ export default function Onboarding() {
     });
 
     const submit = () => {
-        post('/onboarding');
+        post(OnboardingStoreAction.url());
     };
 
     const stepLabels = ['Sobre tu consulta', 'Tu primer paciente', 'Ya casi'];
 
     return (
-        <div className="min-h-screen bg-[var(--color-bg)] flex items-center justify-center p-4">
+        <Flex minH="100vh" bg="bg" alignItems="center" justifyContent="center" p="4">
             <Head title="Configurar cuenta — ClientKosmos" />
 
-            <div className="w-full max-w-[520px]">
-
-                {/* Logo */}
-                <div className="text-center mb-8">
-                    <div className="inline-flex items-center gap-2 mb-2">
-                        <Sparkles size={24} className="text-[var(--color-primary)]" />
-                        <span className="text-display-xl text-[var(--color-text)]">ClientKosmos</span>
-                    </div>
-                    <p className="text-body-md text-[var(--color-text-secondary)]">
+            <Box w="full" maxW="520px">
+                <Box textAlign="center" mb="8">
+                    <Flex display="inline-flex" alignItems="center" gap="2" mb="2">
+                        <Icon as={Sparkles} boxSize="6" color="brand.solid" />
+                        <Text fontSize="2xl" fontWeight="bold" color="fg">ClientKosmos</Text>
+                    </Flex>
+                    <Text fontSize="md" color="fg.muted">
                         Configuremos tu espacio de trabajo
-                    </p>
-                </div>
+                    </Text>
+                </Box>
 
-                {/* Progress */}
-                <div className="flex items-center gap-2 mb-8">
+                <Flex alignItems="center" gap="2" mb="8">
                     {([1, 2, 3] as OnboardingStep[]).map((s) => (
-                        <div key={s} className="flex items-center flex-1">
-                            <div className={`h-2 flex-1 rounded-full transition-colors duration-[var(--duration-normal)] ${
-                                s <= step ? 'bg-[var(--color-primary)]' : 'bg-[var(--color-border)]'
-                            }`} />
-                        </div>
+                        <Flex key={s} alignItems="center" flex="1">
+                            <Box
+                                h="2"
+                                flex="1"
+                                borderRadius="full"
+                                transition="colors"
+                                bg={s <= step ? 'brand.solid' : 'border'}
+                            />
+                        </Flex>
                     ))}
-                </div>
-                <p className="text-caption text-[var(--color-text-secondary)] uppercase tracking-wider mb-6 text-center">
+                </Flex>
+                <Text fontSize="xs" color="fg.muted" textTransform="uppercase" letterSpacing="wider" mb="6" textAlign="center">
                     Paso {step} de 3 — {stepLabels[step - 1]}
-                </p>
+                </Text>
 
-                {/* Card */}
-                <div className="rounded-[var(--radius-xl)] border border-[var(--color-border)] bg-[var(--color-surface)] p-8 shadow-[var(--shadow-md)]">
-
-                    {/* Step 1 */}
+                <Box borderRadius="xl" borderWidth="1px" borderColor="border" bg="bg.surface" p="8" boxShadow="md">
                     {step === 1 && (
-                        <div className="space-y-5">
-                            <h2 className="text-display-lg text-[var(--color-text)]">Sobre tu consulta</h2>
-                            <div className="space-y-1.5">
-                                <Label htmlFor="practice_name" className="text-label text-[var(--color-text)]">
-                                    Nombre de tu consulta <span className="text-[var(--color-error)]">*</span>
+                        <Stack gap="5">
+                            <Heading as="h2" fontSize="xl" color="fg">Sobre tu consulta</Heading>
+                            <Stack gap="1.5">
+                                <Label htmlFor="practice_name">
+                                    Nombre de tu consulta <Box as="span" color="error">*</Box>
                                 </Label>
                                 <Input
                                     id="practice_name"
                                     value={data.practice_name}
                                     onChange={(e) => setData('practice_name', e.target.value)}
                                     placeholder="Ej: Consulta Natalia López"
-                                    className="h-10"
+                                    h="10"
                                 />
                                 {errors.practice_name && (
-                                    <p className="text-xs text-[var(--color-error)]">{errors.practice_name}</p>
+                                    <Text fontSize="xs" color="error">{errors.practice_name}</Text>
                                 )}
-                            </div>
-                            <div className="space-y-1.5">
-                                <Label htmlFor="specialty" className="text-label text-[var(--color-text)]">Especialidad</Label>
-                                <select
+                            </Stack>
+                            <Stack gap="1.5">
+                                <Label htmlFor="specialty">Especialidad</Label>
+                                <chakra.select
                                     id="specialty"
                                     value={data.specialty}
                                     onChange={(e) => setData('specialty', e.target.value)}
-                                    className="w-full h-10 px-3 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] text-[var(--color-text)] text-base focus:outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 transition-[border-color,box-shadow] duration-[var(--duration-normal)]"
+                                    w="full"
+                                    h="10"
+                                    px="3"
+                                    bg="bg.surface"
+                                    borderWidth="1px"
+                                    borderColor="border"
+                                    borderRadius="md"
+                                    color="fg"
+                                    fontSize="md"
+                                    _focusVisible={{
+                                        outline: 'none',
+                                        borderColor: 'brand.solid',
+                                        boxShadow: '0 0 0 3px var(--ck-colors-brand-muted)',
+                                    }}
+                                    transition="border-color, box-shadow"
                                 >
                                     <option value="">Seleccionar…</option>
                                     {specialties.map((s) => <option key={s} value={s}>{s}</option>)}
-                                </select>
-                            </div>
-                            <div className="space-y-1.5">
-                                <Label htmlFor="city" className="text-label text-[var(--color-text)]">Ciudad</Label>
+                                </chakra.select>
+                            </Stack>
+                            <Stack gap="1.5">
+                                <Label htmlFor="city">Ciudad</Label>
                                 <Input
                                     id="city"
                                     value={data.city}
                                     onChange={(e) => setData('city', e.target.value)}
                                     placeholder="Ej: Madrid"
-                                    className="h-10"
+                                    h="10"
                                 />
-                            </div>
-                        </div>
+                            </Stack>
+                        </Stack>
                     )}
 
-                    {/* Step 2 */}
                     {step === 2 && (
-                        <div className="space-y-5">
-                            <h2 className="text-display-lg text-[var(--color-text)]">Tu primer paciente</h2>
-                            <p className="text-body-sm text-[var(--color-text-secondary)]">Puedes hacerlo después si prefieres.</p>
-                            <div className="space-y-1.5">
-                                <Label htmlFor="p_name" className="text-label text-[var(--color-text)]">Nombre del paciente</Label>
+                        <Stack gap="5">
+                            <Heading as="h2" fontSize="xl" color="fg">Tu primer paciente</Heading>
+                            <Text fontSize="sm" color="fg.muted">Puedes hacerlo después si prefieres.</Text>
+                            <Stack gap="1.5">
+                                <Label htmlFor="p_name">Nombre del paciente</Label>
                                 <Input
                                     id="p_name"
                                     value={data.patient.project_name}
                                     onChange={(e) => setData('patient', { ...data.patient, project_name: e.target.value })}
                                     placeholder="Ej: Ana García"
-                                    className="h-10"
+                                    h="10"
                                 />
-                            </div>
-                            <div className="space-y-1.5">
-                                <Label htmlFor="p_scope" className="text-label text-[var(--color-text)]">Motivo de consulta</Label>
-                                <textarea
+                            </Stack>
+                            <Stack gap="1.5">
+                                <Label htmlFor="p_scope">Motivo de consulta</Label>
+                                <chakra.textarea
                                     id="p_scope"
                                     value={data.patient.service_scope}
                                     onChange={(e) => setData('patient', { ...data.patient, service_scope: e.target.value })}
                                     placeholder="Ej: Ansiedad generalizada, gestión del estrés"
-                                    className="w-full min-h-[80px] px-3 py-2 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] text-[var(--color-text)] text-base resize-y focus:outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 transition-[border-color,box-shadow] duration-[var(--duration-normal)]"
+                                    w="full"
+                                    minH="80px"
+                                    px="3"
+                                    py="2"
+                                    bg="bg.surface"
+                                    borderWidth="1px"
+                                    borderColor="border"
+                                    borderRadius="md"
+                                    color="fg"
+                                    fontSize="md"
+                                    resize="vertical"
+                                    _focusVisible={{
+                                        outline: 'none',
+                                        borderColor: 'brand.solid',
+                                        boxShadow: '0 0 0 3px var(--ck-colors-brand-muted)',
+                                    }}
+                                    transition="border-color, box-shadow"
                                 />
-                            </div>
-                            <div className="space-y-1.5">
-                                <Label htmlFor="p_tone" className="text-label text-[var(--color-text)]">Enfoque terapéutico</Label>
+                            </Stack>
+                            <Stack gap="1.5">
+                                <Label htmlFor="p_tone">Enfoque terapéutico</Label>
                                 <Input
                                     id="p_tone"
                                     value={data.patient.brand_tone}
                                     onChange={(e) => setData('patient', { ...data.patient, brand_tone: e.target.value })}
                                     placeholder="Ej: TCC, EMDR, Terapia humanista"
-                                    className="h-10"
+                                    h="10"
                                 />
-                            </div>
-                            <div className="space-y-1.5">
-                                <Label htmlFor="p_deadline" className="text-label text-[var(--color-text)]">Próxima sesión</Label>
+                            </Stack>
+                            <Stack gap="1.5">
+                                <Label htmlFor="p_deadline">Próxima sesión</Label>
                                 <Input
                                     id="p_deadline"
                                     type="date"
                                     value={data.patient.next_deadline}
                                     onChange={(e) => setData('patient', { ...data.patient, next_deadline: e.target.value })}
-                                    className="h-10"
+                                    h="10"
                                 />
-                            </div>
-                        </div>
+                            </Stack>
+                        </Stack>
                     )}
 
-                    {/* Step 3 */}
                     {step === 3 && (
-                        <div className="space-y-6 text-center">
-                            <div className="w-16 h-16 rounded-full bg-[var(--color-primary-subtle)] flex items-center justify-center mx-auto">
-                                <Sparkles size={32} className="text-[var(--color-primary)]" />
-                            </div>
-                            <div>
-                                <h2 className="text-display-lg text-[var(--color-text)] mb-2">¡Todo listo!</h2>
-                                <p className="text-body-md text-[var(--color-text-secondary)]">
+                        <Stack gap="6" textAlign="center">
+                            <Flex
+                                w="16"
+                                h="16"
+                                borderRadius="full"
+                                bg="brand.muted"
+                                alignItems="center"
+                                justifyContent="center"
+                                mx="auto"
+                            >
+                                <Icon as={Sparkles} boxSize="8" color="brand.solid" />
+                            </Flex>
+                            <Box>
+                                <Heading as="h2" fontSize="xl" color="fg" mb="2">¡Todo listo!</Heading>
+                                <Text fontSize="md" color="fg.muted">
                                     Kosmo te acompañará en cada sesión. Tu consulta está lista para empezar.
-                                </p>
-                            </div>
+                                </Text>
+                            </Box>
                             {data.practice_name && (
-                                <div className="rounded-[var(--radius-lg)] border border-[var(--color-border-subtle)] bg-[var(--color-surface-alt)] p-4 text-left space-y-2">
-                                    <p className="text-sm text-[var(--color-text)]">
-                                        <span className="text-[var(--color-text-secondary)]">Consulta:</span> {data.practice_name}
-                                    </p>
+                                <Stack
+                                    borderRadius="lg"
+                                    borderWidth="1px"
+                                    borderColor="border.subtle"
+                                    bg="bg.muted"
+                                    p="4"
+                                    textAlign="left"
+                                    gap="2"
+                                >
+                                    <Text fontSize="sm" color="fg">
+                                        <Box as="span" color="fg.muted">Consulta:</Box> {data.practice_name}
+                                    </Text>
                                     {data.specialty && (
-                                        <p className="text-sm text-[var(--color-text)]">
-                                            <span className="text-[var(--color-text-secondary)]">Especialidad:</span> {data.specialty}
-                                        </p>
+                                        <Text fontSize="sm" color="fg">
+                                            <Box as="span" color="fg.muted">Especialidad:</Box> {data.specialty}
+                                        </Text>
                                     )}
                                     {data.patient.project_name && (
-                                        <p className="text-sm text-[var(--color-text)]">
-                                            <span className="text-[var(--color-text-secondary)]">Primer paciente:</span> {data.patient.project_name}
-                                        </p>
+                                        <Text fontSize="sm" color="fg">
+                                            <Box as="span" color="fg.muted">Primer paciente:</Box> {data.patient.project_name}
+                                        </Text>
                                     )}
-                                </div>
+                                </Stack>
                             )}
-                        </div>
+                        </Stack>
                     )}
+                </Box>
 
-                </div>
-
-                {/* Navigation */}
-                <div className="flex items-center justify-between mt-6 gap-4">
+                <Flex alignItems="center" justifyContent="space-between" mt="6" gap="4">
                     {step > 1 ? (
                         <Button
                             variant="secondary"
@@ -221,16 +262,16 @@ export default function Onboarding() {
                             Anterior
                         </Button>
                     ) : (
-                        <div />
+                        <Box />
                     )}
 
-                    <div className="flex gap-3">
+                    <Flex gap="3">
                         {step === 2 && (
                             <Button
                                 variant="ghost"
                                 onClick={() => setStep(3)}
                                 disabled={processing}
-                                className="text-[var(--color-text-secondary)]"
+                                color="fg.muted"
                             >
                                 Lo haré después
                             </Button>
@@ -252,9 +293,9 @@ export default function Onboarding() {
                                 Ir a mi consulta
                             </Button>
                         )}
-                    </div>
-                </div>
-            </div>
-        </div>
+                    </Flex>
+                </Flex>
+            </Box>
+        </Flex>
     );
 }

@@ -1,10 +1,17 @@
+import { Box, Circle, Flex, HStack, Stack, Text } from '@chakra-ui/react';
 import { Form } from '@inertiajs/react';
-import { Trash2, AlertTriangle, Lock } from 'lucide-react';
+import { AlertTriangle, Lock, Trash2 } from 'lucide-react';
 import { useRef } from 'react';
 import ProfileActions from '@/actions/App/Http/Controllers/Settings/Profile';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
 import {
     Dialog,
     DialogClose,
@@ -21,72 +28,98 @@ export default function DeleteUser() {
     const passwordInput = useRef<HTMLInputElement>(null);
 
     return (
-        <Card className="shadow-sm border-red-200 dark:border-red-900/50">
-            <CardHeader className="border-b border-red-100 bg-red-50/50 pb-4 dark:border-red-900/30 dark:bg-red-900/10">
-                <div className="flex items-center gap-2">
-                    <Trash2 className="h-5 w-5 text-red-600 dark:text-red-400" />
-                    <CardTitle className="text-base font-semibold text-red-800 dark:text-red-200">Eliminar cuenta</CardTitle>
-                </div>
-                <CardDescription className="text-red-700/80 dark:text-red-300/80">
+        <Card shadow="sm" borderColor="danger.muted">
+            <CardHeader
+                borderBottomWidth="1px"
+                borderBottomColor="danger.muted"
+                bg="danger.subtle"
+                pb="4"
+            >
+                <HStack gap="2">
+                    <Trash2 size={20} color="var(--ck-colors-danger-fg)" />
+                    <CardTitle fontSize="md" fontWeight="semibold" color="danger.fg">
+                        Eliminar cuenta
+                    </CardTitle>
+                </HStack>
+                <CardDescription color="danger.fg">
                     Elimina tu cuenta y todos sus datos de forma permanente
                 </CardDescription>
             </CardHeader>
-            <CardContent className="pt-6">
-                <div className="space-y-4">
-                    {/* Warning Banner */}
-                    <div className="flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-900/50 dark:bg-red-900/20">
-                        <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400 shrink-0 mt-0.5" />
-                        <div className="space-y-1">
-                            <p className="font-medium text-red-800 dark:text-red-200">Advertencia</p>
-                            <p className="text-sm text-red-700 dark:text-red-300">
-                                Esta acción es irreversible. Una vez eliminada tu cuenta, todos los datos asociados (tareas, ideas, clientes y recursos) serán eliminados permanentemente.
-                            </p>
-                        </div>
-                    </div>
+            <CardContent pt="6">
+                <Stack gap="4">
+                    <Flex
+                        role="alert"
+                        align="flex-start"
+                        gap="3"
+                        rounded="lg"
+                        borderWidth="1px"
+                        borderColor="danger.muted"
+                        bg="danger.subtle"
+                        p="4"
+                    >
+                        <Box flexShrink={0} mt="0.5">
+                            <AlertTriangle
+                                size={20}
+                                color="var(--ck-colors-danger-fg)"
+                            />
+                        </Box>
+                        <Stack gap="1">
+                            <Text fontWeight="medium" color="danger.fg">
+                                Advertencia
+                            </Text>
+                            <Text fontSize="sm" color="danger.fg">
+                                Esta acción es irreversible. Una vez eliminada tu
+                                cuenta, todos los datos asociados (tareas, ideas,
+                                clientes y recursos) serán eliminados permanentemente.
+                            </Text>
+                        </Stack>
+                    </Flex>
 
                     <Dialog>
                         <DialogTrigger asChild>
                             <Button
                                 variant="destructive"
                                 data-test="delete-user-button"
-                                className="gap-2"
+                                type="button"
                             >
-                                <Trash2 className="h-4 w-4" />
+                                <Trash2 size={16} />
                                 Eliminar mi cuenta
                             </Button>
                         </DialogTrigger>
                         <DialogContent>
-                            <div className="flex items-center gap-3 mb-2">
-                                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
-                                    <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />
-                                </div>
-                                <DialogTitle className="text-lg">
+                            <HStack gap="3" mb="2">
+                                <Circle size="10" bg="danger.subtle">
+                                    <AlertTriangle
+                                        size={20}
+                                        color="var(--ck-colors-danger-fg)"
+                                    />
+                                </Circle>
+                                <DialogTitle fontSize="lg">
                                     ¿Eliminar tu cuenta?
                                 </DialogTitle>
-                            </div>
-                            <DialogDescription className="text-sm">
-                                Una vez eliminada tu cuenta, todos los recursos y datos serán eliminados permanentemente. 
-                                Introduce tu contraseña para confirmar que deseas eliminar tu cuenta definitivamente.
+                            </HStack>
+                            <DialogDescription fontSize="sm">
+                                Una vez eliminada tu cuenta, todos los recursos y
+                                datos serán eliminados permanentemente. Introduce tu
+                                contraseña para confirmar que deseas eliminar tu
+                                cuenta definitivamente.
                             </DialogDescription>
 
                             <Form
                                 {...ProfileActions.DestroyAction.form()}
-                                options={{
-                                    preserveScroll: true,
-                                }}
+                                options={{ preserveScroll: true }}
                                 onError={() => passwordInput.current?.focus()}
                                 resetOnSuccess
-                                className="space-y-4 mt-4"
+                                style={{ marginTop: '1rem' }}
                             >
                                 {({ resetAndClearErrors, processing, errors }) => (
-                                    <>
-                                        <div className="space-y-2">
-                                            <Label
-                                                htmlFor="password"
-                                                className="flex items-center gap-2 text-sm font-medium"
-                                            >
-                                                <Lock className="h-4 w-4 text-muted-foreground" />
-                                                Contraseña
+                                    <Stack gap="4">
+                                        <Stack gap="2">
+                                            <Label htmlFor="password">
+                                                <HStack gap="2" fontSize="sm" fontWeight="medium">
+                                                    <Lock size={16} color="var(--ck-colors-fg-muted)" />
+                                                    <span>Contraseña</span>
+                                                </HStack>
                                             </Label>
 
                                             <Input
@@ -99,11 +132,12 @@ export default function DeleteUser() {
                                             />
 
                                             <InputError message={errors.password} />
-                                        </div>
+                                        </Stack>
 
-                                        <DialogFooter className="gap-2 sm:gap-0">
+                                        <DialogFooter>
                                             <DialogClose asChild>
                                                 <Button
+                                                    type="button"
                                                     variant="outline"
                                                     onClick={() =>
                                                         resetAndClearErrors()
@@ -114,30 +148,22 @@ export default function DeleteUser() {
                                             </DialogClose>
 
                                             <Button
+                                                type="submit"
                                                 variant="destructive"
                                                 disabled={processing}
-                                                asChild
+                                                data-test="confirm-delete-user-button"
+                                                loading={processing}
                                             >
-                                                <button
-                                                    type="submit"
-                                                    data-test="confirm-delete-user-button"
-                                                    className="gap-2"
-                                                >
-                                                    {processing ? (
-                                                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                                                    ) : (
-                                                        <Trash2 className="h-4 w-4" />
-                                                    )}
-                                                    Eliminar cuenta
-                                                </button>
+                                                <Trash2 size={16} />
+                                                Eliminar cuenta
                                             </Button>
                                         </DialogFooter>
-                                    </>
+                                    </Stack>
                                 )}
                             </Form>
                         </DialogContent>
                     </Dialog>
-                </div>
+                </Stack>
             </CardContent>
         </Card>
     );

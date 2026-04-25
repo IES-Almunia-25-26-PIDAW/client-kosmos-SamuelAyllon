@@ -5,28 +5,47 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 class Document extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, LogsActivity, SoftDeletes;
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['name', 'category', 'storage_type'])
+            ->logOnlyDirty()
+            ->dontLogEmptyChanges();
+    }
 
     protected $fillable = [
-        'patient_id', 'user_id', 'name', 'file_path',
-        'mime_type', 'file_size', 'category', 'is_rgpd', 'expires_at',
+        'patient_id', 'user_id', 'workspace_id', 'name', 'local_path',
+        'storage_type', 'gdrive_file_id', 'gdrive_url',
+        'mime_type', 'size_bytes', 'category', 'is_rgpd', 'expires_at',
     ];
 
-    protected $casts = [
-        'is_rgpd'    => 'boolean',
-        'expires_at' => 'date',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'is_rgpd' => 'boolean',
+            'expires_at' => 'date',
+        ];
+    }
 
     public function patient()
     {
-        return $this->belongsTo(Patient::class);
+        return $this->belongsTo(PatientProfile::class, 'patient_id');
     }
 
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function workspace()
+    {
+        return $this->belongsTo(Workspace::class);
     }
 }

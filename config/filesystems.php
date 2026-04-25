@@ -38,6 +38,28 @@ return [
             'report' => false,
         ],
 
+        // Almacenamiento cifrado para documentos clínicos y consentimientos (RGPD Art. 32)
+        'private' => [
+            'driver' => 'local',
+            'root' => storage_path('app/private'),
+            'serve' => false,
+            'throw' => true,
+            'report' => false,
+            'permissions' => [
+                'file' => ['public' => 0600, 'private' => 0600],
+                'dir' => ['public' => 0700, 'private' => 0700],
+            ],
+        ],
+
+        // Chunks de audio temporales — TTL 24h, borrado automático tras transcribir
+        'audio_chunks' => [
+            'driver' => 'local',
+            'root' => storage_path('app/chunks'),
+            'serve' => false,
+            'throw' => false,
+            'report' => false,
+        ],
+
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),

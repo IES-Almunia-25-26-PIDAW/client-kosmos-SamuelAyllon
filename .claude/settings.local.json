@@ -1,0 +1,9 @@
+{
+  "enabledMcpjsonServers": [
+    "laravel-boost",
+    "chakra-ui",
+    "figma",
+    "context7"
+  ],
+  "enableAllProjectMcpServers": true
+}

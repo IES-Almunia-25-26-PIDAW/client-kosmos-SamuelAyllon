@@ -11,7 +11,7 @@ class Agreement extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'patient_id', 'user_id', 'consulting_session_id',
+        'patient_id', 'user_id', 'appointment_id',
         'content', 'is_completed', 'completed_at',
     ];
 
@@ -22,7 +22,7 @@ class Agreement extends Model
 
     public function patient()
     {
-        return $this->belongsTo(Patient::class);
+        return $this->belongsTo(PatientProfile::class, 'patient_id');
     }
 
     public function user()
@@ -30,8 +30,8 @@ class Agreement extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function session()
+    public function appointment()
     {
-        return $this->belongsTo(ConsultingSession::class, 'consulting_session_id');
+        return $this->belongsTo(Appointment::class);
     }
 }

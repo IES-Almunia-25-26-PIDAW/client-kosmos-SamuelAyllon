@@ -16,7 +16,9 @@ class ImpersonationController extends Controller
         $request->session()->put('impersonating_id', $request->user()->id);
         auth()->login($user);
 
-        return redirect()->route('dashboard')
+        $route = $user->isProfessional() ? 'professional.dashboard' : 'patient.dashboard';
+
+        return redirect()->route($route)
             ->with('success', "Viendo como {$user->name}");
     }
 

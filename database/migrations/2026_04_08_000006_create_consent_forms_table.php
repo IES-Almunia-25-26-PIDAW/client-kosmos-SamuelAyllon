@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('consent_forms', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('patient_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('patient_id')->constrained('patient_profiles')->cascadeOnDelete();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('template_version');
             $table->longText('content_snapshot');

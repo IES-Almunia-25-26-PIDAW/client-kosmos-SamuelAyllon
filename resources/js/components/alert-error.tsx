@@ -1,3 +1,4 @@
+import { List } from '@chakra-ui/react';
 import { AlertCircleIcon } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
@@ -13,11 +14,11 @@ export default function AlertError({
             <AlertCircleIcon />
             <AlertTitle>{title || 'Something went wrong.'}</AlertTitle>
             <AlertDescription>
-                <ul className="list-inside list-disc text-sm">
+                <List.Root as="ul" listStyleType="disc" listStylePosition="inside" fontSize="sm">
                     {Array.from(new Set(errors)).map((error, index) => (
-                        <li key={index}>{error}</li>
+                        <List.Item key={index}>{error}</List.Item>
                     ))}
-                </ul>
+                </List.Root>
             </AlertDescription>
         </Alert>
     );

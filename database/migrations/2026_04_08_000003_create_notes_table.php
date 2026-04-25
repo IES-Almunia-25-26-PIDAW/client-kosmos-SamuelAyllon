@@ -10,9 +10,9 @@ return new class extends Migration
     {
         Schema::create('notes', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('patient_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('patient_id')->constrained('patient_profiles')->cascadeOnDelete();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('consulting_session_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('appointment_id')->nullable()->constrained()->nullOnDelete();
             $table->text('content');
             $table->enum('type', ['quick_note', 'session_note', 'observation', 'followup'])->default('quick_note');
             $table->boolean('is_ai_generated')->default(false);

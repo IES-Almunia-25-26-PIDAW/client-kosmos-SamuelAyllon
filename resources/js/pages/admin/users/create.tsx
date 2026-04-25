@@ -1,7 +1,15 @@
+import { Box, Flex, Heading, Stack, Text, chakra } from '@chakra-ui/react';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { ArrowLeft, UserPlus } from 'lucide-react';
-import AdminLayout from '@/layouts/admin-layout';
+import type { ReactNode } from 'react';
+import IndexAction from '@/actions/App/Http/Controllers/Admin/Users/IndexAction';
+import StoreAction from '@/actions/App/Http/Controllers/Admin/Users/StoreAction';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import AdminLayout from '@/layouts/admin-layout';
+
+const ChakraLink = chakra(Link);
 
 export default function AdminUserCreate() {
     const { data, setData, post, processing, errors } = useForm({
@@ -12,99 +20,106 @@ export default function AdminUserCreate() {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        post('/admin/users');
+        post(StoreAction.url());
     };
 
     return (
-        <AdminLayout>
+        <>
             <Head title="Nuevo profesional — Admin — ClientKosmos" />
 
-            <div className="flex flex-col gap-6 p-6 lg:p-8 max-w-2xl">
-                <div>
-                    <Link
-                        href="/admin/users"
-                        className="inline-flex items-center gap-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text)] mb-4"
+            <Stack gap="6" p={{ base: '6', lg: '8' }} maxW="2xl">
+                <Box>
+                    <ChakraLink
+                        href={IndexAction.url()}
+                        display="inline-flex"
+                        alignItems="center"
+                        gap="2"
+                        fontSize="sm"
+                        color="fg.muted"
+                        _hover={{ color: 'fg' }}
+                        mb="4"
                     >
                         <ArrowLeft size={16} />
                         Volver a usuarios
-                    </Link>
-                    <h1 className="text-display-2xl text-[var(--color-text)] flex items-center gap-3">
+                    </ChakraLink>
+                    <Heading as="h1" fontSize="3xl" color="fg" display="flex" alignItems="center" gap="3">
                         <UserPlus size={26} />
                         Nuevo profesional
-                    </h1>
-                    <p className="mt-1 text-body-md text-[var(--color-text-secondary)]">
+                    </Heading>
+                    <Text mt="1" fontSize="md" color="fg.muted">
                         Crea una cuenta de profesional. El usuario podrá actualizar sus datos desde los ajustes.
-                    </p>
-                </div>
+                    </Text>
+                </Box>
 
-                <form
+                <chakra.form
                     onSubmit={handleSubmit}
-                    className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-[var(--shadow-sm)] space-y-5"
+                    borderRadius="lg"
+                    borderWidth="1px"
+                    borderColor="border"
+                    bg="bg.surface"
+                    p="6"
+                    boxShadow="sm"
+                    display="flex"
+                    flexDirection="column"
+                    gap="5"
                 >
-                    <div className="flex flex-col gap-1.5">
-                        <label htmlFor="name" className="text-sm font-medium text-[var(--color-text)]">
-                            Nombre completo
-                        </label>
-                        <input
+                    <Stack gap="1.5">
+                        <Label htmlFor="name">Nombre completo</Label>
+                        <Input
                             id="name"
                             type="text"
                             value={data.name}
                             onChange={(e) => setData('name', e.target.value)}
                             placeholder="Ej. Marta García López"
-                            className="h-10 px-3 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 transition-colors"
                         />
                         {errors.name && (
-                            <p className="text-xs text-destructive">{errors.name}</p>
+                            <Text fontSize="xs" color="fg.error">{errors.name}</Text>
                         )}
-                    </div>
+                    </Stack>
 
-                    <div className="flex flex-col gap-1.5">
-                        <label htmlFor="email" className="text-sm font-medium text-[var(--color-text)]">
-                            Correo electrónico
-                        </label>
-                        <input
+                    <Stack gap="1.5">
+                        <Label htmlFor="email">Correo electrónico</Label>
+                        <Input
                             id="email"
                             type="email"
                             value={data.email}
                             onChange={(e) => setData('email', e.target.value)}
                             placeholder="marta@clinica.com"
-                            className="h-10 px-3 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 transition-colors"
                         />
                         {errors.email && (
-                            <p className="text-xs text-destructive">{errors.email}</p>
+                            <Text fontSize="xs" color="fg.error">{errors.email}</Text>
                         )}
-                    </div>
+                    </Stack>
 
-                    <div className="flex flex-col gap-1.5">
-                        <label htmlFor="password" className="text-sm font-medium text-[var(--color-text)]">
-                            Contraseña inicial
-                        </label>
-                        <input
+                    <Stack gap="1.5">
+                        <Label htmlFor="password">Contraseña inicial</Label>
+                        <Input
                             id="password"
                             type="password"
                             value={data.password}
                             onChange={(e) => setData('password', e.target.value)}
                             placeholder="Mínimo 8 caracteres"
-                            className="h-10 px-3 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 transition-colors"
                         />
                         {errors.password && (
-                            <p className="text-xs text-destructive">{errors.password}</p>
+                            <Text fontSize="xs" color="fg.error">{errors.password}</Text>
                         )}
-                    </div>
+                    </Stack>
 
-                    <div className="flex items-center justify-end gap-3 pt-2 border-t border-[var(--color-border-subtle)]">
-                        <Link href="/admin/users">
+                    <Flex alignItems="center" justifyContent="flex-end" gap="3" pt="2" borderTopWidth="1px" borderColor="border.subtle">
+                        <ChakraLink href={IndexAction.url()}>
                             <Button type="button" variant="secondary">
                                 Cancelar
                             </Button>
-                        </Link>
+                        </ChakraLink>
                         <Button type="submit" variant="primary" loading={processing}>
                             <UserPlus size={15} />
                             Crear profesional
                         </Button>
-                    </div>
-                </form>
-            </div>
-        </AdminLayout>
+                    </Flex>
+                </chakra.form>
+            </Stack>
+        </>
     );
 }
+
+AdminUserCreate.layout = (page: ReactNode) => <AdminLayout>{page}</AdminLayout>;

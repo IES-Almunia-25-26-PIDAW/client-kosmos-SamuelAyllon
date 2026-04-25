@@ -29,9 +29,18 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
+            'tutorial_completed_at' => null,
             'two_factor_secret' => null,
             'two_factor_recovery_codes' => null,
             'two_factor_confirmed_at' => null,
+            'avatar_path' => null,
+            'phone' => null,
+            'date_of_birth' => null,
+            'address' => null,
+            'patient_notes' => null,
+            'stripe_customer_id' => null,
+            'google_refresh_token' => null,
+            'gdrive_refresh_token' => null,
         ];
     }
 

@@ -1,33 +1,33 @@
 <?php
 
-use App\Models\Patient;
-use App\Models\Payment;
+use App\Models\Invoice;
+use App\Models\User;
 
-it('redirects guests from billing to login', function () {
-    $this->get(route('billing'))->assertRedirect(route('login'));
+it('redirects guests from invoices index to login', function () {
+    $this->get(route('professional.invoices.index'))->assertRedirect(route('login'));
 });
 
-it('professional can view billing page', function () {
+it('professional can view invoices page', function () {
     $this->actingAs(createProfessional())
-        ->get(route('billing'))
+        ->get(route('professional.invoices.index'))
         ->assertOk()
-        ->assertInertia(fn ($page) => $page->component('billing/index'));
+        ->assertInertia(fn ($page) => $page->component('professional/invoices/index', false));
 });
 
-it('billing page returns payments, stats and filters', function () {
+it('invoices page returns invoices, stats and filters', function () {
     $this->actingAs(createProfessional())
-        ->get(route('billing'))
+        ->get(route('professional.invoices.index'))
         ->assertInertia(fn ($page) => $page
-            ->component('billing/index')
+            ->component('professional/invoices/index', false)
             ->has('payments')
             ->has('stats')
             ->has('filters')
         );
 });
 
-it('billing stats include total_paid, total_pending and total_overdue', function () {
+it('invoice stats include total_paid, total_pending and total_overdue', function () {
     $this->actingAs(createProfessional())
-        ->get(route('billing'))
+        ->get(route('professional.invoices.index'))
         ->assertInertia(fn ($page) => $page
             ->has('stats.total_paid')
             ->has('stats.total_pending')
@@ -35,41 +35,41 @@ it('billing stats include total_paid, total_pending and total_overdue', function
         );
 });
 
-it('billing only shows payments belonging to authenticated user', function () {
+it('invoices index only shows invoices belonging to authenticated professional', function () {
     $user = createProfessional();
     $other = createProfessional();
 
-    $patientOwn = Patient::factory()->create(['user_id' => $user->id]);
-    $patientOther = Patient::factory()->create(['user_id' => $other->id]);
+    $patientUser = User::factory()->create();
+    $patientUserOther = User::factory()->create();
 
-    Payment::factory()->count(3)->create([
-        'user_id'    => $user->id,
-        'patient_id' => $patientOwn->id,
+    Invoice::factory()->count(3)->create([
+        'professional_id' => $user->id,
+        'patient_id' => $patientUser->id,
     ]);
-    Payment::factory()->create([
-        'user_id'    => $other->id,
-        'patient_id' => $patientOther->id,
+    Invoice::factory()->create([
+        'professional_id' => $other->id,
+        'patient_id' => $patientUserOther->id,
     ]);
 
     $this->actingAs($user)
-        ->get(route('billing'))
+        ->get(route('professional.invoices.index'))
         ->assertInertia(fn ($page) => $page
-            ->component('billing/index')
+            ->component('professional/invoices/index', false)
             ->has('payments.data', 3)
         );
 });
 
-it('billing can be filtered by payment status', function () {
+it('invoices index can be filtered by invoice status', function () {
     $user = createProfessional();
-    $patient = Patient::factory()->create(['user_id' => $user->id]);
+    $patientUser = User::factory()->create();
 
-    Payment::factory()->create(['user_id' => $user->id, 'patient_id' => $patient->id, 'status' => 'paid']);
-    Payment::factory()->create(['user_id' => $user->id, 'patient_id' => $patient->id, 'status' => 'pending']);
+    Invoice::factory()->create(['professional_id' => $user->id, 'patient_id' => $patientUser->id, 'status' => 'paid']);
+    Invoice::factory()->create(['professional_id' => $user->id, 'patient_id' => $patientUser->id, 'status' => 'draft']);
 
     $this->actingAs($user)
-        ->get(route('billing', ['status' => 'paid']))
+        ->get(route('professional.invoices.index', ['status' => 'paid']))
         ->assertInertia(fn ($page) => $page
-            ->component('billing/index')
+            ->component('professional/invoices/index', false)
             ->has('payments.data', 1)
         );
 });

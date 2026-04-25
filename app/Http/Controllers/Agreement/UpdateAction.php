@@ -4,18 +4,18 @@ namespace App\Http\Controllers\Agreement;
 
 use App\Http\Controllers\Controller;
 use App\Models\Agreement;
-use App\Models\Patient;
+use App\Models\PatientProfile;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class UpdateAction extends Controller
 {
-    public function __invoke(Request $request, Patient $patient, Agreement $agreement): RedirectResponse
+    public function __invoke(Request $request, PatientProfile $patient, Agreement $agreement): RedirectResponse
     {
         $this->authorize('view', $patient);
 
         $request->validate([
-            'content'      => ['sometimes', 'string', 'min:1'],
+            'content' => ['sometimes', 'string', 'min:1'],
             'is_completed' => ['sometimes', 'boolean'],
         ]);
 

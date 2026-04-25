@@ -1,43 +1,64 @@
-import { LucideIcon } from 'lucide-react';
+import { Box, Flex, Text, type BoxProps } from '@chakra-ui/react';
+import type { LucideIcon } from 'lucide-react';
 import * as React from 'react';
 
-export interface KPICardProps extends React.HTMLAttributes<HTMLDivElement> {
-  label: string;
-  value: string | number;
-  icon?: LucideIcon;
-  trend?: {
-    value: number;
-    isPositive: boolean;
-  };
-  description?: string;
+export interface KPICardProps extends Omit<BoxProps, 'title'> {
+    label: string;
+    value: string | number;
+    icon?: LucideIcon;
+    trend?: {
+        value: number;
+        isPositive: boolean;
+    };
+    description?: string;
 }
 
 const KPICard = React.forwardRef<HTMLDivElement, KPICardProps>(
-  ({ className = '', label, value, icon: Icon, trend, description, ...props }, ref) => (
-    <div
-      ref={ref}
-      className={`p-4 rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] ${className}`}
-      {...props}
-    >
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-xs font-medium text-[var(--color-text-secondary)] uppercase tracking-wider">{label}</span>
-        {Icon && <Icon className="w-4 h-4 text-[var(--color-text-muted)]" />}
-      </div>
-      
-      <div className="mb-2">
-        <div className="text-2xl font-bold text-[var(--color-foreground)]">{value}</div>
-        {trend && (
-          <div className={`text-xs font-medium ${trend.isPositive ? 'text-[var(--color-success)]' : 'text-[var(--color-error)]'}`}>
-            {trend.isPositive ? '↑' : '↓'} {Math.abs(trend.value)}%
-          </div>
-        )}
-      </div>
+    ({ label, value, icon: Icon, trend, description, ...boxProps }, ref) => (
+        <Box
+            ref={ref}
+            p="4"
+            borderRadius="lg"
+            borderWidth="1px"
+            borderColor="border"
+            bg="card"
+            {...boxProps}
+        >
+            <Flex align="center" justify="space-between" mb="2">
+                <Text
+                    fontSize="xs"
+                    fontWeight="medium"
+                    color="fg.muted"
+                    textTransform="uppercase"
+                    letterSpacing="wider"
+                >
+                    {label}
+                </Text>
+                {Icon && <Icon size={16} color="var(--ck-colors-fg-subtle)" />}
+            </Flex>
 
-      {description && (
-        <p className="text-xs text-[var(--color-text-secondary)]">{description}</p>
-      )}
-    </div>
-  )
+            <Box mb="2">
+                <Text fontSize="2xl" fontWeight="bold" color="fg">
+                    {value}
+                </Text>
+                {trend && (
+                    <Text
+                        fontSize="xs"
+                        fontWeight="medium"
+                        color={trend.isPositive ? 'success.fg' : 'danger.fg'}
+                    >
+                        {trend.isPositive ? '↑' : '↓'} {Math.abs(trend.value)}%
+                    </Text>
+                )}
+            </Box>
+
+            {description && (
+                <Text fontSize="xs" color="fg.muted">
+                    {description}
+                </Text>
+            )}
+        </Box>
+    ),
 );
 KPICard.displayName = 'KPICard';
 

@@ -13,7 +13,7 @@ class IndexAction extends Controller
     public function __invoke(Request $request): Response|RedirectResponse
     {
         if ($request->user()->hasCompletedTutorial()) {
-            return redirect()->route('dashboard');
+            return redirect()->route('professional.dashboard');
         }
 
         return Inertia::render('onboarding');

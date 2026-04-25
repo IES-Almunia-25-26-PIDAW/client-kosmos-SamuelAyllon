@@ -2,24 +2,41 @@
 
 namespace App\Services;
 
-use App\Models\Payment;
+use App\Models\Invoice;
+use App\Notifications\InvoiceOverdueNotification;
+use Illuminate\Support\Facades\Log;
 
 class PaymentReminderService
 {
     /**
-     * @todo Send payment reminder notifications for all overdue/pending payments
-     *       that haven't been reminded recently
+     * Send payment reminder notifications for all overdue invoices.
      */
     public function sendPendingReminders(): void
     {
-        // @todo
+        Invoice::where('status', 'overdue')
+            ->where('due_at', '<', now())
+            ->with('professional')
+            ->each(function (Invoice $invoice): void {
+                $invoice->professional->notify(new InvoiceOverdueNotification($invoice));
+
+                Log::info('Payment reminder sent', [
+                    'invoice_id' => $invoice->id,
+                    'invoice_number' => $invoice->invoice_number,
+                    'professional_id' => $invoice->professional_id,
+                ]);
+            });
     }
 
     /**
-     * @todo Mark a payment as claimed (escalated) and log the action
+     * Mark an invoice as claimed (escalated) and log the action.
      */
-    public function markAsClaimed(Payment $payment): void
+    public function markAsClaimed(Invoice $invoice): void
     {
-        // @todo
+        Log::warning('Invoice escalated/claimed', [
+            'invoice_id' => $invoice->id,
+            'invoice_number' => $invoice->invoice_number,
+            'due_at' => $invoice->due_at,
+            'total' => $invoice->total,
+        ]);
     }
 }

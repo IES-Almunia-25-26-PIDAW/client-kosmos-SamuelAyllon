@@ -1,45 +1,78 @@
+import { Badge, Box } from '@chakra-ui/react';
 import * as React from 'react';
-import { cn } from '@/lib/utils';
 
-type StatusType = 'paid' | 'pending' | 'overdue' | 'noConsent' | 'openDeal' | 'claimed';
+type StatusType =
+    | 'paid'
+    | 'pending'
+    | 'overdue'
+    | 'noConsent'
+    | 'openDeal'
+    | 'claimed';
 
-const statusConfig: Record<StatusType, { label: string; bg: string; text: string; dot: string }> = {
-    paid:      { label: 'Cobrado',          bg: 'bg-[var(--color-success-subtle)]',  text: 'text-[var(--color-success-fg)]',  dot: 'bg-[var(--color-success)]' },
-    pending:   { label: 'Cobro pendiente',  bg: 'bg-[var(--color-warning-subtle)]',  text: 'text-[var(--color-warning-fg)]',  dot: 'bg-[var(--color-warning)]' },
-    overdue:   { label: 'Pago vencido',     bg: 'bg-[var(--color-error-subtle)]',    text: 'text-[var(--color-error-fg)]',    dot: 'bg-[var(--color-error)]' },
-    noConsent: { label: 'Sin consentimiento', bg: 'bg-[var(--color-indigo-subtle)]', text: 'text-[var(--color-indigo-fg)]',   dot: 'bg-[var(--color-indigo)]' },
-    openDeal:  { label: 'Acuerdo abierto',  bg: 'bg-[var(--color-orange-subtle)]',   text: 'text-[var(--color-orange-fg)]',   dot: 'bg-[var(--color-orange)]' },
-    claimed:   { label: 'Reclamado',        bg: 'bg-[var(--color-error-subtle)]',    text: 'text-[var(--color-error-fg)]',    dot: 'bg-[var(--color-error)]' },
+const statusConfig: Record<
+    StatusType,
+    { label: string; colorPalette: string }
+> = {
+    paid: { label: 'Cobrado', colorPalette: 'green' },
+    pending: { label: 'Cobro pendiente', colorPalette: 'yellow' },
+    overdue: { label: 'Pago vencido', colorPalette: 'red' },
+    noConsent: { label: 'Sin consentimiento', colorPalette: 'purple' },
+    openDeal: { label: 'Acuerdo abierto', colorPalette: 'orange' },
+    claimed: { label: 'Reclamado', colorPalette: 'red' },
 };
 
-export interface StatusBadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
+export interface StatusBadgeProps {
     status: StatusType;
     variant?: 'default' | 'subtle';
     showDot?: boolean;
     children?: React.ReactNode;
+    className?: string;
+    style?: React.CSSProperties;
 }
 
 const StatusBadge = React.forwardRef<HTMLSpanElement, StatusBadgeProps>(
-    ({ className, status, variant = 'default', showDot = true, children, ...props }, ref) => {
+    (
+        {
+            status,
+            variant = 'default',
+            showDot = true,
+            children,
+            ...props
+        },
+        ref,
+    ) => {
         const config = statusConfig[status] ?? statusConfig.pending;
+        const isSubtle = variant === 'subtle';
 
         return (
-            <span
+            <Badge
                 ref={ref}
-                className={cn(
-                    'inline-flex items-center gap-1.5 rounded-full font-medium transition-colors',
-                    variant === 'subtle' ? 'px-2 py-0.5 text-xs' : 'px-3 py-1.5 text-sm',
-                    config.bg,
-                    config.text,
-                    className
-                )}
+                data-slot="status-badge"
+                colorPalette={config.colorPalette}
+                variant="subtle"
+                borderRadius="full"
+                fontWeight="medium"
+                display="inline-flex"
+                alignItems="center"
+                gap="1.5"
+                px={isSubtle ? '2' : '3'}
+                py={isSubtle ? '0.5' : '1.5'}
+                fontSize={isSubtle ? 'xs' : 'sm'}
                 {...props}
             >
-                {showDot && <span className={cn('w-1.5 h-1.5 rounded-full shrink-0', config.dot)} />}
+                {showDot && (
+                    <Box
+                        w="1.5"
+                        h="1.5"
+                        borderRadius="full"
+                        bg="colorPalette.solid"
+                        flexShrink={0}
+                    />
+                )}
                 {children ?? config.label}
-            </span>
+            </Badge>
         );
-    }
+    },
 );
 StatusBadge.displayName = 'StatusBadge';
 

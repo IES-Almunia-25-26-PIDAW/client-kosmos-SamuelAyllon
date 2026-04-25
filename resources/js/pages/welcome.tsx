@@ -1,3 +1,4 @@
+import { Box, Flex, Heading, Icon, Stack, Text, chakra } from '@chakra-ui/react';
 import { Head, Link, usePage } from '@inertiajs/react';
 import {
     CheckCircle2,
@@ -23,488 +24,440 @@ import {
     AlertCircle,
 } from 'lucide-react';
 import { useEffect, useState, useRef } from 'react';
-import logo from '@/assets/logo.png';
+import logo from '@/assets/logo.svg';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { dashboard, login, register } from '@/routes';
+import { login, register } from '@/routes';
+import { dashboard } from '@/routes';
+import type { Auth } from '@/types';
 
+const NAV_ITEMS = [
+    { href: '#features', label: 'Funcionalidades' },
+    { href: '#how-it-works', label: 'Cómo funciona' },
+    { href: '#testimonials', label: 'Testimonios' },
+    { href: '#pricing', label: 'Precios' },
+];
 
 export default function Welcome({ canRegister = true }: { canRegister?: boolean }) {
-    const { auth } = usePage().props as { auth: { user: unknown } };
+    const { auth } = usePage<{ auth: Auth }>().props;
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     return (
         <>
             <Head title="ClientKosmos — Gestión de consulta para profesionales de servicios" />
 
-            <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
-
-                {/* ── Navbar ── */}
-                <header className="sticky top-0 z-50 border-b bg-background/60 backdrop-blur-xl">
-                    <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
-                        <div className="flex items-center gap-2 group cursor-pointer">
-                            <img 
-                                src={logo} 
+            <Box minH="100vh" bg="bg" color="fg" overflowX="hidden">
+                {/* Navbar */}
+                <chakra.header position="sticky" top="0" zIndex="50" borderBottomWidth="1px" bg="bg/60" backdropFilter="blur(12px)">
+                    <Flex mx="auto" h="16" maxW="6xl" alignItems="center" justifyContent="space-between" px="6">
+                        <Flex alignItems="center" gap="2" cursor="pointer" role="group">
+                            <chakra.img
+                                src={logo}
                                 alt="ClientKosmos"
-                                className="h-8 w-auto object-contain transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6"
+                                h="8"
+                                w="auto"
+                                objectFit="contain"
+                                transition="transform 0.5s"
+                                _groupHover={{ transform: 'scale(1.1) rotate(6deg)' }}
                             />
-                            <span className="text-xl font-bold tracking-tight gradient-text-animated">
+                            <Text as="span" fontSize="xl" fontWeight="bold" letterSpacing="tight" className="gradient-text-animated">
                                 ClientKosmos
-                            </span>
-                        </div>
+                            </Text>
+                        </Flex>
 
-                        <nav className="hidden items-center gap-8 text-sm font-medium md:flex">
-                            {[
-                                { href: '#features', label: 'Funcionalidades' },
-                                { href: '#how-it-works', label: 'Cómo funciona' },
-                                { href: '#testimonials', label: 'Testimonios' },
-                                { href: '#pricing', label: 'Precios' },
-                            ].map((item) => (
-                                <a
+                        <chakra.nav display={{ base: 'none', md: 'flex' }} alignItems="center" gap="8" fontSize="sm" fontWeight="medium">
+                            {NAV_ITEMS.map((item) => (
+                                <chakra.a
                                     key={item.href}
                                     href={item.href}
-                                    className="relative text-muted-foreground transition-colors hover:text-foreground after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-0 after:bg-primary after:transition-all hover:after:w-full"
+                                    position="relative"
+                                    color="fg.muted"
+                                    transition="colors"
+                                    _hover={{ color: 'fg' }}
                                 >
                                     {item.label}
-                                </a>
+                                </chakra.a>
                             ))}
-                        </nav>
+                        </chakra.nav>
 
-                        <div className="flex items-center gap-3">
+                        <Flex alignItems="center" gap="3">
                             {auth.user ? (
-                                <Button asChild className="group glow-primary">
-                                    <Link href={dashboard()} className="flex items-center gap-2">
-                                        Ir al dashboard
-                                        <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                                <Button asChild className="glow-primary">
+                                    <Link href={dashboard()}>
+                                        <Flex alignItems="center" gap="2">
+                                            Ir al dashboard
+                                            <Icon as={ArrowRight} boxSize="4" />
+                                        </Flex>
                                     </Link>
                                 </Button>
                             ) : (
                                 <>
-                                    <Button variant="ghost" asChild className="hidden sm:inline-flex">
+                                    <Button variant="ghost" asChild display={{ base: 'none', sm: 'inline-flex' }}>
                                         <Link href={login()}>Iniciar sesión</Link>
                                     </Button>
                                     {canRegister && (
-                                        <Button asChild className="group glow-primary relative overflow-hidden hidden sm:inline-flex">
-                                            <Link href={register()} className="flex items-center gap-2">
-                                                <span className="relative z-10">Empezar gratis</span>
-                                                <Sparkles className="h-4 w-4 relative z-10 transition-transform group-hover:rotate-12 group-hover:scale-125" />
-                                                <div className="absolute inset-0 bg-gradient-to-r from-primary via-primary/80 to-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+                                        <Button asChild className="glow-primary" display={{ base: 'none', sm: 'inline-flex' }}>
+                                            <Link href={register()}>
+                                                <Flex alignItems="center" gap="2">
+                                                    <span>Empezar ya</span>
+                                                    <Icon as={Sparkles} boxSize="4" />
+                                                </Flex>
                                             </Link>
                                         </Button>
                                     )}
                                 </>
                             )}
-                            {/* Mobile hamburger */}
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                className="md:hidden"
+                                display={{ base: 'inline-flex', md: 'none' }}
                                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                                 aria-label="Abrir menú"
                             >
-                                {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                                {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
                             </Button>
-                        </div>
-                    </div>
+                        </Flex>
+                    </Flex>
 
-                    {/* Mobile menu */}
                     {isMobileMenuOpen && (
-                        <div className="md:hidden border-t bg-background/95 backdrop-blur-xl animate-fade-in">
-                            <nav className="flex flex-col px-6 py-4 gap-1">
-                                {[
-                                    { href: '#features', label: 'Funcionalidades' },
-                                    { href: '#how-it-works', label: 'Cómo funciona' },
-                                    { href: '#testimonials', label: 'Testimonios' },
-                                    { href: '#pricing', label: 'Precios' },
-                                ].map((item) => (
-                                    <a
+                        <Box display={{ md: 'none' }} borderTopWidth="1px" bg="bg/95" backdropFilter="blur(12px)">
+                            <Stack as="nav" px="6" py="4" gap="1">
+                                {NAV_ITEMS.map((item) => (
+                                    <chakra.a
                                         key={item.href}
                                         href={item.href}
                                         onClick={() => setIsMobileMenuOpen(false)}
-                                        className="rounded-lg px-4 py-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-primary/5 hover:text-foreground"
+                                        borderRadius="lg"
+                                        px="4"
+                                        py="3"
+                                        fontSize="sm"
+                                        fontWeight="medium"
+                                        color="fg.muted"
+                                        transition="colors"
+                                        _hover={{ bg: 'brand.muted', color: 'fg' }}
                                     >
                                         {item.label}
-                                    </a>
+                                    </chakra.a>
                                 ))}
                                 {!auth.user && (
-                                    <div className="mt-3 flex flex-col gap-2 border-t pt-4">
-                                        <Button variant="outline" asChild className="w-full">
+                                    <Stack mt="3" gap="2" borderTopWidth="1px" pt="4">
+                                        <Button variant="outline" asChild w="full">
                                             <Link href={login()}>Iniciar sesión</Link>
                                         </Button>
                                         {canRegister && (
-                                            <Button asChild className="w-full">
+                                            <Button asChild w="full">
                                                 <Link href={register()}>Empezar gratis</Link>
                                             </Button>
                                         )}
-                                    </div>
+                                    </Stack>
                                 )}
-                            </nav>
-                        </div>
+                            </Stack>
+                        </Box>
                     )}
-                </header>
+                </chakra.header>
 
-                {/* ── Hero ── */}
-                <section className="relative mx-auto max-w-6xl px-6 py-16 lg:py-28 overflow-hidden">
-                    {/* Animated background orbs */}
-                    <div className="absolute inset-0 -z-10 overflow-hidden">
-                        <div className="absolute top-20 right-1/4 h-96 w-96 rounded-full bg-gradient-to-br from-primary/30 to-primary/5 blur-3xl animate-orb-1" />
-                        <div className="absolute bottom-20 left-1/4 h-80 w-80 rounded-full bg-gradient-to-tr from-primary/20 to-transparent blur-3xl animate-orb-2" />
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[600px] w-[600px] rounded-full bg-primary/5 blur-3xl animate-glow-pulse" />
-                        <div className="absolute inset-0 bg-[linear-gradient(rgba(14,124,131,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(14,124,131,0.03)_1px,transparent_1px)] bg-[size:60px_60px]" />
-                    </div>
+                {/* Hero */}
+                <chakra.section position="relative" mx="auto" maxW="6xl" px="6" py={{ base: '16', lg: '28' }} overflow="hidden">
+                    <Box position="absolute" inset="0" zIndex="-1" overflow="hidden">
+                        <Box position="absolute" top="20" right="1/4" h="96" w="96" borderRadius="full" bg="brand.muted" filter="blur(60px)" className="animate-orb-1" />
+                        <Box position="absolute" bottom="20" left="1/4" h="80" w="80" borderRadius="full" bg="brand.muted" filter="blur(60px)" className="animate-orb-2" />
+                    </Box>
 
-                    <div className="grid gap-12 lg:grid-cols-2 lg:gap-16 items-center">
-                        <div className="text-center lg:text-left animate-fade-in-left">
-                            <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-2 text-sm font-medium text-primary mb-8 animate-shimmer backdrop-blur-sm">
-                                <div className="relative flex h-2 w-2">
-                                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75"></span>
-                                    <span className="relative inline-flex h-2 w-2 rounded-full bg-primary"></span>
-                                </div>
+                    <Box display="grid" gap={{ base: '12', lg: '16' }} gridTemplateColumns={{ base: '1fr', lg: 'repeat(2, 1fr)' }} alignItems="center">
+                        <Box textAlign={{ base: 'center', lg: 'left' }} className="animate-fade-in-left">
+                            <Flex
+                                display="inline-flex"
+                                alignItems="center"
+                                gap="2"
+                                borderRadius="full"
+                                borderWidth="1px"
+                                borderColor="brand.muted"
+                                bg="brand.muted"
+                                px="4"
+                                py="2"
+                                fontSize="sm"
+                                fontWeight="medium"
+                                color="brand.solid"
+                                mb="8"
+                                backdropFilter="blur(8px)"
+                            >
+                                <Flex position="relative" h="2" w="2">
+                                    <Box as="span" position="absolute" h="full" w="full" borderRadius="full" bg="brand.solid" opacity={0.75} animation="ping 1s cubic-bezier(0, 0, 0.2, 1) infinite" />
+                                    <Box as="span" position="relative" h="2" w="2" borderRadius="full" bg="brand.solid" />
+                                </Flex>
                                 Para psicólogos, coaches y terapeutas
-                            </div>
-                            
-                            <h1 className="mb-6 text-4xl font-extrabold tracking-tight leading-[1.08] sm:text-5xl lg:text-6xl xl:text-7xl">
-                                <span className="animate-fade-in-up-delay-1">Tu consulta organizada,</span>
-                                <br />
-                                <span className="relative inline-block animate-fade-in-up-delay-2">
-                                    <span className="gradient-text-animated">
-                                        cada paciente atendido
-                                    </span>
-                                    <svg className="absolute -bottom-2 left-0 w-full" viewBox="0 0 200 12" fill="none">
-                                        <path 
-                                            d="M2 8c50-6 100-6 196 0" 
-                                            stroke="currentColor" 
-                                            strokeWidth="3" 
-                                            strokeLinecap="round" 
-                                            className="text-primary/40"
-                                            strokeDasharray="200"
-                                            strokeDashoffset="200"
-                                            style={{ animation: 'draw-line 1s ease-out 0.8s forwards' }}
-                                        />
-                                    </svg>
-                                </span>
-                            </h1>
-                            
-                            <p className="mb-10 max-w-xl text-lg text-muted-foreground lg:text-xl animate-fade-in-up-delay-3 leading-relaxed">
+                            </Flex>
+
+                            <Heading
+                                as="h1"
+                                mb="6"
+                                fontSize={{ base: '4xl', sm: '5xl', lg: '6xl', xl: '7xl' }}
+                                fontWeight="extrabold"
+                                letterSpacing="tight"
+                                lineHeight="1.08"
+                            >
+                                <Box as="span" display="block">Tu consulta organizada,</Box>
+                                <Box as="span" position="relative" display="inline-block">
+                                    <Text as="span" className="gradient-text-animated">cada paciente atendido</Text>
+                                </Box>
+                            </Heading>
+
+                            <Text mb="10" maxW="xl" fontSize={{ base: 'lg', lg: 'xl' }} color="fg.muted" lineHeight="relaxed">
                                 ClientKosmos centraliza fichas de pacientes, sesiones, pagos y cumplimiento RGPD en un solo lugar.
-                                Con <span className="text-primary font-semibold">Kosmo IA</span> y un <span className="text-primary font-semibold">panel diario</span>, entras a cada sesión con el contexto listo.
-                            </p>
-                            
-                            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 animate-fade-in-up-delay-3">
+                                Con <Text as="span" color="brand.solid" fontWeight="semibold">Kosmo IA</Text> y un <Text as="span" color="brand.solid" fontWeight="semibold">panel diario</Text>, entras a cada sesión con el contexto listo.
+                            </Text>
+
+                            <Flex direction={{ base: 'column', sm: 'row' }} alignItems="center" justifyContent={{ base: 'center', lg: 'flex-start' }} gap="4">
                                 {canRegister && (
-                                    <Button size="lg" asChild className="w-full sm:w-auto group glow-primary-lg hover:scale-105 transition-all duration-300 text-base px-8 py-6">
-                                        <Link href={register()} className="flex items-center gap-3">
-                                            <span>Comenzar gratis</span>
-                                            <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-2" />
+                                    <Button size="lg" asChild className="glow-primary" w={{ base: 'full', sm: 'auto' }}>
+                                        <Link href={register()}>
+                                            <Flex alignItems="center" gap="3">
+                                                <span>Comenzar gratis</span>
+                                                <Icon as={ArrowRight} boxSize="5" />
+                                            </Flex>
                                         </Link>
                                     </Button>
                                 )}
-                                <Button size="lg" variant="outline" asChild className="w-full sm:w-auto group hover:bg-primary/5 transition-all duration-300 text-base px-8 py-6 border-2">
-                                    <Link href="#how-it-works" className="flex items-center gap-3">
-                                        <Play className="h-4 w-4 text-primary" />
-                                        Ver cómo funciona
+                                <Button size="lg" variant="outline" asChild w={{ base: 'full', sm: 'auto' }}>
+                                    <Link href="#how-it-works">
+                                        <Flex alignItems="center" gap="3">
+                                            <Icon as={Play} boxSize="4" color="brand.solid" />
+                                            Ver cómo funciona
+                                        </Flex>
                                     </Link>
                                 </Button>
-                            </div>
-                            
-                            <div className="mt-10 flex flex-wrap items-center justify-center lg:justify-start gap-6 text-sm text-muted-foreground">
+                            </Flex>
+
+                            <Flex mt="10" flexWrap="wrap" alignItems="center" justifyContent={{ base: 'center', lg: 'flex-start' }} gap="6" fontSize="sm" color="fg.muted">
                                 {[
                                     { icon: CheckCircle2, text: 'Sin tarjeta de crédito' },
                                     { icon: Lock, text: 'RGPD integrado' },
                                     { icon: Shield, text: 'Datos protegidos' },
                                 ].map((item, i) => (
-                                    <span key={i} className="flex items-center gap-2 bg-muted/50 rounded-full px-4 py-2 backdrop-blur-sm">
-                                        <item.icon className="h-4 w-4 text-primary" />
+                                    <Flex key={i} as="span" alignItems="center" gap="2" bg="bg.muted" borderRadius="full" px="4" py="2">
+                                        <Icon as={item.icon} boxSize="4" color="brand.solid" />
                                         {item.text}
-                                    </span>
+                                    </Flex>
                                 ))}
-                            </div>
-                        </div>
+                            </Flex>
+                        </Box>
 
                         {/* Hero visual */}
-                        <div className="relative animate-fade-in-right">
-                            <div className="relative mx-auto max-w-md lg:max-w-none">
-                                <div className="absolute -top-8 -left-8 w-32 h-32 bg-gradient-to-br from-primary/20 to-primary/5 rounded-3xl rotate-12 animate-float blur-sm" />
-                                <div className="absolute -bottom-8 -right-8 w-40 h-40 bg-gradient-to-br from-primary/15 to-transparent rounded-3xl -rotate-12 animate-float-delayed blur-sm" />
-                                
-                                <div className="relative">
-                                    <div className="absolute -inset-1 bg-gradient-to-r from-primary/50 via-primary/20 to-primary/50 rounded-2xl blur-lg animate-glow-pulse" />
-                                    <Card className="relative overflow-hidden border-2 border-primary/30 shadow-2xl backdrop-blur-sm bg-card/95">
-                                        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-primary/5" />
-                                        <CardHeader className="pb-4 relative">
-                                            <div className="flex items-center justify-between">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg shadow-primary/30">
-                                                        <LayoutDashboard className="h-6 w-6 text-primary-foreground" />
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-base font-semibold">Panel de hoy</p>
-                                                        <p className="text-xs text-muted-foreground">3 pacientes · 2 sesiones hoy</p>
-                                                    </div>
-                                                </div>
-                                                <Badge className="bg-gradient-to-r from-primary to-primary/70 text-primary-foreground border-0 shadow-lg shadow-primary/20">
-                                                    <Zap className="h-3 w-3 mr-1" />
-                                                    Al día
+                        <Box position="relative" className="animate-fade-in-right">
+                            <Box position="relative" mx="auto" maxW={{ base: 'md', lg: 'none' }}>
+                                <Box position="relative">
+                                    <Card borderWidth="2px" borderColor="brand.muted" boxShadow="2xl">
+                                        <CardHeader>
+                                            <Flex alignItems="center" justifyContent="space-between">
+                                                <Flex alignItems="center" gap="3">
+                                                    <Flex h="12" w="12" borderRadius="xl" bg="brand.solid" alignItems="center" justifyContent="center" boxShadow="lg">
+                                                        <Icon as={LayoutDashboard} boxSize="6" color="brand.contrast" />
+                                                    </Flex>
+                                                    <Box>
+                                                        <Text fontSize="md" fontWeight="semibold">Panel de hoy</Text>
+                                                        <Text fontSize="xs" color="fg.muted">3 pacientes · 2 sesiones hoy</Text>
+                                                    </Box>
+                                                </Flex>
+                                                <Badge>
+                                                    <Flex alignItems="center" gap="1">
+                                                        <Zap size={12} />
+                                                        Al día
+                                                    </Flex>
                                                 </Badge>
-                                            </div>
-                                            <div className="mt-4 h-2 bg-muted rounded-full overflow-hidden">
-                                                <div className="h-full w-3/4 bg-gradient-to-r from-primary to-primary/70 rounded-full transition-all duration-1000" />
-                                            </div>
+                                            </Flex>
+                                            <Box mt="4" h="2" bg="bg.muted" borderRadius="full" overflow="hidden">
+                                                <Box h="full" w="75%" bg="brand.solid" borderRadius="full" />
+                                            </Box>
                                         </CardHeader>
-                                        <CardContent className="space-y-3 relative">
-                                            <SessionPreviewItem status="done" text="Ana García — Sesión TCC · 10:00" />
-                                            <SessionPreviewItem status="done" text="Carlos R. — Pago recibido · 70 €" />
-                                            <SessionPreviewItem status="pending" text="Laura M. — Sesión · 17:00" animate />
-                                            <div className="pt-3 flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-primary/10 to-transparent border border-primary/20">
-                                                <div className="h-8 w-8 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
-                                                    <Brain className="h-4 w-4 text-primary" />
-                                                </div>
-                                                <p className="text-sm text-muted-foreground flex-1">
-                                                    <span className="text-primary font-medium">Kosmo:</span> "Laura M. tiene el consentimiento RGPD pendiente de firma"
-                                                </p>
-                                            </div>
+                                        <CardContent>
+                                            <Stack gap="3">
+                                                <SessionPreviewItem status="done" text="Ana García — Sesión TCC · 10:00" />
+                                                <SessionPreviewItem status="done" text="Carlos R. — Pago recibido · 70 €" />
+                                                <SessionPreviewItem status="pending" text="Laura M. — Sesión · 17:00" animate />
+                                                <Flex pt="3" alignItems="center" gap="3" p="3" borderRadius="xl" bg="brand.muted" borderWidth="1px" borderColor="brand.muted">
+                                                    <Flex h="8" w="8" borderRadius="lg" bg="brand.muted" alignItems="center" justifyContent="center" flexShrink={0}>
+                                                        <Icon as={Brain} boxSize="4" color="brand.solid" />
+                                                    </Flex>
+                                                    <Text fontSize="sm" color="fg.muted" flex="1">
+                                                        <Text as="span" color="brand.solid" fontWeight="medium">Kosmo:</Text> "Laura M. tiene el consentimiento RGPD pendiente de firma"
+                                                    </Text>
+                                                </Flex>
+                                            </Stack>
                                         </CardContent>
                                     </Card>
-                                </div>
+                                </Box>
+                            </Box>
+                        </Box>
+                    </Box>
+                </chakra.section>
 
-                                <div className="hidden lg:block absolute -right-4 top-1/4 bg-card border-2 border-primary/30 rounded-2xl p-4 shadow-xl animate-bounce-subtle backdrop-blur-sm">
-                                    <div className="flex items-center gap-3">
-                                        <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-500/20 to-blue-500/5 flex items-center justify-center">
-                                            <Users className="h-5 w-5 text-blue-500" />
-                                        </div>
-                                        <div>
-                                            <p className="text-xs font-semibold">Multi‑paciente</p>
-                                            <p className="text-xs text-muted-foreground">Cada consulta separada</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="hidden lg:block absolute -left-4 bottom-1/4 bg-card border-2 border-primary/30 rounded-2xl p-4 shadow-xl animate-float backdrop-blur-sm">
-                                    <div className="flex items-center gap-3">
-                                        <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-500/20 to-indigo-500/5 flex items-center justify-center">
-                                            <Brain className="h-5 w-5 text-indigo-500" />
-                                        </div>
-                                        <div>
-                                            <p className="text-xs font-semibold">Kosmo IA</p>
-                                            <p className="text-xs text-muted-foreground">Briefings y chat contextual</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-
-                {/* ── Features - Bento Grid ── */}
-                <section id="features" className="relative py-28 overflow-hidden">
-                    <div className="absolute inset-0 -z-10">
-                        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/[0.03] to-transparent" />
-                        <div className="absolute inset-0 bg-[linear-gradient(rgba(14,124,131,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(14,124,131,0.04)_1px,transparent_1px)] bg-[size:48px_48px]" />
-                    </div>
-
-                    <div className="mx-auto max-w-6xl px-6">
-                        <div className="mb-20 text-center">
-                            <Badge variant="outline" className="mb-6 border-primary/30 bg-primary/5 px-4 py-1.5 text-sm">
-                                <Sparkles className="h-3.5 w-3.5 mr-1.5 text-primary" />
-                                Funcionalidades
+                {/* Features Bento */}
+                <chakra.section id="features" position="relative" py="28" overflow="hidden">
+                    <Box mx="auto" maxW="6xl" px="6">
+                        <Box mb="20" textAlign="center">
+                            <Badge variant="outline" mb="6" px="4" py="1.5" fontSize="sm">
+                                <Flex alignItems="center" gap="1.5">
+                                    <Sparkles size={14} color="var(--ck-colors-brand-solid)" />
+                                    Funcionalidades
+                                </Flex>
                             </Badge>
-                            <h2 className="mb-5 text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl">
+                            <Heading as="h2" mb="5" fontSize={{ base: '3xl', sm: '4xl', lg: '5xl' }} fontWeight="extrabold" letterSpacing="tight">
                                 Todo lo que necesita tu consulta,{' '}
-                                <span className="gradient-text-animated">
-                                    en un solo lugar
-                                </span>
-                            </h2>
-                            <p className="mx-auto max-w-2xl text-lg text-muted-foreground leading-relaxed">
+                                <Text as="span" className="gradient-text-animated">en un solo lugar</Text>
+                            </Heading>
+                            <Text mx="auto" maxW="2xl" fontSize="lg" color="fg.muted" lineHeight="relaxed">
                                 Diseñado para profesionales autónomos de servicios: psicólogos, coaches, terapeutas y asesores.
-                            </p>
-                        </div>
+                            </Text>
+                        </Box>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-6">
-                            {/* Fichas de pacientes - grande */}
+                        <Box display="grid" gridTemplateColumns={{ base: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }} gap={{ base: '5', lg: '6' }}>
                             <BentoCard
-                                className="md:col-span-2 lg:col-span-2"
-                                icon={<Users className="h-8 w-8" />}
+                                colSpan={{ md: 2, lg: 2 }}
+                                icon={<Users size={32} />}
                                 title="Fichas de pacientes"
                                 description="Cada paciente tiene su propio expediente: notas de sesión, documentos, acuerdos, pagos y consentimientos. Retoma el contexto exacto de la última sesión."
                                 badge="Core"
-                                gradient="from-blue-500/20 via-cyan-500/10 to-transparent"
                                 featured
                                 delay={0}
                             >
-                                <div className="mt-5 flex flex-wrap gap-2">
+                                <Flex mt="5" flexWrap="wrap" gap="2">
                                     {[
-                                        { label: 'Ana García · TCC', color: 'bg-violet-500/15 text-violet-600 ring-1 ring-violet-500/20' },
-                                        { label: 'Carlos R. · Coaching', color: 'bg-emerald-500/15 text-emerald-600 ring-1 ring-emerald-500/20' },
-                                        { label: 'Laura M. · Terapia', color: 'bg-amber-500/15 text-amber-600 ring-1 ring-amber-500/20' },
+                                        { label: 'Ana García · TCC', palette: 'purple' },
+                                        { label: 'Carlos R. · Coaching', palette: 'green' },
+                                        { label: 'Laura M. · Terapia', palette: 'yellow' },
                                     ].map((p, i) => (
-                                        <span key={i} className={`px-3 py-1.5 rounded-full text-xs font-semibold ${p.color}`}>
+                                        <Badge key={i} borderRadius="full" px="3" py="1.5" fontSize="xs" fontWeight="semibold">
                                             {p.label}
-                                        </span>
+                                        </Badge>
                                     ))}
-                                </div>
+                                </Flex>
                             </BentoCard>
 
-                            {/* Sesiones pre/post */}
                             <BentoCard
-                                icon={<CalendarClock className="h-7 w-7" />}
+                                icon={<CalendarClock size={28} />}
                                 title="Pre y post sesión"
                                 description="Revisa el contexto del paciente antes de entrar y registra notas justo al terminar, con el flujo integrado en la ficha."
                                 badge="Gratis"
-                                gradient="from-green-500/20 via-emerald-500/10 to-transparent"
                                 delay={1}
                             />
 
-                            {/* Notas de sesión */}
                             <BentoCard
-                                icon={<NotebookPen className="h-7 w-7" />}
+                                icon={<NotebookPen size={28} />}
                                 title="Notas de sesión"
                                 description="Registra observaciones clínicas y apuntes vinculados al paciente. Historial ordenado y siempre accesible."
                                 badge="Gratis"
-                                gradient="from-yellow-500/20 via-amber-500/10 to-transparent"
                                 delay={2}
                             />
 
-                            {/* Kosmo IA - grande */}
                             <BentoCard
-                                className="md:col-span-2 lg:col-span-1 lg:row-span-2"
-                                icon={<Brain className="h-8 w-8" />}
+                                colSpan={{ md: 2, lg: 1 }}
+                                rowSpan={{ lg: 2 }}
+                                icon={<Brain size={32} />}
                                 title="Kosmo IA"
                                 description="Tu asistente inteligente con briefings diarios automáticos y chat contextual (Llama 3.3 70B). Entra a cada sesión informado, sin revisar notas manualmente."
                                 badge="Solo"
-                                gradient="from-indigo-500/20 via-purple-500/10 to-transparent"
                                 isPremium
                                 featured
                                 delay={3}
                             >
-                                <div className="mt-5 space-y-3">
-                                    <div className="flex gap-2.5 items-start">
-                                        <div className="h-7 w-7 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center flex-shrink-0 ring-1 ring-primary/20">
-                                            <Brain className="h-3.5 w-3.5 text-primary" />
-                                        </div>
-                                        <div className="bg-muted/60 rounded-2xl rounded-tl-sm px-3.5 py-2.5 flex-1 ring-1 ring-border/50">
-                                            <p className="text-xs leading-relaxed">
+                                <Stack mt="5" gap="3">
+                                    <Flex gap="2.5" alignItems="flex-start">
+                                        <Flex h="7" w="7" borderRadius="full" bg="brand.muted" alignItems="center" justifyContent="center" flexShrink={0}>
+                                            <Icon as={Brain} boxSize="3.5" color="brand.solid" />
+                                        </Flex>
+                                        <Box bg="bg.muted" borderRadius="2xl" borderTopLeftRadius="sm" px="3.5" py="2.5" flex="1">
+                                            <Text fontSize="xs" lineHeight="relaxed">
                                                 "Ana lleva 3 sesiones trabajando ansiedad. Última nota: progreso notable en técnicas de respiración."
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div className="flex gap-2.5 items-start justify-end">
-                                        <div className="bg-primary/10 rounded-2xl rounded-tr-sm px-3.5 py-2.5 ring-1 ring-primary/20">
-                                            <p className="text-xs leading-relaxed">
-                                                "¿Qué trabajar hoy con Carlos?"
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div className="flex gap-2.5 items-start">
-                                        <div className="h-7 w-7 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center flex-shrink-0 ring-1 ring-primary/20">
-                                            <Brain className="h-3.5 w-3.5 text-primary" />
-                                        </div>
-                                        <div className="bg-muted/60 rounded-2xl rounded-tl-sm px-3.5 py-2.5 flex-1 ring-1 ring-border/50">
-                                            <p className="text-xs leading-relaxed">
+                                            </Text>
+                                        </Box>
+                                    </Flex>
+                                    <Flex gap="2.5" alignItems="flex-start" justifyContent="flex-end">
+                                        <Box bg="brand.muted" borderRadius="2xl" borderTopRightRadius="sm" px="3.5" py="2.5">
+                                            <Text fontSize="xs" lineHeight="relaxed">"¿Qué trabajar hoy con Carlos?"</Text>
+                                        </Box>
+                                    </Flex>
+                                    <Flex gap="2.5" alignItems="flex-start">
+                                        <Flex h="7" w="7" borderRadius="full" bg="brand.muted" alignItems="center" justifyContent="center" flexShrink={0}>
+                                            <Icon as={Brain} boxSize="3.5" color="brand.solid" />
+                                        </Flex>
+                                        <Box bg="bg.muted" borderRadius="2xl" borderTopLeftRadius="sm" px="3.5" py="2.5" flex="1">
+                                            <Text fontSize="xs" lineHeight="relaxed">
                                                 "Tiene pendiente revisar el acuerdo de sesiones. Sugiero abordar los objetivos del mes."
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
+                                            </Text>
+                                        </Box>
+                                    </Flex>
+                                </Stack>
                             </BentoCard>
 
-                            {/* Pagos y facturación */}
                             <BentoCard
-                                icon={<CreditCard className="h-7 w-7" />}
+                                icon={<CreditCard size={28} />}
                                 title="Pagos y facturación"
                                 description="Registra cobros por paciente (pendiente, pagado, vencido) y consulta el resumen de ingresos con filtros por período."
                                 badge="Gratis"
-                                gradient="from-teal-500/20 via-emerald-500/10 to-transparent"
                                 delay={4}
                             />
 
-                            {/* Documentos y RGPD */}
                             <BentoCard
-                                icon={<FileText className="h-7 w-7" />}
+                                icon={<FileText size={28} />}
                                 title="Documentos y RGPD"
                                 description="Adjunta archivos por paciente y gestiona consentimientos informados digitales con tu plantilla RGPD personalizable."
                                 badge="Solo"
-                                gradient="from-purple-500/20 via-violet-500/10 to-transparent"
                                 isPremium
                                 delay={5}
                             />
-                        </div>
-                    </div>
-                </section>
+                        </Box>
+                    </Box>
+                </chakra.section>
 
-                {/* ── How it works ── */}
-                <section id="how-it-works" className="relative border-y overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-b from-muted/30 via-background to-muted/20" />
-                    <div className="absolute inset-0 bg-[linear-gradient(rgba(14,124,131,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(14,124,131,0.03)_1px,transparent_1px)] bg-[size:50px_50px]" />
-
-                    <div className="relative mx-auto max-w-6xl px-6 py-28">
-                        <div className="mb-20 text-center">
-                            <Badge variant="outline" className="mb-6 border-primary/30 bg-primary/5 px-4 py-1.5 text-sm">
-                                <Rocket className="h-3.5 w-3.5 mr-1.5 text-primary" />
-                                Cómo funciona
+                {/* How it works */}
+                <chakra.section id="how-it-works" position="relative" borderTopWidth="1px" borderBottomWidth="1px" overflow="hidden">
+                    <Box position="relative" mx="auto" maxW="6xl" px="6" py="28">
+                        <Box mb="20" textAlign="center">
+                            <Badge variant="outline" mb="6" px="4" py="1.5" fontSize="sm">
+                                <Flex alignItems="center" gap="1.5">
+                                    <Rocket size={14} color="var(--ck-colors-brand-solid)" />
+                                    Cómo funciona
+                                </Flex>
                             </Badge>
-                            <h2 className="mb-5 text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl">
+                            <Heading as="h2" mb="5" fontSize={{ base: '3xl', sm: '4xl', lg: '5xl' }} fontWeight="extrabold" letterSpacing="tight">
                                 Tu consulta lista en{' '}
-                                <span className="gradient-text-animated">
-                                    3 pasos
-                                </span>
-                            </h2>
-                            <p className="mx-auto max-w-2xl text-lg text-muted-foreground leading-relaxed">
+                                <Text as="span" className="gradient-text-animated">3 pasos</Text>
+                            </Heading>
+                            <Text mx="auto" maxW="2xl" fontSize="lg" color="fg.muted" lineHeight="relaxed">
                                 Empezar con ClientKosmos es tan sencillo que estarás operativo hoy mismo.
-                            </p>
-                        </div>
+                            </Text>
+                        </Box>
 
-                        <div className="relative grid gap-8 md:grid-cols-3">
-                            <div className="hidden md:block absolute top-24 left-[15%] right-[15%] h-0.5 bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
-                            
-                            <StepCard 
-                                number={1}
-                                title="Configura tu consulta"
-                                description="Regístrate gratis, añade el nombre de tu consulta, especialidad y configura tu plantilla RGPD en minutos."
-                                icon={<Users className="h-6 w-6" />}
-                            />
-                            <StepCard 
-                                number={2}
-                                title="Añade tus pacientes"
-                                description="Crea fichas con historial, notas de sesión, documentos, acuerdos y pagos. Todo en el expediente de cada paciente."
-                                icon={<NotebookPen className="h-6 w-6" />}
-                            />
-                            <StepCard 
-                                number={3}
-                                title="Gestiona con Kosmo IA"
-                                description="Cada mañana Kosmo te prepara un briefing de tus pacientes. Entra a cada sesión con el contexto listo, sin buscar notas."
-                                icon={<Brain className="h-6 w-6" />}
-                            />
-                        </div>
-                    </div>
-                </section>
+                        <Box display="grid" gap="8" gridTemplateColumns={{ base: '1fr', md: 'repeat(3, 1fr)' }}>
+                            <StepCard number={1} title="Configura tu consulta" description="Regístrate gratis, añade el nombre de tu consulta, especialidad y configura tu plantilla RGPD en minutos." icon={<Users size={24} />} />
+                            <StepCard number={2} title="Añade tus pacientes" description="Crea fichas con historial, notas de sesión, documentos, acuerdos y pagos. Todo en el expediente de cada paciente." icon={<NotebookPen size={24} />} />
+                            <StepCard number={3} title="Gestiona con Kosmo IA" description="Cada mañana Kosmo te prepara un briefing de tus pacientes. Entra a cada sesión con el contexto listo, sin buscar notas." icon={<Brain size={24} />} />
+                        </Box>
+                    </Box>
+                </chakra.section>
 
-                {/* ── Testimonials ── */}
-                <section id="testimonials" className="relative py-28 overflow-hidden">
-                    <div className="absolute inset-0 -z-10">
-                        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/[0.02] to-transparent" />
-                    </div>
-
-                    <div className="mx-auto max-w-6xl px-6">
-                        <div className="mb-16 text-center">
-                            <Badge variant="outline" className="mb-6 border-primary/30 bg-primary/5 px-4 py-1.5 text-sm">
-                                <Quote className="h-3.5 w-3.5 mr-1.5 text-primary" />
-                                Testimonios
+                {/* Testimonials */}
+                <chakra.section id="testimonials" position="relative" py="28" overflow="hidden">
+                    <Box mx="auto" maxW="6xl" px="6">
+                        <Box mb="16" textAlign="center">
+                            <Badge variant="outline" mb="6" px="4" py="1.5" fontSize="sm">
+                                <Flex alignItems="center" gap="1.5">
+                                    <Quote size={14} color="var(--ck-colors-brand-solid)" />
+                                    Testimonios
+                                </Flex>
                             </Badge>
-                            <h2 className="mb-5 text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl">
+                            <Heading as="h2" mb="5" fontSize={{ base: '3xl', sm: '4xl', lg: '5xl' }} fontWeight="extrabold" letterSpacing="tight">
                                 Lo que dicen{' '}
-                                <span className="gradient-text-animated">
-                                    nuestros usuarios
-                                </span>
-                            </h2>
-                            <p className="mx-auto max-w-2xl text-lg text-muted-foreground leading-relaxed">
+                                <Text as="span" className="gradient-text-animated">nuestros usuarios</Text>
+                            </Heading>
+                            <Text mx="auto" maxW="2xl" fontSize="lg" color="fg.muted" lineHeight="relaxed">
                                 Profesionales de servicios que ya gestionan su consulta sin perder contexto.
-                            </p>
-                        </div>
+                            </Text>
+                        </Box>
 
-                        <div className="grid gap-6 md:grid-cols-3">
+                        <Box display="grid" gap="6" gridTemplateColumns={{ base: '1fr', md: 'repeat(3, 1fr)' }}>
                             <TestimonialCard
                                 quote="Antes mezclaba cuadernos, hojas de Excel y carpetas de email. Con ClientKosmos tengo el expediente completo de cada paciente en segundos, incluyendo los consentimientos RGPD."
                                 author="María García"
@@ -527,87 +480,83 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
                                 avatar="A"
                                 rating={5}
                             />
-                        </div>
-                    </div>
-                </section>
+                        </Box>
+                    </Box>
+                </chakra.section>
 
-                {/* ── Pricing ── */}
-                <section id="pricing" className="relative border-y bg-gradient-to-b from-background via-muted/20 to-background">
-                    <div className="absolute inset-0 bg-[linear-gradient(rgba(14,124,131,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(14,124,131,0.02)_1px,transparent_1px)] bg-[size:40px_40px]" />
-
-                    <div className="relative mx-auto max-w-6xl px-6 py-28">
-                        <div className="mb-20 text-center">
-                            <Badge variant="outline" className="mb-6 border-primary/30 bg-primary/5 px-4 py-1.5 text-sm">
-                                <Star className="h-3.5 w-3.5 mr-1.5 text-primary" />
-                                Precios
+                {/* Pricing */}
+                <chakra.section id="pricing" position="relative" borderTopWidth="1px" borderBottomWidth="1px">
+                    <Box position="relative" mx="auto" maxW="6xl" px="6" py="28">
+                        <Box mb="20" textAlign="center">
+                            <Badge variant="outline" mb="6" px="4" py="1.5" fontSize="sm">
+                                <Flex alignItems="center" gap="1.5">
+                                    <Star size={14} color="var(--ck-colors-brand-solid)" />
+                                    Precios
+                                </Flex>
                             </Badge>
-                            <h2 className="mb-5 text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl">
+                            <Heading as="h2" mb="5" fontSize={{ base: '3xl', sm: '4xl', lg: '5xl' }} fontWeight="extrabold" letterSpacing="tight">
                                 Elige tu{' '}
-                                <span className="gradient-text-animated">
-                                    plan ideal
-                                </span>
-                            </h2>
-                            <p className="mx-auto max-w-2xl text-lg text-muted-foreground leading-relaxed">
+                                <Text as="span" className="gradient-text-animated">plan ideal</Text>
+                            </Heading>
+                            <Text mx="auto" maxW="2xl" fontSize="lg" color="fg.muted" lineHeight="relaxed">
                                 Empieza gratis con un paciente y escala cuando tu consulta crezca.
-                            </p>
-                        </div>
+                            </Text>
+                        </Box>
 
-                        <div className="grid gap-8 lg:grid-cols-3 items-start">
+                        <Box display="grid" gap="8" gridTemplateColumns={{ base: '1fr', lg: 'repeat(3, 1fr)' }} alignItems="flex-start">
                             {/* Free */}
-                            <Card className="group relative flex flex-col overflow-hidden transition-all duration-500 hover:shadow-2xl hover:-translate-y-3 border-2 border-transparent hover:border-muted">
-                                <div className="absolute inset-0 bg-gradient-to-br from-muted/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                                <CardHeader className="relative pb-2">
-                                    <div className="mb-4 h-14 w-14 rounded-2xl bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center transition-all duration-500 group-hover:scale-110 group-hover:shadow-lg">
-                                        <LayoutDashboard className="h-7 w-7 text-muted-foreground" />
-                                    </div>
-                                    <CardTitle className="text-2xl">Gratis</CardTitle>
-                                    <CardDescription className="text-base">Para empezar a conocer la herramienta</CardDescription>
-                                    <div className="pt-6 pb-2">
-                                        <span className="text-6xl font-bold">0 €</span>
-                                        <span className="text-muted-foreground ml-2 text-lg">/ mes</span>
-                                    </div>
-                                    <p className="text-sm text-muted-foreground">Para siempre, sin límites de tiempo</p>
+                            <Card display="flex" flexDirection="column" overflow="hidden" transition="all 0.5s" _hover={{ transform: 'translateY(-12px)', boxShadow: '2xl' }}>
+                                <CardHeader>
+                                    <Flex mb="4" h="14" w="14" borderRadius="2xl" bg="bg.muted" alignItems="center" justifyContent="center">
+                                        <Icon as={LayoutDashboard} boxSize="7" color="fg.muted" />
+                                    </Flex>
+                                    <CardTitle>Gratis</CardTitle>
+                                    <CardDescription>Para empezar a conocer la herramienta</CardDescription>
+                                    <Box pt="6" pb="2">
+                                        <Text as="span" fontSize="6xl" fontWeight="bold">0 €</Text>
+                                        <Text as="span" color="fg.muted" ml="2" fontSize="lg">/ mes</Text>
+                                    </Box>
+                                    <Text fontSize="sm" color="fg.muted">Para siempre, sin límites de tiempo</Text>
                                 </CardHeader>
-                                <CardContent className="relative flex flex-1 flex-col justify-between gap-8 pt-4">
-                                    <ul className="space-y-4 text-sm">
-                                        <PricingFeature text="1 paciente activo" />
-                                        <PricingFeature text="Notas de sesión ilimitadas" />
-                                        <PricingFeature text="Control de pagos básico" />
-                                        <PricingFeature text="Panel diario" />
-                                    </ul>
-                                    {canRegister && (
-                                        <Button variant="outline" size="lg" className="w-full group/btn border-2 hover:border-primary hover:bg-primary/5 transition-all duration-300" asChild>
-                                            <Link href={register()} className="flex items-center justify-center gap-2">
-                                                Empezar gratis
-                                                <ArrowRight className="h-4 w-4 transition-transform group-hover/btn:translate-x-2" />
-                                            </Link>
-                                        </Button>
-                                    )}
+                                <CardContent>
+                                    <Stack gap="8" flex="1" justifyContent="space-between">
+                                        <Stack as="ul" gap="4" fontSize="sm">
+                                            <PricingFeature text="1 paciente activo" />
+                                            <PricingFeature text="Notas de sesión ilimitadas" />
+                                            <PricingFeature text="Control de pagos básico" />
+                                            <PricingFeature text="Panel diario" />
+                                        </Stack>
+                                        {canRegister && (
+                                            <Button variant="outline" size="lg" w="full" asChild>
+                                                <Link href={register()}>
+                                                    <Flex alignItems="center" gap="2" justifyContent="center">
+                                                        Empezar gratis
+                                                        <Icon as={ArrowRight} boxSize="4" />
+                                                    </Flex>
+                                                </Link>
+                                            </Button>
+                                        )}
+                                    </Stack>
                                 </CardContent>
                             </Card>
 
                             {/* Premium Mensual - Featured */}
-                            <Card className="group relative flex flex-col overflow-hidden border-2 border-primary shadow-2xl shadow-primary/20 lg:scale-105 transition-all duration-500 hover:-translate-y-3 z-10">
-                                <div className="absolute -right-12 top-8 rotate-45 bg-gradient-to-r from-primary to-primary/80 px-14 py-1.5 text-xs font-bold text-primary-foreground shadow-lg">
-                                    Popular
-                                </div>
-                                <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/50 via-primary/20 to-primary/50 rounded-xl blur-sm opacity-50 group-hover:opacity-100 transition-opacity" />
-                                <div className="relative bg-card rounded-xl">
-                                    <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent" />
-                                    <CardHeader className="relative pb-2">
-                                        <div className="mb-4 h-14 w-14 rounded-2xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-xl shadow-primary/30 transition-all duration-500 group-hover:scale-110">
-                                            <Star className="h-7 w-7 text-primary-foreground" />
-                                        </div>
-                                        <CardTitle className="text-2xl">Solo Mensual</CardTitle>
-                                        <CardDescription className="text-base">Consulta completa, sin ataduras</CardDescription>
-                                        <div className="pt-6 pb-2">
-                                            <span className="text-6xl font-bold">11,99 €</span>
-                                            <span className="text-muted-foreground ml-2 text-lg">/ mes</span>
-                                        </div>
-                                        <p className="text-sm text-primary font-medium">Cancela cuando quieras</p>
-                                    </CardHeader>
-                                    <CardContent className="relative flex flex-1 flex-col justify-between gap-8 pt-4">
-                                        <ul className="space-y-4 text-sm">
+                            <Card borderWidth="2px" borderColor="brand.solid" boxShadow="2xl" transform={{ lg: 'scale(1.05)' }} position="relative" zIndex="10">
+                                <CardHeader>
+                                    <Flex mb="4" h="14" w="14" borderRadius="2xl" bg="brand.solid" alignItems="center" justifyContent="center" boxShadow="xl">
+                                        <Icon as={Star} boxSize="7" color="brand.contrast" />
+                                    </Flex>
+                                    <CardTitle>Solo Mensual</CardTitle>
+                                    <CardDescription>Consulta completa, sin ataduras</CardDescription>
+                                    <Box pt="6" pb="2">
+                                        <Text as="span" fontSize="6xl" fontWeight="bold">11,99 €</Text>
+                                        <Text as="span" color="fg.muted" ml="2" fontSize="lg">/ mes</Text>
+                                    </Box>
+                                    <Text fontSize="sm" color="brand.solid" fontWeight="medium">Cancela cuando quieras</Text>
+                                </CardHeader>
+                                <CardContent>
+                                    <Stack gap="8" flex="1" justifyContent="space-between">
+                                        <Stack as="ul" gap="4" fontSize="sm">
                                             <PricingFeature text="Pacientes ilimitados" highlight />
                                             <PricingFeature text="Sesiones pre y post ilimitadas" highlight />
                                             <PricingFeature text="Notas y acuerdos ilimitados" />
@@ -615,187 +564,196 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
                                             <PricingFeature text="Consentimientos RGPD digitales" highlight />
                                             <PricingFeature text="Kosmo IA — briefings y chat" highlight />
                                             <PricingFeature text="Facturación consolidada" />
-                                        </ul>
+                                        </Stack>
                                         {canRegister && (
-                                            <Button size="lg" className="w-full group/btn glow-primary text-base transition-all duration-300 hover:scale-[1.02]" asChild>
-                                                <Link href={register()} className="flex items-center justify-center gap-2">
-                                                    Empezar ahora
-                                                    <Sparkles className="h-5 w-5 transition-transform group-hover/btn:rotate-12 group-hover/btn:scale-110" />
+                                            <Button size="lg" w="full" asChild className="glow-primary">
+                                                <Link href={register()}>
+                                                    <Flex alignItems="center" gap="2" justifyContent="center">
+                                                        Empezar ahora
+                                                        <Icon as={Sparkles} boxSize="5" />
+                                                    </Flex>
                                                 </Link>
                                             </Button>
                                         )}
-                                    </CardContent>
-                                </div>
+                                    </Stack>
+                                </CardContent>
                             </Card>
 
                             {/* Premium Anual */}
-                            <Card className="group relative flex flex-col overflow-hidden transition-all duration-500 hover:shadow-2xl hover:-translate-y-3 border-2 border-transparent hover:border-muted">
-                                <div className="absolute inset-0 bg-gradient-to-br from-muted/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                                <CardHeader className="relative pb-2">
-                                    <Badge variant="secondary" className="absolute right-4 top-4 gap-1 py-1">
-                                        <Zap className="h-3.5 w-3.5" />
-                                        Ahorra 17%
+                            <Card display="flex" flexDirection="column" overflow="hidden" transition="all 0.5s" _hover={{ transform: 'translateY(-12px)', boxShadow: '2xl' }} position="relative">
+                                <CardHeader>
+                                    <Badge variant="secondary" position="absolute" right="4" top="4" gap="1" py="1">
+                                        <Flex alignItems="center" gap="1">
+                                            <Zap size={14} />
+                                            Ahorra 17%
+                                        </Flex>
                                     </Badge>
-                                    <div className="mb-4 h-14 w-14 rounded-2xl bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center transition-all duration-500 group-hover:scale-110 group-hover:shadow-lg">
-                                        <Shield className="h-7 w-7 text-muted-foreground" />
-                                    </div>
-                                    <CardTitle className="text-2xl">Solo Anual</CardTitle>
-                                    <CardDescription className="text-base">La opción más inteligente</CardDescription>
-                                    <div className="pt-6 pb-2">
-                                        <span className="text-6xl font-bold">119 €</span>
-                                        <span className="text-muted-foreground ml-2 text-lg">/ año</span>
-                                    </div>
-                                    <p className="text-sm text-primary font-semibold">
+                                    <Flex mb="4" h="14" w="14" borderRadius="2xl" bg="bg.muted" alignItems="center" justifyContent="center">
+                                        <Icon as={Shield} boxSize="7" color="fg.muted" />
+                                    </Flex>
+                                    <CardTitle>Solo Anual</CardTitle>
+                                    <CardDescription>La opción más inteligente</CardDescription>
+                                    <Box pt="6" pb="2">
+                                        <Text as="span" fontSize="6xl" fontWeight="bold">119 €</Text>
+                                        <Text as="span" color="fg.muted" ml="2" fontSize="lg">/ año</Text>
+                                    </Box>
+                                    <Text fontSize="sm" color="brand.solid" fontWeight="semibold">
                                         ≈ 9,92 €/mes — Ahorro de 24,88 €
-                                    </p>
+                                    </Text>
                                 </CardHeader>
-                                <CardContent className="relative flex flex-1 flex-col justify-between gap-8 pt-4">
-                                    <ul className="space-y-4 text-sm">
-                                        <PricingFeature text="Todo lo de Solo Mensual" highlight />
-                                        <PricingFeature text="Facturación anual con descuento" />
-                                        <PricingFeature text="Soporte prioritario" highlight />
-                                        <PricingFeature text="Acceso anticipado a novedades" />
-                                    </ul>
-                                    {canRegister && (
-                                        <Button variant="outline" size="lg" className="w-full group/btn border-2 hover:border-primary hover:bg-primary/5 transition-all duration-300" asChild>
-                                            <Link href={register()} className="flex items-center justify-center gap-2">
-                                                Empezar ahora
-                                                <ArrowRight className="h-4 w-4 transition-transform group-hover/btn:translate-x-2" />
-                                            </Link>
-                                        </Button>
-                                    )}
+                                <CardContent>
+                                    <Stack gap="8" flex="1" justifyContent="space-between">
+                                        <Stack as="ul" gap="4" fontSize="sm">
+                                            <PricingFeature text="Todo lo de Solo Mensual" highlight />
+                                            <PricingFeature text="Facturación anual con descuento" />
+                                            <PricingFeature text="Soporte prioritario" highlight />
+                                            <PricingFeature text="Acceso anticipado a novedades" />
+                                        </Stack>
+                                        {canRegister && (
+                                            <Button variant="outline" size="lg" w="full" asChild>
+                                                <Link href={register()}>
+                                                    <Flex alignItems="center" gap="2" justifyContent="center">
+                                                        Empezar ahora
+                                                        <Icon as={ArrowRight} boxSize="4" />
+                                                    </Flex>
+                                                </Link>
+                                            </Button>
+                                        )}
+                                    </Stack>
                                 </CardContent>
                             </Card>
-                        </div>
+                        </Box>
 
-                        <p className="mt-12 text-center text-sm text-muted-foreground">
+                        <Text mt="12" textAlign="center" fontSize="sm" color="fg.muted">
                             Todos los planes incluyen soporte por email y actualizaciones gratuitas.{' '}
-                            <span className="text-primary font-medium">Sin sorpresas.</span>
-                        </p>
-                    </div>
-                </section>
+                            <Text as="span" color="brand.solid" fontWeight="medium">Sin sorpresas.</Text>
+                        </Text>
+                    </Box>
+                </chakra.section>
 
-                {/* ── Final CTA ── */}
-                <section className="relative overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-b from-background via-primary/[0.06] to-background" />
-                    {/* Subtle orbs */}
-                    <div className="absolute top-1/3 left-1/4 h-64 w-64 rounded-full bg-primary/10 blur-3xl animate-orb-1" />
-                    <div className="absolute bottom-1/3 right-1/4 h-48 w-48 rounded-full bg-primary/8 blur-3xl animate-orb-2" />
-
-                    <div className="relative mx-auto max-w-4xl px-6 py-32 text-center">
-                        <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-5 py-2 text-sm font-medium text-primary mb-8 backdrop-blur-sm">
-                            <Leaf className="h-3.5 w-3.5" />
+                {/* Final CTA */}
+                <chakra.section position="relative" overflow="hidden">
+                    <Box position="relative" mx="auto" maxW="4xl" px="6" py="32" textAlign="center">
+                        <Flex
+                            display="inline-flex"
+                            alignItems="center"
+                            gap="2"
+                            borderRadius="full"
+                            borderWidth="1px"
+                            borderColor="brand.muted"
+                            bg="brand.muted"
+                            px="5"
+                            py="2"
+                            fontSize="sm"
+                            fontWeight="medium"
+                            color="brand.solid"
+                            mb="8"
+                        >
+                            <Leaf size={14} />
                             ¿Listo para organizar tu consulta?
-                        </div>
-                        <h2 className="mb-6 text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl">
+                        </Flex>
+                        <Heading as="h2" mb="6" fontSize={{ base: '4xl', sm: '5xl', lg: '6xl' }} fontWeight="extrabold" letterSpacing="tight">
                             Gestiona tu consulta{' '}
-                            <br className="hidden sm:block" />
-                            <span className="gradient-text-animated">
-                                como un profesional
-                            </span>
-                        </h2>
-                        <p className="mx-auto mb-12 max-w-xl text-lg text-muted-foreground leading-relaxed">
+                            <Box as="br" display={{ base: 'none', sm: 'block' }} />
+                            <Text as="span" className="gradient-text-animated">como un profesional</Text>
+                        </Heading>
+                        <Text mx="auto" mb="12" maxW="xl" fontSize="lg" color="fg.muted" lineHeight="relaxed">
                             Únete a profesionales que ya centralizan su consulta en ClientKosmos.
                             El plan gratuito es para siempre y no requiere tarjeta.
-                        </p>
-                        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                        </Text>
+                        <Flex direction={{ base: 'column', sm: 'row' }} alignItems="center" justifyContent="center" gap="4">
                             {canRegister && (
-                                <Button size="lg" asChild className="group glow-primary-lg hover:scale-105 transition-all duration-300 text-base px-10 py-6">
-                                    <Link href={register()} className="flex items-center gap-3">
-                                        <span>Crear cuenta gratuita</span>
-                                        <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-2" />
+                                <Button size="lg" asChild className="glow-primary">
+                                    <Link href={register()}>
+                                        <Flex alignItems="center" gap="3">
+                                            <span>Crear cuenta gratuita</span>
+                                            <Icon as={ArrowRight} boxSize="5" />
+                                        </Flex>
                                     </Link>
                                 </Button>
                             )}
-                            <Button size="lg" variant="outline" asChild className="text-base px-10 py-6 border-2 hover:bg-primary/5">
+                            <Button size="lg" variant="outline" asChild>
                                 <Link href={login()}>Ya tengo cuenta</Link>
                             </Button>
-                        </div>
-                        
-                        <div className="mt-12 flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground">
-                            <span className="flex items-center gap-2 bg-muted/50 rounded-full px-4 py-2">
-                                <CheckCircle2 className="h-4 w-4 text-primary" />
-                                Sin tarjeta de crédito
-                            </span>
-                            <span className="flex items-center gap-2 bg-muted/50 rounded-full px-4 py-2">
-                                <Lock className="h-4 w-4 text-primary" />
-                                RGPD integrado
-                            </span>
-                            <span className="flex items-center gap-2 bg-muted/50 rounded-full px-4 py-2">
-                                <Zap className="h-4 w-4 text-primary" />
-                                Activo en minutos
-                            </span>
-                        </div>
-                    </div>
-                </section>
+                        </Flex>
 
-                {/* ── Footer ── */}
-                <footer className="border-t bg-gradient-to-b from-muted/20 to-background">
-                    <div className="mx-auto max-w-6xl px-6 py-16">
-                        <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-4 mb-12">
-                            {/* Brand */}
-                            <div className="lg:col-span-2">
-                                <div className="flex items-center gap-3 mb-4">
-                                    <img
-                                        src={logo}
-                                        alt="ClientKosmos"
-                                        className="h-10 w-auto object-contain"
-                                    />
-                                    <span className="text-2xl font-bold gradient-text-animated">
+                        <Flex mt="12" flexWrap="wrap" alignItems="center" justifyContent="center" gap="6" fontSize="sm" color="fg.muted">
+                            <Flex as="span" alignItems="center" gap="2" bg="bg.muted" borderRadius="full" px="4" py="2">
+                                <Icon as={CheckCircle2} boxSize="4" color="brand.solid" />
+                                Sin tarjeta de crédito
+                            </Flex>
+                            <Flex as="span" alignItems="center" gap="2" bg="bg.muted" borderRadius="full" px="4" py="2">
+                                <Icon as={Lock} boxSize="4" color="brand.solid" />
+                                RGPD integrado
+                            </Flex>
+                            <Flex as="span" alignItems="center" gap="2" bg="bg.muted" borderRadius="full" px="4" py="2">
+                                <Icon as={Zap} boxSize="4" color="brand.solid" />
+                                Activo en minutos
+                            </Flex>
+                        </Flex>
+                    </Box>
+                </chakra.section>
+
+                {/* Footer */}
+                <chakra.footer borderTopWidth="1px">
+                    <Box mx="auto" maxW="6xl" px="6" py="16">
+                        <Box display="grid" gap="10" gridTemplateColumns={{ base: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(4, 1fr)' }} mb="12">
+                            <Box gridColumn={{ lg: 'span 2' }}>
+                                <Flex alignItems="center" gap="3" mb="4">
+                                    <chakra.img src={logo} alt="ClientKosmos" h="10" w="auto" objectFit="contain" />
+                                    <Text fontSize="2xl" fontWeight="bold" className="gradient-text-animated">
                                         ClientKosmos
-                                    </span>
-                                </div>
-                                <p className="text-sm text-muted-foreground max-w-xs leading-relaxed">
+                                    </Text>
+                                </Flex>
+                                <Text fontSize="sm" color="fg.muted" maxW="xs" lineHeight="relaxed">
                                     Plataforma de gestión de consulta para profesionales autónomos.
                                     Fichas de pacientes, sesiones, pagos, RGPD y Kosmo IA en un solo lugar.
-                                </p>
-                            </div>
-                            
-                            {/* Links */}
-                            <div>
-                                <h4 className="font-semibold mb-4">Producto</h4>
-                                <ul className="space-y-3 text-sm text-muted-foreground">
-                                    <li><a href="#features" className="transition-colors hover:text-primary">Funcionalidades</a></li>
-                                    <li><a href="#how-it-works" className="transition-colors hover:text-primary">Cómo funciona</a></li>
-                                    <li><a href="#pricing" className="transition-colors hover:text-primary">Precios</a></li>
-                                    <li><a href="#testimonials" className="transition-colors hover:text-primary">Testimonios</a></li>
-                                </ul>
-                            </div>
-                            
-                            {/* CTA mini */}
-                            <div>
-                                <h4 className="font-semibold mb-4">Empezar</h4>
-                                <ul className="space-y-3 text-sm text-muted-foreground">
-                                    <li><Link href={register()} className="transition-colors hover:text-primary">Crear cuenta</Link></li>
-                                    <li><Link href={login()} className="transition-colors hover:text-primary">Iniciar sesión</Link></li>
-                                </ul>
-                            </div>
-                        </div>
-                        
-                        <Separator className="mb-8" />
-                        
-                        <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-between text-sm text-muted-foreground">
-                            <p>© {new Date().getFullYear()} ClientKosmos · Proyecto Intermodular 2º DAM</p>
-                            <p className="flex items-center gap-1.5">
-                                Hecho con <span className="text-red-500 animate-pulse">❤</span> para profesionales organizados
-                            </p>
-                        </div>
-                    </div>
-                </footer>
-            </div>
+                                </Text>
+                            </Box>
+
+                            <Box>
+                                <Heading as="h4" fontSize="md" fontWeight="semibold" mb="4">Producto</Heading>
+                                <Stack as="ul" gap="3" fontSize="sm" color="fg.muted">
+                                    <li><chakra.a href="#features" transition="colors" _hover={{ color: 'brand.solid' }}>Funcionalidades</chakra.a></li>
+                                    <li><chakra.a href="#how-it-works" transition="colors" _hover={{ color: 'brand.solid' }}>Cómo funciona</chakra.a></li>
+                                    <li><chakra.a href="#pricing" transition="colors" _hover={{ color: 'brand.solid' }}>Precios</chakra.a></li>
+                                    <li><chakra.a href="#testimonials" transition="colors" _hover={{ color: 'brand.solid' }}>Testimonios</chakra.a></li>
+                                </Stack>
+                            </Box>
+
+                            <Box>
+                                <Heading as="h4" fontSize="md" fontWeight="semibold" mb="4">Empezar</Heading>
+                                <Stack as="ul" gap="3" fontSize="sm" color="fg.muted">
+                                    <li><chakra.span _hover={{ color: 'brand.solid' }} transition="colors"><Link href={register()}>Crear cuenta</Link></chakra.span></li>
+                                    <li><chakra.span _hover={{ color: 'brand.solid' }} transition="colors"><Link href={login()}>Iniciar sesión</Link></chakra.span></li>
+                                </Stack>
+                            </Box>
+                        </Box>
+
+                        <Separator mb="8" />
+
+                        <Flex direction={{ base: 'column', sm: 'row' }} alignItems="center" justifyContent={{ sm: 'space-between' }} gap="4" fontSize="sm" color="fg.muted">
+                            <Text>© {new Date().getFullYear()} ClientKosmos · Proyecto Intermodular 2º DAM</Text>
+                            <Flex alignItems="center" gap="1.5">
+                                Hecho con <Text as="span" color="red.500">❤</Text> para profesionales organizados
+                            </Flex>
+                        </Flex>
+                    </Box>
+                </chakra.footer>
+            </Box>
         </>
     );
 }
 
-/* ── Subcomponentes locales ── */
+/* Subcomponentes locales */
 
 function BentoCard({
     icon,
     title,
     description,
     badge,
-    gradient = 'from-primary/20 to-transparent',
-    className = '',
+    colSpan,
+    rowSpan,
     featured = false,
     isPremium = false,
     delay = 0,
@@ -805,8 +763,8 @@ function BentoCard({
     title: string;
     description: string;
     badge: string;
-    gradient?: string;
-    className?: string;
+    colSpan?: { md?: number; lg?: number };
+    rowSpan?: { lg?: number };
     featured?: boolean;
     isPremium?: boolean;
     delay?: number;
@@ -826,47 +784,66 @@ function BentoCard({
     }, []);
 
     return (
-        <div
+        <Box
             ref={cardRef}
-            className={`transition-all duration-700 ease-out ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
+            gridColumn={colSpan ? { md: colSpan.md ? `span ${colSpan.md}` : undefined, lg: colSpan.lg ? `span ${colSpan.lg}` : undefined } : undefined}
+            gridRow={rowSpan ? { lg: rowSpan.lg ? `span ${rowSpan.lg}` : undefined } : undefined}
+            transition="all 0.7s ease-out"
+            opacity={isVisible ? 1 : 0}
+            transform={isVisible ? 'translateY(0)' : 'translateY(32px)'}
             style={{ transitionDelay: `${delay * 100}ms` }}
         >
-            <Card className={`group relative overflow-hidden transition-all duration-500 hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-2 h-full ${className} ${featured ? 'border-2 border-primary/20 hover:border-primary/40' : 'border border-border/60 hover:border-primary/30'}`}>
-                {/* Background gradient */}
-                <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-40 group-hover:opacity-80 transition-opacity duration-500`} />
-
-                {/* Featured glow */}
-                {featured && (
-                    <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/20 via-transparent to-primary/20 rounded-xl opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-500" />
-                )}
-
-                {/* Shine sweep on hover */}
-                <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out bg-gradient-to-r from-transparent via-white/[0.07] to-transparent pointer-events-none" />
-
-                <CardContent className={`relative ${featured ? 'p-8' : 'p-6'} h-full`}>
-                    <div className="flex items-start justify-between mb-5">
-                        <div className={`rounded-2xl bg-gradient-to-br ${gradient} p-3.5 text-primary ring-1 ring-primary/10 transition-all duration-500 group-hover:scale-110 group-hover:shadow-xl group-hover:shadow-primary/15 group-hover:ring-primary/25`}>
+            <Card
+                position="relative"
+                overflow="hidden"
+                transition="all 0.5s"
+                h="full"
+                borderWidth={featured ? '2px' : '1px'}
+                borderColor={featured ? 'brand.muted' : 'border'}
+                _hover={{
+                    transform: 'translateY(-8px)',
+                    boxShadow: '2xl',
+                    borderColor: 'brand.solid',
+                }}
+            >
+                <CardContent style={{ padding: featured ? '2rem' : '1.5rem', height: '100%' }}>
+                    <Flex alignItems="flex-start" justifyContent="space-between" mb="5">
+                        <Box
+                            borderRadius="2xl"
+                            bg="brand.muted"
+                            p="3.5"
+                            color="brand.solid"
+                            transition="all 0.5s"
+                        >
                             {icon}
-                        </div>
+                        </Box>
                         <Badge
                             variant={isPremium ? 'default' : 'secondary'}
-                            className={`transition-all duration-300 text-[11px] tracking-wide uppercase font-semibold ${isPremium ? 'bg-gradient-to-r from-primary to-primary/80 shadow-md shadow-primary/20' : 'bg-secondary/80'}`}
+                            colorScheme={isPremium ? 'brand' : 'gray'}
+                            textTransform="uppercase"
+                            fontSize="11px"
+                            letterSpacing="wide"
+                            fontWeight="semibold"
                         >
-                            {isPremium && <Star className="h-3 w-3 mr-1 fill-current" />}
-                            {badge}
+                            {isPremium && (
+                                <Flex alignItems="center" gap="1">
+                                    <Star size={12} />
+                                    {badge}
+                                </Flex>
+                            )}
+                            {!isPremium && badge}
                         </Badge>
-                    </div>
-                    <h3 className={`font-bold mb-2.5 transition-colors duration-300 group-hover:text-primary ${featured ? 'text-xl' : 'text-lg'}`}>
+                    </Flex>
+                    <Heading as="h3" fontWeight="bold" mb="2.5" fontSize={featured ? 'xl' : 'lg'} transition="colors" _groupHover={{ color: 'brand.solid' }}>
                         {title}
-                    </h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed">{description}</p>
+                    </Heading>
+                    <Text fontSize="sm" color="fg.muted" lineHeight="relaxed">{description}</Text>
                     {children}
                 </CardContent>
             </Card>
-        </div>
+        </Box>
     );
 }
-
 
 function TestimonialCard({
     quote,
@@ -884,29 +861,35 @@ function TestimonialCard({
     featured?: boolean;
 }) {
     return (
-        <Card className={`group relative overflow-hidden transition-all duration-500 hover:shadow-xl hover:-translate-y-2 ${featured ? 'border-2 border-primary/30 md:scale-105 z-10' : ''}`}>
-            {featured && (
-                <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/20 via-primary/5 to-primary/20 rounded-xl blur" />
-            )}
-            <CardContent className="relative p-6">
-                <div className="flex gap-1 mb-4">
+        <Card
+            position="relative"
+            overflow="hidden"
+            transition="all 0.5s"
+            borderWidth={featured ? '2px' : '1px'}
+            borderColor={featured ? 'brand.muted' : 'border'}
+            transform={featured ? { md: 'scale(1.05)' } : undefined}
+            zIndex={featured ? 10 : undefined}
+            _hover={{ transform: 'translateY(-8px)', boxShadow: 'xl' }}
+        >
+            <CardContent style={{ padding: '1.5rem' }}>
+                <Flex gap="1" mb="4">
                     {Array.from({ length: rating }).map((_, i) => (
-                        <Star key={i} className="h-4 w-4 fill-yellow-500 text-yellow-500" />
+                        <Icon key={i} as={Star} boxSize="4" color="yellow.500" fill="yellow.500" />
                     ))}
-                </div>
-                <Quote className="h-8 w-8 text-primary/20 mb-2" />
-                <p className="text-sm leading-relaxed mb-6 text-muted-foreground">
+                </Flex>
+                <Icon as={Quote} boxSize="8" color="brand.muted" mb="2" />
+                <Text fontSize="sm" lineHeight="relaxed" mb="6" color="fg.muted">
                     "{quote}"
-                </p>
-                <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-sm font-bold text-primary-foreground shadow-lg shadow-primary/20">
+                </Text>
+                <Flex alignItems="center" gap="3">
+                    <Flex h="10" w="10" borderRadius="full" bg="brand.solid" alignItems="center" justifyContent="center" fontSize="sm" fontWeight="bold" color="brand.contrast" boxShadow="lg">
                         {avatar}
-                    </div>
-                    <div>
-                        <p className="font-semibold text-sm">{author}</p>
-                        <p className="text-xs text-muted-foreground">{role}</p>
-                    </div>
-                </div>
+                    </Flex>
+                    <Box>
+                        <Text fontWeight="semibold" fontSize="sm">{author}</Text>
+                        <Text fontSize="xs" color="fg.muted">{role}</Text>
+                    </Box>
+                </Flex>
             </CardContent>
         </Card>
     );
@@ -914,12 +897,12 @@ function TestimonialCard({
 
 function PricingFeature({ text, highlight = false }: { text: string; highlight?: boolean }) {
     return (
-        <li className="flex items-center gap-3">
-            <div className={`flex-shrink-0 rounded-full p-0.5 ${highlight ? 'bg-primary/20' : ''}`}>
-                <CheckCircle2 className={`h-4 w-4 ${highlight ? 'text-primary' : 'text-primary/70'}`} />
-            </div>
-            <span className={highlight ? 'font-medium' : ''}>{text}</span>
-        </li>
+        <Flex as="li" alignItems="center" gap="3">
+            <Box flexShrink={0} borderRadius="full" p="0.5" bg={highlight ? 'brand.muted' : 'transparent'}>
+                <Icon as={CheckCircle2} boxSize="4" color={highlight ? 'brand.solid' : 'brand.solid/70'} />
+            </Box>
+            <Text as="span" fontWeight={highlight ? 'medium' : 'normal'}>{text}</Text>
+        </Flex>
     );
 }
 
@@ -935,30 +918,44 @@ function StepCard({
     icon: React.ReactNode;
 }) {
     return (
-        <div className="group relative">
-            <Card className="relative overflow-hidden transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 border-2 border-transparent hover:border-primary/20">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <CardContent className="relative pt-8 pb-6 px-6">
-                    <div className="mb-6 flex items-center gap-4">
-                        <div className="relative">
-                            <div className="absolute -inset-1 bg-primary/20 rounded-full blur-md group-hover:bg-primary/30 transition-colors" />
-                            <div className="relative flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary/80 text-primary-foreground font-bold text-xl shadow-xl shadow-primary/30">
-                                {number}
-                            </div>
-                        </div>
-                        <div className="rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 p-3 text-primary transition-all duration-500 group-hover:scale-110 group-hover:shadow-lg">
+        <Box position="relative">
+            <Card
+                position="relative"
+                overflow="hidden"
+                transition="all 0.5s"
+                borderWidth="2px"
+                borderColor="transparent"
+                _hover={{ transform: 'translateY(-8px)', boxShadow: '2xl', borderColor: 'brand.muted' }}
+            >
+                <CardContent style={{ paddingTop: '2rem', paddingBottom: '1.5rem', paddingLeft: '1.5rem', paddingRight: '1.5rem' }}>
+                    <Flex mb="6" alignItems="center" gap="4">
+                        <Flex
+                            h="14"
+                            w="14"
+                            alignItems="center"
+                            justifyContent="center"
+                            borderRadius="full"
+                            bg="brand.solid"
+                            color="brand.contrast"
+                            fontWeight="bold"
+                            fontSize="xl"
+                            boxShadow="xl"
+                        >
+                            {number}
+                        </Flex>
+                        <Box borderRadius="xl" bg="brand.muted" p="3" color="brand.solid">
                             {icon}
-                        </div>
-                    </div>
-                    <h3 className="mb-3 text-xl font-bold transition-colors group-hover:text-primary">
+                        </Box>
+                    </Flex>
+                    <Heading as="h3" mb="3" fontSize="xl" fontWeight="bold">
                         {title}
-                    </h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
+                    </Heading>
+                    <Text fontSize="sm" color="fg.muted" lineHeight="relaxed">
                         {description}
-                    </p>
+                    </Text>
                 </CardContent>
             </Card>
-        </div>
+        </Box>
     );
 }
 
@@ -971,35 +968,37 @@ function SessionPreviewItem({
     text: string;
     animate?: boolean;
 }) {
-    const statusConfig = {
+    const cfg = {
         done: {
-            dot: 'bg-emerald-500 shadow-emerald-500/50',
-            wrapper: 'bg-muted/50 border-muted opacity-70',
-            icon: <CheckCircle2 className="h-4 w-4 text-emerald-500" />,
-            textClass: 'line-through text-muted-foreground',
+            dotBg: 'green.500',
+            wrapperBg: 'bg.muted',
+            wrapperBorder: 'border',
+            icon: <Icon as={CheckCircle2} boxSize="4" color="green.500" />,
+            strikethrough: true,
         },
         pending: {
-            dot: 'bg-primary shadow-primary/50',
-            wrapper: 'bg-primary/5 border-primary/30 shadow-lg shadow-primary/10',
-            icon: <ArrowRight className="h-4 w-4 text-primary animate-pulse" />,
-            textClass: '',
+            dotBg: 'brand.solid',
+            wrapperBg: 'brand.muted',
+            wrapperBorder: 'brand.muted',
+            icon: <Icon as={ArrowRight} boxSize="4" color="brand.solid" />,
+            strikethrough: false,
         },
         alert: {
-            dot: 'bg-amber-500 shadow-amber-500/50',
-            wrapper: 'bg-amber-500/5 border-amber-500/30',
-            icon: <AlertCircle className="h-4 w-4 text-amber-500" />,
-            textClass: '',
+            dotBg: 'yellow.500',
+            wrapperBg: 'yellow.subtle',
+            wrapperBorder: 'yellow.muted',
+            icon: <Icon as={AlertCircle} boxSize="4" color="yellow.500" />,
+            strikethrough: false,
         },
-    };
-
-    const cfg = statusConfig[status];
+    }[status];
 
     return (
-        <div className={`flex items-center gap-3 rounded-xl border-2 p-3 transition-all duration-300 ${cfg.wrapper}`}>
-            <div className={`h-2.5 w-2.5 rounded-full flex-shrink-0 ${cfg.dot} shadow-sm ${animate ? 'animate-pulse' : ''}`} />
-            <span className={`flex-1 text-sm ${cfg.textClass}`}>{text}</span>
+        <Flex alignItems="center" gap="3" borderRadius="xl" borderWidth="2px" borderColor={cfg.wrapperBorder} bg={cfg.wrapperBg} p="3" transition="all 0.3s">
+            <Box h="2.5" w="2.5" borderRadius="full" flexShrink={0} bg={cfg.dotBg} animation={animate ? 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' : undefined} />
+            <Text as="span" flex="1" fontSize="sm" textDecoration={cfg.strikethrough ? 'line-through' : undefined} color={cfg.strikethrough ? 'fg.muted' : undefined}>
+                {text}
+            </Text>
             {cfg.icon}
-        </div>
+        </Flex>
     );
 }
-

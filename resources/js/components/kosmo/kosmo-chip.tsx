@@ -1,20 +1,33 @@
+import { Flex, type FlexProps } from '@chakra-ui/react';
 import * as React from 'react';
 import { KosmoIcon } from './kosmo-icon';
 
-export interface KosmoChipProps extends React.HTMLAttributes<HTMLSpanElement> {
+export interface KosmoChipProps extends Omit<FlexProps, 'children'> {
   children: React.ReactNode;
 }
 
-const KosmoChip = React.forwardRef<HTMLSpanElement, KosmoChipProps>(
-  ({ className = '', children, ...props }, ref) => (
-    <span
+const KosmoChip = React.forwardRef<HTMLDivElement, KosmoChipProps>(
+  ({ children, ...props }, ref) => (
+    <Flex
       ref={ref}
-      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--color-kosmo-surface)] text-[var(--color-kosmo)] text-xs font-medium border border-[var(--color-kosmo-border)] ${className}`}
+      as="span"
+      display="inline-flex"
+      alignItems="center"
+      gap="1.5"
+      px="2.5"
+      py="1"
+      borderRadius="full"
+      bg="kosmo.muted"
+      color="kosmo.fg"
+      fontSize="xs"
+      fontWeight="medium"
+      borderWidth="1px"
+      borderColor="kosmo.emphasized"
       {...props}
     >
-      <KosmoIcon className="w-3.5 h-3.5" />
+      <KosmoIcon size={14} />
       {children}
-    </span>
+    </Flex>
   )
 );
 KosmoChip.displayName = 'KosmoChip';

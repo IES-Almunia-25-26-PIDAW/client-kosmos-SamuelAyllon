@@ -14,11 +14,11 @@ class StorePaymentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'amount'                => ['required', 'numeric', 'min:0'],
-            'due_date'              => ['required', 'date'],
-            'concept'               => ['nullable', 'string'],
-            'payment_method'        => ['nullable', 'in:cash,bizum,transfer,card'],
-            'consulting_session_id' => ['nullable', 'exists:consulting_sessions,id'],
+            'amount'         => ['required', 'numeric', 'min:0'],
+            'due_at'         => ['required', 'date'],
+            'notes'          => ['nullable', 'string'],
+            'payment_method' => ['nullable', 'in:cash,bizum,transfer,card,stripe,other'],
+            'appointment_id' => ['nullable', 'exists:appointments,id'],
         ];
     }
 }

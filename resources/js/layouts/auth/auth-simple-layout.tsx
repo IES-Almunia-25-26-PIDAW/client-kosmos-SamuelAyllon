@@ -1,7 +1,10 @@
+import { Box, Flex, Heading, Image, Text, chakra } from '@chakra-ui/react';
 import { Link } from '@inertiajs/react';
-import logo from '@/assets/logo.png';
+import logo from '@/assets/logo.svg';
 import { home } from '@/routes';
 import type { AuthLayoutProps } from '@/types';
+
+const ChakraLink = chakra(Link);
 
 export default function AuthSimpleLayout({
     children,
@@ -9,30 +12,51 @@ export default function AuthSimpleLayout({
     description,
 }: AuthLayoutProps) {
     return (
-        <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-background p-6 md:p-10">
-            <div className="w-full max-w-sm">
-                <div className="flex flex-col gap-8">
-                    <div className="flex flex-col items-center gap-4">
-                        <Link
+        <Flex
+            minH="100svh"
+            direction="column"
+            alignItems="center"
+            justifyContent="center"
+            gap="6"
+            bg="bg"
+            p={{ base: '6', md: '10' }}
+        >
+            <Box w="full" maxW="sm">
+                <Flex direction="column" gap="8">
+                    <Flex direction="column" alignItems="center" gap="4">
+                        <ChakraLink
                             href={home()}
-                            className="flex flex-col items-center gap-2 font-medium"
+                            display="flex"
+                            flexDirection="column"
+                            alignItems="center"
+                            gap="2"
+                            fontWeight="medium"
                         >
-                            <div className="mb-1 flex h-9 w-9 items-center justify-center rounded-md">
-                                <img src={logo} alt="ClientKosmos" className="size-9 object-contain" />
-                            </div>
-                            <span className="sr-only">{title}</span>
-                        </Link>
+                            <Flex
+                                mb="1"
+                                h="9"
+                                w="9"
+                                alignItems="center"
+                                justifyContent="center"
+                                borderRadius="md"
+                            >
+                                <Image src={logo} alt="ClientKosmos" boxSize="9" objectFit="contain" />
+                            </Flex>
+                            <Box as="span" srOnly>{title}</Box>
+                        </ChakraLink>
 
-                        <div className="space-y-2 text-center">
-                            <h1 className="text-xl font-medium">{title}</h1>
-                            <p className="text-center text-sm text-muted-foreground">
+                        <Flex direction="column" gap="2" textAlign="center">
+                            <Heading as="h1" fontSize="xl" fontWeight="medium">
+                                {title}
+                            </Heading>
+                            <Text textAlign="center" fontSize="sm" color="fg.muted">
                                 {description}
-                            </p>
-                        </div>
-                    </div>
+                            </Text>
+                        </Flex>
+                    </Flex>
                     {children}
-                </div>
-            </div>
-        </div>
+                </Flex>
+            </Box>
+        </Flex>
     );
 }

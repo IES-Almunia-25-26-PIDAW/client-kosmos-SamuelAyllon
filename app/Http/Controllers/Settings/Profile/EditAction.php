@@ -12,9 +12,23 @@ class EditAction extends Controller
 {
     public function __invoke(Request $request): Response
     {
+        $user = $request->user();
+        $patientProfile = $user?->patientProfile;
+
+        $consentForms = $patientProfile
+            ? $patientProfile->consentForms()
+                ->whereIn('status', ['signed', 'revoked', 'expired'])
+                ->orderByDesc('signed_at')
+                ->get([
+                    'id', 'consent_type', 'template_version', 'status',
+                    'signed_at', 'expires_at', 'created_at', 'updated_at',
+                ])
+            : collect();
+
         return Inertia::render('settings/profile', [
-            'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
+            'mustVerifyEmail' => $user instanceof MustVerifyEmail,
             'status' => $request->session()->get('status'),
+            'consentForms' => $consentForms,
         ]);
     }
 }

@@ -1,8 +1,12 @@
+import { Box, Flex, Heading, Stack, Table, Text, chakra } from '@chakra-ui/react';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { Users, Plus, Trash2 } from 'lucide-react';
-import AdminLayout from '@/layouts/admin-layout';
+import { Plus, Trash2, Users } from 'lucide-react';
+import type { ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
+import AdminLayout from '@/layouts/admin-layout';
 import type { Auth } from '@/types';
+
+const ChakraLink = chakra(Link);
 
 interface UserRow {
     id: number;
@@ -37,104 +41,124 @@ export default function AdminUsersIndex({ users }: Props) {
     };
 
     return (
-        <AdminLayout>
+        <>
             <Head title="Usuarios — Admin — ClientKosmos" />
 
-            <div className="flex flex-col gap-6 p-6 lg:p-8">
-                <div className="flex items-start justify-between">
-                    <div>
-                        <h1 className="text-display-2xl text-[var(--color-text)] flex items-center gap-3">
+            <Stack gap="6" p={{ base: '6', lg: '8' }}>
+                <Flex alignItems="flex-start" justifyContent="space-between">
+                    <Box>
+                        <Heading as="h1" fontSize="3xl" color="fg" display="flex" alignItems="center" gap="3">
                             <Users size={28} />
                             Profesionales
-                        </h1>
-                        <p className="mt-1 text-body-md text-[var(--color-text-secondary)]">
+                        </Heading>
+                        <Text mt="1" fontSize="md" color="fg.muted">
                             {users.total} profesionales registrados
-                        </p>
-                    </div>
-                    <Link href="/admin/users/create">
+                        </Text>
+                    </Box>
+                    <ChakraLink href="/admin/users/create">
                         <Button variant="primary">
                             <Plus size={16} />
                             Nuevo profesional
                         </Button>
-                    </Link>
-                </div>
+                    </ChakraLink>
+                </Flex>
 
-                <div className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] overflow-hidden shadow-[var(--shadow-sm)]">
-                    <table className="w-full text-sm">
-                        <thead>
-                            <tr className="border-b border-[var(--color-border-subtle)] bg-[var(--color-surface-alt)]">
-                                <th className="px-4 py-3 text-left text-xs font-medium text-[var(--color-text-secondary)] uppercase tracking-wider">Usuario</th>
-                                <th className="px-4 py-3 text-center text-xs font-medium text-[var(--color-text-secondary)] uppercase tracking-wider">Pacientes</th>
-                                <th className="px-4 py-3 text-center text-xs font-medium text-[var(--color-text-secondary)] uppercase tracking-wider">Sesiones</th>
-                                <th className="px-4 py-3 text-right text-xs font-medium text-[var(--color-text-secondary)] uppercase tracking-wider">Facturado</th>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-[var(--color-text-secondary)] uppercase tracking-wider">Alta</th>
-                                <th className="px-4 py-3 text-right text-xs font-medium text-[var(--color-text-secondary)] uppercase tracking-wider">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-[var(--color-border-subtle)]">
+                <Box
+                    borderRadius="lg"
+                    borderWidth="1px"
+                    borderColor="border"
+                    bg="bg.surface"
+                    overflow="hidden"
+                    boxShadow="sm"
+                >
+                    <Table.Root size="sm">
+                        <Table.Header bg="bg.muted">
+                            <Table.Row borderBottomWidth="1px" borderColor="border.subtle">
+                                <Table.ColumnHeader fontSize="xs" fontWeight="medium" color="fg.muted" textTransform="uppercase" letterSpacing="wider">Usuario</Table.ColumnHeader>
+                                <Table.ColumnHeader textAlign="center" fontSize="xs" fontWeight="medium" color="fg.muted" textTransform="uppercase" letterSpacing="wider">Pacientes</Table.ColumnHeader>
+                                <Table.ColumnHeader textAlign="center" fontSize="xs" fontWeight="medium" color="fg.muted" textTransform="uppercase" letterSpacing="wider">Sesiones</Table.ColumnHeader>
+                                <Table.ColumnHeader textAlign="right" fontSize="xs" fontWeight="medium" color="fg.muted" textTransform="uppercase" letterSpacing="wider">Facturado</Table.ColumnHeader>
+                                <Table.ColumnHeader fontSize="xs" fontWeight="medium" color="fg.muted" textTransform="uppercase" letterSpacing="wider">Alta</Table.ColumnHeader>
+                                <Table.ColumnHeader textAlign="right" fontSize="xs" fontWeight="medium" color="fg.muted" textTransform="uppercase" letterSpacing="wider">Acciones</Table.ColumnHeader>
+                            </Table.Row>
+                        </Table.Header>
+                        <Table.Body>
                             {users.data.map((user) => (
-                                <tr key={user.id} className="hover:bg-[var(--color-surface-alt)] transition-colors">
-                                    <td className="px-4 py-3">
-                                        <Link href={`/admin/users/${user.id}`} className="font-medium text-[var(--color-primary)] hover:underline">
+                                <Table.Row key={user.id} _hover={{ bg: 'bg.muted' }} transition="colors">
+                                    <Table.Cell>
+                                        <ChakraLink
+                                            href={`/admin/users/${user.id}`}
+                                            fontWeight="medium"
+                                            color="brand.solid"
+                                            _hover={{ textDecoration: 'underline' }}
+                                        >
                                             {user.name}
-                                        </Link>
-                                        <p className="text-xs text-[var(--color-text-secondary)]">{user.email}</p>
-                                    </td>
-                                    <td className="px-4 py-3 text-center text-[var(--color-text)]">{user.patients_count}</td>
-                                    <td className="px-4 py-3 text-center text-[var(--color-text)]">{user.sessions_count}</td>
-                                    <td className="px-4 py-3 text-right text-[var(--color-text)] tabular-nums">
+                                        </ChakraLink>
+                                        <Text fontSize="xs" color="fg.muted">{user.email}</Text>
+                                    </Table.Cell>
+                                    <Table.Cell textAlign="center" color="fg">{user.patients_count}</Table.Cell>
+                                    <Table.Cell textAlign="center" color="fg">{user.sessions_count}</Table.Cell>
+                                    <Table.Cell textAlign="right" color="fg" fontVariantNumeric="tabular-nums">
                                         €{Number(user.paid_amount ?? 0).toLocaleString('es-ES', { minimumFractionDigits: 2 })}
-                                    </td>
-                                    <td className="px-4 py-3 text-[var(--color-text-secondary)]">{formatDate(user.created_at)}</td>
-                                    <td className="px-4 py-3 text-right">
-                                        <div className="flex items-center justify-end gap-2">
-                                            <Link href={`/admin/users/${user.id}`}>
+                                    </Table.Cell>
+                                    <Table.Cell color="fg.muted">{formatDate(user.created_at)}</Table.Cell>
+                                    <Table.Cell textAlign="right">
+                                        <Flex alignItems="center" justifyContent="flex-end" gap="2">
+                                            <ChakraLink href={`/admin/users/${user.id}`}>
                                                 <Button variant="secondary" size="sm">
                                                     Ver
                                                 </Button>
-                                            </Link>
+                                            </ChakraLink>
                                             {user.id !== auth.user.id && (
-                                                <Button
-                                                    variant="destructive"
-                                                    size="sm"
-                                                    onClick={() => deleteUser(user)}
-                                                >
+                                                <Button variant="destructive" size="sm" onClick={() => deleteUser(user)}>
                                                     <Trash2 size={13} />
                                                 </Button>
                                             )}
-                                        </div>
-                                    </td>
-                                </tr>
+                                        </Flex>
+                                    </Table.Cell>
+                                </Table.Row>
                             ))}
-                        </tbody>
-                    </table>
+                        </Table.Body>
+                    </Table.Root>
 
                     {users.last_page > 1 && (
-                        <div className="flex items-center justify-between px-4 py-3 border-t border-[var(--color-border-subtle)] bg-[var(--color-surface-alt)]">
-                            <p className="text-xs text-[var(--color-text-secondary)]">
+                        <Flex
+                            alignItems="center"
+                            justifyContent="space-between"
+                            px="4"
+                            py="3"
+                            borderTopWidth="1px"
+                            borderColor="border.subtle"
+                            bg="bg.muted"
+                        >
+                            <Text fontSize="xs" color="fg.muted">
                                 {users.total} usuarios · Página {users.current_page} de {users.last_page}
-                            </p>
-                            <div className="flex gap-1">
+                            </Text>
+                            <Flex gap="1">
                                 {users.links.map((link, i) => (
-                                    <button
+                                    <chakra.button
                                         key={i}
                                         disabled={!link.url}
                                         onClick={() => link.url && router.get(link.url)}
-                                        className={`px-3 py-1 text-xs rounded-[var(--radius-sm)] transition-colors ${
-                                            link.active
-                                                ? 'bg-[var(--color-primary)] text-[var(--color-primary-fg)]'
-                                                : link.url
-                                                    ? 'text-[var(--color-text-secondary)] hover:bg-[var(--color-border)]'
-                                                    : 'text-[var(--color-text-muted)] cursor-not-allowed'
-                                        }`}
+                                        px="3"
+                                        py="1"
+                                        fontSize="xs"
+                                        borderRadius="sm"
+                                        transition="colors"
+                                        bg={link.active ? 'brand.solid' : 'transparent'}
+                                        color={link.active ? 'brand.contrast' : link.url ? 'fg.muted' : 'fg.subtle'}
+                                        cursor={link.url ? 'pointer' : 'not-allowed'}
+                                        _hover={!link.active && link.url ? { bg: 'border' } : undefined}
                                         dangerouslySetInnerHTML={{ __html: link.label }}
                                     />
                                 ))}
-                            </div>
-                        </div>
+                            </Flex>
+                        </Flex>
                     )}
-                </div>
-            </div>
-        </AdminLayout>
+                </Box>
+            </Stack>
+        </>
     );
 }
+
+AdminUsersIndex.layout = (page: ReactNode) => <AdminLayout>{page}</AdminLayout>;

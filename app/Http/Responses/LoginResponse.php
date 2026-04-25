@@ -17,13 +17,17 @@ class LoginResponse implements LoginResponseContract
         $user = auth()->user();
 
         if ($user->isAdmin()) {
-            return redirect()->route('admin.users.index');
+            return redirect()->route('admin.dashboard');
         }
 
-        if (! $user->hasCompletedTutorial()) {
-            return redirect()->route('onboarding');
+        if ($user->isProfessional() && ! $user->hasCompletedTutorial()) {
+            return redirect()->route('professional.onboarding');
         }
 
-        return redirect()->route('dashboard');
+        if ($user->isProfessional()) {
+            return redirect()->route('professional.dashboard');
+        }
+
+        return redirect()->route('patient.dashboard');
     }
 }

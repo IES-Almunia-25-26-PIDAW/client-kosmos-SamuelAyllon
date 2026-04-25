@@ -3,20 +3,26 @@
 namespace App\Providers;
 
 use App\Http\Responses\LoginResponse;
-use App\Models\Patient;
-use App\Models\Payment;
+use App\Models\Document;
+use App\Models\Invoice;
+use App\Models\PatientProfile;
+use App\Models\SessionRecording;
 use App\Models\User;
 use App\Observers\PatientObserver;
 use App\Observers\PaymentObserver;
 use App\Policies\AdminPolicy;
+use App\Policies\DocumentPolicy;
+use App\Policies\PatientPolicy;
+use App\Policies\PaymentPolicy;
+use App\Policies\SessionRecordingPolicy;
 use Carbon\CarbonImmutable;
+use GuzzleHttp\Client as GuzzleClient;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 use Laravel\Fortify\Contracts\LoginResponse as LoginResponseContract;
-use GuzzleHttp\Client as GuzzleClient;
 use OpenAI;
 use OpenAI\Client as OpenAIClient;
 
@@ -55,10 +61,14 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->configureDefaults();
 
-        Patient::observe(PatientObserver::class);
-        Payment::observe(PaymentObserver::class);
+        PatientProfile::observe(PatientObserver::class);
+        Invoice::observe(PaymentObserver::class);
 
         Gate::policy(User::class, AdminPolicy::class);
+        Gate::policy(PatientProfile::class, PatientPolicy::class);
+        Gate::policy(Invoice::class, PaymentPolicy::class);
+        Gate::policy(Document::class, DocumentPolicy::class);
+        Gate::policy(SessionRecording::class, SessionRecordingPolicy::class);
     }
 
     /**

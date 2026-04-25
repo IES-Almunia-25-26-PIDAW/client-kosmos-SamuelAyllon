@@ -1,17 +1,18 @@
-import type { HTMLAttributes } from 'react';
-import { cn } from '@/lib/utils';
+import { Text } from '@chakra-ui/react';
+import type { ComponentProps } from 'react';
 
-export default function InputError({
-    message,
-    className = '',
-    ...props
-}: HTMLAttributes<HTMLParagraphElement> & { message?: string }) {
-    return message ? (
-        <p
-            {...props}
-            className={cn('text-sm text-red-600 dark:text-red-400', className)}
-        >
+type Props = Omit<ComponentProps<typeof Text>, 'children'> & {
+    message?: string;
+};
+
+export default function InputError({ message, ...props }: Props) {
+    if (!message) {
+        return null;
+    }
+
+    return (
+        <Text fontSize="sm" color="danger.fg" {...props}>
             {message}
-        </p>
-    ) : null;
+        </Text>
+    );
 }

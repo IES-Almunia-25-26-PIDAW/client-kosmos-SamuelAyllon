@@ -1,51 +1,34 @@
-import * as AvatarPrimitive from "@radix-ui/react-avatar"
-import * as React from "react"
+import { Avatar as ChakraAvatar } from '@chakra-ui/react';
+import * as React from 'react';
 
-import { cn } from "@/lib/utils"
+type RootProps = React.ComponentProps<typeof ChakraAvatar.Root>;
+type ImageProps = React.ComponentProps<typeof ChakraAvatar.Image>;
+type FallbackProps = React.ComponentProps<typeof ChakraAvatar.Fallback>;
 
-function Avatar({
-  className,
-  ...props
-}: React.ComponentProps<typeof AvatarPrimitive.Root>) {
-  return (
-    <AvatarPrimitive.Root
-      data-slot="avatar"
-      className={cn(
-        "relative flex size-8 shrink-0 overflow-hidden rounded-full",
-        className
-      )}
-      {...props}
-    />
-  )
+function Avatar(props: RootProps) {
+    return (
+        <ChakraAvatar.Root
+            data-slot="avatar"
+            size="sm"
+            shape="full"
+            {...props}
+        />
+    );
 }
 
-function AvatarImage({
-  className,
-  ...props
-}: React.ComponentProps<typeof AvatarPrimitive.Image>) {
-  return (
-    <AvatarPrimitive.Image
-      data-slot="avatar-image"
-      className={cn("aspect-square size-full", className)}
-      {...props}
-    />
-  )
+function AvatarImage(props: ImageProps) {
+    return <ChakraAvatar.Image data-slot="avatar-image" {...props} />;
 }
 
-function AvatarFallback({
-  className,
-  ...props
-}: React.ComponentProps<typeof AvatarPrimitive.Fallback>) {
-  return (
-    <AvatarPrimitive.Fallback
-      data-slot="avatar-fallback"
-      className={cn(
-        "bg-muted flex size-full items-center justify-center rounded-full",
-        className
-      )}
-      {...props}
-    />
-  )
+function AvatarFallback(props: FallbackProps) {
+    return (
+        <ChakraAvatar.Fallback
+            data-slot="avatar-fallback"
+            bg="bg.muted"
+            color="fg.muted"
+            {...props}
+        />
+    );
 }
 
-export { Avatar, AvatarImage, AvatarFallback }
+export { Avatar, AvatarImage, AvatarFallback };

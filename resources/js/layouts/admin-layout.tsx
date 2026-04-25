@@ -1,6 +1,7 @@
-import React from 'react';
+import { Box, Flex, chakra } from '@chakra-ui/react';
 import { Link, usePage } from '@inertiajs/react';
 import { Shield, Users, ChevronsUpDown } from 'lucide-react';
+import React from 'react';
 import { ImpersonationBanner } from '@/components/admin/impersonation-banner';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { UserInfo } from '@/components/user-info';
@@ -14,18 +15,52 @@ interface AdminLayoutProps {
 interface SharedProps {
     auth: { user: User };
     isImpersonating: boolean;
+    [key: string]: unknown;
 }
+
+const UserTrigger = chakra('button', {
+    base: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '2',
+        borderRadius: 'md',
+        px: '2',
+        py: '1.5',
+        fontSize: 'sm',
+        outline: 'none',
+        transitionProperty: 'background-color',
+        transitionDuration: 'var(--duration-normal)',
+        _hover: { bg: 'bg.subtle' },
+    },
+});
+
+const AdminNavLink = chakra(Link, {
+    base: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '1.5',
+        px: '3',
+        py: '1.5',
+        fontSize: 'sm',
+        fontWeight: 'medium',
+        borderRadius: 'sm',
+        color: 'fg.muted',
+        transitionProperty: 'colors',
+        transitionDuration: 'var(--duration-normal)',
+        _hover: { color: 'fg', bg: 'bg.subtle' },
+    },
+});
 
 function AdminNavUser({ user }: { user: User }) {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-2 rounded-[var(--radius-md)] px-2 py-1.5 text-sm hover:bg-[var(--color-surface-alt)] transition-colors outline-none">
+                <UserTrigger>
                     <UserInfo user={user} />
-                    <ChevronsUpDown className="ml-1 size-4 text-[var(--color-text-secondary)]" />
-                </button>
+                    <ChevronsUpDown style={{ marginLeft: '0.25rem', width: '1rem', height: '1rem', opacity: 0.7 }} />
+                </UserTrigger>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="min-w-56 rounded-lg" align="end" side="bottom">
+            <DropdownMenuContent minW="56" borderRadius="lg" align="end">
                 <UserMenuContent user={user} />
             </DropdownMenuContent>
         </DropdownMenu>
@@ -33,45 +68,48 @@ function AdminNavUser({ user }: { user: User }) {
 }
 
 const adminNavItems = [
-    { href: '/admin/users', label: 'Usuarios', icon: Users },
+    { href: '/admin', label: 'Usuarios', icon: Users },
 ];
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
     const { isImpersonating, auth } = usePage<SharedProps>().props;
 
     return (
-        <div className="min-h-screen bg-[var(--color-bg)] flex flex-col">
+        <Flex minH="100vh" bg="bg" direction="column">
             {isImpersonating && <ImpersonationBanner />}
 
-            {/* Admin navbar */}
-            <header className="sticky top-0 z-[var(--z-sticky)] border-b border-[var(--color-border)] bg-[var(--color-surface)] shadow-[var(--shadow-sm)]">
-                <div className="flex h-14 items-center justify-between px-4 lg:px-6">
-                    <div className="flex items-center gap-2">
-                        <Shield size={18} className="text-[var(--color-primary)]" />
-                        <span className="font-semibold text-[var(--color-text)]">Admin</span>
-                    </div>
+            <Box
+                as="header"
+                position="sticky"
+                top="0"
+                zIndex="sticky"
+                borderBottomWidth="1px"
+                borderColor="border"
+                bg="bg.panel"
+                shadow="sm"
+            >
+                <Flex h="14" alignItems="center" justifyContent="space-between" px={{ base: '4', lg: '6' }}>
+                    <Flex alignItems="center" gap="2">
+                        <Shield size={18} style={{ color: 'var(--ck-colors-brand-solid)' }} />
+                        <Box as="span" fontWeight="semibold" color="fg">Admin</Box>
+                    </Flex>
 
-                    <nav className="hidden md:flex items-center gap-1">
+                    <Flex as="nav" display={{ base: 'none', md: 'flex' }} alignItems="center" gap="1">
                         {adminNavItems.map((item) => (
-                            <Link
-                                key={item.href}
-                                href={item.href}
-                                className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-[var(--radius-sm)] text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-alt)] transition-colors"
-                            >
+                            <AdminNavLink key={item.href} href={item.href}>
                                 <item.icon size={16} />
                                 {item.label}
-                            </Link>
+                            </AdminNavLink>
                         ))}
-                    </nav>
+                    </Flex>
 
                     <AdminNavUser user={auth.user} />
-                </div>
-            </header>
+                </Flex>
+            </Box>
 
-            {/* Content */}
-            <main className="flex-1">
+            <Box as="main" flex="1">
                 {children}
-            </main>
-        </div>
+            </Box>
+        </Flex>
     );
 }

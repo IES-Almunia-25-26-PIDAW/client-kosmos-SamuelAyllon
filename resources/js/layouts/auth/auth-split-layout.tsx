@@ -1,44 +1,51 @@
-import { Link, usePage } from '@inertiajs/react';
-import logo from '@/assets/logo.png';
-import { home } from '@/routes';
+import { Flex, Grid, Image } from '@chakra-ui/react';
+import logo from '@/assets/logo.svg';
 import type { AuthLayoutProps } from '@/types';
 
-export default function AuthSplitLayout({
-    children,
-    title,
-    description,
-}: AuthLayoutProps) {
-    const { name } = usePage().props;
-
+export default function AuthSplitLayout({ children }: AuthLayoutProps) {
     return (
-        <div className="relative grid h-dvh flex-col items-center justify-center px-8 sm:px-0 lg:max-w-none lg:grid-cols-2 lg:px-0">
-            <div className="relative hidden h-full flex-col bg-muted p-10 text-white lg:flex dark:border-r">
-                <div className="absolute inset-0 bg-zinc-900" />
-                <Link
-                    href={home()}
-                    className="relative z-20 flex items-center text-lg font-medium"
+        <Grid templateColumns={{ base: '1fr', lg: '5fr 7fr' }}>
+            <Flex
+                display={{ base: 'none', lg: 'flex' }}
+                alignItems="center"
+                justifyContent="center"
+                bg="#00BFA9"
+                position="sticky"
+                top="0"
+                h="100dvh"
+                alignSelf="flex-start"
+            >
+                <Flex
+                    alignItems="center"
+                    justifyContent="center"
+                    bg="#FCF9F4"
+                    borderRadius="full"
+                    w="72"
+                    h="72"
+                    overflow="hidden"
                 >
-                    <img src={logo} alt="ClientKosmos" className="mr-2 size-8 object-contain" />
-                    {name}
-                </Link>
-            </div>
-            <div className="w-full lg:p-8">
-                <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
-                    <Link
-                        href={home()}
-                        className="relative z-20 flex items-center justify-center lg:hidden"
-                    >
-                        <img src={logo} alt="ClientKosmos" className="h-10 w-auto object-contain sm:h-12" />
-                    </Link>
-                    <div className="flex flex-col items-start gap-2 text-left sm:items-center sm:text-center">
-                        <h1 className="text-xl font-medium">{title}</h1>
-                        <p className="text-sm text-balance text-muted-foreground">
-                            {description}
-                        </p>
-                    </div>
+                    <Image
+                        src={logo}
+                        alt="ClientKosmos"
+                        w="140%"
+                        flexShrink={0}
+                        objectFit="cover"
+                    />
+                </Flex>
+            </Flex>
+
+            <Flex
+                alignItems="center"
+                justifyContent="center"
+                bg="white"
+                minH="100dvh"
+                py={{ base: '8', lg: '16' }}
+                px={{ base: '8', md: '12', lg: '24' }}
+            >
+                <Flex direction="column" w="full" maxW="448px" gap="6">
                     {children}
-                </div>
-            </div>
-        </div>
+                </Flex>
+            </Flex>
+        </Grid>
     );
 }

@@ -18,10 +18,14 @@ class HandleInertiaRequests extends Middleware
     {
         return [
             ...parent::share($request),
-            'name'            => config('app.name'),
-            'auth'            => ['user' => $request->user()],
+            'name' => config('app.name'),
+            'auth' => ['user' => $request->user()?->loadMissing('roles')],
             'isImpersonating' => $request->session()->has('impersonating_id'),
-            'sidebarOpen'     => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            'flash' => [
+                'success' => session('success'),
+                'error' => session('error'),
+            ],
         ];
     }
 }

@@ -10,7 +10,7 @@ class KosmoBriefing extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id', 'patient_id', 'consulting_session_id',
+        'user_id', 'patient_id', 'appointment_id',
         'type', 'content', 'is_read', 'for_date',
     ];
 
@@ -27,11 +27,11 @@ class KosmoBriefing extends Model
 
     public function patient()
     {
-        return $this->belongsTo(Patient::class);
+        return $this->belongsTo(PatientProfile::class, 'patient_id');
     }
 
-    public function session()
+    public function appointment()
     {
-        return $this->belongsTo(ConsultingSession::class, 'consulting_session_id');
+        return $this->belongsTo(Appointment::class);
     }
 }

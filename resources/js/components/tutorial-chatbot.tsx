@@ -1,3 +1,4 @@
+import { Box, Flex, Text } from '@chakra-ui/react';
 import { router } from '@inertiajs/react';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
@@ -7,12 +8,11 @@ import { Card, CardContent } from '@/components/ui/card';
 type TutorialStep = {
     id: number;
     botMessage: string;
-    target?: string; // data-tutorial selector
+    target?: string;
     icon: string;
     position?: 'right' | 'bottom' | 'left' | 'top';
 };
 
-// Pasos para usuarios FREE — promociona Premium
 const freeUserSteps: TutorialStep[] = [
     {
         id: 1,
@@ -54,7 +54,6 @@ const freeUserSteps: TutorialStep[] = [
     },
 ];
 
-// Pasos para usuarios PREMIUM — explica las funciones premium
 const premiumUserSteps: TutorialStep[] = [
     {
         id: 1,
@@ -118,14 +117,12 @@ export default function TutorialChatbot({ show, onComplete, isPremium, userName 
     const [tooltipPosition, setTooltipPosition] = useState<TooltipPosition | null>(null);
     const tooltipRef = useRef<HTMLDivElement>(null);
 
-    // Seleccionar pasos según el tipo de usuario y personalizar con el nombre
     const tutorialSteps = isPremium ? premiumUserSteps : freeUserSteps;
-    
+
     const step = tutorialSteps[currentStep];
     const isFirstStep = currentStep === 0;
     const isLastStep = currentStep === tutorialSteps.length - 1;
 
-    // Función para encontrar y medir el elemento objetivo
     const measureTarget = useCallback(() => {
         if (!step.target) {
             setTargetRect(null);
@@ -138,7 +135,6 @@ export default function TutorialChatbot({ show, onComplete, isPremium, userName 
             const rect = element.getBoundingClientRect();
             setTargetRect(rect);
 
-            // Calcular posición del tooltip
             const padding = 16;
             const tooltipWidth = 320;
             const tooltipHeight = 200;
@@ -147,7 +143,6 @@ export default function TutorialChatbot({ show, onComplete, isPremium, userName 
             let left = rect.right + padding;
             let arrowDirection: 'left' | 'right' | 'top' | 'bottom' = 'left';
 
-            // Ajustar si se sale de la pantalla
             if (left + tooltipWidth > window.innerWidth - padding) {
                 left = rect.left - tooltipWidth - padding;
                 arrowDirection = 'right';
@@ -163,22 +158,22 @@ export default function TutorialChatbot({ show, onComplete, isPremium, userName 
         }
     }, [step.target]);
 
-    // Medir elemento cuando cambia el paso
     useEffect(() => {
         if (!isActive) return;
 
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         measureTarget();
 
-        // Re-medir en resize
         window.addEventListener('resize', measureTarget);
         return () => window.removeEventListener('resize', measureTarget);
     }, [isActive, measureTarget, currentStep]);
 
-    // Efecto de escritura del bot
     useEffect(() => {
         if (!isActive) return;
 
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setIsTyping(true);
+         
         setDisplayedMessage('');
 
         const message = currentStep === 0
@@ -224,14 +219,11 @@ export default function TutorialChatbot({ show, onComplete, isPremium, userName 
 
     if (!isActive) return null;
 
-    // Renderizar en portal para estar encima de todo
     return createPortal(
-        <div className="fixed inset-0 z-[9999]">
-            {/* Overlay con spotlight */}
-            <svg className="absolute inset-0 w-full h-full pointer-events-none">
+        <Box position="fixed" inset="0" zIndex="9999">
+            <Box as="svg" position="absolute" inset="0" w="full" h="full" pointerEvents="none">
                 <defs>
                     <mask id="spotlight-mask">
-                        {/* Fondo blanco = visible, negro = agujero */}
                         <rect x="0" y="0" width="100%" height="100%" fill="white" />
                         {targetRect && (
                             <rect
@@ -253,25 +245,29 @@ export default function TutorialChatbot({ show, onComplete, isPremium, userName 
                     fill="rgba(0, 0, 0, 0.75)"
                     mask="url(#spotlight-mask)"
                 />
-            </svg>
+            </Box>
 
-            {/* Borde brillante alrededor del elemento */}
             {targetRect && (
-                <div
-                    className="absolute pointer-events-none rounded-lg ring-4 ring-primary ring-offset-2 ring-offset-background animate-pulse"
+                <Box
+                    position="absolute"
+                    pointerEvents="none"
+                    borderRadius="lg"
+                    animation="pulse 2s infinite"
                     style={{
                         top: targetRect.top - 4,
                         left: targetRect.left - 8,
                         width: targetRect.width + 16,
                         height: targetRect.height + 8,
+                        boxShadow: '0 0 0 2px var(--ck-colors-bg), 0 0 0 6px var(--ck-colors-brand-solid)',
                     }}
                 />
             )}
 
-            {/* Tooltip del chatbot */}
-            <div
+            <Box
                 ref={tooltipRef}
-                className="absolute w-80 pointer-events-auto"
+                position="absolute"
+                w="80"
+                pointerEvents="auto"
                 style={
                     tooltipPosition
                         ? { top: tooltipPosition.top, left: tooltipPosition.left }
@@ -282,55 +278,56 @@ export default function TutorialChatbot({ show, onComplete, isPremium, userName 
                         }
                 }
             >
-                <Card className="shadow-2xl border-2 border-primary/20 bg-card">
-                    {/* Header */}
-                    <div className="flex items-center justify-between px-4 pt-4 pb-2">
-                        <div className="flex items-center gap-2">
-                            <span className="text-2xl">{step.icon}</span>
-                            <span className="font-semibold text-sm">Kosmo</span>
-                        </div>
-                        <span className="text-xs text-muted-foreground">
+                <Card boxShadow="2xl" borderWidth="2px" borderColor="brand.muted" bg="bg.surface">
+                    <Flex alignItems="center" justifyContent="space-between" px="4" pt="4" pb="2">
+                        <Flex alignItems="center" gap="2">
+                            <Text fontSize="2xl">{step.icon}</Text>
+                            <Text fontWeight="semibold" fontSize="sm">Kosmo</Text>
+                        </Flex>
+                        <Text fontSize="xs" color="fg.muted">
                             {currentStep + 1} / {tutorialSteps.length}
-                        </span>
-                    </div>
+                        </Text>
+                    </Flex>
 
-                    {/* Content */}
-                    <CardContent className="pt-0 pb-4">
-                        <div className="bg-muted/50 rounded-lg p-3 mb-4">
-                            <p className="text-sm leading-relaxed">
+                    <CardContent style={{ paddingTop: 0, paddingBottom: '1rem' }}>
+                        <Box bg="bg.muted" borderRadius="lg" p="3" mb="4">
+                            <Text fontSize="sm" lineHeight="relaxed">
                                 {displayedMessage}
-                                {isTyping && <span className="animate-pulse ml-0.5">|</span>}
-                            </p>
-                        </div>
+                                {isTyping && <Box as="span" animation="pulse 1s infinite" ml="0.5">|</Box>}
+                            </Text>
+                        </Box>
 
-                        {/* Progress dots */}
-                        <div className="flex justify-center gap-1.5 mb-4">
+                        <Flex justifyContent="center" gap="1.5" mb="4">
                             {tutorialSteps.map((_, index) => (
-                                <div
+                                <Box
                                     key={index}
-                                    className={`h-1.5 w-1.5 rounded-full transition-colors ${
+                                    h="1.5"
+                                    w={index === currentStep ? '4' : '1.5'}
+                                    borderRadius="full"
+                                    transition="colors"
+                                    bg={
                                         index === currentStep
-                                            ? 'bg-primary w-4'
+                                            ? 'brand.solid'
                                             : index < currentStep
-                                            ? 'bg-primary/50'
-                                            : 'bg-muted-foreground/30'
-                                    }`}
+                                                ? 'brand.muted'
+                                                : 'fg.subtle/30'
+                                    }
                                 />
                             ))}
-                        </div>
+                        </Flex>
 
-                        {/* Actions */}
-                        <div className="flex items-center justify-between">
+                        <Flex alignItems="center" justifyContent="space-between">
                             <Button
                                 variant="ghost"
                                 size="sm"
                                 onClick={handleComplete}
-                                className="text-xs text-muted-foreground hover:text-foreground"
+                                fontSize="xs"
+                                color="fg.muted"
                             >
                                 Saltar
                             </Button>
 
-                            <div className="flex gap-2">
+                            <Flex gap="2">
                                 {!isFirstStep && (
                                     <Button
                                         variant="outline"
@@ -348,15 +345,20 @@ export default function TutorialChatbot({ show, onComplete, isPremium, userName 
                                 >
                                     {isLastStep ? '¡Empezar!' : 'Siguiente'}
                                 </Button>
-                            </div>
-                        </div>
+                            </Flex>
+                        </Flex>
                     </CardContent>
                 </Card>
 
-                {/* Flecha apuntando al elemento */}
                 {tooltipPosition && tooltipPosition.arrowDirection === 'left' && (
-                    <div
-                        className="absolute w-3 h-3 bg-card border-l border-b border-primary/20 rotate-45"
+                    <Box
+                        position="absolute"
+                        w="3"
+                        h="3"
+                        bg="bg.surface"
+                        borderLeftWidth="1px"
+                        borderBottomWidth="1px"
+                        borderColor="brand.muted"
                         style={{
                             top: '50%',
                             left: -6,
@@ -365,8 +367,14 @@ export default function TutorialChatbot({ show, onComplete, isPremium, userName 
                     />
                 )}
                 {tooltipPosition && tooltipPosition.arrowDirection === 'right' && (
-                    <div
-                        className="absolute w-3 h-3 bg-card border-r border-t border-primary/20 rotate-45"
+                    <Box
+                        position="absolute"
+                        w="3"
+                        h="3"
+                        bg="bg.surface"
+                        borderRightWidth="1px"
+                        borderTopWidth="1px"
+                        borderColor="brand.muted"
                         style={{
                             top: '50%',
                             right: -6,
@@ -374,8 +382,8 @@ export default function TutorialChatbot({ show, onComplete, isPremium, userName 
                         }}
                     />
                 )}
-            </div>
-        </div>,
+            </Box>
+        </Box>,
         document.body
     );
 }

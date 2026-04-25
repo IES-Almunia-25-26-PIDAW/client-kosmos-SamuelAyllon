@@ -1,13 +1,10 @@
-import { cn } from "@/lib/utils"
+import {
+    Skeleton as ChakraSkeleton,
+    type SkeletonProps,
+} from '@chakra-ui/react';
 
-function Skeleton({ className, ...props }: React.ComponentProps<"div">) {
-  return (
-    <div
-      data-slot="skeleton"
-      className={cn("bg-primary/10 animate-pulse rounded-md", className)}
-      {...props}
-    />
-  )
+function Skeleton(props: SkeletonProps) {
+    return <ChakraSkeleton data-slot="skeleton" rounded="md" {...props} />;
 }
 
-export { Skeleton }
+export { Skeleton };

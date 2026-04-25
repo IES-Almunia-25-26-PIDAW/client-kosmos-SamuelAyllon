@@ -26,7 +26,7 @@ export function NavMain({ items = [], label = 'Menú' }: { items: NavItem[]; lab
     const { isCurrentUrl } = useCurrentUrl();
 
     return (
-        <SidebarGroup className="px-2 py-0">
+        <SidebarGroup px="2" py="0">
             <SidebarGroupLabel>{label}</SidebarGroupLabel>
             <SidebarMenu>
                 {items.map((item) => {
