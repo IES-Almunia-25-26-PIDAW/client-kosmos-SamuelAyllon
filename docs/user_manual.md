@@ -59,6 +59,15 @@ ClientKosmos unifica todo en una única plataforma:
 2. Recibirás un email de verificación — haz clic en el enlace para activar tu cuenta.
 3. Tras verificar el email serás redirigido al **tutorial de bienvenida**.
 
+**Registro de paciente — consentimientos RGPD obligatorios.** Al registrarse como paciente, el formulario pide marcar 4 casillas (todas son requisito del servicio; sin las 4 no se puede completar el alta):
+
+- Política de privacidad.
+- Términos del servicio.
+- Tratamiento de datos de salud con finalidad terapéutica (RGPD art. 9.2.h).
+- Autorización de grabación y transcripción automatizada de las sesiones por IA para generar resúmenes destinados exclusivamente al profesional (RGPD art. 22).
+
+Cada consentimiento se almacena con la versión del texto, la fecha, la IP y el tipo de firma. El paciente puede revocarlos en cualquier momento desde **Ajustes → Perfil → Mis consentimientos** (ver §13.1). Revocar el consentimiento de grabación no cancela el servicio pero impide la grabación de futuras sesiones.
+
 ### 2.2 Tutorial de bienvenida (Onboarding)
 
 El tutorial te guía en 3 pasos:
@@ -149,12 +158,42 @@ Antes de cada sesión puedes acceder a la vista de **pre-sesión** con el contex
 - Objetivos definidos
 - Alertas activas
 
-Tras la sesión, la vista de **post-sesión** te ayuda a:
-- Añadir la nota del día
-- Actualizar el estado del pago
-- Programar la siguiente cita
+La vista de **post-sesión** (accesible al finalizar una llamada o desde la ficha del paciente) es un **wizard de 3 pasos**:
 
-### 4.5 Archivar / reactivar un paciente
+1. **Notas y resumen IA** — muestra el resumen generado automáticamente a partir de la transcripción de la sesión (se tarda hasta 30 segundos tras finalizar la llamada). Debajo añades la nota clínica del día y los acuerdos pactados con el paciente.
+2. **Factura** — revisas el borrador de factura vinculado a la cita (número secuencial, subtotal, IVA exento art. 20.1.3º LIVA, total) y registras el cobro si ya se ha realizado.
+3. **Confirmar envío** — al pulsar *Confirmar y enviar*, ClientKosmos envía automáticamente al paciente:
+   - La factura en PDF (y la marca como `sent`).
+   - Los acuerdos de la sesión.
+   - Un email de agradecimiento con enlace a su portal.
+
+Puedes navegar entre pasos con **Atrás/Siguiente** o salir con **Guardar y salir** en cualquier momento; las notas, acuerdos y cobros se guardan de forma independiente en cada formulario.
+
+### 4.5 Videollamada y transcripción (Google Meet)
+
+Las sesiones se realizan sobre **Google Meet**. Al crear la cita, ClientKosmos genera automáticamente un evento en el calendario del profesional (vía Google Calendar API) e invita al paciente por email con el enlace de Meet.
+
+**Ventana de unión (10 minutos antes):**
+
+- El botón **"Iniciar sesión"** (profesional) y **"Unirse a la llamada"** (paciente) se habilita 10 minutos antes de la hora de inicio y permanece disponible hasta 15 minutos después del fin de la cita.
+- Antes de esa ventana: botón deshabilitado con un contador regresivo (*"Disponible en HH:MM"*).
+- Si el profesional no se une antes de `starts_at + 20 minutos`, la cita se marca automáticamente como `no_show`.
+
+**Grabación desde el profesional:**
+
+La grabación de audio para la transcripción se hace **exclusivamente desde el profesional**, no desde el paciente. Este flujo simplifica el UX del paciente y centraliza la captura en quien lidera la sesión:
+
+1. Al pulsar *Iniciar sesión*, el profesional abre Google Meet en una nueva pestaña y vuelve a ClientKosmos.
+2. En el panel lateral de la sala pulsa **"Comenzar grabación"**.
+3. El navegador pide compartir una pestaña — el profesional selecciona la de Google Meet y habilita **"Compartir audio de la pestaña"**.
+4. ClientKosmos troceará el audio en chunks de 15 s, los transcribe con Groq Whisper y muestra la transcripción en vivo en el panel lateral.
+5. Al pulsar **"Finalizar sesión"** se dispara automáticamente la generación del resumen IA, disponible en el paso 1 del wizard de post-sesión.
+
+**Requisitos de navegador:** Chrome, Edge u Opera de escritorio (los únicos con soporte completo para `getDisplayMedia` + audio de pestaña). Safari y Firefox funcionan parcialmente: si no es posible capturar audio de pestaña, ClientKosmos cae a capturar solo el micrófono del profesional (se pierde la voz del paciente pero la transcripción sigue funcionando).
+
+> **Aviso al paciente.** En la sala de espera del paciente aparece un mensaje informativo recordando que la sesión será grabada y transcrita por la IA, con un enlace para revocar el consentimiento desde su perfil.
+
+### 4.6 Archivar / reactivar un paciente
 
 Cambia el estado de un paciente a **inactivo** para archivarlo. Los pacientes inactivos no aparecen en las listas activas pero mantienen todo su historial.
 
@@ -259,6 +298,14 @@ El consentimiento informado y el cumplimiento RGPD son obligaciones legales. Cli
 | `activo` | Consentimiento válido y vigente |
 | `revocado` | El paciente ha retirado el consentimiento |
 
+### 9.3 Consentimientos globales del paciente (alta)
+
+Además de los consentimientos específicos de consulta que el profesional puede crear, el paciente firma al registrarse 4 consentimientos globales (ver §2.1). Estos son visibles en la ficha del paciente, pestaña **Consentimiento**, y son gestionados directamente por el propio paciente desde su portal:
+
+- El paciente puede **revocar** cualquier consentimiento salvo el de tratamiento de datos de salud (cuya revocación requiere cierre de cuenta).
+- Si revoca el consentimiento de grabación, el sistema lo detecta antes de cada nuevo chunk y bloquea la transcripción automática (el estado de la `SessionRecording` pasa a `rejected_no_consent`).
+- Toda revocación queda registrada en el audit log con fecha, IP y versión de la plantilla.
+
 ---
 
 ## 10. Facturación
@@ -353,6 +400,7 @@ Accede desde el menú superior → tu avatar → **Perfil** o desde **Ajustes �
 
 - Cambia tu nombre y dirección de email.
 - Si cambias el email necesitarás verificarlo de nuevo.
+- **Mis consentimientos** (solo para pacientes). Lista los consentimientos firmados al registrarte con su tipo, versión, fecha de firma y estado. El botón **Revocar** junto a cada entrada permite retirar el consentimiento (salvo el de tratamiento de datos de salud). La revocación es inmediata: si se revoca el consentimiento de grabación, cualquier sesión futura dejará de transcribirse automáticamente.
 
 ### 13.2 Cambiar contraseña
 
