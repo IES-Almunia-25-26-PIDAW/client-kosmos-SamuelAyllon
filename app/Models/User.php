@@ -177,9 +177,8 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function currentWorkspaceId(): ?int
     {
-        /** @phpstan-ignore nullsafe.neverNull */
         return session('current_workspace_id')
-            ?? $this->workspaces()->first()?->id
+            ?? $this->workspaces()->first()->id
             ?? $this->createdWorkspaces()->first()?->id;
     }
 

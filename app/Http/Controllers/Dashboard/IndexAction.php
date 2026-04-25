@@ -80,7 +80,7 @@ class IndexAction extends Controller
             ->map(fn (Invoice $invoice) => [
                 'id' => $invoice->id,
                 'patient_id' => $invoice->patient_id,
-                'patient_name' => $invoice->patient?->name ?? 'Paciente',
+                'patient_name' => $invoice->patient->name ?? 'Paciente',
                 'amount' => (float) $invoice->total,
                 'status' => $invoice->status,
                 'due_at' => $invoice->due_at?->format('Y-m-d'),
@@ -158,7 +158,7 @@ class IndexAction extends Controller
                 'status' => $appointment->status,
                 'professional' => [
                     'id' => $appointment->professional_id,
-                    'name' => $appointment->professional?->name ?? 'Profesional',
+                    'name' => $appointment->professional->name ?? 'Profesional',
                     'specialty' => $appointment->professional?->specialty,
                     'avatar_path' => $appointment->professional?->avatar_path,
                 ],

@@ -30,6 +30,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read \App\Models\User|null $professional
  * @property-read \App\Models\Service|null $service
  * @property-read \App\Models\SessionRecording|null $sessionRecording
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Agreement> $agreements
  */
 class Appointment extends Model
 {

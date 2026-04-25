@@ -19,7 +19,7 @@ class GenerateInvoiceAction extends Controller
         }
 
         $service = $appointment->service;
-        $amount = $service?->price ?? 0;
+        $amount = $service->price ?? 0;
 
         $invoice = Invoice::create([
             'workspace_id' => $appointment->workspace_id,
@@ -37,7 +37,7 @@ class GenerateInvoiceAction extends Controller
 
         InvoiceItem::create([
             'invoice_id' => $invoice->id,
-            'description' => $service?->name ?? 'Sesión',
+            'description' => $service->name ?? 'Sesión',
             'quantity' => 1,
             'unit_price' => $amount,
             'total' => $amount,

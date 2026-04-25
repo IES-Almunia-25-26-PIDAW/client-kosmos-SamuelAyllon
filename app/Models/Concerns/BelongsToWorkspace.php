@@ -11,8 +11,10 @@ trait BelongsToWorkspace
     {
         static::addGlobalScope('workspace', function (Builder $query) {
             if (auth()->check() && auth()->user()->currentWorkspaceId()) {
+                /** @phpstan-ignore-next-line new.static */
+                $instance = new static;
                 $query->where(
-                    (new static)->getTable().'.workspace_id',
+                    $instance->getTable().'.workspace_id',
                     auth()->user()->currentWorkspaceId()
                 );
             }

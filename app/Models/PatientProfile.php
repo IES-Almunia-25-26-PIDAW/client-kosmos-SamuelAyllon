@@ -31,7 +31,6 @@ class PatientProfile extends Model
             ->dontLogEmptyChanges();
     }
 
-    /** @phpstan-ignore new.static */
     protected static function newFactory(): PatientProfileFactory
     {
         return PatientProfileFactory::new();
@@ -87,6 +86,7 @@ class PatientProfile extends Model
         return $this->hasMany(Invoice::class, 'patient_id', 'user_id');
     }
 
+    /** @return HasMany<Document, $this> */
     public function documents(): HasMany
     {
         return $this->hasMany(Document::class, 'patient_id');
