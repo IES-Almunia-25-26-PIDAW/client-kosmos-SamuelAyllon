@@ -17,7 +17,7 @@ class SecurityHeaders
         $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
         $response->headers->set('Permissions-Policy', 'camera=(self), microphone=(self), display-capture=(self), geolocation=()');
 
-        if (! $response->headers->has('Content-Security-Policy')) {
+        if (! app()->environment('local') && ! $response->headers->has('Content-Security-Policy')) {
             $response->headers->set('Content-Security-Policy', $this->csp());
         }
 
@@ -34,8 +34,8 @@ class SecurityHeaders
         return implode('; ', [
             "default-src 'self'",
             "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
-            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-            "font-src 'self' https://fonts.gstatic.com data:",
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://api.fontshare.com",
+            "font-src 'self' https://fonts.gstatic.com https://api.fontshare.com data:",
             "img-src 'self' data: blob: https:",
             "media-src 'self' blob:",
             "connect-src 'self' {$reverbWs} https://api.groq.com https://www.googleapis.com",
