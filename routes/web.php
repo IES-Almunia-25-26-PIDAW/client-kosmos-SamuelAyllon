@@ -37,6 +37,7 @@ use App\Http\Controllers\ConsentForm\UpdateAction as ConsentFormUpdateAction;
 use App\Http\Controllers\Dashboard\IndexAction as DashboardIndexAction;
 use App\Http\Controllers\Document\DestroyAction as DocumentDestroyAction;
 use App\Http\Controllers\Document\StoreAction as DocumentStoreAction;
+use App\Http\Controllers\Invoice\CreateCheckoutAction as InvoiceCreateCheckoutAction;
 use App\Http\Controllers\Invoice\DestroyAction as InvoiceDestroyAction;
 use App\Http\Controllers\Invoice\ExportPdfAction as InvoiceExportPdfAction;
 use App\Http\Controllers\Invoice\IndexAction as InvoiceIndexAction;
@@ -108,6 +109,7 @@ use App\Http\Controllers\Schedule\Availability\UpdateAction as AvailabilityUpdat
 use App\Http\Controllers\Schedule\IndexAction as ScheduleIndexAction;
 use App\Http\Controllers\Settings\IndexAction as SettingsIndexAction;
 use App\Http\Controllers\Settings\UpdateAction as SettingsUpdateAction;
+use App\Http\Controllers\Webhook\StripeWebhookAction;
 use App\Http\Controllers\Workspace\Analytics\IndexAction as WorkspaceAnalyticsIndexAction;
 use App\Http\Controllers\Workspace\Patient\ShareAction as WorkspacePatientShareAction;
 use App\Http\Controllers\Workspace\Patient\UnshareAction as WorkspacePatientUnshareAction;
@@ -189,6 +191,7 @@ Route::middleware(['auth', 'verified', 'professional'])
         Route::get('/invoices/{invoice}', InvoiceShowAction::class)->name('invoices.show');
         Route::get('/invoices/{invoice}/review', InvoiceReviewAction::class)->name('invoices.review');
         Route::post('/invoices/{invoice}/send', InvoiceSendAction::class)->name('invoices.send');
+        Route::post('/invoices/{invoice}/checkout', InvoiceCreateCheckoutAction::class)->name('invoices.checkout');
         Route::get('/invoices/{invoice}/export-pdf', InvoiceExportPdfAction::class)->name('invoices.export-pdf');
 
         // Appointments
@@ -338,5 +341,8 @@ Route::middleware(['auth', 'verified'])
             ->middleware('throttle:30,1')
             ->name('appointments.transcribe');
     });
+
+// ─── Stripe webhook (público, sin auth ni CSRF — ver bootstrap/app.php) ───────
+Route::post('/webhooks/stripe', StripeWebhookAction::class)->name('webhooks.stripe');
 
 require __DIR__.'/settings.php';

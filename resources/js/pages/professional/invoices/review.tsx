@@ -1,6 +1,7 @@
 import { Alert, Badge, Box, Card, Flex, Heading, HStack, Separator, Stack, Table, Text } from '@chakra-ui/react';
 import { Head, router } from '@inertiajs/react';
 import type { ReactNode } from 'react';
+import CreateCheckoutAction from '@/actions/App/Http/Controllers/Invoice/CreateCheckoutAction';
 import SendAction from '@/actions/App/Http/Controllers/Invoice/SendAction';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
@@ -31,6 +32,7 @@ interface Invoice {
     total: string;
     notes: string | null;
     pdf_path: string | null;
+    stripe_checkout_session_id: string | null;
     patient: User | null;
     professional: User | null;
     items: InvoiceItem[];
@@ -48,11 +50,17 @@ const fmtDate = (d: string | null | undefined) =>
 
 export default function InvoiceReview({ invoice }: Props) {
     const isSent = invoice.status === 'sent' || invoice.status === 'paid';
+    const canCharge = invoice.status === 'sent';
+    const stripePending = canCharge && invoice.stripe_checkout_session_id !== null;
 
     const handleSend = () => {
         router.post(SendAction.url(invoice.id), {}, {
             onSuccess: () => {},
         });
+    };
+
+    const handleCharge = () => {
+        router.post(CreateCheckoutAction.url(invoice.id));
     };
 
     return (
@@ -177,7 +185,7 @@ export default function InvoiceReview({ invoice }: Props) {
                     </Card.Body>
                 </Card.Root>
 
-                <HStack justifyContent="flex-end" gap="3">
+                <HStack justifyContent="flex-end" gap="3" flexWrap="wrap">
                     <Button variant="outline" onClick={() => router.visit(`/invoices/${invoice.id}`)}>
                         Volver
                     </Button>
@@ -188,6 +196,11 @@ export default function InvoiceReview({ invoice }: Props) {
                     >
                         {isSent ? 'Factura ya enviada' : 'Generar PDF y enviar al paciente'}
                     </Button>
+                    {canCharge && (
+                        <Button variant="primary" onClick={handleCharge}>
+                            {stripePending ? 'Reenviar enlace Stripe' : 'Cobrar con Stripe'}
+                        </Button>
+                    )}
                 </HStack>
             </Stack>
         </>

@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Contracts\PaymentGateway;
 use App\Events\TranscriptionSegmentCreated;
 use App\Http\Responses\LoginResponse;
 use App\Listeners\AggregateTranscription;
@@ -19,6 +20,7 @@ use App\Policies\OfferedConsultationPolicy;
 use App\Policies\PatientPolicy;
 use App\Policies\PaymentPolicy;
 use App\Policies\SessionRecordingPolicy;
+use App\Services\Payments\StripeGateway;
 use Carbon\CarbonImmutable;
 use GuzzleHttp\Client as GuzzleClient;
 use Illuminate\Support\Facades\Date;
@@ -56,6 +58,13 @@ class AppServiceProvider extends ServiceProvider
             }
 
             return $factory->make();
+        });
+
+        $this->app->bind(PaymentGateway::class, function () {
+            return new StripeGateway(
+                secret: (string) config('services.stripe.secret'),
+                webhookSecret: (string) config('services.stripe.webhook_secret'),
+            );
         });
     }
 
