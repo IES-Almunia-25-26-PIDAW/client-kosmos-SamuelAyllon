@@ -686,7 +686,8 @@ Se cierra el pipeline en una sola serie de cambios con tests en cada paso:
 ## ADR-0019 — Integración Stripe (test mode) para cobro de sesiones
 
 - **Fecha:** 2026-04-30
-- **Estado:** Aceptado
+- **Estado:** Implementado
+- **Commits:** `b2d85db` (SDK + contrato), `65c3cd2` (endpoint + webhook + UI), `55e15df` (tests)
 
 ### Contexto
 

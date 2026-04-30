@@ -91,3 +91,17 @@ Registro transparente del uso de herramientas de IA en el desarrollo de ClientKo
 - **Revisión humana:** pendiente — validar (a) UAT con sesión real: chunk encriptado en disco; (b) UI post-session muestra Skeleton mientras `summary_status='pending'`; (c) `purge:expired-session-data --dry-run` reporta correctamente; (d) entrada en `activity_log` al descargar una factura.
 - **Prompt(s) relevantes:** "Comprueba si el requisito está implementado de verdad: …grabación, transcripción, resumen, factura, RGPD…", "diseña un plan separando las tareas en pasos pequeños…", "ejecuta el plan".
 - **Relación con ADR:** ADR-0018 (relacionado con ADR-0008, ADR-0013, ADR-0015).
+
+### Integración Stripe (test mode) — pasarela de cobro de facturas
+
+- **Fecha:** 2026-04-30
+- **Herramientas:** Claude Code (Opus 4.7), Plan mode
+- **Alcance IA:** ejecución del plan [`docs/stripe-integration-plan.md`](stripe-integration-plan.md) en rama `feat/stripe-integration`, una tarea por commit con gate completo (Pint, Pest, lint, types, build) entre cada uno:
+    1. **SDK + contrato** (`b2d85db`) — `composer require stripe/stripe-php`, `App\Contracts\PaymentGateway` interface, `App\Services\Payments\StripeGateway` (createCheckoutSession + verifyWebhookSignature), binding en `AppServiceProvider`, env vars `STRIPE_KEY/SECRET/WEBHOOK_SECRET`, namespace `services.stripe`.
+    2. **Endpoint + webhook + UI** (`65c3cd2`) — `Invoice\CreateCheckoutAction` (single-action, autoriza vía `PaymentPolicy::pay`, devuelve `Inertia::location` a Stripe Checkout), `Webhook\StripeWebhookAction` (verifica firma, `BillingService::markAsPaid($invoice, 'stripe')` en `checkout.session.completed`, persiste `stripe_payment_id`), migración aditiva `stripe_checkout_session_id` (string nullable + índice), CSRF excluido para `/webhooks/stripe`, botón Chakra v3 "Cobrar con Stripe" en [`review.tsx`](../resources/js/pages/professional/invoices/review.tsx) y badge "Stripe pendiente" en [`index.tsx`](../resources/js/pages/professional/invoices/index.tsx).
+    3. **Tests** (`55e15df`) — `Tests\Support\FakeStripeGateway` (implementa el contrato sin red; `Util::convertToStripeObject` para parsear payload), fixture JSON `checkout-session-completed.json`, `StripeCheckoutTest` (5 tests: autorización, denegación de paid/draft/intruso/guest), `StripeWebhookTest` (5 tests: firma válida marca paid, firma inválida 400, idempotencia, invoice no encontrada, event types desconocidos).
+- **Tests añadidos:** 10 nuevos (suite total: 253 passed, 1087 assertions). Sin mockear DB — feedback memory respetado: el gateway es lo único stubbed, el resto contra DB real.
+- **Gate ejecutado:** ✅ Pint, ✅ Pest (253 passed), ✅ ESLint, ✅ tsc --noEmit, ✅ Vite build (suite completa requiere `php -d memory_limit=1G` por límite global pre-existente, no relacionado con estos cambios).
+- **Revisión humana:** pendiente — Samuel Ayllón debe (a) configurar `sk_test_*` y `whsec_*` reales en `.env`; (b) UAT manual con `stripe listen --forward-to localhost:8000/webhooks/stripe` y tarjeta `4242 4242 4242 4242`; (c) abrir PR a `main`.
+- **Prompt(s) relevantes:** "ejecuta @docs/stripe-integration-plan.md".
+- **Relación con ADR:** ADR-0019.
