@@ -111,10 +111,6 @@ use App\Http\Controllers\Settings\UpdateAction as SettingsUpdateAction;
 use App\Http\Controllers\Workspace\Analytics\IndexAction as WorkspaceAnalyticsIndexAction;
 use App\Http\Controllers\Workspace\Patient\ShareAction as WorkspacePatientShareAction;
 use App\Http\Controllers\Workspace\Patient\UnshareAction as WorkspacePatientUnshareAction;
-use App\Http\Controllers\Workspace\Services\DestroyAction as WorkspaceServiceDestroyAction;
-use App\Http\Controllers\Workspace\Services\IndexAction as WorkspaceServiceIndexAction;
-use App\Http\Controllers\Workspace\Services\StoreAction as WorkspaceServiceStoreAction;
-use App\Http\Controllers\Workspace\Services\UpdateAction as WorkspaceServiceUpdateAction;
 use App\Http\Controllers\Workspace\Settings\IndexAction as WorkspaceSettingsIndexAction;
 use App\Http\Controllers\Workspace\Settings\UpdateAction as WorkspaceSettingsUpdateAction;
 use App\Http\Controllers\Workspace\StoreAction as WorkspaceStoreAction;
@@ -242,11 +238,6 @@ Route::middleware(['auth', 'verified', 'professional'])
 
             Route::post('/{workspace}/patients/{patient}', WorkspacePatientShareAction::class)->name('patients.share');
             Route::delete('/{workspace}/patients/{patient}', WorkspacePatientUnshareAction::class)->name('patients.unshare');
-
-            Route::get('/services', WorkspaceServiceIndexAction::class)->name('services.index');
-            Route::post('/services', WorkspaceServiceStoreAction::class)->name('services.store');
-            Route::match(['put', 'patch'], '/services/{service}', WorkspaceServiceUpdateAction::class)->name('services.update');
-            Route::delete('/services/{service}', WorkspaceServiceDestroyAction::class)->name('services.destroy');
 
             // Collaboration agreements
             Route::get('/collaborations', CollaborationIndexAction::class)->name('collaborations.index');
