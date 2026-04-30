@@ -51,6 +51,8 @@ class IndexAction extends Controller
             'due_date' => $invoice->due_at?->format('Y-m-d'),
             'paid_at' => $invoice->paid_at?->toIso8601String(),
             'invoice_number' => $invoice->invoice_number,
+            'stripe_checkout_pending' => $invoice->stripe_checkout_session_id !== null
+                && $invoice->status === 'sent',
             'invoice_sent_at' => null,
             'reminder_count' => 0,
             'last_reminder_at' => null,

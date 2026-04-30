@@ -34,7 +34,7 @@ class Invoice extends Model
         'workspace_id', 'patient_id', 'professional_id', 'invoice_number',
         'status', 'issued_at', 'due_at', 'paid_at',
         'subtotal', 'tax_rate', 'tax_amount', 'total',
-        'payment_method', 'stripe_payment_id', 'notes', 'pdf_path',
+        'payment_method', 'stripe_payment_id', 'stripe_checkout_session_id', 'notes', 'pdf_path',
     ];
 
     protected function casts(): array

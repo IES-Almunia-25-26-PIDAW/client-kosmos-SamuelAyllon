@@ -31,4 +31,14 @@ class PaymentPolicy
     {
         return $user->id === $invoice->professional_id;
     }
+
+    /**
+     * Authorize creating a Stripe Checkout session for the invoice.
+     * Only the issuing professional may trigger payment, and only on `sent` invoices.
+     */
+    public function pay(User $user, Invoice $invoice): bool
+    {
+        return $user->id === $invoice->professional_id
+            && $invoice->status === 'sent';
+    }
 }

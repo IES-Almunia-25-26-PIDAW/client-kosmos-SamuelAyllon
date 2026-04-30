@@ -1,4 +1,4 @@
-import { Box, Flex, Heading, Stack, Table, Text, chakra } from '@chakra-ui/react';
+import { Badge, Box, Flex, Heading, HStack, Stack, Table, Text, chakra } from '@chakra-ui/react';
 import { Head, router } from '@inertiajs/react';
 import { Receipt } from 'lucide-react';
 import type { ReactNode } from 'react';
@@ -134,10 +134,18 @@ export default function BillingIndex({ payments, stats, filters }: Props) {
                                             €{Number(payment.amount).toLocaleString('es-ES', { minimumFractionDigits: 2 })}
                                         </Table.Cell>
                                         <Table.Cell>
-                                            <StatusBadge
-                                                status={payment.status as 'paid' | 'pending' | 'overdue'}
-                                                variant="subtle"
-                                            />
+                                            <HStack gap="1.5" flexWrap="wrap">
+                                                <StatusBadge
+                                                    status={payment.status as 'paid' | 'pending' | 'overdue'}
+                                                    variant="subtle"
+                                                />
+                                                {(payment as Payment & { stripe_checkout_pending?: boolean })
+                                                    .stripe_checkout_pending && (
+                                                    <Badge colorPalette="purple" variant="subtle" fontSize="2xs">
+                                                        Stripe pendiente
+                                                    </Badge>
+                                                )}
+                                            </HStack>
                                         </Table.Cell>
                                     </Table.Row>
                                 ))}
