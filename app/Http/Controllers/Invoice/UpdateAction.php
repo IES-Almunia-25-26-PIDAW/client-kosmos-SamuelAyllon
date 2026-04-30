@@ -5,14 +5,19 @@ namespace App\Http\Controllers\Invoice;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StorePaymentRequest;
 use App\Models\Invoice;
-use App\Models\PatientProfile;
 use Illuminate\Http\RedirectResponse;
 
 class UpdateAction extends Controller
 {
-    public function __invoke(StorePaymentRequest $request, PatientProfile $patient, Invoice $invoice): RedirectResponse
+    public function __invoke(StorePaymentRequest $request, Invoice $invoice): RedirectResponse
     {
         $this->authorize('update', $invoice);
+
+        abort_unless(
+            $invoice->status === 'draft',
+            403,
+            'Solo se pueden editar facturas en borrador.',
+        );
 
         $validated = $request->validated();
 
@@ -24,6 +29,7 @@ class UpdateAction extends Controller
             'total' => $validated['amount'],
         ]);
 
-        return back()->with('success', 'Factura actualizada.');
+        return redirect()->route('professional.invoices.review', $invoice)
+            ->with('success', 'Factura actualizada.');
     }
 }

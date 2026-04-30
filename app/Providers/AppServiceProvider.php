@@ -6,12 +6,14 @@ use App\Contracts\PaymentGateway;
 use App\Events\TranscriptionSegmentCreated;
 use App\Http\Responses\LoginResponse;
 use App\Listeners\AggregateTranscription;
+use App\Models\Appointment;
 use App\Models\Document;
 use App\Models\Invoice;
 use App\Models\OfferedConsultation;
 use App\Models\PatientProfile;
 use App\Models\SessionRecording;
 use App\Models\User;
+use App\Observers\AppointmentObserver;
 use App\Observers\PatientObserver;
 use App\Observers\PaymentObserver;
 use App\Policies\AdminPolicy;
@@ -77,6 +79,7 @@ class AppServiceProvider extends ServiceProvider
 
         PatientProfile::observe(PatientObserver::class);
         Invoice::observe(PaymentObserver::class);
+        Appointment::observe(AppointmentObserver::class);
 
         Gate::policy(User::class, AdminPolicy::class);
         Gate::policy(PatientProfile::class, PatientPolicy::class);

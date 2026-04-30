@@ -189,6 +189,14 @@ export default function InvoiceReview({ invoice }: Props) {
                     <Button variant="outline" onClick={() => router.visit(`/invoices/${invoice.id}`)}>
                         Volver
                     </Button>
+                    {invoice.status === 'draft' && (
+                        <Button
+                            variant="secondary"
+                            onClick={() => router.visit(`/professional/invoices/${invoice.id}/edit`)}
+                        >
+                            Editar
+                        </Button>
+                    )}
                     <Button
                         variant="primary"
                         disabled={isSent}

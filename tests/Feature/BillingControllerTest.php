@@ -1,6 +1,10 @@
 <?php
 
+use App\Models\Appointment;
 use App\Models\Invoice;
+use App\Models\InvoiceItem;
+use App\Models\OfferedConsultation;
+use App\Models\ProfessionalProfile;
 use App\Models\User;
 
 it('redirects guests from invoices index to login', function () {
@@ -71,5 +75,62 @@ it('invoices index can be filtered by invoice status', function () {
         ->assertInertia(fn ($page) => $page
             ->component('professional/invoices/index', false)
             ->has('payments.data', 1)
+        );
+});
+
+it('exposes pending billing list with completed appointments lacking invoice', function () {
+    $professional = createProfessional();
+    $patient = createPatient();
+    $profProfile = ProfessionalProfile::factory()->create(['user_id' => $professional->id]);
+    $service = OfferedConsultation::factory()->create([
+        'professional_profile_id' => $profProfile->id,
+        'price' => 70,
+        'name' => 'Primera consulta',
+    ]);
+
+    $orphan = Appointment::factory()->create([
+        'professional_id' => $professional->id,
+        'patient_id' => $patient->id,
+        'service_id' => $service->id,
+        'status' => 'completed',
+        'workspace_id' => null,
+    ]);
+
+    $invoiced = Appointment::factory()->create([
+        'professional_id' => $professional->id,
+        'patient_id' => $patient->id,
+        'service_id' => $service->id,
+        'status' => 'completed',
+        'workspace_id' => null,
+    ]);
+    $invoice = Invoice::create([
+        'workspace_id' => null,
+        'patient_id' => $patient->id,
+        'professional_id' => $professional->id,
+        'invoice_number' => 'FAC-2026-91000',
+        'status' => 'draft',
+        'issued_at' => now(),
+        'due_at' => now()->addDays(30),
+        'subtotal' => 70,
+        'tax_rate' => 0,
+        'tax_amount' => 0,
+        'total' => 70,
+    ]);
+    InvoiceItem::create([
+        'invoice_id' => $invoice->id,
+        'appointment_id' => $invoiced->id,
+        'description' => 'Sesión',
+        'quantity' => 1,
+        'unit_price' => 70,
+        'total' => 70,
+    ]);
+
+    $this->actingAs($professional)
+        ->get(route('professional.invoices.index'))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('professional/invoices/index', false)
+            ->has('pendingBilling', 1)
+            ->where('pendingBilling.0.id', $orphan->id)
         );
 });

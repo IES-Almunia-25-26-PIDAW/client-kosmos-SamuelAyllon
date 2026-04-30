@@ -39,6 +39,7 @@ use App\Http\Controllers\Document\DestroyAction as DocumentDestroyAction;
 use App\Http\Controllers\Document\StoreAction as DocumentStoreAction;
 use App\Http\Controllers\Invoice\CreateCheckoutAction as InvoiceCreateCheckoutAction;
 use App\Http\Controllers\Invoice\DestroyAction as InvoiceDestroyAction;
+use App\Http\Controllers\Invoice\EditAction as InvoiceEditAction;
 use App\Http\Controllers\Invoice\ExportPdfAction as InvoiceExportPdfAction;
 use App\Http\Controllers\Invoice\IndexAction as InvoiceIndexAction;
 use App\Http\Controllers\Invoice\ReviewAction as InvoiceReviewAction;
@@ -175,7 +176,7 @@ Route::middleware(['auth', 'verified', 'professional'])
 
         // Patient sub-resources: Invoices (replaces old payments routes)
         Route::post('/patients/{patient}/invoices', InvoiceStoreAction::class)->name('patients.invoices.store');
-        Route::match(['put', 'patch'], '/patients/{patient}/invoices/{invoice}', InvoiceUpdateAction::class)->name('patients.invoices.update');
+        Route::match(['put', 'patch'], '/invoices/{invoice}', InvoiceUpdateAction::class)->name('invoices.update');
         Route::delete('/patients/{patient}/invoices/{invoice}', InvoiceDestroyAction::class)->name('patients.invoices.destroy');
 
         // Patient sub-resources: Documents
@@ -190,6 +191,7 @@ Route::middleware(['auth', 'verified', 'professional'])
         Route::get('/invoices', InvoiceIndexAction::class)->name('invoices.index');
         Route::get('/invoices/{invoice}', InvoiceShowAction::class)->name('invoices.show');
         Route::get('/invoices/{invoice}/review', InvoiceReviewAction::class)->name('invoices.review');
+        Route::get('/invoices/{invoice}/edit', InvoiceEditAction::class)->name('invoices.edit');
         Route::post('/invoices/{invoice}/send', InvoiceSendAction::class)->name('invoices.send');
         Route::post('/invoices/{invoice}/checkout', InvoiceCreateCheckoutAction::class)->name('invoices.checkout');
         Route::get('/invoices/{invoice}/export-pdf', InvoiceExportPdfAction::class)->name('invoices.export-pdf');
