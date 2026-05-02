@@ -42,7 +42,7 @@ it('redirects guests from admin user show to login', function () {
 });
 
 it('professional cannot view admin user detail', function () {
-    $professional = createProfessional();
+    $professional = createProfessional(false);
     $other = User::factory()->create();
 
     $this->actingAs($professional)
@@ -52,7 +52,7 @@ it('professional cannot view admin user detail', function () {
 
 it('admin can view a specific user detail', function () {
     $admin = createAdmin();
-    $professional = createProfessional();
+    $professional = createProfessional(false);
 
     $this->actingAs($admin)
         ->get(route('admin.users.show', $professional))
@@ -87,7 +87,7 @@ it('admin can create a new professional user', function () {
 
 it('admin can delete a user', function () {
     $admin = createAdmin();
-    $professional = createProfessional();
+    $professional = createProfessional(false);
 
     $this->actingAs($admin)
         ->delete(route('admin.users.destroy', $professional))
@@ -110,7 +110,7 @@ it('admin cannot delete themselves', function () {
 
 it('admin can verify a professional', function () {
     $admin = createAdmin();
-    $professional = createProfessional();
+    $professional = createProfessional(false);
     \App\Models\ProfessionalProfile::factory()->for($professional)->create(['verification_status' => 'pending']);
 
     $this->actingAs($admin)
@@ -126,7 +126,7 @@ it('admin can verify a professional', function () {
 
 it('admin can reject a professional', function () {
     $admin = createAdmin();
-    $professional = createProfessional();
+    $professional = createProfessional(false);
     \App\Models\ProfessionalProfile::factory()->for($professional)->create(['verification_status' => 'pending']);
 
     $this->actingAs($admin)
@@ -141,8 +141,8 @@ it('admin can reject a professional', function () {
 });
 
 it('non-admin cannot verify a professional', function () {
-    $professional = createProfessional();
-    $other = createProfessional();
+    $professional = createProfessional(false);
+    $other = createProfessional(false);
     \App\Models\ProfessionalProfile::factory()->for($other)->create();
 
     $this->actingAs($professional)
@@ -161,7 +161,7 @@ it('verify returns 422 if user has no professional profile', function () {
 
 it('show page includes professional_profile data', function () {
     $admin = createAdmin();
-    $professional = createProfessional();
+    $professional = createProfessional(false);
     \App\Models\ProfessionalProfile::factory()->for($professional)->create(['verification_status' => 'pending']);
 
     $this->actingAs($admin)

@@ -6,7 +6,7 @@ use App\Models\OfferedConsultation;
 use App\Models\ProfessionalProfile;
 
 it('creates a draft invoice when an appointment transitions to completed', function () {
-    $professional = createProfessional();
+    $professional = createProfessional(false);
     $patient = createPatient();
     $profProfile = ProfessionalProfile::factory()->create(['user_id' => $professional->id]);
     $service = OfferedConsultation::factory()->create([
@@ -38,7 +38,7 @@ it('creates a draft invoice when an appointment transitions to completed', funct
 });
 
 it('is idempotent: does not duplicate invoice when status is set to completed twice', function () {
-    $professional = createProfessional();
+    $professional = createProfessional(false);
     $patient = createPatient();
     $profProfile = ProfessionalProfile::factory()->create(['user_id' => $professional->id]);
     $service = OfferedConsultation::factory()->create([
@@ -61,7 +61,7 @@ it('is idempotent: does not duplicate invoice when status is set to completed tw
 });
 
 it('does not generate an invoice for non-completed status changes', function () {
-    $professional = createProfessional();
+    $professional = createProfessional(false);
     $patient = createPatient();
     $profProfile = ProfessionalProfile::factory()->create(['user_id' => $professional->id]);
     $service = OfferedConsultation::factory()->create([
@@ -83,7 +83,7 @@ it('does not generate an invoice for non-completed status changes', function () 
 });
 
 it('skips generation gracefully when appointment has no service', function () {
-    $professional = createProfessional();
+    $professional = createProfessional(false);
     $patient = createPatient();
 
     $appointment = Appointment::factory()->inProgress()->create([

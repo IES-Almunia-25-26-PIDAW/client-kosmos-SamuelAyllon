@@ -65,4 +65,15 @@ jobs:
         run: composer analyse
 
       - name: Tests
-        run: ./vendor/bin/pest
+        run: ./vendor/bin/pest --coverage --coverage-clover=coverage.xml --coverage-text --log-junit=junit.xml --min=60
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: |
+            coverage.xml
+            junit.xml
+          if-no-files-found: warn
+          retention-days: 30

@@ -11,7 +11,7 @@
 ### Orden de precedencia (mayor → menor)
 
 1. Instrucciones explícitas del usuario en la conversación actual.
-2. `c:\Users\usuario\Desktop\CLAUDE.md` — reglas globales Kosmos Excellence + Laravel Boost.
+2. `CLAUDE.md` — reglas globales Kosmos Excellence + Laravel Boost.
 3. **Este archivo** (contexto de proyecto).
 4. Skills del registry en `.agents/skills/` — cargadas bajo demanda.
 

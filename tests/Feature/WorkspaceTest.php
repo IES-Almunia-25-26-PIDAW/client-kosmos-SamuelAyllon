@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\ProfessionalProfile;
 use App\Models\User;
 use App\Models\Workspace;
 
@@ -7,6 +8,7 @@ it('onboarding always creates a personal workspace for a fresh professional', fu
     $user = User::factory()->create(['tutorial_completed_at' => null]);
     ensureRolesExist();
     $user->assignRole('professional');
+    ProfessionalProfile::factory()->verified()->create(['user_id' => $user->id]);
 
     $this->actingAs($user)
         ->post(route('professional.onboarding'))

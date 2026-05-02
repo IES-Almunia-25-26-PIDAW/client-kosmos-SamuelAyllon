@@ -56,6 +56,7 @@ use App\Http\Controllers\Message\StoreAction as MessageStoreAction;
 use App\Http\Controllers\Note\DestroyAction as NoteDestroyAction;
 use App\Http\Controllers\Note\StoreAction as NoteStoreAction;
 use App\Http\Controllers\Note\UpdateAction as NoteUpdateAction;
+use App\Http\Controllers\Notification\MarkReadAction as NotificationMarkReadAction;
 use App\Http\Controllers\OfferedConsultations\CreateAction as OfferedConsultationsCreateAction;
 use App\Http\Controllers\OfferedConsultations\DestroyAction as OfferedConsultationsDestroyAction;
 use App\Http\Controllers\OfferedConsultations\EditAction as OfferedConsultationsEditAction;
@@ -99,6 +100,7 @@ use App\Http\Controllers\Portal\Professional\IndexAction as PortalProfessionalIn
 use App\Http\Controllers\Portal\Professional\ShowAction as PortalProfessionalShowAction;
 use App\Http\Controllers\Portal\Profile\ShowAction as PortalProfileShowAction;
 use App\Http\Controllers\Portal\Profile\UpdateAction as PortalProfileUpdateAction;
+use App\Http\Controllers\Professional\PendingApprovalAction;
 use App\Http\Controllers\Referral\DestroyAction as ReferralDestroyAction;
 use App\Http\Controllers\Referral\IndexAction as ReferralIndexAction;
 use App\Http\Controllers\Referral\StoreAction as ReferralStoreAction;
@@ -140,6 +142,11 @@ Route::middleware(['auth', 'verified'])
 
         return redirect()->route('patient.dashboard');
     })->name('dashboard');
+
+// ─── Professional pending approval (sin middleware professional para evitar loop) ─
+Route::middleware(['auth', 'verified'])
+    ->get('/professional/pending-approval', PendingApprovalAction::class)
+    ->name('professional.pending-approval');
 
 // ─── Professional routes ───────────────────────────────────────────────────────
 Route::middleware(['auth', 'verified', 'professional'])
@@ -331,6 +338,11 @@ Route::middleware(['auth', 'verified'])
         Route::get('/profile', PortalProfileShowAction::class)->name('profile.show');
         Route::match(['put', 'patch'], '/profile', PortalProfileUpdateAction::class)->name('profile.update');
     });
+
+// ─── Notificaciones in-app (cualquier usuario autenticado) ───────────────────
+Route::middleware(['auth', 'verified'])
+    ->post('/notifications/{notification}/read', NotificationMarkReadAction::class)
+    ->name('notifications.read');
 
 // ─── Video call room (accesible por profesional y paciente autenticados) ──────
 Route::middleware(['auth', 'verified'])

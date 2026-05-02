@@ -1,4 +1,6 @@
 /.phpunit.cache
+/coverage.xml
+/junit.xml
 /bootstrap/ssr
 /node_modules
 /public/build

@@ -3,6 +3,7 @@
 use App\Models\CaseAssignment;
 use App\Models\ConsentForm;
 use App\Models\PatientProfile;
+use App\Models\ProfessionalProfile;
 use App\Models\User;
 use App\Services\RgpdService;
 use Database\Seeders\RoleSeeder;
@@ -64,7 +65,7 @@ function createAdmin(): User
 /**
  * Crea un usuario profesional con tutorial completado.
  */
-function createProfessional(): User
+function createProfessional(bool $verified = true): User
 {
     ensureRolesExist();
 
@@ -72,6 +73,10 @@ function createProfessional(): User
         'tutorial_completed_at' => now(),
     ]);
     $user->assignRole('professional');
+
+    if ($verified) {
+        ProfessionalProfile::factory()->verified()->create(['user_id' => $user->id]);
+    }
 
     return $user;
 }

@@ -79,9 +79,9 @@ it('invoices index can be filtered by invoice status', function () {
 });
 
 it('exposes pending billing list with completed appointments lacking invoice', function () {
-    $professional = createProfessional();
+    $professional = createProfessional(false);
     $patient = createPatient();
-    $profProfile = ProfessionalProfile::factory()->create(['user_id' => $professional->id]);
+    $profProfile = ProfessionalProfile::factory()->verified()->create(['user_id' => $professional->id]);
     $service = OfferedConsultation::factory()->create([
         'professional_profile_id' => $profProfile->id,
         'price' => 70,

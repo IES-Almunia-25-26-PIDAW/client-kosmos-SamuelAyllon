@@ -37,9 +37,9 @@ it('dispatches agreements and post-session jobs but skips invoice when appointme
 it('auto-creates invoice and dispatches all jobs when finalizing a serviced appointment', function () {
     Queue::fake();
 
-    $professional = createProfessional();
+    $professional = createProfessional(false);
     $patient = createPatient();
-    $profProfile = ProfessionalProfile::factory()->create(['user_id' => $professional->id]);
+    $profProfile = ProfessionalProfile::factory()->verified()->create(['user_id' => $professional->id]);
     $service = OfferedConsultation::factory()->create([
         'professional_profile_id' => $profProfile->id,
         'price' => 60,

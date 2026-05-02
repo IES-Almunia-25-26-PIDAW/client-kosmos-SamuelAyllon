@@ -6,6 +6,7 @@ use App\DTOs\PatientUpsertData;
 use App\Models\CaseAssignment;
 use App\Models\PatientDelegation;
 use App\Models\PatientProfile;
+use App\Models\ProfessionalProfile;
 use App\Models\User;
 use App\Models\Workspace;
 
@@ -15,6 +16,7 @@ function makeProfessionalWithWorkspaceForUpsert(): array
 
     $professional = User::factory()->create(['tutorial_completed_at' => now()]);
     $professional->assignRole('professional');
+    ProfessionalProfile::factory()->verified()->create(['user_id' => $professional->id]);
 
     $workspace = Workspace::factory()->create(['creator_id' => $professional->id]);
     $workspace->members()->attach($professional->id, [
