@@ -152,3 +152,114 @@ it('forbids unauthenticated users from booking', function () {
         'modality' => 'video_call',
     ])->assertRedirect(route('login'));
 });
+
+// ─── Double-booking protection ─────────────────────────────────────────────
+
+it('prevents a second patient from booking an already-occupied slot', function () {
+    [$professional, , $service] = bookingProfessionalWithWorkspace();
+    $patientA = bookingPatient();
+    $patientB = bookingPatient();
+    $startsAt = now()->addDays(3)->setTime(11, 0)->toIso8601String();
+
+    $this->actingAs($patientA)
+        ->post(route('patient.appointments.store'), [
+            'professional_id' => $professional->id,
+            'service_id' => $service->id,
+            'starts_at' => $startsAt,
+            'modality' => 'video_call',
+        ])
+        ->assertRedirect(route('patient.appointments.book-success'));
+
+    $this->actingAs($patientB)
+        ->post(route('patient.appointments.store'), [
+            'professional_id' => $professional->id,
+            'service_id' => $service->id,
+            'starts_at' => $startsAt,
+            'modality' => 'video_call',
+        ])
+        ->assertSessionHasErrors(['starts_at']);
+
+    expect(Appointment::count())->toBe(1);
+});
+
+it('prevents the same patient from double-booking the same slot', function () {
+    [$professional, , $service] = bookingProfessionalWithWorkspace();
+    $patient = bookingPatient();
+    $startsAt = now()->addDays(3)->setTime(11, 0)->toIso8601String();
+
+    $this->actingAs($patient)
+        ->post(route('patient.appointments.store'), [
+            'professional_id' => $professional->id,
+            'service_id' => $service->id,
+            'starts_at' => $startsAt,
+            'modality' => 'video_call',
+        ])
+        ->assertRedirect(route('patient.appointments.book-success'));
+
+    $this->actingAs($patient)
+        ->post(route('patient.appointments.store'), [
+            'professional_id' => $professional->id,
+            'service_id' => $service->id,
+            'starts_at' => $startsAt,
+            'modality' => 'video_call',
+        ])
+        ->assertSessionHasErrors(['starts_at']);
+
+    expect(Appointment::count())->toBe(1);
+});
+
+it('prevents booking when slots overlap but share different starts_at', function () {
+    // service duration = 50 min; 11:00–11:50 and 11:30–12:20 overlap
+    [$professional, , $service] = bookingProfessionalWithWorkspace();
+    $patientA = bookingPatient();
+    $patientB = bookingPatient();
+
+    $this->actingAs($patientA)
+        ->post(route('patient.appointments.store'), [
+            'professional_id' => $professional->id,
+            'service_id' => $service->id,
+            'starts_at' => now()->addDays(3)->setTime(11, 0)->toIso8601String(),
+            'modality' => 'video_call',
+        ])
+        ->assertRedirect(route('patient.appointments.book-success'));
+
+    $this->actingAs($patientB)
+        ->post(route('patient.appointments.store'), [
+            'professional_id' => $professional->id,
+            'service_id' => $service->id,
+            'starts_at' => now()->addDays(3)->setTime(11, 30)->toIso8601String(),
+            'modality' => 'video_call',
+        ])
+        ->assertSessionHasErrors(['starts_at']);
+
+    expect(Appointment::count())->toBe(1);
+});
+
+it('allows booking a slot that was cancelled', function () {
+    [$professional, , $service] = bookingProfessionalWithWorkspace();
+    $patientA = bookingPatient();
+    $patientB = bookingPatient();
+    $startsAt = now()->addDays(3)->setTime(11, 0)->toIso8601String();
+
+    $this->actingAs($patientA)
+        ->post(route('patient.appointments.store'), [
+            'professional_id' => $professional->id,
+            'service_id' => $service->id,
+            'starts_at' => $startsAt,
+            'modality' => 'video_call',
+        ])
+        ->assertRedirect(route('patient.appointments.book-success'));
+
+    Appointment::first()->update(['status' => 'cancelled']);
+
+    $this->actingAs($patientB)
+        ->post(route('patient.appointments.store'), [
+            'professional_id' => $professional->id,
+            'service_id' => $service->id,
+            'starts_at' => $startsAt,
+            'modality' => 'video_call',
+        ])
+        ->assertRedirect(route('patient.appointments.book-success'));
+
+    expect(Appointment::where('status', '!=', 'cancelled')->count())->toBe(1);
+});

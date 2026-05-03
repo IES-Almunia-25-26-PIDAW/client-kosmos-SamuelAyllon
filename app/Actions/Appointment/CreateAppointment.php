@@ -18,6 +18,40 @@ class CreateAppointment
         private CreateOrUpdateProfessionalPatient $upsertPatient,
     ) {}
 
+    private function assertNoProfessionalConflict(int $professionalId, CarbonImmutable $startsAt, CarbonImmutable $endsAt): void
+    {
+        $conflict = Appointment::query()
+            ->where('professional_id', $professionalId)
+            ->whereNotIn('status', ['cancelled', 'no_show'])
+            ->where('starts_at', '<', $endsAt)
+            ->where('ends_at', '>', $startsAt)
+            ->lockForUpdate()
+            ->exists();
+
+        if ($conflict) {
+            throw ValidationException::withMessages([
+                'starts_at' => 'El profesional ya tiene una cita en ese horario.',
+            ]);
+        }
+    }
+
+    private function assertNoPatientConflict(int $patientId, CarbonImmutable $startsAt, CarbonImmutable $endsAt): void
+    {
+        $conflict = Appointment::query()
+            ->where('patient_id', $patientId)
+            ->whereNotIn('status', ['cancelled', 'no_show'])
+            ->where('starts_at', '<', $endsAt)
+            ->where('ends_at', '>', $startsAt)
+            ->lockForUpdate()
+            ->exists();
+
+        if ($conflict) {
+            throw ValidationException::withMessages([
+                'starts_at' => 'Ya tienes una cita reservada en ese horario.',
+            ]);
+        }
+    }
+
     /**
      * @param  array{professional_id:int,service_id:int,starts_at:string,modality:string,notes?:?string}  $data
      */
@@ -55,7 +89,13 @@ class CreateAppointment
             ]);
         }
 
-        return DB::transaction(function () use ($patient, $professional, $workspace, $service, $data): Appointment {
+        $startsAt = CarbonImmutable::parse($data['starts_at']);
+        $endsAt = $startsAt->addMinutes($service->duration_minutes);
+
+        return DB::transaction(function () use ($patient, $professional, $workspace, $service, $data, $startsAt, $endsAt): Appointment {
+            $this->assertNoProfessionalConflict($professional->id, $startsAt, $endsAt);
+            $this->assertNoPatientConflict($patient->id, $startsAt, $endsAt);
+
             ($this->upsertPatient)(
                 $professional,
                 $workspace,
@@ -68,15 +108,13 @@ class CreateAppointment
                 $patient,
             );
 
-            $startsAt = CarbonImmutable::parse($data['starts_at']);
-
             return Appointment::create([
                 'workspace_id' => $workspace->id,
                 'patient_id' => $patient->id,
                 'professional_id' => $professional->id,
                 'service_id' => $service->id,
                 'starts_at' => $startsAt,
-                'ends_at' => $startsAt->addMinutes($service->duration_minutes),
+                'ends_at' => $endsAt,
                 'modality' => $data['modality'],
                 'status' => 'pending',
                 'notes' => $data['notes'] ?? null,

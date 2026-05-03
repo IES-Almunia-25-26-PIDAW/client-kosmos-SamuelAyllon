@@ -21,6 +21,9 @@ it('patient can grant recording consent and creates the session recording', func
     $recording = SessionRecording::where('appointment_id', $appointment->id)->first();
     expect($recording)->not->toBeNull();
     expect($recording->patient_consent_given_at)->not->toBeNull();
+
+    // [RNF-08] Audit log: SessionRecording uses LogsActivity, the consent grant must be recorded.
+    assertActivityLoggedFor($recording, 'created');
 });
 
 it('granting consent twice is idempotent', function () {

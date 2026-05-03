@@ -113,6 +113,9 @@ it('also dispatches invoice job and marks invoice as sent when invoice exists', 
     Queue::assertPushed(SendInvoiceEmailJob::class);
     Queue::assertPushed(SendAgreementsEmailJob::class);
     Queue::assertPushed(SendPostSessionEmailJob::class);
+
+    // [RF-15] Audit log: Invoice uses LogsActivity — the draft→sent transition must be recorded.
+    assertActivityLoggedFor($invoice->fresh(), 'updated');
 });
 
 it('denies finalize when user is not the appointment professional', function () {

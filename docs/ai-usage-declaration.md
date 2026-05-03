@@ -105,3 +105,43 @@ Registro transparente del uso de herramientas de IA en el desarrollo de ClientKo
 - **Revisión humana:** pendiente — Samuel Ayllón debe (a) configurar `sk_test_*` y `whsec_*` reales en `.env`; (b) UAT manual con `stripe listen --forward-to localhost:8000/webhooks/stripe` y tarjeta `4242 4242 4242 4242`; (c) abrir PR a `main`.
 - **Prompt(s) relevantes:** "ejecuta @docs/stripe-integration-plan.md".
 - **Relación con ADR:** ADR-0019.
+
+### Adopción de Vitest + Testing Library — paso 1 del cierre de deuda de testing frontend
+
+- **Fecha:** 2026-05-02
+- **Herramientas:** Claude Code (Opus 4.7), Plan mode (plan en [`C:\Users\xamue\.claude\plans\rol-arquitecto-senior-zippy-goose.md`](../../.claude/plans/rol-arquitecto-senior-zippy-goose.md)), Explore subagent (auditoría inicial + scope de Vitest setup).
+- **Alcance IA:** auditoría estricta de cobertura de testing y trazabilidad de requisitos (veredicto, evidencias, brechas, riesgos, siguiente paso) e implementación del **paso 1** del plan resultante:
+    1. **Scaffolding de Vitest 2** + `@testing-library/react@16` + `@testing-library/jest-dom@6` + `@testing-library/user-event@14` + `jsdom@25` + `@vitest/ui@2` (devDeps).
+    2. [vitest.config.ts](../vitest.config.ts) — `environment: 'jsdom'`, alias `@`, `setupFiles`, `define: { 'process.env.NODE_ENV': '"development"' }` y `conditions: ['development', 'browser']` para que React 19 + RTL 16 pueda usar `React.act`.
+    3. [resources/js/test/setup.ts](../resources/js/test/setup.ts) — importa `jest-dom/vitest`, `cleanup` post-test, polyfills de `matchMedia`/`ResizeObserver`/`IntersectionObserver`.
+    4. [resources/js/test/render.tsx](../resources/js/test/render.tsx) — helper `renderWithChakra` que envuelve con `ChakraProvider value={system}` desde [`chakra-system.ts`](../resources/js/lib/chakra-system.ts).
+    5. **4 archivos de test** co-locados (18 tests verdes) con tag `[RF-XX]`/`[RNF-XX]` en `it(...)` para trazabilidad code-visible: [`recording-indicator.test.tsx`](../resources/js/components/recording-indicator.test.tsx), [`use-countdown.test.ts`](../resources/js/hooks/use-countdown.test.ts), [`join-call-button.test.tsx`](../resources/js/components/join-call-button.test.tsx), [`use-professional-tab-recorder.test.ts`](../resources/js/hooks/use-professional-tab-recorder.test.ts).
+    6. [package.json](../package.json) scripts `test`, `test:watch`, `test:ui`. [tsconfig.json](../tsconfig.json) `types: ["vitest/globals", "@testing-library/jest-dom"]`.
+    7. [.github/workflows/tests.yml](../.github/workflows/tests.yml) step `Frontend Tests (Vitest)` ejecutando `npm run test` tras `Build Assets`.
+    8. [CLAUDE.md §7](../CLAUDE.md) gate de pre-cierre incorpora `npm run test`.
+    9. [docs/test-traceability.md](test-traceability.md) — `RNF-Q06` pasa de ❌ a 🟡; añadida sección 3.b con la tabla de tests frontend; cabecera y registro de resultados actualizados.
+- **Tests añadidos:** 18 frontend (4 archivos). Backend sigue en 264 verdes. Total: 282.
+- **Gate ejecutado:** ✅ `npm run test` (18/18), ✅ `npm run types`, ✅ `npm run lint`. Pendiente UAT manual: ejecutar el job nuevo en CI tras push.
+- **Revisión humana:** pendiente — Samuel Ayllón debe (a) revisar la convención de mocks (especialmente `vi.hoisted` y los fakes de `MediaRecorder`); (b) confirmar que el job CI `Frontend Tests (Vitest)` corre verde en GitHub Actions; (c) abrir PR.
+- **Prompt(s) relevantes:** "Comprueba si esto está realmente implementado…" (auditoría), "ve de uno en uno" (ejecución del paso 1 del plan).
+- **Relación con ADR:** ADR-0022.
+
+### Audit log assertions (paso 2 del cierre de deuda de testing)
+
+- **Fecha:** 2026-05-02
+- **Herramientas:** Claude Code (Opus 4.7), Explore subagent (mapa de entradas activity_log + traits + cobertura existente).
+- **Alcance IA:** cierre de la deuda "Audit log activo: ❌ sin test directo" detectada en la auditoría. Se añadieron aserciones reales sobre `activity_log` en los flujos clínicos / RGPD críticos:
+    1. **Helpers reutilizables** en [tests/Pest.php](../tests/Pest.php): `assertActivityLogged(array $filter)` y `assertActivityLoggedFor(Model $subject, string $description)`.
+    2. **TranscribeChunkConsentTest** ([tests/Feature/Security/TranscribeChunkConsentTest.php](../tests/Feature/Security/TranscribeChunkConsentTest.php)) — verifica `event=chunk_rejected_no_consent`, `log_name=rgpd_access`, `causer_id`, `properties.position` cuando el job descarta un chunk por revocación o ausencia de consentimiento (RNF-09).
+    3. **ConsentRevokeTest** ([tests/Feature/Sprint3/ConsentRevokeTest.php](../tests/Feature/Sprint3/ConsentRevokeTest.php)) — verifica que la revocación queda en activity_log vía el trait `LogsActivity` de `ConsentForm` (RNF-10).
+    4. **FinalizeAndNotifyTest** ([tests/Feature/Sprint3/FinalizeAndNotifyTest.php](../tests/Feature/Sprint3/FinalizeAndNotifyTest.php)) — verifica que la transición `Invoice` `draft → sent` queda registrada (RF-15).
+    5. **RecordingConsentTest** ([tests/Feature/Portal/RecordingConsentTest.php](../tests/Feature/Portal/RecordingConsentTest.php)) — verifica que la creación de `SessionRecording` con consentimiento queda en activity_log (RNF-08).
+    6. **TranscriptionAccessLogTest** ([tests/Feature/Security/TranscriptionAccessLogTest.php](../tests/Feature/Security/TranscriptionAccessLogTest.php), nuevo) — 3 tests específicos del middleware `rgpd.access_log`: `invoice.show`, `invoice.download` y ausencia de log si no hay usuario autenticado.
+- **Bugs detectados (no fijados, fuera de scope):**
+    1. **`LogTranscriptionAccess::resolveSubjectId()` devuelve siempre `null`** cuando la ruta usa route-model binding de Eloquent: `property_exists($model, 'id')` es `false` en modelos Eloquent (id es un atributo mágico). Pendiente fix; documentado como deuda en [docs/test-traceability.md](test-traceability.md) §6.2.bis.
+    2. **`ProfessionalProfile` no usa el trait `LogsActivity`** — la aprobación de profesional (ADR-0021) **no queda en `activity_log`**. Documentado como deuda.
+- **Tests añadidos:** 3 nuevos en `TranscriptionAccessLogTest` + 4 aserciones añadidas a tests existentes. Backend: 292 verdes (antes 264 según auditoría — la diferencia incluye tests añadidos en otras tareas durante la sesión, todos verdes).
+- **Gate ejecutado:** ✅ `vendor/bin/pest --compact` (292/292, 1245 aserciones). Sin tocar frontend (sigue 18/18).
+- **Revisión humana:** pendiente — Samuel Ayllón debe (a) decidir si añadir `LogsActivity` a `ProfessionalProfile` o loggear explícitamente desde la action; (b) priorizar el fix del bug de `resolveSubjectId`; (c) abrir PR.
+- **Prompt(s) relevantes:** "ve de uno en uno" → "si" (continuar al paso 2 del plan global).
+- **Relación con ADR:** sin nuevo ADR (cambios en tests + helpers, no cambios arquitectónicos). Trazabilidad cruzada con ADR-0018, ADR-0019, ADR-0020, ADR-0021.

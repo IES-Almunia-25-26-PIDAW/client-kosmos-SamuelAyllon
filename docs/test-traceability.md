@@ -3,9 +3,9 @@
 > Documento vivo. Enlaza cada requisito formal del MVP con los tests Pest que lo validan.
 > Las rutas a tests usan el formato `archivo::nombre del test`.
 >
-> **Última actualización:** 2026-05-01
-> **Stack de pruebas:** Pest 3 / PHPUnit 11 (suites `Unit` + `Feature`).
-> **Total tests verdes hoy:** 264 (1.139 aserciones) — ver `junit.xml` publicado por CI como artifact `test-reports`.
+> **Última actualización:** 2026-05-02
+> **Stack de pruebas:** Pest 3 / PHPUnit 11 (suites `Unit` + `Feature`) + Vitest 2 / @testing-library/react 16 (frontend, ADR-0022).
+> **Total tests verdes hoy:** 292 backend (1.245 aserciones) + 18 frontend (4 archivos) — ver `junit.xml` publicado por CI como artifact `test-reports`.
 
 ---
 
@@ -83,7 +83,20 @@ Estados: ✅ cubierto · 🟡 cubierto parcialmente · ❌ sin test directo.
 | RNF-Q03 | Cobertura de código mínima por commit | `pest --coverage --min=60` en CI · artifact `test-reports` (clover + JUnit) | ✅ activado 2026-05-01 |
 | RNF-Q04 | Análisis estático Larastan | `composer analyse` en CI | ✅ |
 | RNF-Q05 | Tests unitarios reales de lógica pura | [tests/Unit/](../tests/Unit/) | ❌ solo `ExampleTest.php` — deuda explícita |
-| RNF-Q06 | Tests de frontend (componentes, hooks, formularios Inertia) | — | ❌ no hay framework configurado — deuda explícita |
+| RNF-Q06 | Tests de frontend (componentes, hooks, formularios Inertia) | Vitest 2 + @testing-library/react 16 (ADR-0022). Suite en [resources/js/**/*.test.{ts,tsx}](../resources/js/) — 18 tests verdes en 4 archivos. Pendiente: booking form pública, más componentes Chakra y subir cobertura mínima en CI. | 🟡 |
+
+---
+
+## 3.b Tests de frontend (Vitest, ADR-0022)
+
+| Unidad | Archivo de test | Requisito | Estado |
+|---|---|---|---|
+| `RecordingIndicator` | [resources/js/components/recording-indicator.test.tsx](../resources/js/components/recording-indicator.test.tsx) | RF-12 | ✅ 2 tests |
+| `useCountdown` | [resources/js/hooks/use-countdown.test.ts](../resources/js/hooks/use-countdown.test.ts) | RF-10 | ✅ 5 tests |
+| `JoinCallButton` | [resources/js/components/join-call-button.test.tsx](../resources/js/components/join-call-button.test.tsx) | RF-09 | ✅ 5 tests |
+| `useProfessionalTabRecorder` | [resources/js/hooks/use-professional-tab-recorder.test.ts](../resources/js/hooks/use-professional-tab-recorder.test.ts) | RF-12, RNF-09 | ✅ 6 tests |
+
+Convención: nombres de test con tag `[RF-XX]` o `[RNF-XX]` para que la trazabilidad sea grep-eable.
 
 ---
 
@@ -101,7 +114,24 @@ Mapa contra el checklist de [mvp-roadmap.md §6](mvp-roadmap.md):
 - Validación de consentimiento en `TranscribeChunkJob`: ✅ RNF-09.
 - `PaymentPolicy`: 🟡 `Security/PolicyTest` cubre policies en general; no hay test específico nominado a `PaymentPolicy`.
 - Consentimientos obligatorios en reserva: ✅ RNF-08.
-- Audit log activo: ❌ sin test directo.
+- Audit log activo: 🟡 cubierto en mutaciones críticas — ver § 6.2.bis abajo.
+
+### 6.2.bis Audit log (Spatie ActivityLog) — 2026-05-02
+
+| Flujo | Test | Aserción |
+|---|---|---|
+| Chunk rechazado por consentimiento revocado/inexistente | [tests/Feature/Security/TranscribeChunkConsentTest.php](../tests/Feature/Security/TranscribeChunkConsentTest.php) | `event=chunk_rejected_no_consent`, `log_name=rgpd_access`, propiedades + causer |
+| Revocación de consentimiento del paciente | [tests/Feature/Sprint3/ConsentRevokeTest.php](../tests/Feature/Sprint3/ConsentRevokeTest.php) | `ConsentForm` `updated` (LogsActivity trait) |
+| Auto-generación + envío de factura tras finalizar | [tests/Feature/Sprint3/FinalizeAndNotifyTest.php](../tests/Feature/Sprint3/FinalizeAndNotifyTest.php) | `Invoice` `updated` (transición draft→sent) |
+| Concesión de consentimiento de grabación | [tests/Feature/Portal/RecordingConsentTest.php](../tests/Feature/Portal/RecordingConsentTest.php) | `SessionRecording` `created` |
+| Acceso a factura (show/download) por middleware `rgpd.access_log` | [tests/Feature/Security/TranscriptionAccessLogTest.php](../tests/Feature/Security/TranscriptionAccessLogTest.php) | `log_name=rgpd_access`, eventos `invoice.show` / `invoice.download`, ausencia de log si no hay user |
+
+Helpers añadidos en [tests/Pest.php](../tests/Pest.php): `assertActivityLogged(array $filter)` y `assertActivityLoggedFor(Model $subject, string $description)`.
+
+**Deuda residual (no cubierta aún):**
+- `ProfessionalProfile` no usa `LogsActivity`; la transición a `verified` (ADR-0021) **no queda en `activity_log`**. Decidir si añadir el trait al modelo o loggear explícitamente desde `Admin\Users\VerifyProfessionalAction`.
+- Bug detectado durante el audit: `LogTranscriptionAccess::resolveSubjectId()` siempre devuelve `null` para rutas con route-model binding (Eloquent), porque `property_exists($model, 'id')` es `false` en modelos. Pendiente fix.
+- Acceso a documentos: la ruta usa `signed`+`rgpd.access_log:document.show` pero no hay test directo. Deuda menor.
 
 ### 6.3 Calidad
 - Gate local: ✅ RNF-Q01.
@@ -114,7 +144,7 @@ Mapa contra el checklist de [mvp-roadmap.md §6](mvp-roadmap.md):
 ## 5. Brechas conocidas (deuda de testing)
 
 1. **Suite Unit vacía** — todo se prueba a nivel Feature (con DB). Acciones puras (ej. cálculo de ventana de 10 min, numeración secuencial de factura) deberían tener tests unitarios aislados.
-2. **Sin tests de frontend** — formularios Inertia, hooks (`useCountdown`, `useProfessionalTabRecorder`), componentes Chakra críticos (`<JoinCallButton>`, `<RecordingIndicator>`) no están cubiertos.
+2. **Tests de frontend parciales** — adoptado Vitest + Testing Library (ADR-0022). Cubiertos `<RecordingIndicator>`, `useCountdown`, `<JoinCallButton>`, `useProfessionalTabRecorder`. **Pendiente:** booking form pública del paciente, resto de componentes Chakra y umbral de cobertura mínima en CI.
 3. **Audit log (Spatie ActivityLog)** — instalado pero sin assert directo en tests.
 4. **PDF de factura** — la conformidad LIVA se verifica por revisión humana, no por test que abra el PDF y compruebe campos.
 5. **Sin SLA temporales medidos en test** (resumen <30 s, etc.).
@@ -125,8 +155,9 @@ Mapa contra el checklist de [mvp-roadmap.md §6](mvp-roadmap.md):
 
 - **CI** ([.github/workflows/tests.yml](../.github/workflows/tests.yml)) ejecuta en cada push/PR a `develop`/`main`/`master`/`workos`:
   - `pest --coverage --coverage-clover=coverage.xml --coverage-text --log-junit=junit.xml --min=60`.
+  - `npm run test` (Vitest, frontend) — bloquea merge si algún test rojo.
   - Sube `test-reports` (clover + JUnit XML) como artifact (retención 30 días).
-- **Local**: cada desarrollador puede regenerar los mismos artefactos con `vendor/bin/pest --coverage --log-junit=junit.xml`. `coverage.xml` y `junit.xml` están en [.gitignore](../.gitignore).
+- **Local**: cada desarrollador puede regenerar los mismos artefactos con `vendor/bin/pest --coverage --log-junit=junit.xml` y `npm run test`. `coverage.xml` y `junit.xml` están en [.gitignore](../.gitignore).
 - **Histórico de resultados** → la pestaña "Actions" del repo en GitHub funciona como registro auditable (commit + branch + autor + duración + outcome + artifacts).
 
 ---

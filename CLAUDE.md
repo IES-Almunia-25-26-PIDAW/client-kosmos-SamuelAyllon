@@ -146,6 +146,7 @@ vendor/bin/pint --dirty --format agent
 php artisan test --compact
 npm run lint
 npm run types
+npm run test
 npm run build
 ```
 
