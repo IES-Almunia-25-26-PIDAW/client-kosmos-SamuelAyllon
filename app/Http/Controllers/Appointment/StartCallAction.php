@@ -13,9 +13,9 @@ class StartCallAction extends Controller
     public function __invoke(Request $request, Appointment $appointment): JsonResponse
     {
         abort_if(
-            $appointment->status !== 'confirmed',
+            ! in_array($appointment->status, ['confirmed', 'in_progress'], strict: true),
             422,
-            'Solo se puede iniciar una llamada en citas confirmadas.'
+            'Solo se puede iniciar una llamada en citas confirmadas o en curso.'
         );
 
         abort_unless(
@@ -24,7 +24,10 @@ class StartCallAction extends Controller
             'Fuera de la ventana de acceso (10 min antes — 15 min después).'
         );
 
-        $roomId = $appointment->meeting_room_id ?? 'kosmos-'.Str::uuid();
+        // Google Meet appointments keep meeting_room_id null; only create internal room otherwise.
+        $roomId = $appointment->meeting_url !== null
+            ? $appointment->meeting_room_id
+            : ($appointment->meeting_room_id ?? 'kosmos-'.Str::uuid());
 
         $appointment->update([
             'status' => 'in_progress',

@@ -1,4 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
+import { Center } from '@chakra-ui/react';
 import {
     CalendarDays,
     CalendarRange,
@@ -22,7 +23,6 @@ import {
     SidebarFooter,
     SidebarHeader,
     SidebarMenu,
-    SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { dashboard as portalDashboard } from '@/routes/patient';
@@ -151,11 +151,11 @@ export function AppSidebar({ onMouseEnter, onMouseLeave }: AppSidebarProps = {})
             <SidebarHeader>
                 <SidebarMenu>
                     <SidebarMenuItem>
-                        <SidebarMenuButton size="lg" asChild h="24 !important">
+                        <Center w="full" py="2">
                             <Link href={homeHref} prefetch>
                                 <AppLogo />
                             </Link>
-                        </SidebarMenuButton>
+                        </Center>
                     </SidebarMenuItem>
                 </SidebarMenu>
             </SidebarHeader>

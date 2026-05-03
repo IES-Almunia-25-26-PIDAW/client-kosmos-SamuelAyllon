@@ -14,7 +14,7 @@ class CallbackAction extends Controller
         $code = $request->query('code');
 
         if ($code === null) {
-            return redirect()->route('settings.profile')
+            return redirect()->route('profile.edit')
                 ->withErrors(['google' => 'No se recibió código de autorización de Google.']);
         }
 
@@ -22,7 +22,7 @@ class CallbackAction extends Controller
 
         $request->user()->update(['google_refresh_token' => $refreshToken]);
 
-        return redirect()->route('settings.profile')
+        return redirect()->route('profile.edit')
             ->with('success', 'Cuenta Google conectada correctamente.');
     }
 }

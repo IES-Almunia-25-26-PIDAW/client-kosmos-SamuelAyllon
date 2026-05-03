@@ -24,7 +24,7 @@ class JoinCallAction extends Controller
             $appointment->update(['patient_joined_at' => now()]);
         }
 
-        if ($appointment->meeting_room_id !== null) {
+        if ($appointment->meeting_room_id !== null || $appointment->meeting_url !== null) {
             return response()->json([
                 'room_id' => $appointment->meeting_room_id,
                 'meeting_url' => $appointment->meeting_url,

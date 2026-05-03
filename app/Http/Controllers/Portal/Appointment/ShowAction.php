@@ -14,7 +14,7 @@ class ShowAction extends Controller
     {
         abort_if($appointment->patient_id !== $request->user()->id, 403);
 
-        $appointment->load(['professional:id,name', 'service:id,name,duration_minutes']);
+        $appointment->load(['professional:id,name,avatar_path', 'service:id,name,duration_minutes']);
 
         return Inertia::render('patient/appointments/show', [
             'appointment' => $appointment,
