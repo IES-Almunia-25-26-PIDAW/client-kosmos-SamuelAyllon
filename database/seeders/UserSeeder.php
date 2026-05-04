@@ -709,8 +709,8 @@ class UserSeeder extends Seeder
             'patient_id' => $samuelPatient->id,
             'professional_id' => $samuelPro->id,
             'service_id' => $samuelService->id,
-            'starts_at' => now()->addDays(5)->setHour(10)->setMinute(0),
-            'ends_at' => now()->addDays(5)->setHour(10)->setMinute(50),
+            'starts_at' => \Carbon\Carbon::parse('2026-05-04 14:20:00', 'Europe/Madrid')->utc(),
+            'ends_at' => \Carbon\Carbon::parse('2026-05-04 14:58:00', 'Europe/Madrid')->utc(),
             'status' => 'confirmed',
             'modality' => 'video_call',
         ]);
