@@ -21,5 +21,8 @@ export default defineConfig({
         css: false,
         clearMocks: true,
         restoreMocks: true,
+        typecheck: {
+            tsconfig: './tsconfig.test.json',
+        },
     },
 });

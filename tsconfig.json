@@ -111,7 +111,7 @@
             "@/*": ["./resources/js/*"]
         },
         "jsx": "react-jsx",
-        "types": ["vitest/globals", "@testing-library/jest-dom"]
+        "types": []
     },
     "include": ["resources/js/**/*.ts", "resources/js/**/*.d.ts", "resources/js/**/*.tsx"]
 }
