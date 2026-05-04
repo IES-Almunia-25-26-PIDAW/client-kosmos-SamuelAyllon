@@ -1,13 +1,14 @@
 import axios from 'axios';
 
-// Configure axios to automatically include CSRF token
 axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 axios.defaults.withCredentials = true;
 
-// Get CSRF token from meta tag or cookie
-const token = document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.content;
-if (token) {
-    axios.defaults.headers.common['X-CSRF-TOKEN'] = token;
-}
+axios.interceptors.request.use((config) => {
+    const token = document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.content;
+    if (token) {
+        config.headers.set('X-CSRF-TOKEN', token);
+    }
+    return config;
+});
 
 export default axios;
