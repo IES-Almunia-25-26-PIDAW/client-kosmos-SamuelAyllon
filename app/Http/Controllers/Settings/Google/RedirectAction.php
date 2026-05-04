@@ -6,11 +6,15 @@ use App\Http\Controllers\Controller;
 use App\Services\GoogleCalendarService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
-class ConnectAction extends Controller
+class RedirectAction extends Controller
 {
     public function __invoke(Request $request, GoogleCalendarService $google): RedirectResponse
     {
-        return redirect($google->getAuthorizationUrl());
+        $state = Str::random(40);
+        $request->session()->put('google_oauth_state', $state);
+
+        return redirect($google->getAuthorizationUrl($state));
     }
 }

@@ -79,6 +79,7 @@ use App\Http\Controllers\Patient\UpdateAction as PatientUpdateAction;
 use App\Http\Controllers\Portal\Appointment\BookAction as PortalAppointmentBookAction;
 use App\Http\Controllers\Portal\Appointment\BookSuccessAction as PortalAppointmentBookSuccessAction;
 use App\Http\Controllers\Portal\Appointment\CancelAction as PortalAppointmentCancelAction;
+use App\Http\Controllers\Portal\Appointment\ConfirmAction as PortalAppointmentConfirmAction;
 use App\Http\Controllers\Portal\Appointment\IndexAction as PortalAppointmentIndexAction;
 use App\Http\Controllers\Portal\Appointment\JoinCallAction as PortalAppointmentJoinCallAction;
 use App\Http\Controllers\Portal\Appointment\PostSessionShowAction as PortalAppointmentPostSessionShowAction;
@@ -310,6 +311,7 @@ Route::middleware(['auth', 'verified'])
         Route::get('/appointments/book-success', PortalAppointmentBookSuccessAction::class)->name('appointments.book-success');
         Route::post('/appointments', PortalAppointmentStoreAction::class)->name('appointments.store');
         Route::get('/appointments/{appointment}', PortalAppointmentShowAction::class)->name('appointments.show');
+        Route::post('/appointments/{appointment}/confirm', PortalAppointmentConfirmAction::class)->name('appointments.confirm');
         Route::post('/appointments/{appointment}/cancel', PortalAppointmentCancelAction::class)->name('appointments.cancel');
         Route::post('/appointments/{appointment}/join', PortalAppointmentJoinCallAction::class)->name('appointments.join');
         Route::get('/appointments/{appointment}/waiting', PortalAppointmentWaitingShowAction::class)->name('appointments.waiting');

@@ -10,7 +10,8 @@ use Illuminate\Http\Request;
 class UpdateStatusAction extends Controller
 {
     private const ALLOWED_TRANSITIONS = [
-        'pending' => ['confirmed', 'cancelled'],
+        // pending → confirmed es exclusivo del paciente vía Portal\Appointment\ConfirmAction.
+        'pending' => ['cancelled'],
         'confirmed' => ['in_progress', 'cancelled', 'no_show'],
         'in_progress' => ['completed'],
         'completed' => [],

@@ -1,5 +1,5 @@
-import { Link, usePage } from '@inertiajs/react';
 import { Center } from '@chakra-ui/react';
+import { Link, usePage } from '@inertiajs/react';
 import {
     CalendarDays,
     CalendarRange,

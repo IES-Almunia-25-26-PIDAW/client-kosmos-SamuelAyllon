@@ -1,5 +1,6 @@
 <?php
 
+use App\Jobs\AutoCancelUnconfirmedAppointments;
 use App\Jobs\CheckConsentExpiry;
 use App\Jobs\GenerateDailyBriefing;
 use App\Jobs\GeneratePreSessionBriefing;
@@ -12,5 +13,6 @@ Schedule::job(new GeneratePreSessionBriefing)->everyFiveMinutes();
 Schedule::job(new SendPaymentReminder)->dailyAt('09:00');
 Schedule::job(new CheckConsentExpiry)->weeklyOn(1, '08:00');
 Schedule::job(new MarkNoShowAppointments)->everyFiveMinutes();
+Schedule::job(new AutoCancelUnconfirmedAppointments)->hourly();
 Schedule::command('audio:cleanup')->dailyAt('03:00');
 Schedule::command('purge:expired-session-data')->dailyAt('03:15');

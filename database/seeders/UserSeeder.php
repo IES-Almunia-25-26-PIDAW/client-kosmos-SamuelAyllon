@@ -617,15 +617,115 @@ class UserSeeder extends Seeder
             'type' => 'session_note',
         ]);
 
+        // ══════════════════════════════════════════════════
+        //  SAMUEL — Profesional de prueba (cuenta real)
+        // ══════════════════════════════════════════════════
+        $samuelPro = User::create([
+            'name' => 'Samuel Ayllón',
+            'email' => 'samuelayllonsevilla1@gmail.com',
+            'password' => Hash::make('password'),
+            'email_verified_at' => now(),
+            'tutorial_completed_at' => now(),
+            'phone' => '+34 600 000 010',
+        ]);
+        $samuelPro->assignRole('professional');
+
+        $samuelWorkspace = Workspace::create([
+            'creator_id' => $samuelPro->id,
+            'name' => 'Consulta Samuel Ayllón',
+            'slug' => 'consulta-samuel-ayllon',
+            'tax_name' => 'Samuel Ayllón Sevilla',
+            'tax_id' => '00000001S',
+            'tax_address' => 'Calle Test 1, 41001 Sevilla',
+            'location_address' => 'Calle Test 1, 41001 Sevilla',
+            'phone' => '+34 600 000 010',
+            'email' => 'samuelayllonsevilla1@gmail.com',
+        ]);
+
+        $samuelWorkspace->members()->attach($samuelPro->id, [
+            'role' => 'billing_manager',
+            'joined_at' => now(),
+            'is_active' => true,
+        ]);
+
+        $samuelProfile = ProfessionalProfile::create([
+            'user_id' => $samuelPro->id,
+            'license_number' => 'PSI-41-00001',
+            'collegiate_number' => 'SE-00001',
+            'specialties' => ['clinical', 'cognitive_behavioral'],
+            'verification_status' => 'verified',
+            'bio' => 'Psicólogo clínico. Cuenta de prueba para desarrollo.',
+            'city' => 'Sevilla',
+            'verified_at' => now(),
+        ]);
+
+        $samuelService = OfferedConsultation::create([
+            'professional_profile_id' => $samuelProfile->id,
+            'name' => 'Sesión de psicología',
+            'description' => 'Sesión individual de psicoterapia (50 min)',
+            'duration_minutes' => 50,
+            'price' => 70.00,
+            'color' => '#6366f1',
+            'is_active' => true,
+            'modality' => 'both',
+        ]);
+
+        // ══════════════════════════════════════════════════
+        //  SAMUEL — Paciente de prueba (cuenta real)
+        // ══════════════════════════════════════════════════
+        $samuelPatient = User::create([
+            'name' => 'Samuel Paciente',
+            'email' => 'samuelayllonsevilla86@gmail.com',
+            'password' => Hash::make('password'),
+            'email_verified_at' => now(),
+            'phone' => '+34 600 000 011',
+        ]);
+        $samuelPatient->assignRole('patient');
+
+        $pSamuel = PatientProfile::withoutGlobalScopes()->create([
+            'user_id' => $samuelPatient->id,
+            'workspace_id' => $samuelWorkspace->id,
+            'professional_id' => $samuelPro->id,
+            'is_active' => true,
+            'clinical_notes' => 'Paciente de prueba para desarrollo.',
+            'diagnosis' => 'Sin diagnóstico',
+            'treatment_plan' => 'Plan de prueba.',
+            'status' => 'active',
+            'first_session_at' => now()->subMonth(),
+            'last_session_at' => now()->subWeek(),
+        ]);
+
+        CaseAssignment::create([
+            'patient_id' => $samuelPatient->id,
+            'professional_id' => $samuelPro->id,
+            'workspace_id' => $samuelWorkspace->id,
+            'is_primary' => true,
+            'status' => 'active',
+            'started_at' => now()->subMonth()->toDateString(),
+        ]);
+
+        Appointment::create([
+            'workspace_id' => $samuelWorkspace->id,
+            'patient_id' => $samuelPatient->id,
+            'professional_id' => $samuelPro->id,
+            'service_id' => $samuelService->id,
+            'starts_at' => now()->addDays(5)->setHour(10)->setMinute(0),
+            'ends_at' => now()->addDays(5)->setHour(10)->setMinute(50),
+            'status' => 'confirmed',
+            'modality' => 'video_call',
+        ]);
+
         $this->command->info('Users seeded successfully (v2).');
-        $this->command->info('  admin@clientkosmos.test      / password  [admin]');
-        $this->command->info('  natalia@clientkosmos.test    / password  [professional]  — workspace con local');
-        $this->command->info('  carlos@clientkosmos.test     / password  [professional]');
-        $this->command->info('  elena@clientkosmos.test      / password  [professional]  — práctica online-only');
-        $this->command->info('  ana.garcia@ejemplo.com       / password  [patient — compartida: Natalia+Carlos]');
-        $this->command->info('  marcos.ruiz@ejemplo.com      / password  [patient]');
-        $this->command->info('  laura.sanchez@ejemplo.com    / password  [patient]');
-        $this->command->info('  javier.moreno@ejemplo.com    / password  [patient — alta]');
-        $this->command->info('  sofia.torres@ejemplo.com     / password  [patient — Elena clinic]');
+        $this->command->info('  admin@clientkosmos.test              / password  [admin]');
+        $this->command->info('  natalia@clientkosmos.test            / password  [professional]  — workspace con local');
+        $this->command->info('  carlos@clientkosmos.test             / password  [professional]');
+        $this->command->info('  elena@clientkosmos.test              / password  [professional]  — práctica online-only');
+        $this->command->info('  samuelayllonsevilla1@gmail.com       / password  [professional]  — cuenta real de prueba');
+        $this->command->info('  ana.garcia@ejemplo.com               / password  [patient — compartida: Natalia+Carlos]');
+        $this->command->info('  marcos.ruiz@ejemplo.com              / password  [patient]');
+        $this->command->info('  laura.sanchez@ejemplo.com            / password  [patient]');
+        $this->command->info('  javier.moreno@ejemplo.com            / password  [patient — alta]');
+        $this->command->info('  sofia.torres@ejemplo.com             / password  [patient — Elena clinic]');
+        $this->command->info('  samuelayllonsevilla86@gmail.com      / password  [patient — cuenta real de prueba]');
     }
 }

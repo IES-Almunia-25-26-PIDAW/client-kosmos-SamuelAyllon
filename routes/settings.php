@@ -2,7 +2,9 @@
 
 use App\Http\Controllers\Settings\Consent\RevokeAction as ConsentRevokeAction;
 use App\Http\Controllers\Settings\Google\CallbackAction as GoogleCallbackAction;
-use App\Http\Controllers\Settings\Google\ConnectAction as GoogleConnectAction;
+use App\Http\Controllers\Settings\Google\DisconnectAction as GoogleDisconnectAction;
+use App\Http\Controllers\Settings\Google\EditAction as GoogleEditAction;
+use App\Http\Controllers\Settings\Google\RedirectAction as GoogleRedirectAction;
 use App\Http\Controllers\Settings\Password\EditAction as PasswordEditAction;
 use App\Http\Controllers\Settings\Password\UpdateAction as PasswordUpdateAction;
 use App\Http\Controllers\Settings\Profile\DestroyAction as ProfileDestroyAction;
@@ -33,8 +35,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('settings/two-factor', TwoFactorShowAction::class)
         ->name('two-factor.show');
 
-    Route::get('settings/google/connect', GoogleConnectAction::class)->name('settings.google.connect');
-    Route::get('settings/google/callback', GoogleCallbackAction::class)->name('settings.google.callback');
+    Route::prefix('settings/google')->name('settings.google.')->group(function () {
+        Route::get('/', GoogleEditAction::class)->name('edit');
+        Route::get('/redirect', GoogleRedirectAction::class)->name('redirect');
+        Route::get('/callback', GoogleCallbackAction::class)->name('callback');
+        Route::delete('/', GoogleDisconnectAction::class)->name('disconnect');
+    });
 
     Route::post('settings/consents/{consentForm}/revoke', ConsentRevokeAction::class)
         ->name('settings.consents.revoke');

@@ -19,6 +19,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Illuminate\Support\Carbon $ends_at
  * @property \Illuminate\Support\Carbon|null $patient_joined_at
  * @property \Illuminate\Support\Carbon|null $professional_joined_at
+ * @property \Illuminate\Support\Carbon|null $confirmed_at
  * @property string $status
  * @property string|null $modality
  * @property string|null $meeting_room_id
@@ -41,7 +42,7 @@ class Appointment extends Model
         'workspace_id', 'patient_id', 'professional_id', 'service_id',
         'starts_at', 'ends_at', 'status', 'modality',
         'meeting_room_id', 'meeting_url', 'external_calendar_event_id',
-        'patient_joined_at', 'professional_joined_at',
+        'patient_joined_at', 'professional_joined_at', 'confirmed_at',
         'cancellation_reason', 'cancelled_by', 'notes',
     ];
 
@@ -52,6 +53,7 @@ class Appointment extends Model
             'ends_at' => 'datetime',
             'patient_joined_at' => 'datetime',
             'professional_joined_at' => 'datetime',
+            'confirmed_at' => 'datetime',
         ];
     }
 

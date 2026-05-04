@@ -1,7 +1,8 @@
 import { Badge, Box, Flex, Heading, Stack, Text, chakra } from '@chakra-ui/react';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { ArrowLeft, CalendarDays, Clock, MapPin, Video } from 'lucide-react';
-import type { ReactNode } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
+import PortalAppointmentConfirmAction from '@/actions/App/Http/Controllers/Portal/Appointment/ConfirmAction';
 import PortalAppointmentIndexAction from '@/actions/App/Http/Controllers/Portal/Appointment/IndexAction';
 import { JoinCallButton } from '@/components/join-call-button';
 import { Button } from '@/components/ui/button';
@@ -54,6 +55,21 @@ export default function PatientAppointmentShow({ appointment }: Props) {
     const statusCfg = STATUS_LABELS[appointment.status] ?? { label: appointment.status, palette: 'gray' };
     const isVideoCall = appointment.modality === 'video_call';
     const isJoinable = JOINABLE_STATUSES.includes(appointment.status);
+
+    const [confirming, setConfirming] = useState(false);
+    const canConfirm = useMemo(() => {
+        if (appointment.status !== 'pending') return false;
+        const cutoff = new Date(appointment.starts_at).getTime() - 24 * 60 * 60 * 1000;
+        return Date.now() <= cutoff;
+    }, [appointment.status, appointment.starts_at]);
+    const handleConfirm = () => {
+        setConfirming(true);
+        router.post(
+            PortalAppointmentConfirmAction.url(appointment.id),
+            {},
+            { preserveScroll: true, onFinish: () => setConfirming(false) },
+        );
+    };
 
     return (
         <>
@@ -146,7 +162,32 @@ export default function PatientAppointmentShow({ appointment }: Props) {
                     )}
                 </Stack>
 
-                {isVideoCall && isJoinable && (
+                {appointment.status === 'pending' && (
+                    <Stack gap="2" alignItems="center" pt="2">
+                        {canConfirm ? (
+                            <>
+                                <Button
+                                    variant="primary"
+                                    size="lg"
+                                    minW="56"
+                                    loading={confirming}
+                                    onClick={handleConfirm}
+                                >
+                                    Confirmar cita
+                                </Button>
+                                <Text fontSize="xs" color="fg.muted">
+                                    Confírmala con al menos 24 horas de antelación.
+                                </Text>
+                            </>
+                        ) : (
+                            <Text fontSize="sm" color="fg.muted">
+                                El plazo para confirmar esta cita ha expirado.
+                            </Text>
+                        )}
+                    </Stack>
+                )}
+
+                {isVideoCall && isJoinable && appointment.status !== 'pending' && (
                     <Flex justifyContent="center" pt="2">
                         <JoinCallButton appointment={appointment} role="patient" />
                     </Flex>

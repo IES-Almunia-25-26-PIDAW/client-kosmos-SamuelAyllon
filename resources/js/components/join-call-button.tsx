@@ -62,10 +62,13 @@ export function JoinCallButton({ appointment, role }: Props) {
                 }
             }
         } catch (e: unknown) {
-            const msg =
-                e instanceof Error
-                    ? e.message
-                    : 'No se pudo conectar. Inténtalo de nuevo.';
+            let msg = 'No se pudo conectar. Inténtalo de nuevo.';
+            if (axios.isAxiosError(e)) {
+                const data = e.response?.data as { message?: string } | undefined;
+                msg = data?.message ?? e.message ?? msg;
+            } else if (e instanceof Error) {
+                msg = e.message;
+            }
             setError(msg);
         } finally {
             setLoading(false);
