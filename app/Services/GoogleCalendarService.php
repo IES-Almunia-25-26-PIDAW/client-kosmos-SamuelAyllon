@@ -64,12 +64,14 @@ class GoogleCalendarService
         $client = $this->makeClient($professional);
         $service = new Calendar($client);
 
-        $attendees = [
-            (new EventAttendee)->setEmail($professional->email),
-        ];
+        $professionalAttendee = new EventAttendee;
+        $professionalAttendee->setEmail($professional->email);
+        $attendees = [$professionalAttendee];
 
         if ($appointment->patient?->email !== null) {
-            $attendees[] = (new EventAttendee)->setEmail($appointment->patient->email);
+            $patientAttendee = new EventAttendee;
+            $patientAttendee->setEmail($appointment->patient->email);
+            $attendees[] = $patientAttendee;
         }
 
         $conferenceKey = new ConferenceSolutionKey;
@@ -82,15 +84,21 @@ class GoogleCalendarService
         $conferenceData = new ConferenceData;
         $conferenceData->setCreateRequest($conferenceRequest);
 
+        $timezone = config('app.timezone', 'Europe/Madrid');
+
+        $start = new EventDateTime;
+        $start->setDateTime($appointment->starts_at->toRfc3339String());
+        $start->setTimeZone($timezone);
+
+        $end = new EventDateTime;
+        $end->setDateTime($appointment->ends_at->toRfc3339String());
+        $end->setTimeZone($timezone);
+
         $event = new Event([
             'summary' => 'Consulta ClientKosmos',
             'description' => 'Sesión terapéutica — ClientKosmos',
-            'start' => (new EventDateTime)
-                ->setDateTime($appointment->starts_at->toRfc3339String())
-                ->setTimeZone(config('app.timezone', 'Europe/Madrid')),
-            'end' => (new EventDateTime)
-                ->setDateTime($appointment->ends_at->toRfc3339String())
-                ->setTimeZone(config('app.timezone', 'Europe/Madrid')),
+            'start' => $start,
+            'end' => $end,
             'attendees' => $attendees,
             'conferenceData' => $conferenceData,
             'reminders' => ['useDefault' => false],
