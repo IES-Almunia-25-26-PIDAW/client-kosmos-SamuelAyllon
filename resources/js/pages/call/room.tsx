@@ -1,9 +1,10 @@
 import { Button, Flex, Stack, Text } from '@chakra-ui/react';
-import { Head, router, usePage } from '@inertiajs/react';
+import { Head, usePage } from '@inertiajs/react';
 import type { ReactNode } from 'react';
 import { LiveTranscriptPanel } from '@/components/live-transcript-panel';
 import { RecordingIndicator } from '@/components/recording-indicator';
 import { useProfessionalTabRecorder } from '@/hooks/use-professional-tab-recorder';
+import axios from '@/lib/axios';
 import type { Auth } from '@/types';
 
 interface AppointmentUser {
@@ -43,13 +44,14 @@ export default function CallRoom({ appointment, exitUrl }: Props) {
         }
     };
 
-    const handleEndSession = () => {
+    const handleEndSession = async () => {
         if (recorder.status === 'recording') recorder.stopRecording();
-        router.post(
-            `/appointments/${appointment.id}/end-call`,
-            {},
-            { onFinish: () => { window.location.href = exitUrl; } },
-        );
+        try {
+            await axios.post(`/appointments/${appointment.id}/end-call`);
+        } catch {
+            // even on failure, navigate the user out
+        }
+        window.location.href = exitUrl;
     };
 
     return (
@@ -132,7 +134,7 @@ export default function CallRoom({ appointment, exitUrl }: Props) {
                         colorPalette="red"
                         variant="solid"
                         mt="4"
-                        onClick={handleEndSession}
+                        onClick={() => void handleEndSession()}
                     >
                         {isProfessional ? 'Finalizar sesión' : 'Salir de la sesión'}
                     </Button>

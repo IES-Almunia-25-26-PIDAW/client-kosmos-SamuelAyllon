@@ -2,6 +2,12 @@ import { Badge, Box, Flex, Grid, Heading, Skeleton, SkeletonText, Stack, Text, c
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import { ArrowLeft, Check, FileText, Mail, Sparkles } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
+import AgreementStoreAction from '@/actions/App/Http/Controllers/Agreement/StoreAction';
+import FinalizeAndNotifyAction from '@/actions/App/Http/Controllers/Appointment/FinalizeAndNotifyAction';
+import InvoiceReviewAction from '@/actions/App/Http/Controllers/Invoice/ReviewAction';
+import InvoiceStoreAction from '@/actions/App/Http/Controllers/Invoice/StoreAction';
+import NoteStoreAction from '@/actions/App/Http/Controllers/Note/StoreAction';
+import PatientShowAction from '@/actions/App/Http/Controllers/Patient/ShowAction';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -162,7 +168,7 @@ export default function PostSession({ patient, lastAppointment, lastInvoice }: P
 
     const submitNote = (e: React.FormEvent) => {
         e.preventDefault();
-        noteForm.post(`/patients/${patient.id}/notes`, {
+        noteForm.post(NoteStoreAction.url(patient.id), {
             onSuccess: () => {
                 noteForm.reset();
                 setNoteSaved(true);
@@ -172,7 +178,7 @@ export default function PostSession({ patient, lastAppointment, lastInvoice }: P
 
     const submitAgreement = (e: React.FormEvent) => {
         e.preventDefault();
-        agreementForm.post(`/patients/${patient.id}/agreements`, {
+        agreementForm.post(AgreementStoreAction.url(patient.id), {
             onSuccess: () => {
                 agreementForm.reset();
                 setAgreementSaved(true);
@@ -182,7 +188,7 @@ export default function PostSession({ patient, lastAppointment, lastInvoice }: P
 
     const submitPayment = (e: React.FormEvent) => {
         e.preventDefault();
-        paymentForm.post(`/patients/${patient.id}/payments`, {
+        paymentForm.post(InvoiceStoreAction.url(patient.id), {
             onSuccess: () => {
                 paymentForm.reset();
                 setPaymentSaved(true);
@@ -200,7 +206,7 @@ export default function PostSession({ patient, lastAppointment, lastInvoice }: P
         }
         setConfirming(true);
         router.post(
-            `/professional/appointments/${lastAppointment.id}/finalize-and-notify`,
+            FinalizeAndNotifyAction.url(lastAppointment.id),
             {},
             {
                 preserveScroll: true,
@@ -225,7 +231,7 @@ export default function PostSession({ patient, lastAppointment, lastInvoice }: P
             <Stack gap="6" p={{ base: '6', lg: '8' }} maxW="5xl">
                 <Box>
                     <ChakraLink
-                        href={`/patients/${patient.id}`}
+                        href={PatientShowAction.url(patient.id)}
                         display="inline-flex"
                         alignItems="center"
                         gap="2"
@@ -409,7 +415,7 @@ export default function PostSession({ patient, lastAppointment, lastInvoice }: P
                                             (servicios de asistencia sanitaria prestados por profesionales psicólogos).
                                         </Text>
                                     </Box>
-                                    <ChakraLink href={`/invoices/${lastInvoice.id}`} alignSelf="flex-start">
+                                    <ChakraLink href={InvoiceReviewAction.url(lastInvoice.id)} alignSelf="flex-start">
                                         <Button variant="secondary" size="sm">Revisar factura completa</Button>
                                     </ChakraLink>
                                 </Stack>
@@ -572,7 +578,7 @@ export default function PostSession({ patient, lastAppointment, lastInvoice }: P
                         Atrás
                     </Button>
                     <Flex gap="3" ml="auto">
-                        <ChakraLink href={`/patients/${patient.id}`}>
+                        <ChakraLink href={PatientShowAction.url(patient.id)}>
                             <Button variant="secondary">Guardar y salir</Button>
                         </ChakraLink>
                         {currentStep < 3 ? (
@@ -580,7 +586,7 @@ export default function PostSession({ patient, lastAppointment, lastInvoice }: P
                                 Siguiente
                             </Button>
                         ) : (
-                            <ChakraLink href={`/patients/${patient.id}`}>
+                            <ChakraLink href={PatientShowAction.url(patient.id)}>
                                 <Button variant="primary" disabled={!confirmed}>
                                     Finalizar
                                 </Button>

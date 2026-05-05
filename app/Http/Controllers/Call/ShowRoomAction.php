@@ -13,7 +13,7 @@ class ShowRoomAction extends Controller
     public function __invoke(Request $request, string $roomId): Response
     {
         $appointment = Appointment::where('meeting_room_id', $roomId)
-            ->with(['patient', 'professional'])
+            ->with(['patient.patientProfile', 'professional'])
             ->firstOrFail();
 
         $user = $request->user();
@@ -25,11 +25,17 @@ class ShowRoomAction extends Controller
 
         abort_unless($appointment->canBeJoinedNow(), 403, 'Fuera del horario permitido para esta cita.');
 
+        $patientProfileId = $appointment->patient?->patientProfile?->id;
+
+        $professionalExitUrl = $patientProfileId !== null
+            ? route('professional.patients.post-session', $patientProfileId)
+            : route('professional.appointments.closing-success', $appointment);
+
         return Inertia::render('call/room', [
             'appointment' => $appointment,
             'exitUrl' => $isPatient
                 ? route('patient.appointments.post-session', $appointment)
-                : route('professional.appointments.closing-success', $appointment),
+                : $professionalExitUrl,
         ]);
     }
 }
