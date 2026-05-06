@@ -704,13 +704,33 @@ class UserSeeder extends Seeder
             'started_at' => now()->subMonth()->toDateString(),
         ]);
 
+        foreach (['privacy_policy', 'terms_of_service', 'health_data', 'recording_global'] as $consentType) {
+            ConsentForm::create([
+                'patient_id' => $pSamuel->id,
+                'user_id' => $samuelPatient->id,
+                'consent_type' => $consentType,
+                'template_version' => '1.0',
+                'content_snapshot' => match ($consentType) {
+                    'privacy_policy' => 'He leído y acepto la política de privacidad de ClientKosmos.',
+                    'terms_of_service' => 'He leído y acepto los términos del servicio de ClientKosmos.',
+                    'health_data' => 'Consiento el tratamiento de mis datos de salud para la finalidad terapéutica indicada. (RGPD Art. 9.2.h)',
+                    'recording_global' => 'Autorizo la grabación de audio de mis sesiones y su procesamiento automatizado por la IA de ClientKosmos para generar resúmenes clínicos destinados exclusivamente a mi profesional. (RGPD Art. 22)',
+                },
+                'status' => 'signed',
+                'signed_at' => now()->subMonth(),
+                'signed_ip' => '127.0.0.1',
+                'signature_data' => 'checkbox_registration',
+                'expires_at' => null,
+            ]);
+        }
+
         Appointment::create([
             'workspace_id' => $samuelWorkspace->id,
             'patient_id' => $samuelPatient->id,
             'professional_id' => $samuelPro->id,
             'service_id' => $samuelService->id,
-            'starts_at' => \Carbon\Carbon::parse('2026-05-05 17:15:00', 'Europe/Madrid')->utc(),
-            'ends_at' => \Carbon\Carbon::parse('2026-05-05 17:40:00', 'Europe/Madrid')->utc(),
+            'starts_at' => \Carbon\Carbon::parse('2026-05-06 17:10:00', 'Europe/Madrid')->utc(),
+            'ends_at' => \Carbon\Carbon::parse('2026-05-06 17:40:00', 'Europe/Madrid')->utc(),
             'status' => 'confirmed',
             'modality' => 'video_call',
         ]);
