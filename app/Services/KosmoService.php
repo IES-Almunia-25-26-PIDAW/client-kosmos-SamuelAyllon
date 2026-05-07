@@ -77,11 +77,56 @@ class KosmoService
     }
 
     /**
-     * @todo Generate a post-session briefing summarizing what was discussed and agreed
+     * Generate a post-session briefing aggregating AI summary, session notes,
+     * and open agreements. Idempotent per appointment.
      */
     public function generatePostSessionBriefing(Appointment $appointment): void
     {
-        // @todo
+        $patient = PatientProfile::where('user_id', $appointment->patient_id)->first();
+
+        if ($patient === null) {
+            return;
+        }
+
+        $exists = KosmoBriefing::query()
+            ->where('patient_id', $patient->id)
+            ->where('appointment_id', $appointment->id)
+            ->where('type', 'post_session')
+            ->exists();
+
+        if ($exists) {
+            return;
+        }
+
+        $recording = $appointment->sessionRecording;
+        $parsed = json_decode((string) ($recording?->ai_summary ?? ''), true);
+        $parsed = is_array($parsed) ? $parsed : [];
+
+        $sessionNotes = $appointment->notes()->orderByDesc('created_at')->limit(5)->get();
+        $sessionAgreements = $appointment->agreements()->where('is_completed', false)->limit(5)->get();
+
+        $content = [
+            'session_date' => $appointment->starts_at->format('d/m/Y H:i'),
+            'key_points' => array_values(array_map('strval', (array) ($parsed['key_points'] ?? []))),
+            'patient_state' => (string) ($parsed['patient_state'] ?? ''),
+            'next_actions' => array_values(array_map('strval', (array) ($parsed['next_actions'] ?? []))),
+            'session_notes' => $sessionNotes->pluck('content')
+                ->map(fn ($c) => (string) str($c)->limit(120))
+                ->values()
+                ->all(),
+            'open_agreements' => $sessionAgreements->pluck('content')->map(fn ($c) => (string) $c)->values()->all(),
+            'summary_status' => $recording?->ai_summary ? 'ready' : 'pending',
+        ];
+
+        KosmoBriefing::create([
+            'user_id' => $appointment->professional_id,
+            'patient_id' => $patient->id,
+            'appointment_id' => $appointment->id,
+            'type' => 'post_session',
+            'content' => $content,
+            'is_read' => false,
+            'for_date' => $appointment->starts_at->toDateString(),
+        ]);
     }
 
     /**

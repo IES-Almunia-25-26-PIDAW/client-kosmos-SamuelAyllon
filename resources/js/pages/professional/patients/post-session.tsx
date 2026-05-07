@@ -1,5 +1,6 @@
 import { Badge, Box, Flex, Grid, Heading, Skeleton, SkeletonText, Stack, Text, chakra } from '@chakra-ui/react';
 import { Head, Link, router, useForm } from '@inertiajs/react';
+import { useEcho } from '@laravel/echo-react';
 import { ArrowLeft, Check, FileText, Mail, Sparkles } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
 import AgreementStoreAction from '@/actions/App/Http/Controllers/Agreement/StoreAction';
@@ -218,6 +219,17 @@ export default function PostSession({ patient, lastAppointment, lastInvoice }: P
 
     const aiSummary = lastAppointment?.session_recording?.ai_summary ?? null;
     const transcriptionStatus = lastAppointment?.session_recording?.transcription_status ?? null;
+
+    useEcho(
+        lastAppointment ? `appointment.${lastAppointment.id}` : 'appointment.none',
+        '.session.summarized',
+        () => {
+            if (lastAppointment) {
+                router.reload({ only: ['lastAppointment'] });
+            }
+        },
+    );
+
     const summaryStatus: 'ready' | 'pending' | 'failed' = aiSummary
         ? 'ready'
         : transcriptionStatus === 'rejected_no_consent'

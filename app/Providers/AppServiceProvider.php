@@ -3,9 +3,11 @@
 namespace App\Providers;
 
 use App\Contracts\PaymentGateway;
+use App\Events\SessionSummarized;
 use App\Events\TranscriptionSegmentCreated;
 use App\Http\Responses\LoginResponse;
 use App\Listeners\AggregateTranscription;
+use App\Listeners\GeneratePostSessionBriefingOnSummarized;
 use App\Models\Appointment;
 use App\Models\Document;
 use App\Models\Invoice;
@@ -89,6 +91,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(OfferedConsultation::class, OfferedConsultationPolicy::class);
 
         Event::listen(TranscriptionSegmentCreated::class, AggregateTranscription::class);
+        Event::listen(SessionSummarized::class, GeneratePostSessionBriefingOnSummarized::class);
     }
 
     /**

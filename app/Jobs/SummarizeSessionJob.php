@@ -13,9 +13,12 @@ class SummarizeSessionJob implements ShouldQueue
 {
     use Queueable;
 
-    public int $tries = 2;
+    public int $tries = 5;
 
-    public int $backoff = 10;
+    /**
+     * @var array<int,int>
+     */
+    public array $backoff = [15, 30, 60, 120, 240];
 
     public function __construct(
         public int $sessionRecordingId,
@@ -32,7 +35,20 @@ class SummarizeSessionJob implements ShouldQueue
         }
 
         if (trim((string) $recording->transcription) === '') {
-            Log::info('SummarizeSessionJob: no transcription to summarize', ['id' => $this->sessionRecordingId]);
+            if ($this->attempts() < $this->tries) {
+                Log::info('SummarizeSessionJob: transcription not ready, retrying', [
+                    'id' => $this->sessionRecordingId,
+                    'attempt' => $this->attempts(),
+                ]);
+                $this->release(30);
+
+                return;
+            }
+
+            Log::warning('SummarizeSessionJob: transcription still empty after retries, marking failed', [
+                'id' => $this->sessionRecordingId,
+            ]);
+            $recording->update(['transcription_status' => 'failed']);
 
             return;
         }
@@ -42,6 +58,7 @@ class SummarizeSessionJob implements ShouldQueue
         $recording->update([
             'ai_summary' => $summary['raw'],
             'summarized_at' => now(),
+            'transcription_status' => 'completed',
         ]);
 
         event(new SessionSummarized(
