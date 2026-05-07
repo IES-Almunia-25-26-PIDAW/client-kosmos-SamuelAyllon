@@ -3,27 +3,41 @@ export type PatientStatus = 'paid' | 'pending' | 'overdue' | 'noConsent' | 'open
 export type Patient = {
     id: number;
     user_id: number;
-    project_name: string;
-    brand_tone: string | null;
-    service_scope: string | null;
-    next_deadline: string | null;
+    name: string;
     email: string | null;
     phone: string | null;
     avatar_path: string | null;
+    consultation_reason: string | null;
+    therapeutic_approach: string | null;
+    status: 'active' | 'inactive' | 'discharged';
     is_active: boolean;
-    payment_status: 'paid' | 'pending' | 'overdue';
-    has_valid_consent: boolean;
-    has_open_agreement: boolean;
-    statuses: PatientStatus[];
+    first_session_at: string | null;
+    last_session_at: string | null;
     created_at: string;
     updated_at: string;
-    deleted_at: string | null;
+    deleted_at?: string | null;
     sessions?: ConsultingSessionType[];
     notes?: Note[];
     agreements?: Agreement[];
     payments?: Payment[];
     documents?: Document[];
     consent_forms?: ConsentForm[];
+    /** @deprecated legacy; mantener como opcional para vistas no migradas */
+    project_name?: string | null;
+    /** @deprecated legacy alias de therapeutic_approach */
+    brand_tone?: string | null;
+    /** @deprecated legacy alias de consultation_reason */
+    service_scope?: string | null;
+    /** @deprecated legacy */
+    next_deadline?: string | null;
+    /** @deprecated legacy */
+    payment_status?: 'paid' | 'pending' | 'overdue';
+    /** @deprecated legacy */
+    has_valid_consent?: boolean;
+    /** @deprecated legacy */
+    has_open_agreement?: boolean;
+    /** @deprecated legacy */
+    statuses?: PatientStatus[];
 };
 
 export type ConsultingSessionType = {
@@ -82,7 +96,7 @@ export type Payment = {
     last_reminder_at: string | null;
     created_at: string;
     updated_at: string;
-    patient?: Pick<Patient, 'id' | 'project_name'>;
+    patient?: Pick<Patient, 'id' | 'name'>;
 };
 
 export type Document = {

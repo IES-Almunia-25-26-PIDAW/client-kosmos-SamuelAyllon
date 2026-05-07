@@ -238,7 +238,7 @@ export default function PostSession({ patient, lastAppointment, lastInvoice }: P
 
     return (
         <>
-            <Head title={`Post-sesión: ${patient.project_name} — ClientKosmos`} />
+            <Head title={`Post-sesión: ${(patient.name ?? patient.project_name ?? 'Paciente')} — ClientKosmos`} />
 
             <Stack gap="6" p={{ base: '6', lg: '8' }} maxW="5xl">
                 <Box>
@@ -253,13 +253,13 @@ export default function PostSession({ patient, lastAppointment, lastInvoice }: P
                         _hover={{ color: 'fg' }}
                     >
                         <Box as={ArrowLeft} w="4" h="4" />
-                        Volver a {patient.project_name}
+                        Volver a {(patient.name ?? patient.project_name ?? 'Paciente')}
                     </ChakraLink>
                     <Heading as="h1" fontSize="3xl" fontWeight="bold" color="fg">
                         Cerrar sesión
                     </Heading>
                     <Text fontSize="md" color="fg.muted" mt="1">
-                        {patient.project_name}
+                        {(patient.name ?? patient.project_name ?? 'Paciente')}
                     </Text>
                 </Box>
 

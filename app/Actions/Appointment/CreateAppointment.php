@@ -2,8 +2,6 @@
 
 namespace App\Actions\Appointment;
 
-use App\Actions\Patient\CreateOrUpdateProfessionalPatient;
-use App\DTOs\PatientUpsertData;
 use App\Models\Appointment;
 use App\Models\OfferedConsultation;
 use App\Models\ProfessionalProfile;
@@ -14,10 +12,6 @@ use Illuminate\Validation\ValidationException;
 
 class CreateAppointment
 {
-    public function __construct(
-        private CreateOrUpdateProfessionalPatient $upsertPatient,
-    ) {}
-
     private function assertNoProfessionalConflict(int $professionalId, CarbonImmutable $startsAt, CarbonImmutable $endsAt): void
     {
         $conflict = Appointment::query()
@@ -95,18 +89,6 @@ class CreateAppointment
         return DB::transaction(function () use ($patient, $professional, $workspace, $service, $data, $startsAt, $endsAt): Appointment {
             $this->assertNoProfessionalConflict($professional->id, $startsAt, $endsAt);
             $this->assertNoPatientConflict($patient->id, $startsAt, $endsAt);
-
-            ($this->upsertPatient)(
-                $professional,
-                $workspace,
-                new PatientUpsertData(
-                    name: $patient->name,
-                    email: $patient->email,
-                    phone: $patient->phone,
-                    consultationReason: $data['notes'] ?? null,
-                ),
-                $patient,
-            );
 
             return Appointment::create([
                 'workspace_id' => $workspace->id,

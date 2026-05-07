@@ -9,32 +9,32 @@ import { PatientCard } from '@/components/patient/patient-card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import AppLayout from '@/layouts/app-layout';
-import type { Patient, PatientStatus } from '@/types';
+import type { Patient } from '@/types';
 
 interface Props {
     patients: Patient[];
 }
 
-const filterLabels: { key: PatientStatus | 'all'; label: string }[] = [
+type ClinicalFilter = 'all' | 'active' | 'inactive' | 'discharged';
+
+const filterLabels: { key: ClinicalFilter; label: string }[] = [
     { key: 'all', label: 'Todos' },
-    { key: 'pending', label: 'Pendiente de cobro' },
-    { key: 'overdue', label: 'Cobro vencido' },
-    { key: 'noConsent', label: 'Sin consentimiento' },
-    { key: 'openDeal', label: 'Acuerdo pendiente' },
+    { key: 'active', label: 'Activos' },
+    { key: 'inactive', label: 'Inactivos' },
+    { key: 'discharged', label: 'Alta' },
 ];
 
 export default function PatientsIndex({ patients }: Props) {
     const [search, setSearch] = useState('');
-    const [activeFilter, setActiveFilter] = useState<PatientStatus | 'all'>('all');
+    const [activeFilter, setActiveFilter] = useState<ClinicalFilter>('all');
 
     const filtered = patients.filter((p) => {
-        const matchesSearch = (p.project_name ?? '').toLowerCase().includes(search.toLowerCase())
-            || (p.brand_tone ?? '').toLowerCase().includes(search.toLowerCase());
+        const term = search.toLowerCase();
+        const name = (p.name ?? p.project_name ?? '').toLowerCase();
+        const email = (p.email ?? '').toLowerCase();
+        const matchesSearch = term === '' || name.includes(term) || email.includes(term);
 
-        const matchesFilter = activeFilter === 'all'
-            || p.statuses.includes(activeFilter as PatientStatus)
-            || (activeFilter === 'pending' && p.payment_status === 'pending')
-            || (activeFilter === 'overdue' && p.payment_status === 'overdue');
+        const matchesFilter = activeFilter === 'all' || p.status === activeFilter;
 
         return matchesSearch && matchesFilter;
     });

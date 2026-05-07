@@ -183,7 +183,7 @@ export default function BillingIndex({ payments, stats, filters, pendingBilling 
                                 {payments.data.map((payment) => (
                                     <Table.Row key={payment.id} _hover={{ bg: 'bg.muted' }} transition="colors">
                                         <Table.Cell color="fg" fontWeight="medium">
-                                            {payment.patient?.project_name ?? '—'}
+                                            {payment.patient?.name ?? '—'}
                                         </Table.Cell>
                                         <Table.Cell color="fg.muted">
                                             {payment.concept ?? 'Sesión'}

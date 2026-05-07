@@ -56,8 +56,8 @@ function makeFreshlyRegisteredPatient(): User
     return $user;
 }
 
-it('adopts the floating PatientProfile when a new patient opens the booking page', function () {
-    [$professional, $profile, $workspace] = makeVerifiedProfessionalWithWorkspace();
+it('does NOT link the patient to the workspace just by opening the booking page', function () {
+    [, $profile, $workspace] = makeVerifiedProfessionalWithWorkspace();
     $patient = makeFreshlyRegisteredPatient();
 
     $startsAt = now()->addDays(2)->setTime(10, 0);
@@ -69,64 +69,14 @@ it('adopts the floating PatientProfile when a new patient opens the booking page
         ]))
         ->assertOk();
 
-    expect(PatientProfile::where('user_id', $patient->id)->count())->toBe(1);
+    expect(PatientProfile::where('user_id', $patient->id)
+        ->where('workspace_id', $workspace->id)
+        ->count())->toBe(0);
 
-    $linked = PatientProfile::where('user_id', $patient->id)->first();
-    expect($linked->workspace_id)->toBe($workspace->id)
-        ->and($linked->professional_id)->toBe($professional->id)
-        ->and($linked->is_active)->toBeTrue()
-        ->and($linked->status)->toBe('active');
-
-    expect(CaseAssignment::where([
-        'patient_id' => $patient->id,
-        'professional_id' => $professional->id,
-        'workspace_id' => $workspace->id,
-    ])->count())->toBe(1);
+    expect(CaseAssignment::where('patient_id', $patient->id)->count())->toBe(0);
 });
 
-it('is idempotent across repeated visits to the booking page', function () {
-    [$professional, $profile, $workspace] = makeVerifiedProfessionalWithWorkspace();
-    $patient = makeFreshlyRegisteredPatient();
-
-    $startsAt = now()->addDays(2)->setTime(10, 0);
-    $url = route('patient.appointments.book', [
-        'professional_id' => $profile->id,
-        'starts_at' => $startsAt->toIso8601String(),
-    ]);
-
-    $this->actingAs($patient)->get($url)->assertOk();
-    $this->actingAs($patient)->get($url)->assertOk();
-    $this->actingAs($patient)->get($url)->assertOk();
-
-    expect(PatientProfile::where('user_id', $patient->id)->count())->toBe(1);
-    expect(CaseAssignment::where('patient_id', $patient->id)->count())->toBe(1);
-});
-
-it('creates a separate PatientProfile per workspace when the patient books with another professional', function () {
-    [$proA, $profileA, $workspaceA] = makeVerifiedProfessionalWithWorkspace();
-    [$proB, $profileB, $workspaceB] = makeVerifiedProfessionalWithWorkspace();
-    $patient = makeFreshlyRegisteredPatient();
-
-    $startsAt = now()->addDays(2)->setTime(10, 0)->toIso8601String();
-
-    $this->actingAs($patient)
-        ->get(route('patient.appointments.book', ['professional_id' => $profileA->id, 'starts_at' => $startsAt]))
-        ->assertOk();
-
-    $this->actingAs($patient)
-        ->get(route('patient.appointments.book', ['professional_id' => $profileB->id, 'starts_at' => $startsAt]))
-        ->assertOk();
-
-    $profiles = PatientProfile::where('user_id', $patient->id)->get();
-    expect($profiles)->toHaveCount(2);
-    expect($profiles->pluck('workspace_id')->all())
-        ->toContain($workspaceA->id)
-        ->toContain($workspaceB->id);
-
-    expect(CaseAssignment::where('patient_id', $patient->id)->count())->toBe(2);
-});
-
-it('links the patient and creates the appointment on POST without duplicating profiles', function () {
+it('does NOT link the patient when creating the appointment in pending status', function () {
     [$professional, $profile, $workspace] = makeVerifiedProfessionalWithWorkspace();
     $service = OfferedConsultation::where('professional_profile_id', $profile->id)->first();
     $patient = makeFreshlyRegisteredPatient();
@@ -143,18 +93,17 @@ it('links the patient and creates the appointment on POST without duplicating pr
         ])
         ->assertRedirect(route('patient.appointments.book-success'));
 
-    expect(PatientProfile::where('user_id', $patient->id)->count())->toBe(1);
-
-    $linked = PatientProfile::where('user_id', $patient->id)->first();
-    expect($linked->workspace_id)->toBe($workspace->id)
-        ->and($linked->professional_id)->toBe($professional->id);
-
     $this->assertDatabaseHas('appointments', [
         'workspace_id' => $workspace->id,
         'patient_id' => $patient->id,
         'professional_id' => $professional->id,
         'service_id' => $service->id,
-        'modality' => 'video_call',
         'status' => 'pending',
     ]);
+
+    expect(PatientProfile::where('user_id', $patient->id)
+        ->where('workspace_id', $workspace->id)
+        ->count())->toBe(0);
+
+    expect(CaseAssignment::where('patient_id', $patient->id)->count())->toBe(0);
 });

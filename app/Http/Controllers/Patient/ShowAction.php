@@ -14,6 +14,7 @@ class ShowAction extends Controller
         $this->authorize('view', $patient);
 
         $patient->load([
+            'user:id,name,email,phone,avatar_path',
             'appointments' => fn ($q) => $q->orderByDesc('starts_at')->limit(10),
             'notes' => fn ($q) => $q->orderByDesc('created_at')->limit(20),
             'agreements' => fn ($q) => $q->orderByDesc('created_at'),
@@ -61,6 +62,10 @@ class ShowAction extends Controller
 
         return Inertia::render('professional/patients/show', [
             'patient' => array_merge($patient->toArray(), [
+                'name' => $patient->user?->name,
+                'email' => $patient->user?->email,
+                'phone' => $patient->user?->phone,
+                'avatar_path' => $patient->user?->avatar_path,
                 'sessions' => $sessions,
                 'payments' => $payments,
             ]),

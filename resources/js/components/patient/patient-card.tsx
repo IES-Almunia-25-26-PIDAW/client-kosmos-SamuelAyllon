@@ -2,15 +2,29 @@ import { Box, Flex, Image, Text } from '@chakra-ui/react';
 import { Link } from '@inertiajs/react';
 import React from 'react';
 import PatientShowAction from '@/actions/App/Http/Controllers/Patient/ShowAction';
-import { StatusBadge } from '@/components/ui/status-badge';
-import type { Patient, PatientStatus } from '@/types';
+import type { Patient } from '@/types';
 
 interface PatientCardProps {
     patient: Patient;
 }
 
+const initials = (name: string | null | undefined): string => {
+    if (!name) {
+        return '?';
+    }
+    return name
+        .split(/\s+/)
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((part) => part[0])
+        .join('')
+        .toUpperCase();
+};
+
 export const PatientCard: React.FC<PatientCardProps> = ({ patient }) => {
-    const statuses: PatientStatus[] = patient.statuses ?? [];
+    const displayName = patient.name ?? patient.project_name ?? '—';
+    const subtitle = patient.consultation_reason ?? patient.therapeutic_approach ?? null;
+    const lastSessionAt = patient.last_session_at ?? null;
 
     return (
         <Box
@@ -32,7 +46,7 @@ export const PatientCard: React.FC<PatientCardProps> = ({ patient }) => {
                 {patient.avatar_path ? (
                     <Image
                         src={patient.avatar_path}
-                        alt={patient.project_name}
+                        alt={displayName}
                         h="10"
                         w="10"
                         rounded="full"
@@ -52,34 +66,26 @@ export const PatientCard: React.FC<PatientCardProps> = ({ patient }) => {
                         fontWeight="semibold"
                         fontSize="sm"
                     >
-                        {patient.project_name?.substring(0, 2).toUpperCase() ?? '?'}
+                        {initials(displayName)}
                     </Flex>
                 )}
                 <Box flex="1" minW="0">
                     <Text fontSize="sm" fontWeight="medium" color="fg" truncate>
-                        {patient.project_name}
+                        {displayName}
                     </Text>
-                    {patient.brand_tone && (
+                    {subtitle && (
                         <Text fontSize="xs" color="fg.subtle" truncate>
-                            {patient.brand_tone}
+                            {subtitle}
                         </Text>
                     )}
                 </Box>
             </Flex>
 
-            {statuses.length > 0 && (
-                <Flex wrap="wrap" gap="1.5">
-                    {statuses.map((s) => (
-                        <StatusBadge key={s} status={s} variant="subtle" />
-                    ))}
-                </Flex>
-            )}
-
-            {patient.next_deadline && (
+            {lastSessionAt && (
                 <Text fontSize="xs" color="fg.muted" mt="2">
-                    Próxima sesión:{' '}
+                    Última sesión:{' '}
                     {new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'short' }).format(
-                        new Date(patient.next_deadline),
+                        new Date(lastSessionAt),
                     )}
                 </Text>
             )}
