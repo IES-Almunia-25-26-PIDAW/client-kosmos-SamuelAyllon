@@ -27,6 +27,8 @@ class FakeStripeGateway implements PaymentGateway
 
     public string $expectedSignature = 'valid';
 
+    public string $checkoutSessionPaymentStatus = 'paid';
+
     public function createCheckoutSession(Invoice $invoice, string $successUrl, string $cancelUrl): CheckoutSession
     {
         $this->lastInvoice = $invoice;
@@ -37,6 +39,15 @@ class FakeStripeGateway implements PaymentGateway
             'id' => $this->sessionId,
             'url' => $this->sessionUrl,
             'object' => 'checkout.session',
+        ]);
+    }
+
+    public function retrieveCheckoutSession(string $sessionId): CheckoutSession
+    {
+        return CheckoutSession::constructFrom([
+            'id' => $sessionId,
+            'object' => 'checkout.session',
+            'payment_status' => $this->checkoutSessionPaymentStatus,
         ]);
     }
 

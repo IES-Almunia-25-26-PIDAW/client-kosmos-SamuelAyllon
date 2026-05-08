@@ -2,7 +2,9 @@ import { Alert, Badge, Box, Card, Flex, Heading, HStack, Separator, Stack, Table
 import { Head, router } from '@inertiajs/react';
 import type { ReactNode } from 'react';
 import CreateCheckoutAction from '@/actions/App/Http/Controllers/Invoice/CreateCheckoutAction';
+import EditAction from '@/actions/App/Http/Controllers/Invoice/EditAction';
 import SendAction from '@/actions/App/Http/Controllers/Invoice/SendAction';
+import ShowAction from '@/actions/App/Http/Controllers/Invoice/ShowAction';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 
@@ -186,13 +188,13 @@ export default function InvoiceReview({ invoice }: Props) {
                 </Card.Root>
 
                 <HStack justifyContent="flex-end" gap="3" flexWrap="wrap">
-                    <Button variant="outline" onClick={() => router.visit(`/invoices/${invoice.id}`)}>
+                    <Button variant="outline" onClick={() => router.visit(ShowAction.url(invoice.id))}>
                         Volver
                     </Button>
                     {invoice.status === 'draft' && (
                         <Button
                             variant="secondary"
-                            onClick={() => router.visit(`/professional/invoices/${invoice.id}/edit`)}
+                            onClick={() => router.visit(EditAction.url(invoice.id))}
                         >
                             Editar
                         </Button>

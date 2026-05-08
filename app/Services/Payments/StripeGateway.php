@@ -48,6 +48,11 @@ class StripeGateway implements PaymentGateway
         ]);
     }
 
+    public function retrieveCheckoutSession(string $sessionId): CheckoutSession
+    {
+        return $this->client->checkout->sessions->retrieve($sessionId);
+    }
+
     /**
      * Verify the Stripe webhook signature and return the parsed event.
      *

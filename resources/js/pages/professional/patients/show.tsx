@@ -1,8 +1,14 @@
-import { Box, Flex, Grid, Heading, Separator, Stack, Table, Text, Textarea, chakra } from '@chakra-ui/react';
-import { Head, Link, router, useForm } from '@inertiajs/react';
-import { CalendarClock, CheckCircle, FileText, Receipt, Shield, Sparkles, User } from 'lucide-react';
+import { Box, Flex, Grid, Heading, Separator, Stack, Table, Text, Textarea } from '@chakra-ui/react';
+import { Head, router, useForm } from '@inertiajs/react';
+import { CalendarClock, CheckCircle, FileText, Pencil, Receipt, Shield, Sparkles, Trash2, User } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useState } from 'react';
+import AgreementDestroyAction from '@/actions/App/Http/Controllers/Agreement/DestroyAction';
+import AgreementUpdateAction from '@/actions/App/Http/Controllers/Agreement/UpdateAction';
+import DocumentDestroyAction from '@/actions/App/Http/Controllers/Document/DestroyAction';
+import NoteDestroyAction from '@/actions/App/Http/Controllers/Note/DestroyAction';
+import NoteStoreAction from '@/actions/App/Http/Controllers/Note/StoreAction';
+import NoteUpdateAction from '@/actions/App/Http/Controllers/Note/UpdateAction';
 import { EmptyState } from '@/components/empty-state';
 import { PatientHeader } from '@/components/patient/patient-header';
 import { Button } from '@/components/ui/button';
@@ -10,8 +16,6 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { StatusBadge } from '@/components/ui/status-badge';
 import AppLayout from '@/layouts/app-layout';
 import type { Agreement, ConsentForm, ConsultingSessionType, Document, Note, Patient, Payment } from '@/types';
-
-const ChakraLink = chakra(Link);
 
 interface Props {
     patient: Patient & {
@@ -92,6 +96,10 @@ const SectionCard = ({ children, p = '5' }: SectionCardProps) => (
 export default function PatientShow({ patient }: Props) {
     const [activeTab, setActiveTab] = useState<Tab>('resumen');
     const [noteFocused, setNoteFocused] = useState(false);
+    const [editingNoteId, setEditingNoteId] = useState<number | null>(null);
+    const [editingNoteContent, setEditingNoteContent] = useState('');
+    const [editingAgreementId, setEditingAgreementId] = useState<number | null>(null);
+    const [editingAgreementContent, setEditingAgreementContent] = useState('');
 
     const { data: noteData, setData: setNoteData, post: postNote, processing: savingNote, reset: resetNote } = useForm({
         content: '',
@@ -108,12 +116,36 @@ export default function PatientShow({ patient }: Props) {
 
     const submitNote = (e: React.FormEvent) => {
         e.preventDefault();
-        postNote(`/patients/${patient.id}/notes`, {
+        postNote(NoteStoreAction.url(patient.id), {
             onSuccess: () => {
                 resetNote();
                 setNoteFocused(false);
             },
         });
+    };
+
+    const saveNote = (noteId: number) => {
+        router.patch(NoteUpdateAction.url({ patient: patient.id, note: noteId }), { content: editingNoteContent }, {
+            onSuccess: () => setEditingNoteId(null),
+        });
+    };
+
+    const deleteNote = (noteId: number) => {
+        router.delete(NoteDestroyAction.url({ patient: patient.id, note: noteId }));
+    };
+
+    const saveAgreement = (agreementId: number) => {
+        router.patch(AgreementUpdateAction.url({ patient: patient.id, agreement: agreementId }), { content: editingAgreementContent }, {
+            onSuccess: () => setEditingAgreementId(null),
+        });
+    };
+
+    const deleteAgreement = (agreementId: number) => {
+        router.delete(AgreementDestroyAction.url({ patient: patient.id, agreement: agreementId }));
+    };
+
+    const deleteDocument = (documentId: number) => {
+        router.delete(DocumentDestroyAction.url({ patient: patient.id, document: documentId }));
     };
 
     const upcomingSession = patient.sessions[0];
@@ -243,18 +275,6 @@ export default function PatientShow({ patient }: Props) {
                                     </Stack>
                                 </SectionCard>
 
-                                <Flex direction={{ base: 'column', sm: 'row' }} gap="3">
-                                    <ChakraLink href={`/patients/${patient.id}/pre-session`} flex="1">
-                                        <Button variant="primary" size="md" w="full">
-                                            Preparar sesión
-                                        </Button>
-                                    </ChakraLink>
-                                    <ChakraLink href={`/patients/${patient.id}/post-session`} flex="1">
-                                        <Button variant="secondary" size="md" w="full">
-                                            Al terminar
-                                        </Button>
-                                    </ChakraLink>
-                                </Flex>
                             </Stack>
 
                             <Stack gap="6">
@@ -370,25 +390,74 @@ export default function PatientShow({ patient }: Props) {
                                                 <Checkbox
                                                     checked={agreement.is_completed}
                                                     onCheckedChange={() =>
-                                                        router.patch(`/patients/${patient.id}/agreements/${agreement.id}`, {
+                                                        router.patch(AgreementUpdateAction.url({ patient: patient.id, agreement: agreement.id }), {
                                                             is_completed: !agreement.is_completed,
                                                         })
                                                     }
                                                 />
                                             </Box>
                                             <Box flex="1" minW="0">
-                                                <Text
-                                                    fontSize="sm"
-                                                    color={agreement.is_completed ? 'fg.subtle' : 'fg'}
-                                                    textDecoration={agreement.is_completed ? 'line-through' : undefined}
-                                                    lineHeight="short"
-                                                >
-                                                    {agreement.content}
-                                                </Text>
-                                                <Text fontSize="xs" color="fg.subtle" mt="1.5">
-                                                    {formatDate(agreement.created_at)}
-                                                </Text>
+                                                {editingAgreementId === agreement.id ? (
+                                                    <Stack gap="2">
+                                                        <Textarea
+                                                            value={editingAgreementContent}
+                                                            onChange={(e) => setEditingAgreementContent(e.target.value)}
+                                                            autoFocus
+                                                            minH="80px"
+                                                            fontSize="sm"
+                                                            resize="vertical"
+                                                        />
+                                                        <Flex gap="2">
+                                                            <Button size="sm" variant="primary" onClick={() => saveAgreement(agreement.id)} disabled={!editingAgreementContent.trim()}>
+                                                                Guardar
+                                                            </Button>
+                                                            <Button size="sm" variant="secondary" onClick={() => setEditingAgreementId(null)}>
+                                                                Cancelar
+                                                            </Button>
+                                                        </Flex>
+                                                    </Stack>
+                                                ) : (
+                                                    <>
+                                                        <Text
+                                                            fontSize="sm"
+                                                            color={agreement.is_completed ? 'fg.subtle' : 'fg'}
+                                                            textDecoration={agreement.is_completed ? 'line-through' : undefined}
+                                                            lineHeight="short"
+                                                        >
+                                                            {agreement.content}
+                                                        </Text>
+                                                        <Text fontSize="xs" color="fg.subtle" mt="1.5">
+                                                            {formatDate(agreement.created_at)}
+                                                        </Text>
+                                                    </>
+                                                )}
                                             </Box>
+                                            {editingAgreementId !== agreement.id && (
+                                                <Flex gap="1" flexShrink={0}>
+                                                    <Box
+                                                        as="button"
+                                                        p="1.5"
+                                                        borderRadius="md"
+                                                        color="fg.muted"
+                                                        _hover={{ color: 'fg', bg: 'bg.muted' }}
+                                                        onClick={() => { setEditingAgreementId(agreement.id); setEditingAgreementContent(agreement.content); }}
+                                                        aria-label="Editar acuerdo"
+                                                    >
+                                                        <Box as={Pencil} w="3.5" h="3.5" />
+                                                    </Box>
+                                                    <Box
+                                                        as="button"
+                                                        p="1.5"
+                                                        borderRadius="md"
+                                                        color="fg.muted"
+                                                        _hover={{ color: 'red.fg', bg: 'red.subtle' }}
+                                                        onClick={() => deleteAgreement(agreement.id)}
+                                                        aria-label="Eliminar acuerdo"
+                                                    >
+                                                        <Box as={Trash2} w="3.5" h="3.5" />
+                                                    </Box>
+                                                </Flex>
+                                            )}
                                         </Flex>
                                     ))}
                                 </SectionCard>
@@ -470,12 +539,61 @@ export default function PatientShow({ patient }: Props) {
                                             borderTopWidth={idx > 0 ? '1px' : undefined}
                                             borderColor="border.subtle"
                                         >
-                                            <Text fontSize="sm" color="fg" whiteSpace="pre-wrap" lineHeight="tall">
-                                                {note.content}
-                                            </Text>
-                                            <Text fontSize="xs" color="fg.subtle" mt="2.5">
-                                                {formatDate(note.created_at)}
-                                            </Text>
+                                            {editingNoteId === note.id ? (
+                                                <Stack gap="2">
+                                                    <Textarea
+                                                        value={editingNoteContent}
+                                                        onChange={(e) => setEditingNoteContent(e.target.value)}
+                                                        autoFocus
+                                                        minH="100px"
+                                                        fontSize="sm"
+                                                        resize="vertical"
+                                                    />
+                                                    <Flex gap="2">
+                                                        <Button size="sm" variant="primary" onClick={() => saveNote(note.id)} disabled={!editingNoteContent.trim()}>
+                                                            Guardar
+                                                        </Button>
+                                                        <Button size="sm" variant="secondary" onClick={() => setEditingNoteId(null)}>
+                                                            Cancelar
+                                                        </Button>
+                                                    </Flex>
+                                                </Stack>
+                                            ) : (
+                                                <Flex gap="3" alignItems="flex-start">
+                                                    <Box flex="1" minW="0">
+                                                        <Text fontSize="sm" color="fg" whiteSpace="pre-wrap" lineHeight="tall">
+                                                            {note.content}
+                                                        </Text>
+                                                        <Text fontSize="xs" color="fg.subtle" mt="2.5">
+                                                            {formatDate(note.created_at)}
+                                                        </Text>
+                                                    </Box>
+                                                    <Flex gap="1" flexShrink={0}>
+                                                        <Box
+                                                            as="button"
+                                                            p="1.5"
+                                                            borderRadius="md"
+                                                            color="fg.muted"
+                                                            _hover={{ color: 'fg', bg: 'bg.muted' }}
+                                                            onClick={() => { setEditingNoteId(note.id); setEditingNoteContent(note.content); }}
+                                                            aria-label="Editar nota"
+                                                        >
+                                                            <Box as={Pencil} w="3.5" h="3.5" />
+                                                        </Box>
+                                                        <Box
+                                                            as="button"
+                                                            p="1.5"
+                                                            borderRadius="md"
+                                                            color="fg.muted"
+                                                            _hover={{ color: 'red.fg', bg: 'red.subtle' }}
+                                                            onClick={() => deleteNote(note.id)}
+                                                            aria-label="Eliminar nota"
+                                                        >
+                                                            <Box as={Trash2} w="3.5" h="3.5" />
+                                                        </Box>
+                                                    </Flex>
+                                                </Flex>
+                                            )}
                                         </Box>
                                     ))}
                                 </SectionCard>
@@ -528,20 +646,32 @@ export default function PatientShow({ patient }: Props) {
                                                     </Text>
                                                 </Box>
                                             </Flex>
-                                            {doc.is_rgpd && (
-                                                <Text
-                                                    fontSize="xs"
-                                                    fontWeight="medium"
-                                                    px="2"
-                                                    py="0.5"
-                                                    borderRadius="full"
-                                                    bg="purple.subtle"
-                                                    color="purple.fg"
-                                                    flexShrink={0}
+                                            <Flex gap="2" alignItems="center" flexShrink={0}>
+                                                {doc.is_rgpd && (
+                                                    <Text
+                                                        fontSize="xs"
+                                                        fontWeight="medium"
+                                                        px="2"
+                                                        py="0.5"
+                                                        borderRadius="full"
+                                                        bg="purple.subtle"
+                                                        color="purple.fg"
+                                                    >
+                                                        RGPD
+                                                    </Text>
+                                                )}
+                                                <Box
+                                                    as="button"
+                                                    p="1.5"
+                                                    borderRadius="md"
+                                                    color="fg.muted"
+                                                    _hover={{ color: 'red.fg', bg: 'red.subtle' }}
+                                                    onClick={() => deleteDocument(doc.id)}
+                                                    aria-label="Eliminar documento"
                                                 >
-                                                    RGPD
-                                                </Text>
-                                            )}
+                                                    <Box as={Trash2} w="3.5" h="3.5" />
+                                                </Box>
+                                            </Flex>
                                         </Flex>
                                     ))}
                                 </SectionCard>

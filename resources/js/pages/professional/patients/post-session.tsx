@@ -1,7 +1,7 @@
 import { Badge, Box, Flex, Grid, Heading, Skeleton, SkeletonText, Stack, Text, chakra } from '@chakra-ui/react';
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import { useEcho } from '@laravel/echo-react';
-import { ArrowLeft, Check, FileText, Mail, Sparkles } from 'lucide-react';
+import { ArrowLeft, Check, FileText, Sparkles } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
 import AgreementStoreAction from '@/actions/App/Http/Controllers/Agreement/StoreAction';
 import FinalizeAndNotifyAction from '@/actions/App/Http/Controllers/Appointment/FinalizeAndNotifyAction';
@@ -67,12 +67,11 @@ interface PaymentForm {
     [key: string]: string;
 }
 
-type StepId = 1 | 2 | 3;
+type StepId = 1 | 2;
 
 const STEPS: Array<{ id: StepId; title: string; description: string }> = [
     { id: 1, title: 'Notas y resumen IA', description: 'Revisa el resumen generado y añade notas o acuerdos.' },
     { id: 2, title: 'Factura', description: 'Revisa la factura y registra el cobro si aplica.' },
-    { id: 3, title: 'Confirmar envío', description: 'Envía factura y acuerdos al paciente por email.' },
 ];
 
 function Stepper({ current }: { current: StepId }) {
@@ -155,8 +154,7 @@ export default function PostSession({ patient, lastAppointment, lastInvoice }: P
     const [noteSaved, setNoteSaved] = useState(false);
     const [agreementSaved, setAgreementSaved] = useState(false);
     const [paymentSaved, setPaymentSaved] = useState(false);
-    const [confirmed, setConfirmed] = useState(false);
-    const [confirming, setConfirming] = useState(false);
+    const [finishing, setFinishing] = useState(false);
 
     const noteForm = useForm<NoteForm>({ content: '', type: 'session_note' });
     const agreementForm = useForm<AgreementForm>({ content: '' });
@@ -197,22 +195,22 @@ export default function PostSession({ patient, lastAppointment, lastInvoice }: P
         });
     };
 
-    const goNext = () => setCurrentStep((s) => (s < 3 ? ((s + 1) as StepId) : s));
+    const goNext = () => setCurrentStep((s) => (s < 2 ? ((s + 1) as StepId) : s));
     const goBack = () => setCurrentStep((s) => (s > 1 ? ((s - 1) as StepId) : s));
 
-    const confirmAndSend = () => {
+    const finishAndExit = () => {
         if (lastAppointment === null) {
-            setConfirmed(true);
+            router.visit(PatientShowAction.url(patient.id));
             return;
         }
-        setConfirming(true);
+        setFinishing(true);
         router.post(
             FinalizeAndNotifyAction.url(lastAppointment.id),
             {},
             {
                 preserveScroll: true,
-                onSuccess: () => setConfirmed(true),
-                onFinish: () => setConfirming(false),
+                onSuccess: () => router.visit(PatientShowAction.url(patient.id)),
+                onFinish: () => setFinishing(false),
             },
         );
     };
@@ -240,7 +238,7 @@ export default function PostSession({ patient, lastAppointment, lastInvoice }: P
         <>
             <Head title={`Post-sesión: ${(patient.name ?? patient.project_name ?? 'Paciente')} — ClientKosmos`} />
 
-            <Stack gap="6" p={{ base: '6', lg: '8' }} maxW="5xl">
+            <Stack gap="6" p={{ base: '6', lg: '8' }} maxW="5xl" mx="auto" w="full">
                 <Box>
                     <ChakraLink
                         href={PatientShowAction.url(patient.id)}
@@ -516,67 +514,6 @@ export default function PostSession({ patient, lastAppointment, lastInvoice }: P
                     </Stack>
                 )}
 
-                {currentStep === 3 && (
-                    <Card>
-                        <Flex gap="3" align="center" mb="4">
-                            <Box as={Mail} w="5" h="5" color="brand.solid" />
-                            <Heading as="h3" fontSize="lg" fontWeight="semibold" color="fg">
-                                Confirmar envío al paciente
-                            </Heading>
-                        </Flex>
-                        <Stack gap="4">
-                            <Text fontSize="sm" color="fg.muted">
-                                Al confirmar se enviará al paciente un correo con:
-                            </Text>
-                            <Stack gap="2" pl="4">
-                                <Flex gap="2" align="center">
-                                    <Box as={Check} w="4" h="4" color="success.fg" />
-                                    <Text fontSize="sm" color="fg">
-                                        {lastInvoice
-                                            ? `Factura ${lastInvoice.invoice_number} (${formatCurrency(lastInvoice.total)})`
-                                            : 'Sin factura asociada a esta sesión'}
-                                    </Text>
-                                </Flex>
-                                <Flex gap="2" align="center">
-                                    <Box as={Check} w="4" h="4" color="success.fg" />
-                                    <Text fontSize="sm" color="fg">
-                                        Acuerdos registrados en esta sesión (si los hay)
-                                    </Text>
-                                </Flex>
-                                <Flex gap="2" align="center">
-                                    <Box as={Check} w="4" h="4" color="success.fg" />
-                                    <Text fontSize="sm" color="fg">
-                                        Enlace al portal del paciente con el resumen de la sesión
-                                    </Text>
-                                </Flex>
-                            </Stack>
-                            {confirmed ? (
-                                <Box
-                                    p="3"
-                                    borderRadius="md"
-                                    bg="success.subtle"
-                                    borderLeftWidth="3px"
-                                    borderLeftColor="success.solid"
-                                >
-                                    <Text fontSize="sm" color="success.fg" fontWeight="semibold">
-                                        Envío confirmado. El paciente recibirá los correos en breve.
-                                    </Text>
-                                </Box>
-                            ) : (
-                                <Button
-                                    variant="primary"
-                                    onClick={confirmAndSend}
-                                    alignSelf="flex-start"
-                                    loading={confirming}
-                                    disabled={lastAppointment === null}
-                                >
-                                    Confirmar y enviar
-                                </Button>
-                            )}
-                        </Stack>
-                    </Card>
-                )}
-
                 <Flex
                     justify="space-between"
                     align="center"
@@ -590,19 +527,14 @@ export default function PostSession({ patient, lastAppointment, lastInvoice }: P
                         Atrás
                     </Button>
                     <Flex gap="3" ml="auto">
-                        <ChakraLink href={PatientShowAction.url(patient.id)}>
-                            <Button variant="secondary">Guardar y salir</Button>
-                        </ChakraLink>
-                        {currentStep < 3 ? (
+                        {currentStep < 2 ? (
                             <Button variant="primary" onClick={goNext}>
                                 Siguiente
                             </Button>
                         ) : (
-                            <ChakraLink href={PatientShowAction.url(patient.id)}>
-                                <Button variant="primary" disabled={!confirmed}>
-                                    Finalizar
-                                </Button>
-                            </ChakraLink>
+                            <Button variant="primary" onClick={finishAndExit} loading={finishing}>
+                                Finalizar
+                            </Button>
                         )}
                     </Flex>
                 </Flex>
