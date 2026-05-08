@@ -99,7 +99,8 @@ class KosmoService
         }
 
         $recording = $appointment->sessionRecording;
-        $parsed = json_decode((string) ($recording?->ai_summary ?? ''), true);
+        $rawSummary = $recording !== null ? (string) ($recording->ai_summary ?? '') : '';
+        $parsed = json_decode($rawSummary, true);
         $parsed = is_array($parsed) ? $parsed : [];
 
         $sessionNotes = $appointment->notes()->orderByDesc('created_at')->limit(5)->get();

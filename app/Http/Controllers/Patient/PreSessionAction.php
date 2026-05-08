@@ -25,9 +25,7 @@ class PreSessionAction extends Controller
                 'scheduled_at' => optional($a->starts_at)->toIso8601String(),
                 'started_at' => optional($a->patient_joined_at)->toIso8601String(),
                 'ended_at' => optional($a->ends_at)->toIso8601String(),
-                'duration_minutes' => $a->starts_at && $a->ends_at
-                    ? $a->starts_at->diffInMinutes($a->ends_at)
-                    : null,
+                'duration_minutes' => (int) $a->starts_at->diffInMinutes($a->ends_at),
                 'status' => $a->status,
                 'ai_summary' => null,
                 'ai_summary_generated' => false,

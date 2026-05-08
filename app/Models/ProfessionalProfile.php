@@ -35,6 +35,7 @@ class ProfessionalProfile extends Model
         return $this->belongsTo(User::class);
     }
 
+    /** @return HasMany<OfferedConsultation, $this> */
     public function offeredConsultations(): HasMany
     {
         return $this->hasMany(OfferedConsultation::class);

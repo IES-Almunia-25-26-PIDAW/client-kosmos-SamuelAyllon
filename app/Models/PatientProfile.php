@@ -14,6 +14,16 @@ use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
 /**
+ * @property int $id
+ * @property int $user_id
+ * @property bool $is_active
+ * @property string $status
+ * @property string|null $consultation_reason
+ * @property string|null $therapeutic_approach
+ * @property \Illuminate\Support\Carbon|null $first_session_at
+ * @property \Illuminate\Support\Carbon|null $last_session_at
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \App\Models\User $user
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Appointment> $appointments
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Invoice> $invoices
@@ -57,31 +67,37 @@ class PatientProfile extends Model
         ];
     }
 
+    /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /** @return BelongsTo<User, $this> */
     public function professional(): BelongsTo
     {
         return $this->belongsTo(User::class, 'professional_id');
     }
 
+    /** @return HasMany<Appointment, $this> */
     public function appointments(): HasMany
     {
         return $this->hasMany(Appointment::class, 'patient_id', 'user_id');
     }
 
+    /** @return HasMany<Note, $this> */
     public function notes(): HasMany
     {
         return $this->hasMany(Note::class, 'patient_id');
     }
 
+    /** @return HasMany<Agreement, $this> */
     public function agreements(): HasMany
     {
         return $this->hasMany(Agreement::class, 'patient_id');
     }
 
+    /** @return HasMany<Invoice, $this> */
     public function invoices(): HasMany
     {
         return $this->hasMany(Invoice::class, 'patient_id', 'user_id');
@@ -93,6 +109,7 @@ class PatientProfile extends Model
         return $this->hasMany(Document::class, 'patient_id');
     }
 
+    /** @return HasMany<ConsentForm, $this> */
     public function consentForms(): HasMany
     {
         return $this->hasMany(ConsentForm::class, 'patient_id');

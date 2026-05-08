@@ -10,6 +10,15 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
+ * @property int $id
+ * @property int $creator_id
+ * @property string $type
+ * @property string $name
+ * @property array<string, mixed>|null $settings
+ * @property string|null $location_address
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read int|null $members_count
  * @property-read \App\Models\User $creator
  */
 class Workspace extends Model
@@ -57,6 +66,7 @@ class Workspace extends Model
         return $this->belongsTo(User::class, 'creator_id');
     }
 
+    /** @return BelongsToMany<User, $this> */
     public function members(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'workspace_members')

@@ -23,7 +23,7 @@ class InvoiceOverdueNotification extends Notification
         return (new MailMessage)
             ->subject('Factura vencida: '.$this->invoice->invoice_number)
             ->line('La factura '.$this->invoice->invoice_number.' ha vencido el '.($this->invoice->due_at?->format('d/m/Y') ?? '—').'.')
-            ->line('Total pendiente: '.number_format($this->invoice->total, 2).' €')
+            ->line('Total pendiente: '.number_format((float) $this->invoice->total, 2).' €')
             ->action('Ver factura', url('/invoices/'.$this->invoice->id));
     }
 }

@@ -62,10 +62,10 @@ class ShowAction extends Controller
 
         return Inertia::render('professional/patients/show', [
             'patient' => array_merge($patient->toArray(), [
-                'name' => $patient->user?->name,
-                'email' => $patient->user?->email,
-                'phone' => $patient->user?->phone,
-                'avatar_path' => $patient->user?->avatar_path,
+                'name' => $patient->user->name,
+                'email' => $patient->user->email,
+                'phone' => $patient->user->phone,
+                'avatar_path' => $patient->user->avatar_path,
                 'sessions' => $sessions,
                 'payments' => $payments,
             ]),

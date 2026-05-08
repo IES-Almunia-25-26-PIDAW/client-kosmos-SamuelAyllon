@@ -77,7 +77,7 @@ class IndexAction extends Controller
                 'patient_name' => $appointment->patient?->name,
                 'service_name' => $appointment->service?->name,
                 'price' => $appointment->service?->price !== null ? (float) $appointment->service->price : null,
-                'ended_at' => $appointment->ends_at?->toIso8601String(),
+                'ended_at' => $appointment->ends_at->toIso8601String(),
             ]);
 
         return Inertia::render('professional/invoices/index', [

@@ -11,9 +11,20 @@ use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
 /**
+ * @property int $id
+ * @property int $patient_id
+ * @property int $professional_id
+ * @property string $invoice_number
+ * @property string $status
+ * @property string|null $payment_method
+ * @property string|null $stripe_checkout_session_id
+ * @property string|null $notes
+ * @property string $total
  * @property \Illuminate\Support\Carbon|null $issued_at
  * @property \Illuminate\Support\Carbon|null $due_at
  * @property \Illuminate\Support\Carbon|null $paid_at
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \App\Models\User|null $patient
  * @property-read \App\Models\User|null $professional
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\InvoiceItem> $items

@@ -35,6 +35,10 @@ use Illuminate\Support\Carbon;
  * @property-read OfferedConsultation|null $offeredConsultation
  * @property-read SessionRecording|null $sessionRecording
  * @property-read Collection<int, Agreement> $agreements
+ * @property-read Collection<int, InvoiceItem> $invoiceItems
+ * @property-read Collection<int, Note> $notes
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  */
 class Appointment extends Model
 {
@@ -89,6 +93,7 @@ class Appointment extends Model
         return $this->hasOne(SessionRecording::class);
     }
 
+    /** @return HasMany<InvoiceItem, $this> */
     public function invoiceItems(): HasMany
     {
         return $this->hasMany(InvoiceItem::class);
@@ -99,11 +104,13 @@ class Appointment extends Model
         return $this->belongsTo(User::class, 'cancelled_by');
     }
 
+    /** @return HasMany<Note, $this> */
     public function notes(): HasMany
     {
         return $this->hasMany(Note::class);
     }
 
+    /** @return HasMany<Agreement, $this> */
     public function agreements(): HasMany
     {
         return $this->hasMany(Agreement::class);
