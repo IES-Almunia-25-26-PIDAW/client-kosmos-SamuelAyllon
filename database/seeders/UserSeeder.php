@@ -4,16 +4,17 @@ namespace Database\Seeders;
 
 use App\Models\Agreement;
 use App\Models\Appointment;
-use App\Models\Workspace;
+use App\Models\CaseAssignment;
 use App\Models\ConsentForm;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
 use App\Models\Note;
-use App\Models\CaseAssignment;
 use App\Models\OfferedConsultation;
 use App\Models\PatientProfile;
 use App\Models\ProfessionalProfile;
 use App\Models\User;
+use App\Models\Workspace;
+use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -729,8 +730,8 @@ class UserSeeder extends Seeder
             'patient_id' => $samuelPatient->id,
             'professional_id' => $samuelPro->id,
             'service_id' => $samuelService->id,
-            'starts_at' => \Carbon\Carbon::parse('2026-05-07 17:23:00', 'Europe/Madrid')->utc(),
-            'ends_at' => \Carbon\Carbon::parse('2026-05-07 17:50:00', 'Europe/Madrid')->utc(),
+            'starts_at' => Carbon::parse('2026-05-08 12:47:00', 'Europe/Madrid')->utc(),
+            'ends_at' => Carbon::parse('2026-05-08 13:50:00', 'Europe/Madrid')->utc(),
             'status' => 'confirmed',
             'modality' => 'video_call',
         ]);
