@@ -730,8 +730,8 @@ class UserSeeder extends Seeder
             'patient_id' => $samuelPatient->id,
             'professional_id' => $samuelPro->id,
             'service_id' => $samuelService->id,
-            'starts_at' => Carbon::parse('2026-05-08 13:47:00', 'Europe/Madrid')->utc(),
-            'ends_at' => Carbon::parse('2026-05-08 14:30:00', 'Europe/Madrid')->utc(),
+            'starts_at' => Carbon::parse('2026-05-08 17:51:00', 'Europe/Madrid')->utc(),
+            'ends_at' => Carbon::parse('2026-05-08 18:20:00', 'Europe/Madrid')->utc(),
             'status' => 'confirmed',
             'modality' => 'video_call',
         ]);

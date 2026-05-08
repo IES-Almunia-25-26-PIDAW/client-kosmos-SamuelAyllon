@@ -24,21 +24,21 @@ function startableAppointment(array $overrides = []): Appointment
 
 // ─── Google Meet path ───────────────────────────────────────────────────────
 
-it('returns meeting_url without creating a Kosmos room for Google Meet appointments', function () {
+it('returns meeting_url and generates a Kosmos room_id for Google Meet appointments', function () {
     $appointment = startableAppointment([
         'meeting_url' => 'https://meet.google.com/abc-defg-hij',
         'meeting_room_id' => null,
     ]);
 
-    $this->actingAs($appointment->professional)
+    $response = $this->actingAs($appointment->professional)
         ->postJson(route('professional.appointments.start-call', $appointment))
         ->assertOk()
         ->assertJsonFragment([
             'meeting_url' => 'https://meet.google.com/abc-defg-hij',
-            'room_id' => null,
         ]);
 
-    expect($appointment->fresh()->meeting_room_id)->toBeNull();
+    expect($response->json('room_id'))->toStartWith('kosmos-')
+        ->and($appointment->fresh()->meeting_room_id)->toStartWith('kosmos-');
 });
 
 it('sets status to in_progress and records professional_joined_at for Google Meet', function () {
