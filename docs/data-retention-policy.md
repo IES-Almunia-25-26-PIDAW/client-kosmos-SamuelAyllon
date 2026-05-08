@@ -38,7 +38,7 @@ Este documento define el tiempo de retención aplicable a cada categoría de dat
 
 Los campos sensibles se cifran a nivel ORM con el cast `encrypted` de Laravel (AES-256-CBC con HMAC, clave `APP_KEY`):
 
-- `users.google_refresh_token`, `users.gdrive_refresh_token`
+- `users.google_refresh_token`
 - `patient_profiles.clinical_notes`, `diagnosis`, `treatment_plan`
 - `notes.content`
 - `session_recordings.transcription`, `ai_summary`

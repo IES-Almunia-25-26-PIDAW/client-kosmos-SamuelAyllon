@@ -5,6 +5,7 @@ use App\Http\Middleware\EnsureProfessional;
 use App\Http\Middleware\EnsureWorkspaceAccess;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
+use App\Http\Middleware\LogTranscriptionAccess;
 use App\Http\Middleware\SecurityHeaders;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -24,6 +25,8 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
 
+        $middleware->validateCsrfTokens(except: ['webhooks/stripe']);
+
         $middleware->web(append: [
             HandleAppearance::class,
             HandleInertiaRequests::class,
@@ -38,6 +41,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => EnsureAdmin::class,
             'professional' => EnsureProfessional::class,
             'workspace.access' => EnsureWorkspaceAccess::class,
+            'rgpd.access_log' => LogTranscriptionAccess::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

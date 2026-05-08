@@ -1,9 +1,11 @@
-import { Box, Flex, Heading, Stack, Table, Text, chakra } from '@chakra-ui/react';
+import { Alert, Badge, Box, Flex, Heading, HStack, Stack, Table, Text, chakra } from '@chakra-ui/react';
 import { Head, router } from '@inertiajs/react';
 import { Receipt } from 'lucide-react';
 import type { ReactNode } from 'react';
+import GenerateInvoiceAction from '@/actions/App/Http/Controllers/Appointment/GenerateInvoiceAction';
 import { EmptyState } from '@/components/empty-state';
 import { KPICard } from '@/components/patient/kpi-card';
+import { Button } from '@/components/ui/button';
 import { StatusBadge } from '@/components/ui/status-badge';
 import AppLayout from '@/layouts/app-layout';
 import { index as invoicesIndex } from '@/routes/professional/invoices';
@@ -24,10 +26,19 @@ interface PaginatedPayments {
     links: { url: string | null; label: string; active: boolean }[];
 }
 
+interface PendingBillingAppointment {
+    id: number;
+    patient_name: string | null;
+    service_name: string | null;
+    price: number | null;
+    ended_at: string | null;
+}
+
 interface Props {
     payments: PaginatedPayments;
     stats: Stats;
     filters: { status?: string; patient_id?: string };
+    pendingBilling: PendingBillingAppointment[];
 }
 
 const formatDate = (d: string | null | undefined) =>
@@ -42,7 +53,11 @@ const statusLabels: Record<string, string> = {
 
 const FILTER_OPTIONS = ['', 'paid', 'pending', 'overdue', 'claimed'] as const;
 
-export default function BillingIndex({ payments, stats, filters }: Props) {
+export default function BillingIndex({ payments, stats, filters, pendingBilling }: Props) {
+    const handleGenerate = (appointmentId: number) => {
+        router.post(GenerateInvoiceAction.url(appointmentId));
+    };
+
     return (
         <>
             <Head title="Cobros — ClientKosmos" />
@@ -54,6 +69,52 @@ export default function BillingIndex({ payments, stats, filters }: Props) {
                         Control de pagos y estado de cobros de todos tus pacientes
                     </Text>
                 </Box>
+
+                {pendingBilling.length > 0 && (
+                    <Alert.Root status="warning" variant="subtle" borderRadius="md">
+                        <Alert.Indicator />
+                        <Stack gap="3" flex="1">
+                            <Alert.Description fontSize="sm">
+                                <Text fontWeight="semibold">
+                                    {pendingBilling.length === 1
+                                        ? '1 sesión pendiente de facturar'
+                                        : `${pendingBilling.length} sesiones pendientes de facturar`}
+                                </Text>
+                                <Text color="fg.muted" fontSize="xs" mt="0.5">
+                                    Sesiones completadas sin factura asociada. Lo normal es que se generen automáticamente; si ves alguna aquí, puedes crearla manualmente.
+                                </Text>
+                            </Alert.Description>
+                            <Stack gap="2">
+                                {pendingBilling.map((appt) => (
+                                    <Flex
+                                        key={appt.id}
+                                        alignItems="center"
+                                        justifyContent="space-between"
+                                        gap="3"
+                                        p="2"
+                                        borderRadius="md"
+                                        bg="bg.surface"
+                                        flexWrap="wrap"
+                                    >
+                                        <Box>
+                                            <Text fontSize="sm" fontWeight="medium" color="fg">
+                                                {appt.patient_name ?? '—'}
+                                            </Text>
+                                            <Text fontSize="xs" color="fg.muted">
+                                                {appt.service_name ?? 'Sesión'}
+                                                {appt.ended_at && ` · ${formatDate(appt.ended_at)}`}
+                                                {appt.price !== null && ` · €${appt.price.toLocaleString('es-ES', { minimumFractionDigits: 2 })}`}
+                                            </Text>
+                                        </Box>
+                                        <Button size="sm" variant="primary" onClick={() => handleGenerate(appt.id)}>
+                                            Generar factura
+                                        </Button>
+                                    </Flex>
+                                ))}
+                            </Stack>
+                        </Stack>
+                    </Alert.Root>
+                )}
 
                 <Box display="grid" gridTemplateColumns={{ base: '1fr', sm: 'repeat(3, 1fr)' }} gap="4">
                     <KPICard
@@ -122,7 +183,7 @@ export default function BillingIndex({ payments, stats, filters }: Props) {
                                 {payments.data.map((payment) => (
                                     <Table.Row key={payment.id} _hover={{ bg: 'bg.muted' }} transition="colors">
                                         <Table.Cell color="fg" fontWeight="medium">
-                                            {payment.patient?.project_name ?? '—'}
+                                            {payment.patient?.name ?? '—'}
                                         </Table.Cell>
                                         <Table.Cell color="fg.muted">
                                             {payment.concept ?? 'Sesión'}
@@ -134,10 +195,18 @@ export default function BillingIndex({ payments, stats, filters }: Props) {
                                             €{Number(payment.amount).toLocaleString('es-ES', { minimumFractionDigits: 2 })}
                                         </Table.Cell>
                                         <Table.Cell>
-                                            <StatusBadge
-                                                status={payment.status as 'paid' | 'pending' | 'overdue'}
-                                                variant="subtle"
-                                            />
+                                            <HStack gap="1.5" flexWrap="wrap">
+                                                <StatusBadge
+                                                    status={payment.status as 'paid' | 'pending' | 'overdue'}
+                                                    variant="subtle"
+                                                />
+                                                {(payment as Payment & { stripe_checkout_pending?: boolean })
+                                                    .stripe_checkout_pending && (
+                                                    <Badge colorPalette="purple" variant="subtle" fontSize="2xs">
+                                                        Stripe pendiente
+                                                    </Badge>
+                                                )}
+                                            </HStack>
                                         </Table.Cell>
                                     </Table.Row>
                                 ))}

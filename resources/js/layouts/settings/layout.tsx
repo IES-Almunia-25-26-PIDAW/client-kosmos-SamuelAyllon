@@ -1,6 +1,6 @@
 import { Box, Flex, Heading, Stack, Text, chakra } from '@chakra-ui/react';
 import { Link } from '@inertiajs/react';
-import { Lock, Palette, Settings, Shield, User } from 'lucide-react';
+import { Calendar, Lock, Palette, Settings, Shield, User } from 'lucide-react';
 import type { PropsWithChildren } from 'react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -8,6 +8,7 @@ import { useCurrentUrl } from '@/hooks/use-current-url';
 import { toUrl } from '@/lib/utils';
 import { edit as editAppearance } from '@/routes/appearance';
 import { edit } from '@/routes/profile';
+import { edit as editGoogle } from '@/routes/settings/google';
 import { show } from '@/routes/two-factor';
 import { edit as editPassword } from '@/routes/user-password';
 import type { NavItem } from '@/types';
@@ -19,6 +20,7 @@ const sidebarNavItems: NavItem[] = [
     { title: 'Contraseña', href: editPassword(), icon: Lock },
     { title: 'Autenticación 2FA', href: show(), icon: Shield },
     { title: 'Apariencia', href: editAppearance(), icon: Palette },
+    { title: 'Google Calendar', href: editGoogle(), icon: Calendar },
 ];
 
 export default function SettingsLayout({ children }: PropsWithChildren) {

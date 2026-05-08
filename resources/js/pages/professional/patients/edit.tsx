@@ -14,12 +14,16 @@ interface Props {
 }
 
 export default function PatientEdit({ patient }: Props) {
+    const initialName = patient.name ?? patient.project_name ?? '';
+    const initialReason = patient.consultation_reason ?? patient.service_scope ?? '';
+    const initialApproach = patient.therapeutic_approach ?? patient.brand_tone ?? '';
+
     const { data, setData, put, processing, errors } = useForm({
-        project_name: patient.project_name,
+        project_name: initialName,
         email: patient.email ?? '',
         phone: patient.phone ?? '',
-        brand_tone: patient.brand_tone ?? '',
-        service_scope: patient.service_scope ?? '',
+        brand_tone: initialApproach,
+        service_scope: initialReason,
         next_deadline: patient.next_deadline ?? '',
     });
 
@@ -30,7 +34,7 @@ export default function PatientEdit({ patient }: Props) {
 
     return (
         <>
-            <Head title={`Editar ${patient.project_name} — ClientKosmos`} />
+            <Head title={`Editar ${initialName} — ClientKosmos`} />
 
             <Stack gap="6" p={{ base: '6', lg: '8' }} maxW="2xl">
                 <Box>
@@ -38,7 +42,7 @@ export default function PatientEdit({ patient }: Props) {
                         Editar paciente
                     </Heading>
                     <Text mt="1" fontSize="md" color="fg.muted">
-                        {patient.project_name}
+                        {initialName}
                     </Text>
                 </Box>
 

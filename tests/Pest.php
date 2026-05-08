@@ -3,10 +3,14 @@
 use App\Models\CaseAssignment;
 use App\Models\ConsentForm;
 use App\Models\PatientProfile;
+use App\Models\ProfessionalProfile;
 use App\Models\User;
 use App\Services\RgpdService;
 use Database\Seeders\RoleSeeder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Assert;
+use Spatie\Activitylog\Models\Activity;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
@@ -64,7 +68,7 @@ function createAdmin(): User
 /**
  * Crea un usuario profesional con tutorial completado.
  */
-function createProfessional(): User
+function createProfessional(bool $verified = true): User
 {
     ensureRolesExist();
 
@@ -72,6 +76,10 @@ function createProfessional(): User
         'tutorial_completed_at' => now(),
     ]);
     $user->assignRole('professional');
+
+    if ($verified) {
+        ProfessionalProfile::factory()->verified()->create(['user_id' => $user->id]);
+    }
 
     return $user;
 }
@@ -135,4 +143,46 @@ function createPatientProfileFor(User $professional, array $overrides = []): Pat
     ]);
 
     return $profile;
+}
+
+/*
+|--------------------------------------------------------------------------
+| Audit log assertions (Spatie ActivityLog)
+|--------------------------------------------------------------------------
+*/
+
+/**
+ * Asserts that an activity_log row matches the given filter.
+ *
+ * @param  array<string, mixed>  $filter  Keys: event, log_name, description, subject_type, subject_id, causer_id.
+ */
+function assertActivityLogged(array $filter): Activity
+{
+    $query = Activity::query();
+
+    foreach ($filter as $column => $value) {
+        $query->where($column, $value);
+    }
+
+    /** @var Activity|null $activity */
+    $activity = $query->latest('id')->first();
+
+    Assert::assertNotNull(
+        $activity,
+        'Failed asserting that an activity_log row exists matching: '.json_encode($filter, JSON_UNESCAPED_SLASHES)
+    );
+
+    return $activity;
+}
+
+/**
+ * Asserts that the latest activity_log row for the given subject matches the description.
+ */
+function assertActivityLoggedFor(Model $subject, string $description): Activity
+{
+    return assertActivityLogged([
+        'subject_type' => $subject->getMorphClass(),
+        'subject_id' => $subject->getKey(),
+        'description' => $description,
+    ]);
 }

@@ -37,7 +37,9 @@ use App\Http\Controllers\ConsentForm\UpdateAction as ConsentFormUpdateAction;
 use App\Http\Controllers\Dashboard\IndexAction as DashboardIndexAction;
 use App\Http\Controllers\Document\DestroyAction as DocumentDestroyAction;
 use App\Http\Controllers\Document\StoreAction as DocumentStoreAction;
+use App\Http\Controllers\Invoice\CreateCheckoutAction as InvoiceCreateCheckoutAction;
 use App\Http\Controllers\Invoice\DestroyAction as InvoiceDestroyAction;
+use App\Http\Controllers\Invoice\EditAction as InvoiceEditAction;
 use App\Http\Controllers\Invoice\ExportPdfAction as InvoiceExportPdfAction;
 use App\Http\Controllers\Invoice\IndexAction as InvoiceIndexAction;
 use App\Http\Controllers\Invoice\ReviewAction as InvoiceReviewAction;
@@ -54,6 +56,14 @@ use App\Http\Controllers\Message\StoreAction as MessageStoreAction;
 use App\Http\Controllers\Note\DestroyAction as NoteDestroyAction;
 use App\Http\Controllers\Note\StoreAction as NoteStoreAction;
 use App\Http\Controllers\Note\UpdateAction as NoteUpdateAction;
+use App\Http\Controllers\Notification\MarkReadAction as NotificationMarkReadAction;
+use App\Http\Controllers\OfferedConsultations\CreateAction as OfferedConsultationsCreateAction;
+use App\Http\Controllers\OfferedConsultations\DestroyAction as OfferedConsultationsDestroyAction;
+use App\Http\Controllers\OfferedConsultations\EditAction as OfferedConsultationsEditAction;
+use App\Http\Controllers\OfferedConsultations\IndexAction as OfferedConsultationsIndexAction;
+use App\Http\Controllers\OfferedConsultations\ShowAction as OfferedConsultationsShowAction;
+use App\Http\Controllers\OfferedConsultations\StoreAction as OfferedConsultationsStoreAction;
+use App\Http\Controllers\OfferedConsultations\UpdateAction as OfferedConsultationsUpdateAction;
 use App\Http\Controllers\Onboarding\IndexAction as OnboardingIndexAction;
 use App\Http\Controllers\Onboarding\StoreAction as OnboardingStoreAction;
 use App\Http\Controllers\Patient\CreateAction as PatientCreateAction;
@@ -67,7 +77,9 @@ use App\Http\Controllers\Patient\ShowAction as PatientShowAction;
 use App\Http\Controllers\Patient\StoreAction as PatientStoreAction;
 use App\Http\Controllers\Patient\UpdateAction as PatientUpdateAction;
 use App\Http\Controllers\Portal\Appointment\BookAction as PortalAppointmentBookAction;
+use App\Http\Controllers\Portal\Appointment\BookSuccessAction as PortalAppointmentBookSuccessAction;
 use App\Http\Controllers\Portal\Appointment\CancelAction as PortalAppointmentCancelAction;
+use App\Http\Controllers\Portal\Appointment\ConfirmAction as PortalAppointmentConfirmAction;
 use App\Http\Controllers\Portal\Appointment\IndexAction as PortalAppointmentIndexAction;
 use App\Http\Controllers\Portal\Appointment\JoinCallAction as PortalAppointmentJoinCallAction;
 use App\Http\Controllers\Portal\Appointment\PostSessionShowAction as PortalAppointmentPostSessionShowAction;
@@ -86,8 +98,10 @@ use App\Http\Controllers\Portal\Invoice\ShowAction as PortalInvoiceShowAction;
 use App\Http\Controllers\Portal\Message\IndexAction as PortalMessageIndexAction;
 use App\Http\Controllers\Portal\Message\StoreAction as PortalMessageStoreAction;
 use App\Http\Controllers\Portal\Professional\IndexAction as PortalProfessionalIndexAction;
+use App\Http\Controllers\Portal\Professional\ShowAction as PortalProfessionalShowAction;
 use App\Http\Controllers\Portal\Profile\ShowAction as PortalProfileShowAction;
 use App\Http\Controllers\Portal\Profile\UpdateAction as PortalProfileUpdateAction;
+use App\Http\Controllers\Professional\PendingApprovalAction;
 use App\Http\Controllers\Referral\DestroyAction as ReferralDestroyAction;
 use App\Http\Controllers\Referral\IndexAction as ReferralIndexAction;
 use App\Http\Controllers\Referral\StoreAction as ReferralStoreAction;
@@ -99,16 +113,17 @@ use App\Http\Controllers\Schedule\Availability\UpdateAction as AvailabilityUpdat
 use App\Http\Controllers\Schedule\IndexAction as ScheduleIndexAction;
 use App\Http\Controllers\Settings\IndexAction as SettingsIndexAction;
 use App\Http\Controllers\Settings\UpdateAction as SettingsUpdateAction;
+use App\Http\Controllers\Webhook\StripeWebhookAction;
 use App\Http\Controllers\Workspace\Analytics\IndexAction as WorkspaceAnalyticsIndexAction;
-use App\Http\Controllers\Workspace\Services\DestroyAction as WorkspaceServiceDestroyAction;
-use App\Http\Controllers\Workspace\Services\IndexAction as WorkspaceServiceIndexAction;
-use App\Http\Controllers\Workspace\Services\StoreAction as WorkspaceServiceStoreAction;
-use App\Http\Controllers\Workspace\Services\UpdateAction as WorkspaceServiceUpdateAction;
+use App\Http\Controllers\Workspace\Patient\ShareAction as WorkspacePatientShareAction;
+use App\Http\Controllers\Workspace\Patient\UnshareAction as WorkspacePatientUnshareAction;
 use App\Http\Controllers\Workspace\Settings\IndexAction as WorkspaceSettingsIndexAction;
 use App\Http\Controllers\Workspace\Settings\UpdateAction as WorkspaceSettingsUpdateAction;
+use App\Http\Controllers\Workspace\StoreAction as WorkspaceStoreAction;
 use App\Http\Controllers\Workspace\Team\DestroyAction as WorkspaceTeamDestroyAction;
 use App\Http\Controllers\Workspace\Team\IndexAction as WorkspaceTeamIndexAction;
 use App\Http\Controllers\Workspace\Team\InviteAction as WorkspaceTeamInviteAction;
+use App\Http\Controllers\Workspace\Team\ShowAction as WorkspaceTeamShowAction;
 use App\Http\Controllers\Workspace\Team\UpdatePermissionsAction as WorkspaceTeamUpdatePermissionsAction;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -128,6 +143,11 @@ Route::middleware(['auth', 'verified'])
 
         return redirect()->route('patient.dashboard');
     })->name('dashboard');
+
+// ─── Professional pending approval (sin middleware professional para evitar loop) ─
+Route::middleware(['auth', 'verified'])
+    ->get('/professional/pending-approval', PendingApprovalAction::class)
+    ->name('professional.pending-approval');
 
 // ─── Professional routes ───────────────────────────────────────────────────────
 Route::middleware(['auth', 'verified', 'professional'])
@@ -164,7 +184,7 @@ Route::middleware(['auth', 'verified', 'professional'])
 
         // Patient sub-resources: Invoices (replaces old payments routes)
         Route::post('/patients/{patient}/invoices', InvoiceStoreAction::class)->name('patients.invoices.store');
-        Route::match(['put', 'patch'], '/patients/{patient}/invoices/{invoice}', InvoiceUpdateAction::class)->name('patients.invoices.update');
+        Route::match(['put', 'patch'], '/invoices/{invoice}', InvoiceUpdateAction::class)->name('invoices.update');
         Route::delete('/patients/{patient}/invoices/{invoice}', InvoiceDestroyAction::class)->name('patients.invoices.destroy');
 
         // Patient sub-resources: Documents
@@ -179,7 +199,9 @@ Route::middleware(['auth', 'verified', 'professional'])
         Route::get('/invoices', InvoiceIndexAction::class)->name('invoices.index');
         Route::get('/invoices/{invoice}', InvoiceShowAction::class)->name('invoices.show');
         Route::get('/invoices/{invoice}/review', InvoiceReviewAction::class)->name('invoices.review');
+        Route::get('/invoices/{invoice}/edit', InvoiceEditAction::class)->name('invoices.edit');
         Route::post('/invoices/{invoice}/send', InvoiceSendAction::class)->name('invoices.send');
+        Route::post('/invoices/{invoice}/checkout', InvoiceCreateCheckoutAction::class)->name('invoices.checkout');
         Route::get('/invoices/{invoice}/export-pdf', InvoiceExportPdfAction::class)->name('invoices.export-pdf');
 
         // Appointments
@@ -205,21 +227,30 @@ Route::middleware(['auth', 'verified', 'professional'])
         Route::match(['put', 'patch'], '/schedule/availability/{availability}', AvailabilityUpdateAction::class)->name('schedule.availability.update');
         Route::delete('/schedule/availability/{availability}', AvailabilityDestroyAction::class)->name('schedule.availability.destroy');
 
+        // OfferedConsultations (services del profesional)
+        Route::get('/offered-consultations', OfferedConsultationsIndexAction::class)->name('offered-consultations.index');
+        Route::get('/offered-consultations/create', OfferedConsultationsCreateAction::class)->name('offered-consultations.create');
+        Route::post('/offered-consultations', OfferedConsultationsStoreAction::class)->name('offered-consultations.store');
+        Route::get('/offered-consultations/{offered_consultation}', OfferedConsultationsShowAction::class)->name('offered-consultations.show');
+        Route::get('/offered-consultations/{offered_consultation}/edit', OfferedConsultationsEditAction::class)->name('offered-consultations.edit');
+        Route::match(['put', 'patch'], '/offered-consultations/{offered_consultation}', OfferedConsultationsUpdateAction::class)->name('offered-consultations.update');
+        Route::delete('/offered-consultations/{offered_consultation}', OfferedConsultationsDestroyAction::class)->name('offered-consultations.destroy');
+
         // Workspace management
         Route::prefix('workspace')->name('workspace.')->group(function () {
+            Route::post('/collaborative', WorkspaceStoreAction::class)->name('collaborative.store');
             Route::get('/settings', WorkspaceSettingsIndexAction::class)->name('settings.index');
             Route::put('/settings', WorkspaceSettingsUpdateAction::class)->name('settings.update');
             Route::get('/analytics', WorkspaceAnalyticsIndexAction::class)->name('analytics.index');
 
             Route::get('/team', WorkspaceTeamIndexAction::class)->name('team.index');
-            Route::post('/team/invite', WorkspaceTeamInviteAction::class)->name('team.invite');
-            Route::put('/team/{user}/permissions', WorkspaceTeamUpdatePermissionsAction::class)->name('team.permissions');
-            Route::delete('/team/{user}', WorkspaceTeamDestroyAction::class)->name('team.destroy');
+            Route::get('/{workspace}/team', WorkspaceTeamShowAction::class)->name('team.show');
+            Route::post('/{workspace}/team/invite', WorkspaceTeamInviteAction::class)->name('team.invite');
+            Route::put('/{workspace}/team/{user}/permissions', WorkspaceTeamUpdatePermissionsAction::class)->name('team.permissions');
+            Route::delete('/{workspace}/team/{user}', WorkspaceTeamDestroyAction::class)->name('team.destroy');
 
-            Route::get('/services', WorkspaceServiceIndexAction::class)->name('services.index');
-            Route::post('/services', WorkspaceServiceStoreAction::class)->name('services.store');
-            Route::match(['put', 'patch'], '/services/{service}', WorkspaceServiceUpdateAction::class)->name('services.update');
-            Route::delete('/services/{service}', WorkspaceServiceDestroyAction::class)->name('services.destroy');
+            Route::post('/{workspace}/patients/{patient}', WorkspacePatientShareAction::class)->name('patients.share');
+            Route::delete('/{workspace}/patients/{patient}', WorkspacePatientUnshareAction::class)->name('patients.unshare');
 
             // Collaboration agreements
             Route::get('/collaborations', CollaborationIndexAction::class)->name('collaborations.index');
@@ -273,11 +304,14 @@ Route::middleware(['auth', 'verified'])
         Route::get('/', PortalDashboardIndexAction::class)->name('dashboard');
 
         Route::get('/professionals', PortalProfessionalIndexAction::class)->name('professionals.index');
+        Route::get('/professionals/{professional}', PortalProfessionalShowAction::class)->name('professionals.show');
 
         Route::get('/appointments', PortalAppointmentIndexAction::class)->name('appointments.index');
         Route::get('/appointments/book', PortalAppointmentBookAction::class)->name('appointments.book');
+        Route::get('/appointments/book-success', PortalAppointmentBookSuccessAction::class)->name('appointments.book-success');
         Route::post('/appointments', PortalAppointmentStoreAction::class)->name('appointments.store');
         Route::get('/appointments/{appointment}', PortalAppointmentShowAction::class)->name('appointments.show');
+        Route::post('/appointments/{appointment}/confirm', PortalAppointmentConfirmAction::class)->name('appointments.confirm');
         Route::post('/appointments/{appointment}/cancel', PortalAppointmentCancelAction::class)->name('appointments.cancel');
         Route::post('/appointments/{appointment}/join', PortalAppointmentJoinCallAction::class)->name('appointments.join');
         Route::get('/appointments/{appointment}/waiting', PortalAppointmentWaitingShowAction::class)->name('appointments.waiting');
@@ -285,12 +319,18 @@ Route::middleware(['auth', 'verified'])
         Route::get('/appointments/{appointment}/post-session', PortalAppointmentPostSessionShowAction::class)->name('appointments.post-session');
 
         Route::get('/invoices', PortalInvoiceIndexAction::class)->name('invoices.index');
-        Route::get('/invoices/{invoice}', PortalInvoiceShowAction::class)->name('invoices.show');
-        Route::get('/invoices/{invoice}/download', PortalInvoiceDownloadPdfAction::class)->name('invoices.download');
+        Route::get('/invoices/{invoice}', PortalInvoiceShowAction::class)
+            ->middleware('rgpd.access_log:invoice.show')
+            ->name('invoices.show');
+        Route::get('/invoices/{invoice}/download', PortalInvoiceDownloadPdfAction::class)
+            ->middleware('rgpd.access_log:invoice.download')
+            ->name('invoices.download');
+        Route::post('/invoices/{invoice}/checkout', InvoiceCreateCheckoutAction::class)
+            ->name('invoices.checkout');
 
         Route::get('/documents', PortalDocumentIndexAction::class)->name('documents.index');
         Route::get('/documents/{document}', PortalDocumentShowAction::class)
-            ->middleware('signed')
+            ->middleware(['signed', 'rgpd.access_log:document.show'])
             ->name('documents.show');
 
         Route::get('/consent-forms', PortalConsentFormIndexAction::class)->name('consent-forms.index');
@@ -303,6 +343,11 @@ Route::middleware(['auth', 'verified'])
         Route::match(['put', 'patch'], '/profile', PortalProfileUpdateAction::class)->name('profile.update');
     });
 
+// ─── Notificaciones in-app (cualquier usuario autenticado) ───────────────────
+Route::middleware(['auth', 'verified'])
+    ->post('/notifications/{notification}/read', NotificationMarkReadAction::class)
+    ->name('notifications.read');
+
 // ─── Video call room (accesible por profesional y paciente autenticados) ──────
 Route::middleware(['auth', 'verified'])
     ->group(function () {
@@ -314,5 +359,8 @@ Route::middleware(['auth', 'verified'])
             ->middleware('throttle:30,1')
             ->name('appointments.transcribe');
     });
+
+// ─── Stripe webhook (público, sin auth ni CSRF — ver bootstrap/app.php) ───────
+Route::post('/webhooks/stripe', StripeWebhookAction::class)->name('webhooks.stripe');
 
 require __DIR__.'/settings.php';

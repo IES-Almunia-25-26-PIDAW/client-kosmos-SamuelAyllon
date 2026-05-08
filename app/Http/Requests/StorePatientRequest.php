@@ -14,10 +14,10 @@ class StorePatientRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'project_name'  => ['required', 'string', 'max:255'],
-            'email'         => ['nullable', 'email'],
-            'phone'         => ['nullable', 'string'],
-            'brand_tone'    => ['nullable', 'string', 'max:100'],
+            'project_name' => ['required', 'string', 'max:255'],
+            'email' => ['nullable', 'email'],
+            'phone' => ['nullable', 'string', 'max:50'],
+            'brand_tone' => ['nullable', 'string', 'max:150'],
             'service_scope' => ['nullable', 'string'],
             'next_deadline' => ['nullable', 'date'],
         ];

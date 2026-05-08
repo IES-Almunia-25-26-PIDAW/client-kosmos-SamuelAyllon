@@ -31,9 +31,13 @@ const formatDateTime = (d: string) =>
     new Intl.DateTimeFormat('es-ES', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).format(new Date(d));
 
 export default function PreSession({ patient, context, briefing }: Props) {
+    const displayName = patient.name ?? patient.project_name ?? 'Paciente';
+    const consultationReason = patient.consultation_reason ?? patient.service_scope ?? null;
+    const therapeuticApproach = patient.therapeutic_approach ?? patient.brand_tone ?? null;
+
     return (
         <>
-            <Head title={`Pre-sesión: ${patient.project_name} — ClientKosmos`} />
+            <Head title={`Pre-sesión: ${displayName} — ClientKosmos`} />
 
             <Stack gap="6" p={{ base: '6', lg: '8' }} maxW="4xl">
 
@@ -49,7 +53,7 @@ export default function PreSession({ patient, context, briefing }: Props) {
                         _hover={{ color: 'fg' }}
                     >
                         <Box as={ArrowLeft} w="4" h="4" />
-                        Volver a {patient.project_name}
+                        Volver a {displayName}
                     </ChakraLink>
                     <Flex alignItems="center" justifyContent="space-between">
                         <Box>
@@ -57,7 +61,7 @@ export default function PreSession({ patient, context, briefing }: Props) {
                                 Preparar sesión
                             </Heading>
                             <Text fontSize="md" color="fg.muted" mt="1">
-                                {patient.project_name}
+                                {displayName}
                             </Text>
                         </Box>
                         <Flex gap="2">
@@ -208,7 +212,7 @@ export default function PreSession({ patient, context, briefing }: Props) {
                             </Box>
                         )}
 
-                        {patient.service_scope && (
+                        {consultationReason && (
                             <Box
                                 borderRadius="lg"
                                 borderWidth="1px"
@@ -221,11 +225,11 @@ export default function PreSession({ patient, context, briefing }: Props) {
                                     Motivo de consulta
                                 </Heading>
                                 <Text fontSize="sm" color="fg.muted">
-                                    {patient.service_scope}
+                                    {consultationReason}
                                 </Text>
-                                {patient.brand_tone && (
+                                {therapeuticApproach && (
                                     <Text fontSize="xs" color="fg.subtle" mt="2">
-                                        Enfoque: {patient.brand_tone}
+                                        Enfoque: {therapeuticApproach}
                                     </Text>
                                 )}
                             </Box>

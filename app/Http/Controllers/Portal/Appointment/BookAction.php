@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Portal\Appointment;
 
 use App\Http\Controllers\Controller;
+use App\Models\OfferedConsultation;
 use App\Models\ProfessionalProfile;
-use App\Models\Service;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -21,12 +21,6 @@ class BookAction extends Controller
             'service_id' => ['nullable', 'integer'],
         ]);
 
-        $workspaceId = $request->user()->patientProfile?->workspace_id;
-
-        if (! $workspaceId) {
-            return redirect()->route('patient.dashboard');
-        }
-
         $profile = ProfessionalProfile::with('user:id,name,avatar_path')
             ->find($validated['professional_id']);
 
@@ -36,10 +30,19 @@ class BookAction extends Controller
                 ->withErrors(['professional_id' => 'Profesional no disponible.']);
         }
 
-        $services = Service::where('workspace_id', $workspaceId)
+        $workspace = $profile->user->workspaces()->first();
+
+        if (! $workspace) {
+            return redirect()
+                ->route('patient.professionals.index')
+                ->withErrors(['professional_id' => 'Profesional no disponible.']);
+        }
+
+        $services = OfferedConsultation::query()
+            ->where('professional_profile_id', $profile->id)
             ->where('is_active', true)
             ->orderBy('name')
-            ->get(['id', 'name', 'description', 'duration_minutes', 'price']);
+            ->get(['id', 'name', 'description', 'duration_minutes', 'price', 'modality']);
 
         $service = isset($validated['service_id'])
             ? $services->firstWhere('id', $validated['service_id'])

@@ -80,7 +80,13 @@ export default function AppointmentWaiting({ appointment }: Props) {
                         </Text>
                     </Box>
 
-                    <JoinCallButton appointment={appointment} role="professional" />
+                    {appointment.status === 'confirmed' || appointment.status === 'in_progress' ? (
+                        <JoinCallButton appointment={appointment} role="professional" />
+                    ) : (
+                        <Text fontSize="sm" color="fg.muted">
+                            Esta cita aún no ha sido confirmada. Confírmala antes de iniciar la sesión.
+                        </Text>
+                    )}
                 </Stack>
             </Flex>
         </>

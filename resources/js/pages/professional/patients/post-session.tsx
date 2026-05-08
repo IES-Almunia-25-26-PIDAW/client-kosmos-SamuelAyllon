@@ -1,7 +1,14 @@
-import { Badge, Box, Flex, Grid, Heading, Stack, Text, chakra } from '@chakra-ui/react';
+import { Badge, Box, Flex, Grid, Heading, Skeleton, SkeletonText, Stack, Text, chakra } from '@chakra-ui/react';
 import { Head, Link, router, useForm } from '@inertiajs/react';
-import { ArrowLeft, Check, FileText, Mail, Sparkles } from 'lucide-react';
+import { useEcho } from '@laravel/echo-react';
+import { ArrowLeft, Check, FileText, Sparkles } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
+import AgreementStoreAction from '@/actions/App/Http/Controllers/Agreement/StoreAction';
+import FinalizeAndNotifyAction from '@/actions/App/Http/Controllers/Appointment/FinalizeAndNotifyAction';
+import InvoiceReviewAction from '@/actions/App/Http/Controllers/Invoice/ReviewAction';
+import InvoiceStoreAction from '@/actions/App/Http/Controllers/Invoice/StoreAction';
+import NoteStoreAction from '@/actions/App/Http/Controllers/Note/StoreAction';
+import PatientShowAction from '@/actions/App/Http/Controllers/Patient/ShowAction';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -60,12 +67,11 @@ interface PaymentForm {
     [key: string]: string;
 }
 
-type StepId = 1 | 2 | 3;
+type StepId = 1 | 2;
 
 const STEPS: Array<{ id: StepId; title: string; description: string }> = [
     { id: 1, title: 'Notas y resumen IA', description: 'Revisa el resumen generado y añade notas o acuerdos.' },
     { id: 2, title: 'Factura', description: 'Revisa la factura y registra el cobro si aplica.' },
-    { id: 3, title: 'Confirmar envío', description: 'Envía factura y acuerdos al paciente por email.' },
 ];
 
 function Stepper({ current }: { current: StepId }) {
@@ -148,8 +154,7 @@ export default function PostSession({ patient, lastAppointment, lastInvoice }: P
     const [noteSaved, setNoteSaved] = useState(false);
     const [agreementSaved, setAgreementSaved] = useState(false);
     const [paymentSaved, setPaymentSaved] = useState(false);
-    const [confirmed, setConfirmed] = useState(false);
-    const [confirming, setConfirming] = useState(false);
+    const [finishing, setFinishing] = useState(false);
 
     const noteForm = useForm<NoteForm>({ content: '', type: 'session_note' });
     const agreementForm = useForm<AgreementForm>({ content: '' });
@@ -162,7 +167,7 @@ export default function PostSession({ patient, lastAppointment, lastInvoice }: P
 
     const submitNote = (e: React.FormEvent) => {
         e.preventDefault();
-        noteForm.post(`/patients/${patient.id}/notes`, {
+        noteForm.post(NoteStoreAction.url(patient.id), {
             onSuccess: () => {
                 noteForm.reset();
                 setNoteSaved(true);
@@ -172,7 +177,7 @@ export default function PostSession({ patient, lastAppointment, lastInvoice }: P
 
     const submitAgreement = (e: React.FormEvent) => {
         e.preventDefault();
-        agreementForm.post(`/patients/${patient.id}/agreements`, {
+        agreementForm.post(AgreementStoreAction.url(patient.id), {
             onSuccess: () => {
                 agreementForm.reset();
                 setAgreementSaved(true);
@@ -182,7 +187,7 @@ export default function PostSession({ patient, lastAppointment, lastInvoice }: P
 
     const submitPayment = (e: React.FormEvent) => {
         e.preventDefault();
-        paymentForm.post(`/patients/${patient.id}/payments`, {
+        paymentForm.post(InvoiceStoreAction.url(patient.id), {
             onSuccess: () => {
                 paymentForm.reset();
                 setPaymentSaved(true);
@@ -190,22 +195,22 @@ export default function PostSession({ patient, lastAppointment, lastInvoice }: P
         });
     };
 
-    const goNext = () => setCurrentStep((s) => (s < 3 ? ((s + 1) as StepId) : s));
+    const goNext = () => setCurrentStep((s) => (s < 2 ? ((s + 1) as StepId) : s));
     const goBack = () => setCurrentStep((s) => (s > 1 ? ((s - 1) as StepId) : s));
 
-    const confirmAndSend = () => {
+    const finishAndExit = () => {
         if (lastAppointment === null) {
-            setConfirmed(true);
+            router.visit(PatientShowAction.url(patient.id));
             return;
         }
-        setConfirming(true);
+        setFinishing(true);
         router.post(
-            `/professional/appointments/${lastAppointment.id}/finalize-and-notify`,
+            FinalizeAndNotifyAction.url(lastAppointment.id),
             {},
             {
                 preserveScroll: true,
-                onSuccess: () => setConfirmed(true),
-                onFinish: () => setConfirming(false),
+                onSuccess: () => router.visit(PatientShowAction.url(patient.id)),
+                onFinish: () => setFinishing(false),
             },
         );
     };
@@ -213,14 +218,30 @@ export default function PostSession({ patient, lastAppointment, lastInvoice }: P
     const aiSummary = lastAppointment?.session_recording?.ai_summary ?? null;
     const transcriptionStatus = lastAppointment?.session_recording?.transcription_status ?? null;
 
+    useEcho(
+        lastAppointment ? `appointment.${lastAppointment.id}` : 'appointment.none',
+        '.session.summarized',
+        () => {
+            if (lastAppointment) {
+                router.reload({ only: ['lastAppointment'] });
+            }
+        },
+    );
+
+    const summaryStatus: 'ready' | 'pending' | 'failed' = aiSummary
+        ? 'ready'
+        : transcriptionStatus === 'rejected_no_consent'
+            ? 'failed'
+            : 'pending';
+
     return (
         <>
-            <Head title={`Post-sesión: ${patient.project_name} — ClientKosmos`} />
+            <Head title={`Post-sesión: ${(patient.name ?? patient.project_name ?? 'Paciente')} — ClientKosmos`} />
 
-            <Stack gap="6" p={{ base: '6', lg: '8' }} maxW="5xl">
+            <Stack gap="6" p={{ base: '6', lg: '8' }} maxW="5xl" mx="auto" w="full">
                 <Box>
                     <ChakraLink
-                        href={`/patients/${patient.id}`}
+                        href={PatientShowAction.url(patient.id)}
                         display="inline-flex"
                         alignItems="center"
                         gap="2"
@@ -230,13 +251,13 @@ export default function PostSession({ patient, lastAppointment, lastInvoice }: P
                         _hover={{ color: 'fg' }}
                     >
                         <Box as={ArrowLeft} w="4" h="4" />
-                        Volver a {patient.project_name}
+                        Volver a {(patient.name ?? patient.project_name ?? 'Paciente')}
                     </ChakraLink>
                     <Heading as="h1" fontSize="3xl" fontWeight="bold" color="fg">
                         Cerrar sesión
                     </Heading>
                     <Text fontSize="md" color="fg.muted" mt="1">
-                        {patient.project_name}
+                        {(patient.name ?? patient.project_name ?? 'Paciente')}
                     </Text>
                 </Box>
 
@@ -256,17 +277,28 @@ export default function PostSession({ patient, lastAppointment, lastInvoice }: P
                                     </Badge>
                                 )}
                             </Flex>
-                            {aiSummary ? (
+                            {summaryStatus === 'ready' && (
                                 <Text fontSize="sm" color="fg" whiteSpace="pre-wrap" lineHeight="1.7">
                                     {aiSummary}
                                 </Text>
-                            ) : (
-                                <Text fontSize="sm" color="fg.muted">
-                                    {transcriptionStatus === 'rejected_no_consent'
-                                        ? 'No se generó resumen: el paciente no otorgó consentimiento de grabación.'
-                                        : lastAppointment?.session_recording
-                                            ? 'Generando resumen automático… Esta operación puede tardar hasta 30 segundos. Refresca la página si no aparece.'
+                            )}
+                            {summaryStatus === 'pending' && (
+                                <Stack gap="3">
+                                    <Text fontSize="sm" color="fg.muted">
+                                        {lastAppointment?.session_recording
+                                            ? 'Generando resumen automático… Esta operación puede tardar hasta 30 segundos.'
                                             : 'No hay transcripción disponible para esta sesión.'}
+                                    </Text>
+                                    {lastAppointment?.session_recording && (
+                                        <Skeleton height="6" loading>
+                                            <SkeletonText noOfLines={4} gap="2" />
+                                        </Skeleton>
+                                    )}
+                                </Stack>
+                            )}
+                            {summaryStatus === 'failed' && (
+                                <Text fontSize="sm" color="fg.muted">
+                                    No se generó resumen: el paciente no otorgó consentimiento de grabación.
                                 </Text>
                             )}
                         </Card>
@@ -393,7 +425,7 @@ export default function PostSession({ patient, lastAppointment, lastInvoice }: P
                                             (servicios de asistencia sanitaria prestados por profesionales psicólogos).
                                         </Text>
                                     </Box>
-                                    <ChakraLink href={`/invoices/${lastInvoice.id}`} alignSelf="flex-start">
+                                    <ChakraLink href={InvoiceReviewAction.url(lastInvoice.id)} alignSelf="flex-start">
                                         <Button variant="secondary" size="sm">Revisar factura completa</Button>
                                     </ChakraLink>
                                 </Stack>
@@ -482,67 +514,6 @@ export default function PostSession({ patient, lastAppointment, lastInvoice }: P
                     </Stack>
                 )}
 
-                {currentStep === 3 && (
-                    <Card>
-                        <Flex gap="3" align="center" mb="4">
-                            <Box as={Mail} w="5" h="5" color="brand.solid" />
-                            <Heading as="h3" fontSize="lg" fontWeight="semibold" color="fg">
-                                Confirmar envío al paciente
-                            </Heading>
-                        </Flex>
-                        <Stack gap="4">
-                            <Text fontSize="sm" color="fg.muted">
-                                Al confirmar se enviará al paciente un correo con:
-                            </Text>
-                            <Stack gap="2" pl="4">
-                                <Flex gap="2" align="center">
-                                    <Box as={Check} w="4" h="4" color="success.fg" />
-                                    <Text fontSize="sm" color="fg">
-                                        {lastInvoice
-                                            ? `Factura ${lastInvoice.invoice_number} (${formatCurrency(lastInvoice.total)})`
-                                            : 'Sin factura asociada a esta sesión'}
-                                    </Text>
-                                </Flex>
-                                <Flex gap="2" align="center">
-                                    <Box as={Check} w="4" h="4" color="success.fg" />
-                                    <Text fontSize="sm" color="fg">
-                                        Acuerdos registrados en esta sesión (si los hay)
-                                    </Text>
-                                </Flex>
-                                <Flex gap="2" align="center">
-                                    <Box as={Check} w="4" h="4" color="success.fg" />
-                                    <Text fontSize="sm" color="fg">
-                                        Enlace al portal del paciente con el resumen de la sesión
-                                    </Text>
-                                </Flex>
-                            </Stack>
-                            {confirmed ? (
-                                <Box
-                                    p="3"
-                                    borderRadius="md"
-                                    bg="success.subtle"
-                                    borderLeftWidth="3px"
-                                    borderLeftColor="success.solid"
-                                >
-                                    <Text fontSize="sm" color="success.fg" fontWeight="semibold">
-                                        Envío confirmado. El paciente recibirá los correos en breve.
-                                    </Text>
-                                </Box>
-                            ) : (
-                                <Button
-                                    variant="primary"
-                                    onClick={confirmAndSend}
-                                    alignSelf="flex-start"
-                                    loading={confirming}
-                                    disabled={lastAppointment === null}
-                                >
-                                    Confirmar y enviar
-                                </Button>
-                            )}
-                        </Stack>
-                    </Card>
-                )}
-
                 <Flex
                     justify="space-between"
                     align="center"
@@ -556,19 +527,14 @@ export default function PostSession({ patient, lastAppointment, lastInvoice }: P
                         Atrás
                     </Button>
                     <Flex gap="3" ml="auto">
-                        <ChakraLink href={`/patients/${patient.id}`}>
-                            <Button variant="secondary">Guardar y salir</Button>
-                        </ChakraLink>
-                        {currentStep < 3 ? (
+                        {currentStep < 2 ? (
                             <Button variant="primary" onClick={goNext}>
                                 Siguiente
                             </Button>
                         ) : (
-                            <ChakraLink href={`/patients/${patient.id}`}>
-                                <Button variant="primary" disabled={!confirmed}>
-                                    Finalizar
-                                </Button>
-                            </ChakraLink>
+                            <Button variant="primary" onClick={finishAndExit} loading={finishing}>
+                                Finalizar
+                            </Button>
                         )}
                     </Flex>
                 </Flex>

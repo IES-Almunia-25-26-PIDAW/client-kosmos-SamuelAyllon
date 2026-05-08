@@ -28,15 +28,11 @@ class EncryptedCastsTest extends TestCase
     {
         $user = User::factory()->create([
             'google_refresh_token' => 'plain-token-value',
-            'gdrive_refresh_token' => 'plain-gdrive-token',
         ]);
 
         $raw = DB::table('users')->where('id', $user->id)->value('google_refresh_token');
         $this->assertNotEquals('plain-token-value', $raw);
         $this->assertEquals('plain-token-value', $user->fresh()->google_refresh_token);
-
-        $rawGdrive = DB::table('users')->where('id', $user->id)->value('gdrive_refresh_token');
-        $this->assertNotEquals('plain-gdrive-token', $rawGdrive);
     }
 
     public function test_patient_profile_clinical_fields_are_stored_encrypted(): void

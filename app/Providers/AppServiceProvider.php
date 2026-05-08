@@ -2,23 +2,34 @@
 
 namespace App\Providers;
 
+use App\Contracts\PaymentGateway;
+use App\Events\SessionSummarized;
+use App\Events\TranscriptionSegmentCreated;
 use App\Http\Responses\LoginResponse;
+use App\Listeners\AggregateTranscription;
+use App\Listeners\GeneratePostSessionBriefingOnSummarized;
+use App\Models\Appointment;
 use App\Models\Document;
 use App\Models\Invoice;
+use App\Models\OfferedConsultation;
 use App\Models\PatientProfile;
 use App\Models\SessionRecording;
 use App\Models\User;
+use App\Observers\AppointmentObserver;
 use App\Observers\PatientObserver;
 use App\Observers\PaymentObserver;
 use App\Policies\AdminPolicy;
 use App\Policies\DocumentPolicy;
+use App\Policies\OfferedConsultationPolicy;
 use App\Policies\PatientPolicy;
 use App\Policies\PaymentPolicy;
 use App\Policies\SessionRecordingPolicy;
+use App\Services\Payments\StripeGateway;
 use Carbon\CarbonImmutable;
 use GuzzleHttp\Client as GuzzleClient;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
@@ -52,6 +63,13 @@ class AppServiceProvider extends ServiceProvider
 
             return $factory->make();
         });
+
+        $this->app->bind(PaymentGateway::class, function () {
+            return new StripeGateway(
+                secret: (string) config('services.stripe.secret'),
+                webhookSecret: (string) config('services.stripe.webhook_secret'),
+            );
+        });
     }
 
     /**
@@ -63,12 +81,17 @@ class AppServiceProvider extends ServiceProvider
 
         PatientProfile::observe(PatientObserver::class);
         Invoice::observe(PaymentObserver::class);
+        Appointment::observe(AppointmentObserver::class);
 
         Gate::policy(User::class, AdminPolicy::class);
         Gate::policy(PatientProfile::class, PatientPolicy::class);
         Gate::policy(Invoice::class, PaymentPolicy::class);
         Gate::policy(Document::class, DocumentPolicy::class);
         Gate::policy(SessionRecording::class, SessionRecordingPolicy::class);
+        Gate::policy(OfferedConsultation::class, OfferedConsultationPolicy::class);
+
+        Event::listen(TranscriptionSegmentCreated::class, AggregateTranscription::class);
+        Event::listen(SessionSummarized::class, GeneratePostSessionBriefingOnSummarized::class);
     }
 
     /**

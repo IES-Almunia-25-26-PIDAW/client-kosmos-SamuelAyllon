@@ -158,6 +158,33 @@ it('professional can access pre-session page for their patient', function () {
         ->assertInertia(fn ($page) => $page->component('professional/patients/pre-session'));
 });
 
+it('pre-session page exposes context with frontend-shaped keys', function () {
+    $user = createProfessional();
+    $patient = createPatientProfileFor($user);
+
+    \App\Models\Appointment::factory()->completed()->create([
+        'patient_id' => $patient->user_id,
+        'professional_id' => $user->id,
+    ]);
+
+    $this->actingAs($user)
+        ->get(route('professional.patients.pre-session', $patient))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('professional/patients/pre-session')
+            ->has('context.lastSessions')
+            ->has('context.recentNotes')
+            ->has('context.openAgreements')
+            ->has('context', fn ($c) => $c
+                ->has('lastSessions')
+                ->has('recentNotes')
+                ->has('openAgreements')
+                ->has('lastPayment')
+                ->has('validConsent')
+            )
+        );
+});
+
 it('professional can access post-session page for their patient', function () {
     $user = createProfessional();
     $patient = createPatientProfileFor($user);

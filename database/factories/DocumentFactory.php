@@ -21,25 +21,12 @@ class DocumentFactory extends Factory
             'workspace_id' => null,
             'name' => $filename,
             'local_path' => 'documents/'.$filename,
-            'storage_type' => 'local',
-            'gdrive_file_id' => null,
-            'gdrive_url' => null,
             'mime_type' => 'application/pdf',
             'size_bytes' => fake()->numberBetween(10_000, 5_000_000),
             'category' => 'other',
             'is_rgpd' => false,
             'expires_at' => null,
         ];
-    }
-
-    public function gdrive(): static
-    {
-        return $this->state([
-            'storage_type' => 'gdrive',
-            'local_path' => null,
-            'gdrive_file_id' => fake()->uuid(),
-            'gdrive_url' => 'https://drive.google.com/file/d/'.fake()->uuid(),
-        ]);
     }
 
     public function rgpd(): static

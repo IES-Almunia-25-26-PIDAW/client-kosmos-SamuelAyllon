@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Appointment;
+use App\Models\KosmoBriefing;
 use App\Models\PatientProfile;
 use App\Models\SessionRecording;
 use App\Models\User;
@@ -20,29 +21,148 @@ class KosmoService
     }
 
     /**
-     * @todo Generate a pre-session briefing for the patient, summarizing last appointment,
-     *       open agreements, invoice status and key notes
+     * Generate a deterministic pre-session briefing aggregating last appointment,
+     * open agreements, last invoice status and recent notes. Idempotent per appointment.
      */
     public function generatePreSessionBriefing(PatientProfile $patient, Appointment $appointment): void
     {
-        // @todo
+        $exists = KosmoBriefing::query()
+            ->where('patient_id', $patient->id)
+            ->where('appointment_id', $appointment->id)
+            ->where('type', 'pre_session')
+            ->exists();
+
+        if ($exists) {
+            return;
+        }
+
+        $previousAppointment = $patient->appointments()
+            ->where('id', '!=', $appointment->id)
+            ->where('starts_at', '<', $appointment->starts_at)
+            ->orderByDesc('starts_at')
+            ->first();
+
+        $openAgreements = $patient->agreements()->where('is_completed', false)->limit(5)->get();
+        $recentNotes = $patient->notes()->orderByDesc('created_at')->limit(3)->get();
+        $lastInvoice = $patient->invoices()->orderByDesc('due_at')->first();
+
+        $content = [
+            'next_session' => 'Próxima sesión: '.$appointment->starts_at->format('d/m/Y H:i'),
+            'previous_session' => $previousAppointment
+                ? 'Última sesión: '.$previousAppointment->starts_at->format('d/m/Y')
+                : 'Es la primera sesión registrada con este paciente.',
+            'open_agreements' => $openAgreements->isEmpty()
+                ? 'Sin acuerdos pendientes.'
+                : 'Acuerdos pendientes: '.$openAgreements->pluck('content')->implode(' · '),
+            'recent_notes' => $recentNotes->isEmpty()
+                ? 'Sin notas recientes.'
+                : 'Notas recientes: '.$recentNotes->pluck('content')->map(fn ($c) => str($c)->limit(80))->implode(' / '),
+            'payment_status' => $lastInvoice
+                ? 'Última factura: '.$lastInvoice->status.' ('.number_format((float) $lastInvoice->total, 2).' €)'
+                : 'Sin facturas registradas.',
+            'consent_status' => $patient->consentForms()->where('status', 'signed')->exists()
+                ? 'Consentimiento RGPD vigente.'
+                : 'Atención: paciente sin consentimiento RGPD firmado.',
+        ];
+
+        KosmoBriefing::create([
+            'user_id' => $appointment->professional_id,
+            'patient_id' => $patient->id,
+            'appointment_id' => $appointment->id,
+            'type' => 'pre_session',
+            'content' => $content,
+            'is_read' => false,
+            'for_date' => $appointment->starts_at->toDateString(),
+        ]);
     }
 
     /**
-     * @todo Generate a post-session briefing summarizing what was discussed and agreed
+     * Generate a post-session briefing aggregating AI summary, session notes,
+     * and open agreements. Idempotent per appointment.
      */
     public function generatePostSessionBriefing(Appointment $appointment): void
     {
-        // @todo
+        $patient = PatientProfile::where('user_id', $appointment->patient_id)->first();
+
+        if ($patient === null) {
+            return;
+        }
+
+        $exists = KosmoBriefing::query()
+            ->where('patient_id', $patient->id)
+            ->where('appointment_id', $appointment->id)
+            ->where('type', 'post_session')
+            ->exists();
+
+        if ($exists) {
+            return;
+        }
+
+        $recording = $appointment->sessionRecording;
+        $rawSummary = $recording !== null ? (string) ($recording->ai_summary ?? '') : '';
+        $parsed = json_decode($rawSummary, true);
+        $parsed = is_array($parsed) ? $parsed : [];
+
+        $sessionNotes = $appointment->notes()->orderByDesc('created_at')->limit(5)->get();
+        $sessionAgreements = $appointment->agreements()->where('is_completed', false)->limit(5)->get();
+
+        $content = [
+            'session_date' => $appointment->starts_at->format('d/m/Y H:i'),
+            'key_points' => array_values(array_map('strval', (array) ($parsed['key_points'] ?? []))),
+            'patient_state' => (string) ($parsed['patient_state'] ?? ''),
+            'next_actions' => array_values(array_map('strval', (array) ($parsed['next_actions'] ?? []))),
+            'session_notes' => $sessionNotes->pluck('content')
+                ->map(fn ($c) => (string) str($c)->limit(120))
+                ->values()
+                ->all(),
+            'open_agreements' => $sessionAgreements->pluck('content')->map(fn ($c) => (string) $c)->values()->all(),
+            'summary_status' => $recording?->ai_summary ? 'ready' : 'pending',
+        ];
+
+        KosmoBriefing::create([
+            'user_id' => $appointment->professional_id,
+            'patient_id' => $patient->id,
+            'appointment_id' => $appointment->id,
+            'type' => 'post_session',
+            'content' => $content,
+            'is_read' => false,
+            'for_date' => $appointment->starts_at->toDateString(),
+        ]);
     }
 
     /**
-     * @todo Handle a chat message from the user, returning Kosmo's response
+     * Handle a chat message from the user via Groq LLM.
      */
     public function chat(User $user, string $message): string
     {
-        // @todo
-        return '';
+        $systemPrompt = <<<'PROMPT'
+Eres Kosmo, asistente clínico para psicólogos en una plataforma de gestión de pacientes.
+Responde en español, de forma breve, profesional y empática. Nunca des consejos médicos
+fuera de tu ámbito; deriva al criterio del profesional cuando proceda.
+PROMPT;
+
+        $response = Http::withToken(config('services.groq.api_key'))
+            ->post(rtrim((string) config('services.groq.base_url'), '/').'/chat/completions', [
+                'model' => config('services.groq.model', 'llama-3.3-70b-versatile'),
+                'messages' => [
+                    ['role' => 'system', 'content' => $systemPrompt],
+                    ['role' => 'user', 'content' => $message],
+                ],
+                'temperature' => 0.5,
+                'max_tokens' => 600,
+            ]);
+
+        if ($response->failed()) {
+            Log::error('KosmoService::chat Groq failed', [
+                'status' => $response->status(),
+                'body' => $response->body(),
+                'user_id' => $user->id,
+            ]);
+
+            return 'No he podido procesar tu mensaje en este momento. Inténtalo de nuevo en unos instantes.';
+        }
+
+        return trim((string) $response->json('choices.0.message.content', ''));
     }
 
     /**

@@ -5,13 +5,26 @@ interface Options {
     appointmentId: number;
     enabled: boolean;
     chunkDurationMs?: number;
+    silenceRmsThreshold?: number;
 }
 
 interface State {
     recording: boolean;
     error: string | null;
     chunksUploaded: number;
+    chunksSkippedSilent: number;
 }
+
+type AudioContextCtor = typeof AudioContext;
+
+const getAudioContextCtor = (): AudioContextCtor | null => {
+    if (typeof window === 'undefined') return null;
+    const w = window as unknown as {
+        AudioContext?: AudioContextCtor;
+        webkitAudioContext?: AudioContextCtor;
+    };
+    return w.AudioContext ?? w.webkitAudioContext ?? null;
+};
 
 const pickMimeType = (): string => {
     if (typeof MediaRecorder === 'undefined') return '';
@@ -34,12 +47,18 @@ const detectInitialError = (): string | null => {
     return null;
 };
 
-export function useAudioChunks({ appointmentId, enabled, chunkDurationMs = 8000 }: Options): State {
+export function useAudioChunks({
+    appointmentId,
+    enabled,
+    chunkDurationMs = 8000,
+    silenceRmsThreshold = 0.012,
+}: Options): State {
     const initialError = useMemo(() => detectInitialError(), []);
     const mimeType = useMemo(() => pickMimeType(), []);
     const [recording, setRecording] = useState(false);
     const [runtimeError, setRuntimeError] = useState<string | null>(null);
     const [chunksUploaded, setChunksUploaded] = useState(0);
+    const [chunksSkippedSilent, setChunksSkippedSilent] = useState(0);
 
     const streamRef = useRef<MediaStream | null>(null);
     const recorderRef = useRef<MediaRecorder | null>(null);
@@ -53,6 +72,41 @@ export function useAudioChunks({ appointmentId, enabled, chunkDurationMs = 8000 
 
         let cancelled = false;
         runningRef.current = true;
+
+        let audioContext: AudioContext | null = null;
+        let analyser: AnalyserNode | null = null;
+        let vadBuffer: Uint8Array<ArrayBuffer> | null = null;
+        let vadInterval: ReturnType<typeof setInterval> | null = null;
+        let sliceHadVoice = false;
+
+        const setupVad = (stream: MediaStream): boolean => {
+            const Ctor = getAudioContextCtor();
+            if (Ctor === null) return false;
+            try {
+                audioContext = new Ctor();
+                const source = audioContext.createMediaStreamSource(stream);
+                analyser = audioContext.createAnalyser();
+                analyser.fftSize = 1024;
+                source.connect(analyser);
+                vadBuffer = new Uint8Array(new ArrayBuffer(analyser.fftSize));
+                return true;
+            } catch {
+                analyser = null;
+                vadBuffer = null;
+                return false;
+            }
+        };
+
+        const sampleRms = (): number => {
+            if (!analyser || !vadBuffer) return 0;
+            analyser.getByteTimeDomainData(vadBuffer);
+            let sumSquares = 0;
+            for (let i = 0; i < vadBuffer.length; i += 1) {
+                const sample = (vadBuffer[i]! - 128) / 128;
+                sumSquares += sample * sample;
+            }
+            return Math.sqrt(sumSquares / vadBuffer.length);
+        };
 
         const uploadBlob = async (blob: Blob, position: number, startedAtMs: number, endedAtMs: number) => {
             const form = new FormData();
@@ -79,15 +133,32 @@ export function useAudioChunks({ appointmentId, enabled, chunkDurationMs = 8000 
             const position = positionRef.current;
             positionRef.current += 1;
 
+            sliceHadVoice = false;
+            const vadActive = analyser !== null;
+            if (vadActive) {
+                if (vadInterval) clearInterval(vadInterval);
+                vadInterval = setInterval(() => {
+                    if (sampleRms() >= silenceRmsThreshold) sliceHadVoice = true;
+                }, 100);
+            }
+
             const parts: Blob[] = [];
             recorder.ondataavailable = (e) => {
                 if (e.data && e.data.size > 0) parts.push(e.data);
             };
             recorder.onstop = () => {
+                if (vadInterval) {
+                    clearInterval(vadInterval);
+                    vadInterval = null;
+                }
                 const blob = new Blob(parts, { type: mimeType });
                 const sliceEndedAt = performance.now() - startedAtMsRef.current;
-                if (blob.size > 0) {
+                const hasContent = blob.size > 0;
+                const hasVoice = !vadActive || sliceHadVoice;
+                if (hasContent && hasVoice) {
                     void uploadBlob(blob, position, Math.round(sliceStartedAt), Math.round(sliceEndedAt));
+                } else if (hasContent && !hasVoice) {
+                    setChunksSkippedSilent((n) => n + 1);
                 }
                 if (runningRef.current && !cancelled) {
                     recordOneSlice(stream);
@@ -110,6 +181,7 @@ export function useAudioChunks({ appointmentId, enabled, chunkDurationMs = 8000 
                 streamRef.current = stream;
                 startedAtMsRef.current = performance.now();
                 positionRef.current = 0;
+                setupVad(stream);
                 setRecording(true);
                 setRuntimeError(null);
                 recordOneSlice(stream);
@@ -123,6 +195,7 @@ export function useAudioChunks({ appointmentId, enabled, chunkDurationMs = 8000 
             cancelled = true;
             runningRef.current = false;
             if (sliceTimeoutRef.current) clearTimeout(sliceTimeoutRef.current);
+            if (vadInterval) clearInterval(vadInterval);
             if (recorderRef.current && recorderRef.current.state === 'recording') {
                 recorderRef.current.stop();
             }
@@ -130,13 +203,21 @@ export function useAudioChunks({ appointmentId, enabled, chunkDurationMs = 8000 
                 streamRef.current.getTracks().forEach((t) => t.stop());
                 streamRef.current = null;
             }
+            analyser?.disconnect();
+            analyser = null;
+            vadBuffer = null;
+            if (audioContext && audioContext.state !== 'closed') {
+                void audioContext.close().catch(() => undefined);
+            }
+            audioContext = null;
             setRecording(false);
         };
-    }, [appointmentId, enabled, chunkDurationMs, initialError, mimeType]);
+    }, [appointmentId, enabled, chunkDurationMs, initialError, mimeType, silenceRmsThreshold]);
 
     return {
         recording,
         error: initialError ?? runtimeError,
         chunksUploaded,
+        chunksSkippedSilent,
     };
 }

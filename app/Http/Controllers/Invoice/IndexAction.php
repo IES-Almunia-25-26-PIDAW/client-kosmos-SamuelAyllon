@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Invoice;
 
 use App\Http\Controllers\Controller;
+use App\Models\Appointment;
 use App\Models\Invoice;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -51,6 +52,8 @@ class IndexAction extends Controller
             'due_date' => $invoice->due_at?->format('Y-m-d'),
             'paid_at' => $invoice->paid_at?->toIso8601String(),
             'invoice_number' => $invoice->invoice_number,
+            'stripe_checkout_pending' => $invoice->stripe_checkout_session_id !== null
+                && $invoice->status === 'sent',
             'invoice_sent_at' => null,
             'reminder_count' => 0,
             'last_reminder_at' => null,
@@ -62,10 +65,26 @@ class IndexAction extends Controller
             ] : null,
         ]);
 
+        $pendingBilling = Appointment::where('professional_id', $user->id)
+            ->where('status', 'completed')
+            ->whereDoesntHave('invoiceItems.invoice')
+            ->with(['patient', 'service'])
+            ->orderByDesc('ends_at')
+            ->limit(20)
+            ->get()
+            ->map(fn (Appointment $appointment) => [
+                'id' => $appointment->id,
+                'patient_name' => $appointment->patient?->name,
+                'service_name' => $appointment->service?->name,
+                'price' => $appointment->service?->price !== null ? (float) $appointment->service->price : null,
+                'ended_at' => $appointment->ends_at->toIso8601String(),
+            ]);
+
         return Inertia::render('professional/invoices/index', [
             'payments' => $payments,
             'stats' => $stats,
             'filters' => $request->only(['status', 'patient_id']),
+            'pendingBilling' => $pendingBilling,
         ]);
     }
 }

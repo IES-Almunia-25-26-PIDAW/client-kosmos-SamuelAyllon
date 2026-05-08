@@ -2,15 +2,16 @@ import { Box, Flex, Heading, Image } from '@chakra-ui/react';
 import { Link } from '@inertiajs/react';
 import { ArrowLeft, Edit } from 'lucide-react';
 import React from 'react';
-import { StatusBadge } from '@/components/ui/status-badge';
-import type { Patient, PatientStatus } from '@/types';
+import PatientEditAction from '@/actions/App/Http/Controllers/Patient/EditAction';
+import PatientIndexAction from '@/actions/App/Http/Controllers/Patient/IndexAction';
+import type { Patient } from '@/types';
 
 interface PatientHeaderProps {
     patient: Patient;
 }
 
 const PatientHeader: React.FC<PatientHeaderProps> = ({ patient }) => {
-    const statuses: PatientStatus[] = patient.statuses ?? [];
+    const displayName = patient.name ?? patient.project_name ?? '—';
 
     return (
         <Box
@@ -33,7 +34,7 @@ const PatientHeader: React.FC<PatientHeaderProps> = ({ patient }) => {
                     <Box
                         as={Link}
                         // @ts-expect-error — Inertia Link props forwarded via `as`
-                        href="/patients"
+                        href={PatientIndexAction.url()}
                         p="1.5"
                         borderRadius="sm"
                         transition="background-color 200ms"
@@ -47,7 +48,7 @@ const PatientHeader: React.FC<PatientHeaderProps> = ({ patient }) => {
                     {patient.avatar_path ? (
                         <Image
                             src={patient.avatar_path}
-                            alt={patient.project_name}
+                            alt={displayName}
                             h="9"
                             w="9"
                             rounded="full"
@@ -67,21 +68,20 @@ const PatientHeader: React.FC<PatientHeaderProps> = ({ patient }) => {
                             fontSize="sm"
                             fontWeight="semibold"
                         >
-                            {patient.project_name.substring(0, 2).toUpperCase()}
+                            {displayName
+                                .split(/\s+/)
+                                .filter(Boolean)
+                                .slice(0, 2)
+                                .map((p) => p[0])
+                                .join('')
+                                .toUpperCase()}
                         </Flex>
                     )}
 
                     <Box flex="1" minW="0">
                         <Heading as="h1" fontSize="sm" fontWeight="medium" color="fg" truncate>
-                            {patient.project_name}
+                            {displayName}
                         </Heading>
-                        {statuses.length > 0 && (
-                            <Flex gap="1" mt="0.5" overflowX="auto">
-                                {statuses.map((s) => (
-                                    <StatusBadge key={s} status={s} variant="subtle" />
-                                ))}
-                            </Flex>
-                        )}
                     </Box>
                 </Flex>
 
@@ -89,7 +89,7 @@ const PatientHeader: React.FC<PatientHeaderProps> = ({ patient }) => {
                     <Box
                         as={Link}
                         // @ts-expect-error — Inertia Link props forwarded via `as`
-                        href={`/patients/${patient.id}/edit`}
+                        href={PatientEditAction.url(patient.id)}
                         p="1.5"
                         borderRadius="sm"
                         transition="background-color 200ms"

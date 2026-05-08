@@ -11,9 +11,20 @@ use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
 /**
+ * @property int $id
+ * @property int $patient_id
+ * @property int $professional_id
+ * @property string $invoice_number
+ * @property string $status
+ * @property string|null $payment_method
+ * @property string|null $stripe_checkout_session_id
+ * @property string|null $notes
+ * @property string $total
  * @property \Illuminate\Support\Carbon|null $issued_at
  * @property \Illuminate\Support\Carbon|null $due_at
  * @property \Illuminate\Support\Carbon|null $paid_at
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \App\Models\User|null $patient
  * @property-read \App\Models\User|null $professional
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\InvoiceItem> $items
@@ -34,7 +45,7 @@ class Invoice extends Model
         'workspace_id', 'patient_id', 'professional_id', 'invoice_number',
         'status', 'issued_at', 'due_at', 'paid_at',
         'subtotal', 'tax_rate', 'tax_amount', 'total',
-        'payment_method', 'stripe_payment_id', 'notes', 'pdf_path',
+        'payment_method', 'stripe_payment_id', 'stripe_checkout_session_id', 'notes', 'pdf_path',
     ];
 
     protected function casts(): array

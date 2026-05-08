@@ -6,9 +6,11 @@ use App\Jobs\SendPostSessionEmailJob;
 use App\Models\Appointment;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
+use App\Models\OfferedConsultation;
+use App\Models\ProfessionalProfile;
 use Illuminate\Support\Facades\Queue;
 
-it('dispatches agreements and post-session jobs when finalizing without invoice', function () {
+it('dispatches agreements and post-session jobs but skips invoice when appointment has no service', function () {
     Queue::fake();
 
     $professional = createProfessional();
@@ -16,6 +18,7 @@ it('dispatches agreements and post-session jobs when finalizing without invoice'
     $appointment = Appointment::factory()->create([
         'professional_id' => $professional->id,
         'patient_id' => $patient->id,
+        'service_id' => null,
         'status' => 'completed',
         'workspace_id' => null,
         'starts_at' => now()->subMinutes(60),
@@ -29,6 +32,39 @@ it('dispatches agreements and post-session jobs when finalizing without invoice'
     Queue::assertPushed(SendAgreementsEmailJob::class);
     Queue::assertPushed(SendPostSessionEmailJob::class);
     Queue::assertNotPushed(SendInvoiceEmailJob::class);
+});
+
+it('auto-creates invoice and dispatches all jobs when finalizing a serviced appointment', function () {
+    Queue::fake();
+
+    $professional = createProfessional(false);
+    $patient = createPatient();
+    $profProfile = ProfessionalProfile::factory()->verified()->create(['user_id' => $professional->id]);
+    $service = OfferedConsultation::factory()->create([
+        'professional_profile_id' => $profProfile->id,
+        'price' => 60,
+    ]);
+    $appointment = Appointment::factory()->create([
+        'professional_id' => $professional->id,
+        'patient_id' => $patient->id,
+        'service_id' => $service->id,
+        'status' => 'completed',
+        'workspace_id' => null,
+        'starts_at' => now()->subMinutes(60),
+        'ends_at' => now()->subMinutes(10),
+    ]);
+
+    $this->actingAs($professional)
+        ->post("/professional/appointments/{$appointment->id}/finalize-and-notify")
+        ->assertRedirect();
+
+    $invoice = Invoice::first();
+    expect($invoice)->not->toBeNull()
+        ->and($invoice->status)->toBe('sent');
+
+    Queue::assertPushed(SendInvoiceEmailJob::class);
+    Queue::assertPushed(SendAgreementsEmailJob::class);
+    Queue::assertPushed(SendPostSessionEmailJob::class);
 });
 
 it('also dispatches invoice job and marks invoice as sent when invoice exists', function () {
@@ -77,6 +113,9 @@ it('also dispatches invoice job and marks invoice as sent when invoice exists', 
     Queue::assertPushed(SendInvoiceEmailJob::class);
     Queue::assertPushed(SendAgreementsEmailJob::class);
     Queue::assertPushed(SendPostSessionEmailJob::class);
+
+    // [RF-15] Audit log: Invoice uses LogsActivity — the draft→sent transition must be recorded.
+    assertActivityLoggedFor($invoice->fresh(), 'updated');
 });
 
 it('denies finalize when user is not the appointment professional', function () {

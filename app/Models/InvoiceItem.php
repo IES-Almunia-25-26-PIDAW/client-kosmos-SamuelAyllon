@@ -4,7 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property-read \App\Models\Invoice|null $invoice
+ * @property-read \App\Models\Appointment|null $appointment
+ */
 class InvoiceItem extends Model
 {
     use HasFactory;
@@ -22,12 +27,14 @@ class InvoiceItem extends Model
         ];
     }
 
-    public function invoice()
+    /** @return BelongsTo<Invoice, $this> */
+    public function invoice(): BelongsTo
     {
         return $this->belongsTo(Invoice::class);
     }
 
-    public function appointment()
+    /** @return BelongsTo<Appointment, $this> */
+    public function appointment(): BelongsTo
     {
         return $this->belongsTo(Appointment::class);
     }

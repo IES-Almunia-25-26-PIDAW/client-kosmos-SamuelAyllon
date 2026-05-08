@@ -4,15 +4,17 @@ namespace Database\Seeders;
 
 use App\Models\Agreement;
 use App\Models\Appointment;
-use App\Models\Workspace;
+use App\Models\CaseAssignment;
 use App\Models\ConsentForm;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
 use App\Models\Note;
-use App\Models\CaseAssignment;
+use App\Models\OfferedConsultation;
 use App\Models\PatientProfile;
-use App\Models\Service;
+use App\Models\ProfessionalProfile;
 use App\Models\User;
+use App\Models\Workspace;
+use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -69,24 +71,37 @@ class UserSeeder extends Seeder
             'is_active' => true,
         ]);
 
-        $serviceSession = Service::create([
-            'workspace_id' => $workspace->id,
+        $nataliaProfile = ProfessionalProfile::create([
+            'user_id' => $owner->id,
+            'license_number' => 'PSI-08-12345',
+            'collegiate_number' => 'B-01234',
+            'specialties' => ['clinical', 'cognitive_behavioral'],
+            'verification_status' => 'verified',
+            'bio' => 'Psicóloga clínica con 12 años de experiencia en TCC, EMDR y trauma.',
+            'city' => 'Barcelona',
+            'verified_at' => now(),
+        ]);
+
+        $serviceSession = OfferedConsultation::create([
+            'professional_profile_id' => $nataliaProfile->id,
             'name' => 'Sesión de psicología',
             'description' => 'Sesión individual de psicoterapia (50 min)',
             'duration_minutes' => 50,
             'price' => 70.00,
             'color' => '#6366f1',
             'is_active' => true,
+            'modality' => 'both',
         ]);
 
-        Service::create([
-            'workspace_id' => $workspace->id,
+        OfferedConsultation::create([
+            'professional_profile_id' => $nataliaProfile->id,
             'name' => 'Sesión EMDR',
             'description' => 'Sesión especializada EMDR (60 min)',
             'duration_minutes' => 60,
             'price' => 80.00,
             'color' => '#8b5cf6',
             'is_active' => true,
+            'modality' => 'in_person',
         ]);
 
         // ══════════════════════════════════════════════════
@@ -520,14 +535,26 @@ class UserSeeder extends Seeder
             'is_active' => true,
         ]);
 
-        $elenaService = Service::create([
-            'workspace_id' => $elenaClinic->id,
+        $elenaProfile = ProfessionalProfile::create([
+            'user_id' => $elenaOwner->id,
+            'license_number' => 'PSI-28-54321',
+            'collegiate_number' => 'M-07890',
+            'specialties' => ['clinical', 'cognitive_behavioral'],
+            'verification_status' => 'verified',
+            'bio' => 'Psicóloga online especializada en autoestima y gestión emocional.',
+            'city' => 'Madrid',
+            'verified_at' => now(),
+        ]);
+
+        $elenaService = OfferedConsultation::create([
+            'professional_profile_id' => $elenaProfile->id,
             'name' => 'Sesión online',
             'description' => 'Sesión individual por videollamada (50 min)',
             'duration_minutes' => 50,
             'price' => 65.00,
             'color' => '#10b981',
             'is_active' => true,
+            'modality' => 'video_call',
         ]);
 
         $patientUserElena = User::create([
@@ -591,15 +618,135 @@ class UserSeeder extends Seeder
             'type' => 'session_note',
         ]);
 
+        // ══════════════════════════════════════════════════
+        //  SAMUEL — Profesional de prueba (cuenta real)
+        // ══════════════════════════════════════════════════
+        $samuelPro = User::create([
+            'name' => 'Samuel Ayllón',
+            'email' => 'samuelayllonsevilla1@gmail.com',
+            'password' => Hash::make('password'),
+            'email_verified_at' => now(),
+            'tutorial_completed_at' => now(),
+            'phone' => '+34 600 000 010',
+        ]);
+        $samuelPro->assignRole('professional');
+
+        $samuelWorkspace = Workspace::create([
+            'creator_id' => $samuelPro->id,
+            'name' => 'Consulta Samuel Ayllón',
+            'slug' => 'consulta-samuel-ayllon',
+            'tax_name' => 'Samuel Ayllón Sevilla',
+            'tax_id' => '00000001S',
+            'tax_address' => 'Calle Test 1, 41001 Sevilla',
+            'location_address' => 'Calle Test 1, 41001 Sevilla',
+            'phone' => '+34 600 000 010',
+            'email' => 'samuelayllonsevilla1@gmail.com',
+        ]);
+
+        $samuelWorkspace->members()->attach($samuelPro->id, [
+            'role' => 'billing_manager',
+            'joined_at' => now(),
+            'is_active' => true,
+        ]);
+
+        $samuelProfile = ProfessionalProfile::create([
+            'user_id' => $samuelPro->id,
+            'license_number' => 'PSI-41-00001',
+            'collegiate_number' => 'SE-00001',
+            'specialties' => ['clinical', 'cognitive_behavioral'],
+            'verification_status' => 'verified',
+            'bio' => 'Psicólogo clínico. Cuenta de prueba para desarrollo.',
+            'city' => 'Sevilla',
+            'verified_at' => now(),
+        ]);
+
+        $samuelService = OfferedConsultation::create([
+            'professional_profile_id' => $samuelProfile->id,
+            'name' => 'Sesión de psicología',
+            'description' => 'Sesión individual de psicoterapia (50 min)',
+            'duration_minutes' => 50,
+            'price' => 70.00,
+            'color' => '#6366f1',
+            'is_active' => true,
+            'modality' => 'both',
+        ]);
+
+        // ══════════════════════════════════════════════════
+        //  SAMUEL — Paciente de prueba (cuenta real)
+        // ══════════════════════════════════════════════════
+        $samuelPatient = User::create([
+            'name' => 'Samuel Paciente',
+            'email' => 'samuelayllonsevilla86@gmail.com',
+            'password' => Hash::make('password'),
+            'email_verified_at' => now(),
+            'phone' => '+34 600 000 011',
+        ]);
+        $samuelPatient->assignRole('patient');
+
+        $pSamuel = PatientProfile::withoutGlobalScopes()->create([
+            'user_id' => $samuelPatient->id,
+            'workspace_id' => $samuelWorkspace->id,
+            'professional_id' => $samuelPro->id,
+            'is_active' => true,
+            'clinical_notes' => 'Paciente de prueba para desarrollo.',
+            'diagnosis' => 'Sin diagnóstico',
+            'treatment_plan' => 'Plan de prueba.',
+            'status' => 'active',
+            'first_session_at' => now()->subMonth(),
+            'last_session_at' => now()->subWeek(),
+        ]);
+
+        CaseAssignment::create([
+            'patient_id' => $samuelPatient->id,
+            'professional_id' => $samuelPro->id,
+            'workspace_id' => $samuelWorkspace->id,
+            'is_primary' => true,
+            'status' => 'active',
+            'started_at' => now()->subMonth()->toDateString(),
+        ]);
+
+        foreach (['privacy_policy', 'terms_of_service', 'health_data', 'recording_global'] as $consentType) {
+            ConsentForm::create([
+                'patient_id' => $pSamuel->id,
+                'user_id' => $samuelPatient->id,
+                'consent_type' => $consentType,
+                'template_version' => '1.0',
+                'content_snapshot' => match ($consentType) {
+                    'privacy_policy' => 'He leído y acepto la política de privacidad de ClientKosmos.',
+                    'terms_of_service' => 'He leído y acepto los términos del servicio de ClientKosmos.',
+                    'health_data' => 'Consiento el tratamiento de mis datos de salud para la finalidad terapéutica indicada. (RGPD Art. 9.2.h)',
+                    'recording_global' => 'Autorizo la grabación de audio de mis sesiones y su procesamiento automatizado por la IA de ClientKosmos para generar resúmenes clínicos destinados exclusivamente a mi profesional. (RGPD Art. 22)',
+                },
+                'status' => 'signed',
+                'signed_at' => now()->subMonth(),
+                'signed_ip' => '127.0.0.1',
+                'signature_data' => 'checkbox_registration',
+                'expires_at' => null,
+            ]);
+        }
+
+        Appointment::create([
+            'workspace_id' => $samuelWorkspace->id,
+            'patient_id' => $samuelPatient->id,
+            'professional_id' => $samuelPro->id,
+            'service_id' => $samuelService->id,
+            'starts_at' => Carbon::parse('2026-05-08 17:51:00', 'Europe/Madrid')->utc(),
+            'ends_at' => Carbon::parse('2026-05-08 18:20:00', 'Europe/Madrid')->utc(),
+            'status' => 'confirmed',
+            'modality' => 'video_call',
+        ]);
+
         $this->command->info('Users seeded successfully (v2).');
-        $this->command->info('  admin@clientkosmos.test      / password  [admin]');
-        $this->command->info('  natalia@clientkosmos.test    / password  [professional]  — workspace con local');
-        $this->command->info('  carlos@clientkosmos.test     / password  [professional]');
-        $this->command->info('  elena@clientkosmos.test      / password  [professional]  — práctica online-only');
-        $this->command->info('  ana.garcia@ejemplo.com       / password  [patient — compartida: Natalia+Carlos]');
-        $this->command->info('  marcos.ruiz@ejemplo.com      / password  [patient]');
-        $this->command->info('  laura.sanchez@ejemplo.com    / password  [patient]');
-        $this->command->info('  javier.moreno@ejemplo.com    / password  [patient — alta]');
-        $this->command->info('  sofia.torres@ejemplo.com     / password  [patient — Elena clinic]');
+        $this->command->info('  admin@clientkosmos.test              / password  [admin]');
+        $this->command->info('  natalia@clientkosmos.test            / password  [professional]  — workspace con local');
+        $this->command->info('  carlos@clientkosmos.test             / password  [professional]');
+        $this->command->info('  elena@clientkosmos.test              / password  [professional]  — práctica online-only');
+        $this->command->info('  samuelayllonsevilla1@gmail.com       / password  [professional]  — cuenta real de prueba');
+        $this->command->info('  ana.garcia@ejemplo.com               / password  [patient — compartida: Natalia+Carlos]');
+        $this->command->info('  marcos.ruiz@ejemplo.com              / password  [patient]');
+        $this->command->info('  laura.sanchez@ejemplo.com            / password  [patient]');
+        $this->command->info('  javier.moreno@ejemplo.com            / password  [patient — alta]');
+        $this->command->info('  sofia.torres@ejemplo.com             / password  [patient — Elena clinic]');
+        $this->command->info('  samuelayllonsevilla86@gmail.com      / password  [patient — cuenta real de prueba]');
     }
 }

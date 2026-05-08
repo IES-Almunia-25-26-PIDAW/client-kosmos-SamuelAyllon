@@ -21,6 +21,9 @@ it('allows patient to revoke their own signed consent', function () {
         ->assertRedirect();
 
     expect($consent->fresh()->status)->toBe('revoked');
+
+    // [RNF-10] Audit log: ConsentForm uses LogsActivity, the status flip must be recorded.
+    assertActivityLoggedFor($consent->fresh(), 'updated');
 });
 
 it('forbids user from revoking a consent they do not own', function () {

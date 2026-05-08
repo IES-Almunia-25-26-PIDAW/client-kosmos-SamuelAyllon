@@ -10,8 +10,14 @@ class EnsureProfessional
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if ($request->user()?->isAdmin()) {
+        $user = $request->user();
+
+        if ($user?->isAdmin()) {
             return redirect()->route('admin.users.index');
+        }
+
+        if ($user?->isProfessional() && ! $user->professionalProfile?->isVerified()) {
+            return redirect()->route('professional.pending-approval');
         }
 
         return $next($request);

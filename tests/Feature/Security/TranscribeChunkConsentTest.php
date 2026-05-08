@@ -12,9 +12,11 @@ use App\Models\User;
 use App\Services\RgpdService;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
+use Spatie\Activitylog\Models\Activity;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
@@ -70,10 +72,10 @@ class TranscribeChunkConsentTest extends TestCase
     {
         Storage::fake('local');
 
-        [$recording] = $this->makePatientWithConsent('revoked');
+        [$recording, $patient] = $this->makePatientWithConsent('revoked');
 
         $chunkPath = 'chunks/test-chunk.webm';
-        Storage::disk('local')->put($chunkPath, 'fake-audio-data');
+        Storage::disk('local')->put($chunkPath, Crypt::encryptString('fake-audio-data'));
 
         Http::fake();
 
@@ -89,6 +91,19 @@ class TranscribeChunkConsentTest extends TestCase
         $this->assertEquals('rejected_no_consent', $recording->fresh()->transcription_status);
         Storage::disk('local')->assertMissing($chunkPath);
         Http::assertNothingSent();
+
+        // [RNF-09] Audit log for RGPD: rejection MUST be recorded.
+        $activity = Activity::query()
+            ->where('event', 'chunk_rejected_no_consent')
+            ->where('subject_type', $recording->getMorphClass())
+            ->where('subject_id', $recording->id)
+            ->latest('id')
+            ->first();
+
+        $this->assertNotNull($activity, 'Expected activity_log entry chunk_rejected_no_consent');
+        $this->assertSame('rgpd_access', $activity->log_name);
+        $this->assertSame($patient->id, $activity->causer_id);
+        $this->assertSame(0, $activity->properties['position']);
     }
 
     public function test_transcription_is_skipped_when_no_consent_exists(): void
@@ -98,7 +113,7 @@ class TranscribeChunkConsentTest extends TestCase
         [$recording] = $this->makePatientWithConsent('none');
 
         $chunkPath = 'chunks/test-chunk.webm';
-        Storage::disk('local')->put($chunkPath, 'fake-audio-data');
+        Storage::disk('local')->put($chunkPath, Crypt::encryptString('fake-audio-data'));
 
         Http::fake();
 
@@ -113,6 +128,14 @@ class TranscribeChunkConsentTest extends TestCase
 
         $this->assertEquals('rejected_no_consent', $recording->fresh()->transcription_status);
         Http::assertNothingSent();
+
+        // [RNF-09] Audit log for RGPD: rejection MUST be recorded even when no consent ever existed.
+        $this->assertDatabaseHas('activity_log', [
+            'event' => 'chunk_rejected_no_consent',
+            'log_name' => 'rgpd_access',
+            'subject_type' => $recording->getMorphClass(),
+            'subject_id' => $recording->id,
+        ]);
     }
 
     public function test_transcription_proceeds_when_consent_is_active(): void
@@ -123,7 +146,7 @@ class TranscribeChunkConsentTest extends TestCase
         [$recording] = $this->makePatientWithConsent('signed');
 
         $chunkPath = 'chunks/test-chunk.webm';
-        Storage::disk('local')->put($chunkPath, 'fake-audio-data');
+        Storage::disk('local')->put($chunkPath, Crypt::encryptString('fake-audio-data'));
 
         Http::fake([
             '*/audio/transcriptions' => Http::response(['text' => 'texto transcrito'], 200),

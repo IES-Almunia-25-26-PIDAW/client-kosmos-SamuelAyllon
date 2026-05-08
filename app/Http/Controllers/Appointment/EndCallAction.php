@@ -21,8 +21,9 @@ class EndCallAction extends Controller
 
         $recording = $appointment->sessionRecording;
 
-        if ($recording !== null && trim((string) $recording->transcription) !== '') {
-            SummarizeSessionJob::dispatch($recording->id);
+        if ($recording !== null) {
+            SummarizeSessionJob::dispatch($recording->id)
+                ->delay(now()->addSeconds(20));
         }
 
         return response()->json(['status' => 'completed']);

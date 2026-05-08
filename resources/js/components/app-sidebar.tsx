@@ -1,3 +1,4 @@
+import { Center } from '@chakra-ui/react';
 import { Link, usePage } from '@inertiajs/react';
 import {
     CalendarDays,
@@ -22,7 +23,6 @@ import {
     SidebarFooter,
     SidebarHeader,
     SidebarMenu,
-    SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { dashboard as portalDashboard } from '@/routes/patient';
@@ -34,6 +34,7 @@ import { index as portalProfessionalsIndex } from '@/routes/patient/professional
 import { dashboard, kosmo, settings } from '@/routes/professional';
 import { index as invoicesIndex } from '@/routes/professional/invoices';
 import { index as messagesIndex } from '@/routes/professional/messages';
+import { index as services } from '@/routes/professional/offered-consultations';
 import { index as patientsIndex } from '@/routes/professional/patients';
 import { index as scheduleIndex } from '@/routes/professional/schedule';
 import { index as teamIndex } from '@/routes/professional/workspace/team';
@@ -73,6 +74,11 @@ const professionalNavItems: NavItem[] = [
         title: 'Calendario',
         href: scheduleIndex.url(),
         icon: CalendarRange,
+    },
+    {
+        title: 'Servicios',
+        href: services.url(),
+        icon: FileText,
     },
     {
         title: 'Kosmo',
@@ -145,11 +151,11 @@ export function AppSidebar({ onMouseEnter, onMouseLeave }: AppSidebarProps = {})
             <SidebarHeader>
                 <SidebarMenu>
                     <SidebarMenuItem>
-                        <SidebarMenuButton size="lg" asChild h="24 !important">
+                        <Center w="full" py="2">
                             <Link href={homeHref} prefetch>
                                 <AppLogo />
                             </Link>
-                        </SidebarMenuButton>
+                        </Center>
                     </SidebarMenuItem>
                 </SidebarMenu>
             </SidebarHeader>

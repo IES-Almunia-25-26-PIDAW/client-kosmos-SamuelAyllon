@@ -15,14 +15,13 @@ class Document extends Model
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['name', 'category', 'storage_type'])
+            ->logOnly(['name', 'category'])
             ->logOnlyDirty()
             ->dontLogEmptyChanges();
     }
 
     protected $fillable = [
         'patient_id', 'user_id', 'workspace_id', 'name', 'local_path',
-        'storage_type', 'gdrive_file_id', 'gdrive_url',
         'mime_type', 'size_bytes', 'category', 'is_rgpd', 'expires_at',
     ];
 

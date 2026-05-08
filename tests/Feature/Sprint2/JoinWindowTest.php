@@ -175,7 +175,7 @@ it('dispatches SummarizeSessionJob when ending call with transcription', functio
     Queue::assertPushed(SummarizeSessionJob::class);
 });
 
-it('does not dispatch SummarizeSessionJob when transcription is empty', function () {
+it('still dispatches SummarizeSessionJob when transcription is empty (job retries until ready)', function () {
     Queue::fake();
 
     $professional = createProfessional();
@@ -198,5 +198,5 @@ it('does not dispatch SummarizeSessionJob when transcription is empty', function
         ->postJson("/professional/appointments/{$appointment->id}/end-call")
         ->assertOk();
 
-    Queue::assertNotPushed(SummarizeSessionJob::class);
+    Queue::assertPushed(SummarizeSessionJob::class);
 });

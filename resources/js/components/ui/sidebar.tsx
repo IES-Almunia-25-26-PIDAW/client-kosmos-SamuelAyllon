@@ -119,7 +119,7 @@ function SidebarProvider({
                         } as React.CSSProperties
                     }
                     css={{
-                        '&:has([data-variant=inset])': { background: 'var(--ck-colors-sidebar)' },
+                        '&:has([data-variant=inset])': { background: 'transparent' },
                     }}
                     {...props}
                 >
@@ -153,7 +153,7 @@ function Sidebar({
                 h="full"
                 w="var(--sidebar-width)"
                 flexDirection="column"
-                bg="sidebar.DEFAULT"
+                bg="transparent"
                 color="sidebar.fg"
                 {...props}
             >
@@ -278,7 +278,7 @@ function Sidebar({
                     h="full"
                     w="full"
                     flexDirection="column"
-                    bg="sidebar.DEFAULT"
+                    bg="transparent"
                     css={{
                         '[data-variant=floating] &': {
                             borderRadius: 'var(--radii-lg)',

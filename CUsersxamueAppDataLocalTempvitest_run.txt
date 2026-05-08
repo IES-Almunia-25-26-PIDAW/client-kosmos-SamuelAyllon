@@ -1,0 +1,13 @@
+
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90mC:/Users/xamue/Developer/client-kosmos-SamuelAyllon[39m
+
+ [31m❯[39m resources/js/components/join-call-button.test.tsx [2m([22m[2m5 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 5374[2mms[22m[39m
+[31m   [31m×[31m JoinCallButton[2m > [22m[RF-09] surfaces a friendly error message when the API call fails[33m 5048[2mms[22m[31m[39m
+[31m     → Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m4 passed[39m[22m[90m (5)[39m
+[2m   Start at [22m 17:34:03
+[2m   Duration [22m 11.01s[2m (transform 100ms, setup 329ms, collect 3.80s, tests 5.37s, environment 1.04s, prepare 134ms)[22m
+

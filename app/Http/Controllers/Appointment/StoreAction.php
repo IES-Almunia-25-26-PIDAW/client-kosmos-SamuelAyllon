@@ -15,7 +15,7 @@ class StoreAction extends Controller
     {
         $validated = $request->validate([
             'patient_id' => ['required', 'exists:users,id'],
-            'service_id' => ['nullable', 'exists:services,id'],
+            'service_id' => ['nullable', 'exists:offered_consultations,id'],
             'starts_at' => ['required', 'date'],
             'ends_at' => ['required', 'date', 'after:starts_at'],
             'modality' => ['required', 'in:in_person,video_call'],

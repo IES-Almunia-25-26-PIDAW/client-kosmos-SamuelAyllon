@@ -1,6 +1,6 @@
 import { Box, Flex, Grid, Heading, Stack, Text, chakra } from '@chakra-ui/react';
 import { Form, Head, Link } from '@inertiajs/react';
-import { ArrowLeft, BookOpen, FileText, Folder, MessageSquare, Paperclip, Play } from 'lucide-react';
+import { ArrowLeft, FileText, MessageSquare, Paperclip, Play } from 'lucide-react';
 import type { ReactNode } from 'react';
 import JoinWaitingRoomAction from '@/actions/App/Http/Controllers/Appointment/JoinWaitingRoomAction';
 import DashboardIndexAction from '@/actions/App/Http/Controllers/Dashboard/IndexAction';
@@ -34,9 +34,6 @@ interface Agreement {
 interface Document {
     id: number;
     name: string;
-    storage_type: string | null;
-    gdrive_file_id: string | null;
-    gdrive_url: string | null;
     mime_type: string | null;
     size_bytes: number | null;
     category: string | null;
@@ -116,14 +113,8 @@ const extFromMime = (mime: string | null) => {
 };
 
 const resourceMeta = (doc: Document): { Icon: typeof Paperclip; subtitle: string } => {
-    if (doc.gdrive_file_id || doc.storage_type === 'gdrive') {
-        return { Icon: Folder, subtitle: 'Directorio Compartido' };
-    }
-    if (doc.storage_type === 'local') {
-        const size = formatFileSize(doc.size_bytes);
-        return { Icon: Paperclip, subtitle: size ? `${extFromMime(doc.mime_type)} · ${size}` : extFromMime(doc.mime_type) };
-    }
-    return { Icon: BookOpen, subtitle: 'Recursos Externos' };
+    const size = formatFileSize(doc.size_bytes);
+    return { Icon: Paperclip, subtitle: size ? `${extFromMime(doc.mime_type)} · ${size}` : extFromMime(doc.mime_type) };
 };
 
 export default function AppointmentShow({ appointment, lastClinicalNote }: Props) {

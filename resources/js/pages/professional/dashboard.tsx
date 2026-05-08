@@ -6,6 +6,7 @@ import professionalAppointmentsIndex from '@/actions/App/Http/Controllers/Appoin
 import AppointmentShowAction from '@/actions/App/Http/Controllers/Appointment/ShowAction';
 import PatientShowAction from '@/actions/App/Http/Controllers/Patient/ShowAction';
 import { KosmoBriefing as KosmoBriefingComponent } from '@/components/kosmo/kosmo-briefing';
+import { NotificationsBanner } from '@/components/notifications/notifications-banner';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 import type { Auth, KosmoBriefing } from '@/types';
@@ -147,6 +148,8 @@ export default function ProfessionalDashboard({
             <Head title="Hoy — ClientKosmos" />
 
             <Stack gap="6" p={{ base: '6', lg: '8' }}>
+
+                <NotificationsBanner />
 
                 <Box>
                     <Heading as="h1" fontSize="3xl" fontWeight="bold" color="fg">

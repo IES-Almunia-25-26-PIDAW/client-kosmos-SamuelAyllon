@@ -40,7 +40,6 @@ class UserFactory extends Factory
             'patient_notes' => null,
             'stripe_customer_id' => null,
             'google_refresh_token' => null,
-            'gdrive_refresh_token' => null,
         ];
     }
 

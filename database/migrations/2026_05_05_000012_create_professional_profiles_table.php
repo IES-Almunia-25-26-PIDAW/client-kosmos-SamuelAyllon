@@ -16,6 +16,7 @@ return new class extends Migration
             $table->json('specialties')->nullable();
             $table->enum('verification_status', ['unverified', 'pending', 'verified', 'rejected'])->default('unverified');
             $table->text('bio')->nullable();
+            $table->string('city')->nullable();
             $table->timestamp('verified_at')->nullable();
             $table->timestamps();
         });

@@ -8,6 +8,9 @@ use App\Models\Appointment;
 use App\Models\SessionRecording;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class TranscribeAction extends Controller
 {
@@ -40,9 +43,18 @@ class TranscribeAction extends Controller
             $recording->update(['transcription_status' => 'processing']);
         }
 
-        $chunkPath = $request->file('chunk')->store(
-            "transcription-chunks/{$recording->id}",
-            'local',
+        $uploaded = $request->file('chunk');
+        $extension = $uploaded->getClientOriginalExtension() ?: 'webm';
+        $chunkPath = sprintf(
+            'transcription-chunks/%d/%s.%s.enc',
+            $recording->id,
+            Str::ulid(),
+            $extension,
+        );
+
+        Storage::disk('local')->put(
+            $chunkPath,
+            Crypt::encryptString((string) $uploaded->get()),
         );
 
         TranscribeChunkJob::dispatch(

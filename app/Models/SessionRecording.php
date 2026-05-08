@@ -10,6 +10,8 @@ use Spatie\Activitylog\Support\LogOptions;
 
 /**
  * @property int $appointment_id
+ * @property string|null $ai_summary
+ * @property string|null $transcription
  * @property \Illuminate\Support\Carbon|null $patient_consent_given_at
  * @property \Illuminate\Support\Carbon|null $summarized_at
  * @property-read \App\Models\Appointment|null $appointment

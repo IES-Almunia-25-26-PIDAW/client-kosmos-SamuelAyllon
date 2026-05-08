@@ -26,7 +26,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'name', 'email', 'password',
         'avatar_path', 'phone', 'date_of_birth', 'address',
         'patient_notes',
-        'stripe_customer_id', 'google_refresh_token', 'gdrive_refresh_token',
+        'stripe_customer_id', 'google_refresh_token',
         'tutorial_completed_at',
     ];
 
@@ -34,7 +34,6 @@ class User extends Authenticatable implements MustVerifyEmail
         'password',
         'remember_token',
         'google_refresh_token',
-        'gdrive_refresh_token',
     ];
 
     protected function casts(): array
@@ -45,7 +44,6 @@ class User extends Authenticatable implements MustVerifyEmail
             'date_of_birth' => 'date',
             'password' => 'hashed',
             'google_refresh_token' => 'encrypted',
-            'gdrive_refresh_token' => 'encrypted',
         ];
     }
 

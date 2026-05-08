@@ -13,7 +13,7 @@ return new class extends Migration
             $table->foreignId('workspace_id')->nullable()->constrained('workspaces')->nullOnDelete();
             $table->foreignId('patient_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('professional_id')->constrained('users')->cascadeOnDelete();
-            $table->foreignId('service_id')->nullable()->constrained('services')->nullOnDelete();
+            $table->foreignId('service_id')->nullable()->constrained('offered_consultations')->nullOnDelete();
             $table->timestamp('starts_at');
             $table->timestamp('ends_at');
             $table->enum('status', ['pending', 'confirmed', 'in_progress', 'completed', 'cancelled', 'no_show'])

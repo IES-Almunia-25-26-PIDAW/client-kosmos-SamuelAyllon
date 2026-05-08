@@ -12,7 +12,7 @@ class UpdateAction extends Controller
     public function __invoke(Request $request, Appointment $appointment): RedirectResponse
     {
         $validated = $request->validate([
-            'service_id' => ['nullable', 'exists:services,id'],
+            'service_id' => ['nullable', 'exists:offered_consultations,id'],
             'starts_at'  => ['required', 'date'],
             'ends_at'    => ['required', 'date', 'after:starts_at'],
             'modality'   => ['required', 'in:in_person,video_call'],

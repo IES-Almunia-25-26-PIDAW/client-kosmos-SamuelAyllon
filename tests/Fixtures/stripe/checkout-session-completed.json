@@ -1,0 +1,23 @@
+{
+  "id": "evt_test_checkout_completed",
+  "object": "event",
+  "api_version": "2024-11-20",
+  "created": 1714400000,
+  "type": "checkout.session.completed",
+  "livemode": false,
+  "pending_webhooks": 0,
+  "data": {
+    "object": {
+      "id": "{{SESSION_ID}}",
+      "object": "checkout.session",
+      "payment_intent": "pi_test_payment_intent_123",
+      "payment_status": "paid",
+      "status": "complete",
+      "amount_total": 5000,
+      "currency": "eur",
+      "metadata": {
+        "invoice_id": "{{INVOICE_ID}}"
+      }
+    }
+  }
+}

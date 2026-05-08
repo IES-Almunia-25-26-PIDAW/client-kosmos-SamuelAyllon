@@ -1,9 +1,10 @@
-import { Badge, Box, Flex, Heading, Separator, Stack, Text, chakra } from '@chakra-ui/react';
+import { Badge, Box, Flex, Heading, List, Stack, Text, chakra } from '@chakra-ui/react';
 import { Head, router } from '@inertiajs/react';
-import { BadgeCheck, CalendarClock, ChevronDown, MapPin, Search, SlidersHorizontal, Users } from 'lucide-react';
+import { BadgeCheck, CalendarClock, MapPin, Search, SlidersHorizontal, Users, X } from 'lucide-react';
 import type { ReactNode } from 'react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import BookAction from '@/actions/App/Http/Controllers/Portal/Appointment/BookAction';
+import ShowAction from '@/actions/App/Http/Controllers/Portal/Professional/ShowAction';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -24,6 +25,7 @@ interface Professional {
     specialties: string[];
     bio: string | null;
     collegiate_number: string | null;
+    city: string | null;
     is_verified: boolean;
     slots: SlotsByDay[];
 }
@@ -38,6 +40,7 @@ interface Service {
 interface Props {
     professionals: Professional[];
     services: Service[];
+    cities: string[];
 }
 
 const SPECIALTY_LABELS: Record<string, string> = {
@@ -78,20 +81,56 @@ const formatDateLabel = (isoDate: string): string => {
     }).format(date);
 };
 
-export default function PortalProfessionalsIndex({ professionals }: Props) {
+type NameSuggestion = { type: 'professional'; label: string; id: number };
+
+export default function PortalProfessionalsIndex({ professionals, cities }: Props) {
     const [activeProfessional, setActiveProfessional] = useState<Professional | null>(null);
     const [selectedDate, setSelectedDate] = useState<string | null>(null);
-    const [searchQuery, setSearchQuery] = useState('');
+
+    // Name search
+    const [nameQuery, setNameQuery] = useState('');
+    const [showNameSuggestions, setShowNameSuggestions] = useState(false);
+    const nameSearchRef = useRef<HTMLDivElement>(null);
+
+    // City search
+    const [cityQuery, setCityQuery] = useState('');
+    const [activeCity, setActiveCity] = useState<string | null>(null);
+    const [showCitySuggestions, setShowCitySuggestions] = useState(false);
+    const citySearchRef = useRef<HTMLDivElement>(null);
+
+    // Specialty filter — uses all known keys, not just those in current data
+    const [activeSpecialty, setActiveSpecialty] = useState<string | null>(null);
+
+    const allSpecialtyKeys = Object.keys(SPECIALTY_LABELS);
+
+    // Professional name suggestions
+    const nameSuggestions: NameSuggestion[] = (() => {
+        if (!nameQuery.trim()) { return []; }
+        const q = nameQuery.toLowerCase();
+        return professionals
+            .filter((p) => p.name.toLowerCase().includes(q))
+            .slice(0, 5)
+            .map((p) => ({ type: 'professional', label: p.name, id: p.id }));
+    })();
+
+    // City suggestions from the cities prop
+    const citySuggestions = (() => {
+        if (!cityQuery.trim()) { return cities; }
+        const q = cityQuery.toLowerCase();
+        return cities.filter((c) => c.toLowerCase().includes(q));
+    })();
 
     const filteredProfessionals = professionals.filter((p) => {
-        if (!searchQuery.trim()) { return true; }
-        const q = searchQuery.toLowerCase();
+        if (activeSpecialty && !p.specialties.includes(activeSpecialty)) { return false; }
+        if (activeCity && p.city !== activeCity) { return false; }
+        if (!nameQuery.trim()) { return true; }
+        const q = nameQuery.toLowerCase();
         return (
             p.name.toLowerCase().includes(q) ||
             p.specialties.some((s) => formatSpecialty(s).toLowerCase().includes(q)) ||
             (p.bio?.toLowerCase().includes(q) ?? false)
         );
-    });
+    });;
 
     const openBooking = (professional: Professional) => {
         setActiveProfessional(professional);
@@ -105,23 +144,33 @@ export default function PortalProfessionalsIndex({ professionals }: Props) {
 
     const selectSlot = (date: string, time: string) => {
         if (!activeProfessional) { return; }
-
         const [y, mo, d] = date.split('-').map(Number);
         const [h, mi] = time.split(':').map(Number);
         const local = new Date(y, mo - 1, d, h, mi, 0);
-        const startsAt = local.toISOString();
-
         router.visit(
             BookAction.url({
                 query: {
                     professional_id: activeProfessional.id,
-                    starts_at: startsAt,
+                    starts_at: local.toISOString(),
                 },
             }),
         );
     };
 
+    const applyCity = (city: string) => {
+        setActiveCity(city);
+        setCityQuery(city);
+        setShowCitySuggestions(false);
+    };
+
+    const clearCity = () => {
+        setActiveCity(null);
+        setCityQuery('');
+    };
+
     const activeDaySlots = activeProfessional?.slots.find((s) => s.date === selectedDate);
+
+    const hasActiveFilters = activeSpecialty !== null || activeCity !== null || nameQuery.trim() !== '';
 
     return (
         <>
@@ -148,56 +197,287 @@ export default function PortalProfessionalsIndex({ professionals }: Props) {
                     </Text>
                 </Stack>
 
-                {/* Search bar */}
-                <Box
-                    borderRadius="xl"
-                    borderWidth="1px"
-                    borderColor="border"
-                    bg="bg.surface"
-                    p="3"
-                >
-                    <Flex align="center" gap="0">
-                        <Flex align="center" gap="2" flex="1" px="3">
-                            <Box as={Search} w="4" h="4" color="fg.subtle" flexShrink={0} aria-hidden />
-                            <Input
-                                border="none"
-                                _focusVisible={{ boxShadow: 'none', borderColor: 'transparent' }}
-                                placeholder="Sector de psicólogo (ej. Psicología infantil)"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                aria-label="Buscar por especialidad o nombre"
-                            />
-                        </Flex>
+                {/* Search bars */}
+                <Flex gap="3" direction={{ base: 'column', sm: 'row' }}>
+                    {/* Name search */}
+                    <Box position="relative" ref={nameSearchRef} flex="1">
+                        <Box
+                            borderRadius="xl"
+                            borderWidth="1px"
+                            borderColor="border"
+                            bg="bg.surface"
+                            px="3"
+                            py="2.5"
+                        >
+                            <Flex align="center" gap="2">
+                                <Box as={Search} w="4" h="4" color="fg.subtle" flexShrink={0} aria-hidden />
+                                <Input
+                                    border="none"
+                                    _focusVisible={{ boxShadow: 'none', borderColor: 'transparent' }}
+                                    placeholder="Nombre o especialidad"
+                                    value={nameQuery}
+                                    onChange={(e) => { setNameQuery(e.target.value); setShowNameSuggestions(true); }}
+                                    onFocus={() => setShowNameSuggestions(true)}
+                                    onBlur={() => setTimeout(() => setShowNameSuggestions(false), 150)}
+                                    aria-label="Buscar por nombre o especialidad"
+                                />
+                                {nameQuery && (
+                                    <Box
+                                        as="button"
+                                        onClick={() => { setNameQuery(''); setShowNameSuggestions(false); }}
+                                        aria-label="Limpiar búsqueda"
+                                        flexShrink={0}
+                                        color="fg.subtle"
+                                        _hover={{ color: 'fg' }}
+                                    >
+                                        <Box as={X} w="3.5" h="3.5" aria-hidden />
+                                    </Box>
+                                )}
+                            </Flex>
+                        </Box>
 
-                        <Separator orientation="vertical" h="8" borderColor="border" />
+                        {showNameSuggestions && nameSuggestions.length > 0 && (
+                            <Box
+                                position="absolute"
+                                top="calc(100% + 4px)"
+                                left="0"
+                                right="0"
+                                bg="bg.surface"
+                                borderWidth="1px"
+                                borderColor="border"
+                                borderRadius="xl"
+                                boxShadow="md"
+                                zIndex="dropdown"
+                                overflow="hidden"
+                            >
+                                <List.Root listStyle="none" p="0" m="0">
+                                    {nameSuggestions.map((s) => (
+                                        <List.Item key={s.id}>
+                                            <Box
+                                                as="button"
+                                                w="full"
+                                                textAlign="left"
+                                                px="4"
+                                                py="3"
+                                                display="flex"
+                                                alignItems="center"
+                                                gap="3"
+                                                _hover={{ bg: 'bg.subtle' }}
+                                                onClick={() => { setNameQuery(s.label); setShowNameSuggestions(false); }}
+                                                fontSize="sm"
+                                            >
+                                                <Box as={Users} w="4" h="4" color="fg.subtle" flexShrink={0} aria-hidden />
+                                                <Text color="fg">{s.label}</Text>
+                                            </Box>
+                                        </List.Item>
+                                    ))}
+                                </List.Root>
+                            </Box>
+                        )}
+                    </Box>
 
-                        <Flex align="center" gap="2" flex="1" px="3">
-                            <Box as={MapPin} w="4" h="4" color="fg.subtle" flexShrink={0} aria-hidden />
-                            <Input
-                                border="none"
-                                _focusVisible={{ boxShadow: 'none', borderColor: 'transparent' }}
-                                placeholder="Ciudad (ej. Zaragoza, Madrid)"
-                                aria-label="Filtrar por ciudad"
-                            />
-                        </Flex>
+                    {/* City search */}
+                    <Box position="relative" ref={citySearchRef} flex="1">
+                        <Box
+                            borderRadius="xl"
+                            borderWidth="1px"
+                            borderColor={activeCity ? 'brand.solid' : 'border'}
+                            bg="bg.surface"
+                            px="3"
+                            py="2.5"
+                        >
+                            <Flex align="center" gap="2">
+                                <Box as={MapPin} w="4" h="4" color={activeCity ? 'brand.solid' : 'fg.subtle'} flexShrink={0} aria-hidden />
+                                <Input
+                                    border="none"
+                                    _focusVisible={{ boxShadow: 'none', borderColor: 'transparent' }}
+                                    placeholder="Ciudad (ej. Jerez de la Frontera)"
+                                    value={cityQuery}
+                                    onChange={(e) => { setCityQuery(e.target.value); setActiveCity(null); setShowCitySuggestions(true); }}
+                                    onFocus={() => setShowCitySuggestions(true)}
+                                    onBlur={() => setTimeout(() => setShowCitySuggestions(false), 150)}
+                                    aria-label="Filtrar por ciudad"
+                                />
+                                {(cityQuery || activeCity) && (
+                                    <Box
+                                        as="button"
+                                        onClick={clearCity}
+                                        aria-label="Limpiar ciudad"
+                                        flexShrink={0}
+                                        color="fg.subtle"
+                                        _hover={{ color: 'fg' }}
+                                    >
+                                        <Box as={X} w="3.5" h="3.5" aria-hidden />
+                                    </Box>
+                                )}
+                            </Flex>
+                        </Box>
 
-                        <Button variant="primary" size="icon" aria-label="Buscar">
-                            <Box as={Search} w="4" h="4" aria-hidden />
+                        {showCitySuggestions && citySuggestions.length > 0 && (
+                            <Box
+                                position="absolute"
+                                top="calc(100% + 4px)"
+                                left="0"
+                                right="0"
+                                bg="bg.surface"
+                                borderWidth="1px"
+                                borderColor="border"
+                                borderRadius="xl"
+                                boxShadow="md"
+                                zIndex="dropdown"
+                                overflow="hidden"
+                            >
+                                <List.Root listStyle="none" p="0" m="0">
+                                    {citySuggestions.map((city) => (
+                                        <List.Item key={city}>
+                                            <Box
+                                                as="button"
+                                                w="full"
+                                                textAlign="left"
+                                                px="4"
+                                                py="3"
+                                                display="flex"
+                                                alignItems="center"
+                                                gap="3"
+                                                _hover={{ bg: 'bg.subtle' }}
+                                                onClick={() => applyCity(city)}
+                                                fontSize="sm"
+                                            >
+                                                <Box as={MapPin} w="4" h="4" color="fg.subtle" flexShrink={0} aria-hidden />
+                                                <Text color="fg">{city}</Text>
+                                            </Box>
+                                        </List.Item>
+                                    ))}
+                                </List.Root>
+                            </Box>
+                        )}
+                    </Box>
+                </Flex>
+
+                {/* Specialty filter chips — all known specialties */}
+                <Stack gap="2">
+                    <Flex align="center" gap="2">
+                        <Box as={SlidersHorizontal} w="3.5" h="3.5" color="fg.subtle" aria-hidden />
+                        <Text fontSize="xs" fontWeight="semibold" color="fg.subtle" textTransform="uppercase" letterSpacing="wider">
+                            Tipo de psicología
+                        </Text>
+                    </Flex>
+                    <Flex gap="2" flexWrap="wrap">
+                        <Button
+                            variant={activeSpecialty === null ? 'primary' : 'secondary'}
+                            size="sm"
+                            onClick={() => setActiveSpecialty(null)}
+                        >
+                            Todas
+                        </Button>
+                        {allSpecialtyKeys.map((key) => {
+                            const count = professionals.filter((p) => p.specialties.includes(key)).length;
+                            const isActive = activeSpecialty === key;
+                            return (
+                                <Button
+                                    key={key}
+                                    variant={isActive ? 'primary' : 'secondary'}
+                                    size="sm"
+                                    onClick={() => setActiveSpecialty(isActive ? null : key)}
+                                    opacity={count === 0 ? 0.45 : 1}
+                                    title={count === 0 ? 'Sin profesionales disponibles' : undefined}
+                                >
+                                    {formatSpecialty(key)}
+                                    {count > 0 && (
+                                        <Box
+                                            as="span"
+                                            display="inline-flex"
+                                            alignItems="center"
+                                            justifyContent="center"
+                                            w="4"
+                                            h="4"
+                                            borderRadius="full"
+                                            bg={isActive ? 'whiteAlpha.300' : 'bg.subtle'}
+                                            fontSize="2xs"
+                                            fontWeight="bold"
+                                            color={isActive ? 'white' : 'fg.subtle'}
+                                            ml="0.5"
+                                        >
+                                            {count}
+                                        </Box>
+                                    )}
+                                    {isActive && (
+                                        <Box as={X} w="3" h="3" aria-hidden />
+                                    )}
+                                </Button>
+                            );
+                        })}
+                    </Flex>
+                </Stack>
+
+                {/* Active filters summary */}
+                {hasActiveFilters && (
+                    <Flex align="center" gap="2" flexWrap="wrap">
+                        <Text fontSize="xs" color="fg.subtle">Filtros activos:</Text>
+                        {nameQuery.trim() && (
+                            <Badge
+                                variant="outline"
+                                colorPalette="brand"
+                                borderRadius="full"
+                                px="2.5"
+                                py="0.5"
+                                fontSize="xs"
+                                display="flex"
+                                alignItems="center"
+                                gap="1"
+                            >
+                                {nameQuery}
+                                <Box as="button" onClick={() => setNameQuery('')} aria-label="Quitar filtro nombre">
+                                    <Box as={X} w="2.5" h="2.5" />
+                                </Box>
+                            </Badge>
+                        )}
+                        {activeCity && (
+                            <Badge
+                                variant="outline"
+                                colorPalette="brand"
+                                borderRadius="full"
+                                px="2.5"
+                                py="0.5"
+                                fontSize="xs"
+                                display="flex"
+                                alignItems="center"
+                                gap="1"
+                            >
+                                <Box as={MapPin} w="2.5" h="2.5" />
+                                {activeCity}
+                                <Box as="button" onClick={clearCity} aria-label="Quitar filtro ciudad">
+                                    <Box as={X} w="2.5" h="2.5" />
+                                </Box>
+                            </Badge>
+                        )}
+                        {activeSpecialty && (
+                            <Badge
+                                variant="outline"
+                                colorPalette="brand"
+                                borderRadius="full"
+                                px="2.5"
+                                py="0.5"
+                                fontSize="xs"
+                                display="flex"
+                                alignItems="center"
+                                gap="1"
+                            >
+                                {formatSpecialty(activeSpecialty)}
+                                <Box as="button" onClick={() => setActiveSpecialty(null)} aria-label="Quitar filtro especialidad">
+                                    <Box as={X} w="2.5" h="2.5" />
+                                </Box>
+                            </Badge>
+                        )}
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => { setNameQuery(''); clearCity(); setActiveSpecialty(null); }}
+                        >
+                            Limpiar todo
                         </Button>
                     </Flex>
-                </Box>
-
-                {/* Filter chips */}
-                <Flex gap="2" flexWrap="wrap">
-                    <Button variant="secondary" size="sm">
-                        <Box as={SlidersHorizontal} w="3.5" h="3.5" aria-hidden />
-                        All Specialties
-                    </Button>
-                    <Button variant="secondary" size="sm">
-                        Availability: This Week
-                        <Box as={ChevronDown} w="3.5" h="3.5" aria-hidden />
-                    </Button>
-                </Flex>
+                )}
 
                 {/* Professional list */}
                 {filteredProfessionals.length === 0 ? (
@@ -293,11 +573,19 @@ export default function PortalProfessionalsIndex({ professionals }: Props) {
                                                 </Flex>
                                             )}
 
-                                            {professional.collegiate_number && (
-                                                <Text fontSize="xs" color="fg.subtle">
-                                                    Nº colegiado: {professional.collegiate_number}
-                                                </Text>
-                                            )}
+                                            <Flex align="center" gap="3" flexWrap="wrap">
+                                                {professional.city && (
+                                                    <Flex align="center" gap="1">
+                                                        <Box as={MapPin} w="3" h="3" color="fg.subtle" aria-hidden />
+                                                        <Text fontSize="xs" color="fg.subtle">{professional.city}</Text>
+                                                    </Flex>
+                                                )}
+                                                {professional.collegiate_number && (
+                                                    <Text fontSize="xs" color="fg.subtle">
+                                                        Nº colegiado: {professional.collegiate_number}
+                                                    </Text>
+                                                )}
+                                            </Flex>
                                         </Box>
 
                                         {/* Actions */}
@@ -315,7 +603,7 @@ export default function PortalProfessionalsIndex({ professionals }: Props) {
                                             <Button
                                                 variant="ghost"
                                                 size="sm"
-                                                disabled
+                                                onClick={() => router.visit(ShowAction.url(professional.id))}
                                                 aria-label={`Ver perfil de ${professional.name}`}
                                             >
                                                 Ver Perfil
