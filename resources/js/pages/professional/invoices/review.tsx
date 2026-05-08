@@ -60,7 +60,7 @@ export default function InvoiceReview({ invoice }: Props) {
     };
 
     const handleCharge = () => {
-        router.post(CreateCheckoutAction.url(invoice.id));
+        router.post(CreateCheckoutAction['/professional/invoices/{invoice}/checkout'].url(invoice.id));
     };
 
     return (

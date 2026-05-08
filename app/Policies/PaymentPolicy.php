@@ -34,11 +34,14 @@ class PaymentPolicy
 
     /**
      * Authorize creating a Stripe Checkout session for the invoice.
-     * Only the issuing professional may trigger payment, and only on `sent` invoices.
+     * Either the issuing professional or the billed patient may trigger payment,
+     * and only while the invoice is in `sent` status.
      */
     public function pay(User $user, Invoice $invoice): bool
     {
-        return $user->id === $invoice->professional_id
-            && $invoice->status === 'sent';
+        $isIssuer = $user->id === $invoice->professional_id;
+        $isPayer = $user->id === $invoice->patient_id;
+
+        return ($isIssuer || $isPayer) && $invoice->status === 'sent';
     }
 }

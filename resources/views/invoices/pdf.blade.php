@@ -18,6 +18,7 @@
         .header-row { display: table; width: 100%; }
         .header-left { display: table-cell; width: 50%; vertical-align: top; }
         .header-right { display: table-cell; width: 50%; vertical-align: top; text-align: right; }
+        .stamp-paid { display: inline-block; border: 3px solid #16a34a; color: #16a34a; font-weight: bold; font-size: 13px; letter-spacing: 2px; padding: 4px 12px; margin-top: 6px; text-transform: uppercase; }
     </style>
 </head>
 <body>
@@ -33,6 +34,12 @@
         @if($invoice->due_at)
         <div class="label" style="margin-top:6px;">Vencimiento</div>
         <div>{{ $invoice->due_at->format('d/m/Y') }}</div>
+        @endif
+        @if($invoice->isPaid())
+        <div style="margin-top:10px;"><span class="stamp-paid">Pagada</span></div>
+        @if($invoice->paid_at)
+        <div style="font-size:10px;color:#555;margin-top:3px;">{{ $invoice->paid_at->format('d/m/Y') }}</div>
+        @endif
         @endif
     </div>
 </div>

@@ -325,6 +325,8 @@ Route::middleware(['auth', 'verified'])
         Route::get('/invoices/{invoice}/download', PortalInvoiceDownloadPdfAction::class)
             ->middleware('rgpd.access_log:invoice.download')
             ->name('invoices.download');
+        Route::post('/invoices/{invoice}/checkout', InvoiceCreateCheckoutAction::class)
+            ->name('invoices.checkout');
 
         Route::get('/documents', PortalDocumentIndexAction::class)->name('documents.index');
         Route::get('/documents/{document}', PortalDocumentShowAction::class)

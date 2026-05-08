@@ -1,12 +1,13 @@
-import { Badge, Box, Card, Flex, Heading, HStack, Separator, Stack, Table, Text } from '@chakra-ui/react';
+import { Alert, Badge, Box, Card, Flex, Heading, HStack, Separator, Stack, Table, Text } from '@chakra-ui/react';
 import { chakra } from '@chakra-ui/react';
-import { Head, Link } from '@inertiajs/react';
-import { ArrowLeft, Download } from 'lucide-react';
-import type { ReactNode } from 'react';
-import PortalInvoiceDownloadAction from '@/actions/App/Http/Controllers/Portal/Invoice/DownloadPdfAction';
-import PortalInvoiceIndexAction from '@/actions/App/Http/Controllers/Portal/Invoice/IndexAction';
+import { Head, Link, router } from '@inertiajs/react';
+import { ArrowLeft, CreditCard, Download } from 'lucide-react';
+import { useEffect, useState, type ReactNode } from 'react';
+import CreateCheckoutAction from '@/actions/App/Http/Controllers/Invoice/CreateCheckoutAction';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
+import PortalInvoiceDownloadAction from '@/actions/App/Http/Controllers/Portal/Invoice/DownloadPdfAction';
+import PortalInvoiceIndexAction from '@/actions/App/Http/Controllers/Portal/Invoice/IndexAction';
 
 const ChakraLink = chakra(Link);
 
@@ -35,6 +36,7 @@ interface Invoice {
     total: string;
     notes: string | null;
     pdf_path: string | null;
+    stripe_checkout_session_id: string | null;
     items: InvoiceItem[];
     workspace: Workspace | null;
 }
@@ -58,6 +60,28 @@ const STATUS_PALETTE: Record<string, string> = {
 };
 
 export default function PatientInvoiceShow({ invoice }: Props) {
+    const canPay = invoice.status === 'sent';
+    const [checkoutOutcome, setCheckoutOutcome] = useState<'success' | 'cancel' | null>(null);
+    const [paying, setPaying] = useState(false);
+
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const outcome = params.get('checkout');
+        if (outcome === 'success' || outcome === 'cancel') {
+            setCheckoutOutcome(outcome);
+            window.history.replaceState(null, '', window.location.pathname);
+        }
+    }, []);
+
+    const handlePay = () => {
+        setPaying(true);
+        router.post(
+            CreateCheckoutAction['/patient/invoices/{invoice}/checkout'].url(invoice.id),
+            {},
+            { onError: () => setPaying(false) },
+        );
+    };
+
     return (
         <>
             <Head title={`Factura ${invoice.invoice_number}`} />
@@ -81,6 +105,24 @@ export default function PatientInvoiceShow({ invoice }: Props) {
                         Factura {invoice.invoice_number}
                     </Heading>
                 </Box>
+
+                {checkoutOutcome === 'success' && (
+                    <Alert.Root status="success" variant="subtle" borderRadius="md">
+                        <Alert.Indicator />
+                        <Alert.Description>
+                            Pago completado. Tu factura quedará marcada como pagada en breve.
+                        </Alert.Description>
+                    </Alert.Root>
+                )}
+
+                {checkoutOutcome === 'cancel' && (
+                    <Alert.Root status="warning" variant="subtle" borderRadius="md">
+                        <Alert.Indicator />
+                        <Alert.Description>
+                            Pago cancelado. Puedes intentarlo de nuevo cuando quieras.
+                        </Alert.Description>
+                    </Alert.Root>
+                )}
 
                 <Card.Root>
                     <Card.Body gap="6">
@@ -173,13 +215,19 @@ export default function PatientInvoiceShow({ invoice }: Props) {
                     </Card.Body>
                 </Card.Root>
 
-                <Flex justifyContent="flex-end">
+                <Flex justifyContent="flex-end" gap="3" flexWrap="wrap">
                     <Button asChild variant="secondary">
                         <ChakraLink href={PortalInvoiceDownloadAction.url(invoice.id)}>
                             <Box as={Download} w="4" h="4" />
                             Descargar PDF
                         </ChakraLink>
                     </Button>
+                    {canPay && (
+                        <Button variant="primary" onClick={handlePay} disabled={paying}>
+                            <Box as={CreditCard} w="4" h="4" />
+                            {paying ? 'Redirigiendo…' : 'Pagar con Stripe'}
+                        </Button>
+                    )}
                 </Flex>
             </Stack>
         </>

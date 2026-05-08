@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
@@ -15,11 +17,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $patient_id
  * @property int $professional_id
  * @property int|null $service_id Foreign key to offered_consultations.id (legacy column name kept to avoid breaking 25+ files; ADR-0007).
- * @property \Illuminate\Support\Carbon $starts_at
- * @property \Illuminate\Support\Carbon $ends_at
- * @property \Illuminate\Support\Carbon|null $patient_joined_at
- * @property \Illuminate\Support\Carbon|null $professional_joined_at
- * @property \Illuminate\Support\Carbon|null $confirmed_at
+ * @property Carbon $starts_at
+ * @property Carbon $ends_at
+ * @property Carbon|null $patient_joined_at
+ * @property Carbon|null $professional_joined_at
+ * @property Carbon|null $confirmed_at
  * @property string $status
  * @property string|null $modality
  * @property string|null $meeting_room_id
@@ -27,12 +29,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int|null $cancelled_by
  * @property string|null $cancellation_reason
  * @property string|null $notes
- * @property-read \App\Models\User|null $patient
- * @property-read \App\Models\User|null $professional
- * @property-read \App\Models\OfferedConsultation|null $service
- * @property-read \App\Models\OfferedConsultation|null $offeredConsultation
- * @property-read \App\Models\SessionRecording|null $sessionRecording
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Agreement> $agreements
+ * @property-read User|null $patient
+ * @property-read User|null $professional
+ * @property-read OfferedConsultation|null $service
+ * @property-read OfferedConsultation|null $offeredConsultation
+ * @property-read SessionRecording|null $sessionRecording
+ * @property-read Collection<int, Agreement> $agreements
  */
 class Appointment extends Model
 {
@@ -140,5 +142,15 @@ class Appointment extends Model
     public function isCancelled(): bool
     {
         return $this->status === 'cancelled';
+    }
+
+    /**
+     * True when any InvoiceItem linked to this appointment belongs to a paid Invoice.
+     * Requires invoiceItems.invoice to be eager-loaded to avoid N+1 queries.
+     */
+    public function isPaid(): bool
+    {
+        return $this->invoiceItems
+            ->contains(fn (InvoiceItem $item) => $item->invoice?->status === 'paid');
     }
 }

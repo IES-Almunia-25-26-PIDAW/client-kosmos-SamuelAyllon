@@ -2,11 +2,11 @@ import { Badge, Box, Flex, Heading, Stack, Text, chakra } from '@chakra-ui/react
 import { Head, Link, router } from '@inertiajs/react';
 import { ArrowLeft, CalendarDays, Clock, MapPin, Video } from 'lucide-react';
 import { useMemo, useState, type ReactNode } from 'react';
-import PortalAppointmentConfirmAction from '@/actions/App/Http/Controllers/Portal/Appointment/ConfirmAction';
-import PortalAppointmentIndexAction from '@/actions/App/Http/Controllers/Portal/Appointment/IndexAction';
 import { JoinCallButton } from '@/components/join-call-button';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
+import PortalAppointmentConfirmAction from '@/actions/App/Http/Controllers/Portal/Appointment/ConfirmAction';
+import PortalAppointmentIndexAction from '@/actions/App/Http/Controllers/Portal/Appointment/IndexAction';
 
 const ChakraLink = chakra(Link);
 
@@ -27,6 +27,7 @@ interface Appointment {
 
 interface Props {
     appointment: Appointment;
+    isPaid: boolean;
 }
 
 const STATUS_LABELS: Record<string, { label: string; palette: string }> = {
@@ -51,7 +52,7 @@ const formatTime = (iso: string): string =>
 
 const JOINABLE_STATUSES = ['pending', 'confirmed', 'in_progress'];
 
-export default function PatientAppointmentShow({ appointment }: Props) {
+export default function PatientAppointmentShow({ appointment, isPaid }: Props) {
     const statusCfg = STATUS_LABELS[appointment.status] ?? { label: appointment.status, palette: 'gray' };
     const isVideoCall = appointment.modality === 'video_call';
     const isJoinable = JOINABLE_STATUSES.includes(appointment.status);
@@ -161,6 +162,23 @@ export default function PatientAppointmentShow({ appointment }: Props) {
                         </Box>
                     )}
                 </Stack>
+
+                {appointment.status === 'completed' && (
+                    <Flex
+                        alignItems="center"
+                        gap="2"
+                        px="4"
+                        py="3"
+                        borderRadius="lg"
+                        bg={isPaid ? 'green.subtle' : 'yellow.subtle'}
+                        borderWidth="1px"
+                        borderColor={isPaid ? 'green.muted' : 'yellow.muted'}
+                    >
+                        <Text fontSize="sm" fontWeight="medium" color={isPaid ? 'green.fg' : 'yellow.fg'}>
+                            {isPaid ? 'Sesión pagada' : 'Pago pendiente'}
+                        </Text>
+                    </Flex>
+                )}
 
                 {appointment.status === 'pending' && (
                     <Stack gap="2" alignItems="center" pt="2">

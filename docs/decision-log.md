@@ -937,3 +937,27 @@ Adicionalmente, no había telemetría que indicase si el profesional había comp
 - El `silenceRmsThreshold` por defecto (0.012) está calibrado a ojo. Si entornos clínicos muy silenciosos se quedan sin transcripción, exponer el umbral por configuración o ajustarlo tras observación en producción.
 - La lista negra de alucinaciones es estática; nuevos patrones pueden requerir actualización (riesgo bajo: el corpus de Whisper-ES es estable). Si aparecen nuevos, ampliar `isHallucination()` y añadir dataset al test correspondiente.
 - Fase 3 sigue abierta: hasta que se haga, persiste la pérdida fronteriza entre slices y el preroll Opus. Crear ADR-0025 cuando se aborde.
+
+
+---
+
+## ADR-0025 — Pago no muta Appointment.status; is_paid derivado de InvoiceItem
+
+- **Fecha:** 2026-05-08
+- **Estado:** Aceptado
+
+### Contexto
+
+Al habilitar el pago de facturas desde el portal del paciente surgió la pregunta de si el pago de una `Invoice` debía cambiar el `status` de la `Appointment` vinculada (p.ej. añadir un estado `paid` o transicionar de `completed` a otro valor). La relación entre ambos modelos no es directa: `Invoice` ↔ `Appointment` se vincula a través de `InvoiceItem.appointment_id`, y una misma sesión puede generar más de un ítem de factura.
+
+### Decisión
+
+El campo `Appointment.status` **no cambia** cuando se paga una factura. Los valores del enum de estado (`pending`, `confirmed`, `in_progress`, `completed`, `cancelled`) describen el ciclo de vida clínico de la cita, no su estado financiero. Mezclar ambas dimensiones en un solo campo rompería las transiciones de estado existentes (p.ej. `AppointmentObserver` que genera facturas al pasar a `completed`) y añadiría un estado financiero a un modelo clínico.
+
+En su lugar, se expone el estado de pago como un atributo derivado `isPaid()` en `Appointment`, calculado a partir de la colección `invoiceItems.invoice.status`. Se serializa como `isPaid` en `PortalAppointmentShowAction` para que la UI del paciente lo consuma sin queries adicionales (eager-load `invoiceItems.invoice:id,status`).
+
+### Consecuencias
+
+- **Positivas:** separación de responsabilidades; el ciclo de vida clínico y el financiero son independientes; sin migraciones; sin riesgo de romper lógica existente.
+- **Negativas:** `isPaid()` requiere que `invoiceItems.invoice` esté eager-loaded; si se llama sin él, retornará `false` (colección vacía). Los controladores que necesiten el dato deben cargar explícitamente la relación.
+- Cualquier vista que necesite saber si una cita está pagada debe pasar por `Appointment::isPaid()` — no consultar `Invoice` directamente desde el frontend.
