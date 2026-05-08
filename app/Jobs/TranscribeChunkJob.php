@@ -94,6 +94,8 @@ class TranscribeChunkJob implements ShouldQueue
                 ['name' => 'model',           'contents' => 'whisper-large-v3-turbo'],
                 ['name' => 'language',        'contents' => 'es'],
                 ['name' => 'response_format', 'contents' => 'json'],
+                ['name' => 'temperature',     'contents' => '0'],
+                ['name' => 'prompt',          'contents' => 'Conversación clínica entre profesional sanitario y paciente, en español de España. Vocabulario médico habitual.'],
             ]);
 
         $disk->delete($this->chunkPath);
@@ -109,7 +111,13 @@ class TranscribeChunkJob implements ShouldQueue
 
         $text = trim((string) $response->json('text', ''));
 
-        if ($text === '') {
+        if ($text === '' || $this->isHallucination($text)) {
+            Log::info('TranscribeChunkJob: discarded chunk (empty or hallucination)', [
+                'session_recording_id' => $this->sessionRecordingId,
+                'position' => $this->position,
+                'text' => $text,
+            ]);
+
             return;
         }
 
@@ -127,5 +135,33 @@ class TranscribeChunkJob implements ShouldQueue
         );
 
         event(TranscriptionSegmentCreated::fromSegment($segment, $recording->appointment_id));
+    }
+
+    private function isHallucination(string $text): bool
+    {
+        $lower = mb_strtolower(trim($text));
+        $stripped = trim((string) preg_replace('/\s+/u', ' ', (string) preg_replace('/[\p{P}\p{S}]+/u', ' ', $lower)));
+
+        if ($stripped === '') {
+            return true;
+        }
+
+        $patterns = [
+            '/^gracias$/u',
+            '/^muchas gracias$/u',
+            '/^gracias por (ver|escuchar)/u',
+            '/subt[ií]tulos? (por|realizad|creados?)/u',
+            '/amara\s*org/u',
+            '/^suscr[ií]b/u',
+            '/^subtitulado por/u',
+        ];
+
+        foreach ($patterns as $pattern) {
+            if (preg_match($pattern, $stripped) === 1) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

@@ -2,16 +2,20 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import axios from '@/lib/axios';
 
 type RecorderStatus = 'idle' | 'permission_pending' | 'recording' | 'error';
+type AudioSource = 'tab' | 'microphone' | null;
 
 interface State {
     status: RecorderStatus;
     error: string | null;
     chunksUploaded: number;
+    audioSource: AudioSource;
+    chunksSkippedSilent: number;
 }
 
 interface Options {
     appointmentId: number;
     chunkDurationMs?: number;
+    silenceRmsThreshold?: number;
 }
 
 const CANDIDATES = [
@@ -26,10 +30,27 @@ const pickMimeType = (): string => {
     return CANDIDATES.find((c) => MediaRecorder.isTypeSupported(c)) ?? '';
 };
 
-export function useProfessionalTabRecorder({ appointmentId, chunkDurationMs = 15000 }: Options) {
+type AudioContextCtor = typeof AudioContext;
+
+const getAudioContextCtor = (): AudioContextCtor | null => {
+    if (typeof window === 'undefined') return null;
+    const w = window as unknown as {
+        AudioContext?: AudioContextCtor;
+        webkitAudioContext?: AudioContextCtor;
+    };
+    return w.AudioContext ?? w.webkitAudioContext ?? null;
+};
+
+export function useProfessionalTabRecorder({
+    appointmentId,
+    chunkDurationMs = 15000,
+    silenceRmsThreshold = 0.012,
+}: Options) {
     const [status, setStatus] = useState<RecorderStatus>('idle');
     const [error, setError] = useState<string | null>(null);
     const [chunksUploaded, setChunksUploaded] = useState(0);
+    const [chunksSkippedSilent, setChunksSkippedSilent] = useState(0);
+    const [audioSource, setAudioSource] = useState<AudioSource>(null);
 
     const streamRef = useRef<MediaStream | null>(null);
     const recorderRef = useRef<MediaRecorder | null>(null);
@@ -39,6 +60,58 @@ export function useProfessionalTabRecorder({ appointmentId, chunkDurationMs = 15
     const sliceTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const recordOneSliceRef = useRef<((stream: MediaStream) => void) | null>(null);
     const mimeType = useMemo(() => pickMimeType(), []);
+
+    const audioContextRef = useRef<AudioContext | null>(null);
+    const analyserRef = useRef<AnalyserNode | null>(null);
+    const vadIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+    const sliceHadVoiceRef = useRef(false);
+    const vadBufferRef = useRef<Uint8Array<ArrayBuffer> | null>(null);
+
+    const setupVad = useCallback((stream: MediaStream): boolean => {
+        const Ctor = getAudioContextCtor();
+        if (Ctor === null) return false;
+        try {
+            const ctx = new Ctor();
+            const source = ctx.createMediaStreamSource(stream);
+            const analyser = ctx.createAnalyser();
+            analyser.fftSize = 1024;
+            source.connect(analyser);
+            audioContextRef.current = ctx;
+            analyserRef.current = analyser;
+            vadBufferRef.current = new Uint8Array(new ArrayBuffer(analyser.fftSize));
+            return true;
+        } catch {
+            return false;
+        }
+    }, []);
+
+    const teardownVad = useCallback(() => {
+        if (vadIntervalRef.current) {
+            clearInterval(vadIntervalRef.current);
+            vadIntervalRef.current = null;
+        }
+        analyserRef.current?.disconnect();
+        analyserRef.current = null;
+        vadBufferRef.current = null;
+        const ctx = audioContextRef.current;
+        audioContextRef.current = null;
+        if (ctx && ctx.state !== 'closed') {
+            void ctx.close().catch(() => undefined);
+        }
+    }, []);
+
+    const sampleRms = useCallback((): number => {
+        const analyser = analyserRef.current;
+        const buffer = vadBufferRef.current;
+        if (!analyser || !buffer) return 0;
+        analyser.getByteTimeDomainData(buffer);
+        let sumSquares = 0;
+        for (let i = 0; i < buffer.length; i += 1) {
+            const sample = (buffer[i]! - 128) / 128;
+            sumSquares += sample * sample;
+        }
+        return Math.sqrt(sumSquares / buffer.length);
+    }, []);
 
     const uploadBlob = useCallback(
         async (blob: Blob, position: number, startedAtMs: number, endedAtMs: number) => {
@@ -68,15 +141,34 @@ export function useProfessionalTabRecorder({ appointmentId, chunkDurationMs = 15
             const position = positionRef.current;
             positionRef.current += 1;
 
+            sliceHadVoiceRef.current = false;
+            const vadActive = analyserRef.current !== null;
+            if (vadActive) {
+                if (vadIntervalRef.current) clearInterval(vadIntervalRef.current);
+                vadIntervalRef.current = setInterval(() => {
+                    if (sampleRms() >= silenceRmsThreshold) {
+                        sliceHadVoiceRef.current = true;
+                    }
+                }, 100);
+            }
+
             const parts: Blob[] = [];
             recorder.ondataavailable = (e) => {
                 if (e.data?.size > 0) parts.push(e.data);
             };
             recorder.onstop = () => {
+                if (vadIntervalRef.current) {
+                    clearInterval(vadIntervalRef.current);
+                    vadIntervalRef.current = null;
+                }
                 const blob = new Blob(parts, { type: mimeType });
                 const sliceEnd = performance.now() - startedAtRef.current;
-                if (blob.size > 0) {
+                const hasContent = blob.size > 0;
+                const hasVoice = !vadActive || sliceHadVoiceRef.current;
+                if (hasContent && hasVoice) {
                     void uploadBlob(blob, position, Math.round(sliceStart), Math.round(sliceEnd));
+                } else if (hasContent && !hasVoice) {
+                    setChunksSkippedSilent((n) => n + 1);
                 }
                 if (runningRef.current) recordOneSliceRef.current?.(stream);
             };
@@ -86,7 +178,7 @@ export function useProfessionalTabRecorder({ appointmentId, chunkDurationMs = 15
                 if (recorder.state === 'recording') recorder.stop();
             }, chunkDurationMs);
         },
-        [mimeType, chunkDurationMs, uploadBlob],
+        [mimeType, chunkDurationMs, uploadBlob, sampleRms, silenceRmsThreshold],
     );
 
     useEffect(() => {
@@ -105,20 +197,19 @@ export function useProfessionalTabRecorder({ appointmentId, chunkDurationMs = 15
         setError(null);
 
         let stream: MediaStream | null = null;
+        let source: AudioSource = null;
 
-        // Try getDisplayMedia (tab audio) first
         if (typeof navigator.mediaDevices?.getDisplayMedia === 'function') {
             try {
                 const displayStream = await navigator.mediaDevices.getDisplayMedia({
                     video: true,
                     audio: true,
                 });
-                // Drop video tracks — we only need audio
                 displayStream.getVideoTracks().forEach((t) => t.stop());
                 if (displayStream.getAudioTracks().length > 0) {
                     stream = displayStream;
+                    source = 'tab';
                 } else {
-                    // Browser shared display but without audio (e.g. user didn't tick "share tab audio")
                     displayStream.getTracks().forEach((t) => t.stop());
                 }
             } catch {
@@ -126,12 +217,15 @@ export function useProfessionalTabRecorder({ appointmentId, chunkDurationMs = 15
             }
         }
 
-        // Fallback: capture professional's microphone only
         if (stream === null) {
             try {
                 stream = await navigator.mediaDevices.getUserMedia({
                     audio: { echoCancellation: true, noiseSuppression: true },
                 });
+                source = 'microphone';
+                console.info(
+                    '[recorder] Tab audio not shared — falling back to microphone. Pídele al profesional que marque "Compartir audio de la pestaña".',
+                );
             } catch {
                 setError('No se pudo acceder al audio. Comprueba los permisos del navegador.');
                 setStatus('error');
@@ -143,10 +237,12 @@ export function useProfessionalTabRecorder({ appointmentId, chunkDurationMs = 15
         runningRef.current = true;
         startedAtRef.current = performance.now();
         positionRef.current = 0;
+        setAudioSource(source);
+        setupVad(stream);
         setStatus('recording');
 
         recordOneSlice(stream);
-    }, [mimeType, recordOneSlice]);
+    }, [mimeType, recordOneSlice, setupVad]);
 
     const stopRecording = useCallback(() => {
         runningRef.current = false;
@@ -154,10 +250,20 @@ export function useProfessionalTabRecorder({ appointmentId, chunkDurationMs = 15
         if (recorderRef.current?.state === 'recording') recorderRef.current.stop();
         streamRef.current?.getTracks().forEach((t) => t.stop());
         streamRef.current = null;
+        teardownVad();
+        setAudioSource(null);
         setStatus('idle');
-    }, []);
+    }, [teardownVad]);
 
-    return { status, error, chunksUploaded, startRecording, stopRecording } satisfies State & {
+    return {
+        status,
+        error,
+        chunksUploaded,
+        chunksSkippedSilent,
+        audioSource,
+        startRecording,
+        stopRecording,
+    } satisfies State & {
         startRecording: () => Promise<void>;
         stopRecording: () => void;
     };
