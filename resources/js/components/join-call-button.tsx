@@ -1,4 +1,4 @@
-import { Box, Text } from '@chakra-ui/react';
+import { Alert, Box, Text } from '@chakra-ui/react';
 import { router } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
 import StartCallAction from '@/actions/App/Http/Controllers/Appointment/StartCallAction';
@@ -13,6 +13,7 @@ interface Appointment {
     ends_at: string;
     meeting_url: string | null;
     meeting_room_id: string | null;
+    professional_joined_at: string | null;
 }
 
 interface Props {
@@ -98,9 +99,18 @@ export function JoinCallButton({ appointment, role }: Props) {
     }
 
     const label = role === 'professional' ? 'Iniciar sesión' : 'Unirse a la llamada';
+    const professionalNotReady = role === 'patient' && !appointment.professional_joined_at;
 
     return (
-        <Box textAlign="center">
+        <Box textAlign="center" w="full">
+            {professionalNotReady && (
+                <Alert.Root status="warning" variant="subtle" borderRadius="md" mb="3" textAlign="left">
+                    <Alert.Indicator />
+                    <Alert.Description fontSize="sm">
+                        Tu profesional aún no ha iniciado la sesión. Podrás unirte en cuanto entre.
+                    </Alert.Description>
+                </Alert.Root>
+            )}
             <Button variant="primary" size="lg" minW="56" loading={loading} onClick={() => void handleJoin()}>
                 {label}
             </Button>
