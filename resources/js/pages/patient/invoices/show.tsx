@@ -2,12 +2,12 @@ import { Alert, Badge, Box, Card, Flex, Heading, HStack, Separator, Stack, Table
 import { chakra } from '@chakra-ui/react';
 import { Head, Link, router } from '@inertiajs/react';
 import { ArrowLeft, CreditCard, Download } from 'lucide-react';
-import { useEffect, useState, type ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import CreateCheckoutAction from '@/actions/App/Http/Controllers/Invoice/CreateCheckoutAction';
-import { Button } from '@/components/ui/button';
-import AppLayout from '@/layouts/app-layout';
 import PortalInvoiceDownloadAction from '@/actions/App/Http/Controllers/Portal/Invoice/DownloadPdfAction';
 import PortalInvoiceIndexAction from '@/actions/App/Http/Controllers/Portal/Invoice/IndexAction';
+import { Button } from '@/components/ui/button';
+import AppLayout from '@/layouts/app-layout';
 
 const ChakraLink = chakra(Link);
 
@@ -61,17 +61,16 @@ const STATUS_PALETTE: Record<string, string> = {
 
 export default function PatientInvoiceShow({ invoice }: Props) {
     const canPay = invoice.status === 'sent';
-    const [checkoutOutcome, setCheckoutOutcome] = useState<'success' | 'cancel' | null>(null);
-    const [paying, setPaying] = useState(false);
-
-    useEffect(() => {
+    const [checkoutOutcome] = useState<'success' | 'cancel' | null>(() => {
         const params = new URLSearchParams(window.location.search);
         const outcome = params.get('checkout');
         if (outcome === 'success' || outcome === 'cancel') {
-            setCheckoutOutcome(outcome);
             window.history.replaceState(null, '', window.location.pathname);
+            return outcome;
         }
-    }, []);
+        return null;
+    });
+    const [paying, setPaying] = useState(false);
 
     const handlePay = () => {
         setPaying(true);

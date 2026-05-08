@@ -8,7 +8,7 @@ const { axiosPost, routerVisit, routerReload } = vi.hoisted(() => ({
 }));
 
 vi.mock('@/lib/axios', () => ({
-    default: { post: axiosPost },
+    default: { post: axiosPost, isAxiosError: vi.fn().mockReturnValue(false) },
 }));
 
 vi.mock('@inertiajs/react', () => ({

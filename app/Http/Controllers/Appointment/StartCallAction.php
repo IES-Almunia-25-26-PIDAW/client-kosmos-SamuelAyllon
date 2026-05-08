@@ -45,7 +45,9 @@ class StartCallAction extends Controller
             }
         }
 
-        $roomId = $appointment->meeting_room_id ?? 'kosmos-'.Str::uuid();
+        $roomId = $appointment->meeting_url !== null
+            ? null
+            : ($appointment->meeting_room_id ?? 'kosmos-'.Str::uuid());
 
         $appointment->update([
             'status' => 'in_progress',

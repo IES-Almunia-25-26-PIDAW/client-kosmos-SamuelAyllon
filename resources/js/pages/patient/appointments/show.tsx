@@ -1,12 +1,12 @@
 import { Badge, Box, Flex, Heading, Stack, Text, chakra } from '@chakra-ui/react';
 import { Head, Link, router } from '@inertiajs/react';
 import { ArrowLeft, CalendarDays, Clock, MapPin, Video } from 'lucide-react';
-import { useMemo, useState, type ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
+import PortalAppointmentConfirmAction from '@/actions/App/Http/Controllers/Portal/Appointment/ConfirmAction';
+import PortalAppointmentIndexAction from '@/actions/App/Http/Controllers/Portal/Appointment/IndexAction';
 import { JoinCallButton } from '@/components/join-call-button';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
-import PortalAppointmentConfirmAction from '@/actions/App/Http/Controllers/Portal/Appointment/ConfirmAction';
-import PortalAppointmentIndexAction from '@/actions/App/Http/Controllers/Portal/Appointment/IndexAction';
 
 const ChakraLink = chakra(Link);
 
@@ -58,11 +58,11 @@ export default function PatientAppointmentShow({ appointment, isPaid }: Props) {
     const isJoinable = JOINABLE_STATUSES.includes(appointment.status);
 
     const [confirming, setConfirming] = useState(false);
-    const canConfirm = useMemo(() => {
+    const [canConfirm] = useState(() => {
         if (appointment.status !== 'pending') return false;
         const cutoff = new Date(appointment.starts_at).getTime() - 24 * 60 * 60 * 1000;
         return Date.now() <= cutoff;
-    }, [appointment.status, appointment.starts_at]);
+    });
     const handleConfirm = () => {
         setConfirming(true);
         router.post(
