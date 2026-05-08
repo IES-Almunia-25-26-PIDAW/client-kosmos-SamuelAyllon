@@ -77,11 +77,7 @@ describe('JoinCallButton', () => {
         await vi.waitFor(() => expect(routerVisit).toHaveBeenCalledWith('/call/room-xyz'));
 
         expect(axiosPost).toHaveBeenCalledWith('/appointments/42/start-call');
-        expect(window.open).toHaveBeenCalledWith(
-            'https://meet.example/xyz',
-            '_blank',
-            'noopener,noreferrer',
-        );
+        expect(window.open).not.toHaveBeenCalled();
     });
 
     it('[RF-09] calls JoinCallAction for the patient and reloads if no room is provisioned yet', async () => {
