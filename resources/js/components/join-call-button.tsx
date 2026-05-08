@@ -44,7 +44,6 @@ export function JoinCallButton({ appointment, role }: Props) {
                 const { data } = await axios.post<{ room_id: string; meeting_url: string | null }>(
                     StartCallAction.url(appointment.id),
                 );
-                if (data.meeting_url) window.open(data.meeting_url, '_blank', 'noopener,noreferrer');
                 if (data.room_id) router.visit(`/call/${data.room_id}`);
             } else {
                 const { data } = await axios.post<{

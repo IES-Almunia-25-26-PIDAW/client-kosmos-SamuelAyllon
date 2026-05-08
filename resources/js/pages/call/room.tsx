@@ -39,6 +39,9 @@ export default function CallRoom({ appointment, exitUrl }: Props) {
     const recorder = useProfessionalTabRecorder({ appointmentId: appointment.id });
 
     const handleOpenMeet = () => {
+        if (isProfessional && recorder.status === 'idle') {
+            void recorder.startRecording();
+        }
         if (appointment.meeting_url) {
             window.open(appointment.meeting_url, '_blank', 'noopener,noreferrer');
         }
