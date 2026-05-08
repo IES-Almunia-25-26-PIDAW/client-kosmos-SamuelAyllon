@@ -216,10 +216,10 @@ export default function PatientInvoiceShow({ invoice }: Props) {
 
                 <Flex justifyContent="flex-end" gap="3" flexWrap="wrap">
                     <Button asChild variant="secondary">
-                        <ChakraLink href={PortalInvoiceDownloadAction.url(invoice.id)}>
+                        <chakra.a href={PortalInvoiceDownloadAction.url(invoice.id)}>
                             <Box as={Download} w="4" h="4" />
                             Descargar PDF
-                        </ChakraLink>
+                        </chakra.a>
                     </Button>
                     {canPay && (
                         <Button variant="primary" onClick={handlePay} disabled={paying}>
