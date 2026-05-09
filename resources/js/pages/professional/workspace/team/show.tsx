@@ -131,7 +131,7 @@ export default function TeamShow({ workspace, members, patients }: Props) {
                                                 required
                                             />
                                             {errors.email && (
-                                                <Text fontSize="sm" color="red.500">
+                                                <Text fontSize="sm" color="danger.fg">
                                                     {errors.email}
                                                 </Text>
                                             )}

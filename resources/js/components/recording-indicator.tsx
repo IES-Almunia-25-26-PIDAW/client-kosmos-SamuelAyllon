@@ -7,13 +7,13 @@ export function RecordingIndicator() {
                 w="2.5"
                 h="2.5"
                 borderRadius="full"
-                bg="red.500"
+                bg="danger.solid"
                 animation="pulse 1s ease-in-out infinite"
             />
             <Text
                 fontSize="xs"
                 fontWeight="semibold"
-                color="red.400"
+                color="danger.fg"
                 letterSpacing="wider"
                 textTransform="uppercase"
             >

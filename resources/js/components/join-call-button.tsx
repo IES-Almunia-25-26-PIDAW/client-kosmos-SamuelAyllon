@@ -90,7 +90,7 @@ export function JoinCallButton({ appointment, role }: Props) {
                     Disponible en {countdown.hh}:{countdown.mm}:{countdown.ss}
                 </Button>
                 {error && (
-                    <Text mt="2" fontSize="sm" color="red.500">
+                    <Text mt="2" fontSize="sm" color="danger.fg">
                         {error}
                     </Text>
                 )}
@@ -115,7 +115,7 @@ export function JoinCallButton({ appointment, role }: Props) {
                 {label}
             </Button>
             {error && (
-                <Text mt="2" fontSize="sm" color="red.500">
+                <Text mt="2" fontSize="sm" color="danger.fg">
                     {error}
                 </Text>
             )}

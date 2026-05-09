@@ -139,7 +139,7 @@ function ConsultationsTable({ consultations, onDelete }: ListProps) {
                         <Table.Row key={c.id}>
                             <Table.Cell>
                                 <HStack gap="3">
-                                    <Box w="3" h="3" borderRadius="full" bg={c.color ?? 'gray.400'} />
+                                    <Box w="3" h="3" borderRadius="full" bg={c.color ?? 'border'} />
                                     <Stack gap="0">
                                         <Link href={OfferedConsultationsShowAction.url({ offered_consultation: c.id })}>
                                             <Text fontWeight="semibold" color="fg">{c.name}</Text>
@@ -195,7 +195,7 @@ function ConsultationsGallery({ consultations, onDelete }: ListProps) {
                     _hover={{ boxShadow: 'md', borderColor: 'brand.solid' }}
                 >
                     <Flex align="center" gap="3">
-                        <Box w="4" h="4" borderRadius="full" bg={c.color ?? 'gray.400'} flexShrink={0} />
+                        <Box w="4" h="4" borderRadius="full" bg={c.color ?? 'border'} flexShrink={0} />
                         <Heading as="h3" fontSize="lg" color="fg" lineClamp={1} flex="1">
                             {c.name}
                         </Heading>

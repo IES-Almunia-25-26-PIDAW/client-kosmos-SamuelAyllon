@@ -35,6 +35,7 @@ const buildAppointment = (overrides: Partial<Parameters<typeof JoinCallButton>[0
     ends_at: '2026-05-02T11:00:00.000Z',
     meeting_url: null,
     meeting_room_id: null,
+    professional_joined_at: null,
     ...overrides,
 });
 
