@@ -1,11 +1,10 @@
-import { Box, Flex, Stack, Text } from '@chakra-ui/react';
+import { Box, Flex, Stack } from '@chakra-ui/react';
 import { Form, Head } from '@inertiajs/react';
 import { KeyRound, Lock, Mail, ShieldCheck } from 'lucide-react';
 import type { ReactNode } from 'react';
-import InputError from '@/components/input-error';
+import { FormField } from '@/components/form-field';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { IconInput } from '@/components/ui/icon-input';
 import { Spinner } from '@/components/ui/spinner';
 import AuthLayout from '@/layouts/auth-layout';
 import { update } from '@/routes/password';
@@ -37,61 +36,48 @@ export default function ResetPassword({ token, email }: Props) {
             >
                 {({ processing, errors }) => (
                     <Stack gap="5">
-                        <Stack gap="2">
-                            <Label htmlFor="email">
-                                <Text as="span" fontSize="sm" fontWeight="semibold">Correo electrónico</Text>
-                            </Label>
-                            <Box position="relative">
-                                <Box as={Mail} position="absolute" left="3" top="50%" transform="translateY(-50%)" h="4" w="4" color="fg.muted" />
-                                <Input
-                                    id="email"
-                                    type="email"
-                                    name="email"
-                                    autoComplete="email"
-                                    value={email}
-                                    readOnly
-                                    style={{ paddingLeft: '2.5rem' }}
-                                />
-                            </Box>
-                            <InputError message={errors.email} />
-                        </Stack>
+                        <FormField
+                            label="Correo electrónico"
+                            error={errors.email}
+                        >
+                            <IconInput
+                                icon={Mail}
+                                type="email"
+                                name="email"
+                                autoComplete="email"
+                                value={email}
+                                readOnly
+                            />
+                        </FormField>
 
-                        <Stack gap="2">
-                            <Label htmlFor="password">
-                                <Text as="span" fontSize="sm" fontWeight="semibold">Nueva contraseña</Text>
-                            </Label>
-                            <Box position="relative">
-                                <Box as={Lock} position="absolute" left="3" top="50%" transform="translateY(-50%)" h="4" w="4" color="fg.muted" />
-                                <Input
-                                    id="password"
-                                    type="password"
-                                    name="password"
-                                    autoComplete="new-password"
-                                    autoFocus
-                                    placeholder="Mínimo 8 caracteres"
-                                    style={{ paddingLeft: '2.5rem' }}
-                                />
-                            </Box>
-                            <InputError message={errors.password} />
-                        </Stack>
+                        <FormField
+                            label="Nueva contraseña"
+                            error={errors.password}
+                            required
+                        >
+                            <IconInput
+                                icon={Lock}
+                                type="password"
+                                name="password"
+                                autoComplete="new-password"
+                                autoFocus
+                                placeholder="Mínimo 8 caracteres"
+                            />
+                        </FormField>
 
-                        <Stack gap="2">
-                            <Label htmlFor="password_confirmation">
-                                <Text as="span" fontSize="sm" fontWeight="semibold">Confirmar contraseña</Text>
-                            </Label>
-                            <Box position="relative">
-                                <Box as={KeyRound} position="absolute" left="3" top="50%" transform="translateY(-50%)" h="4" w="4" color="fg.muted" />
-                                <Input
-                                    id="password_confirmation"
-                                    type="password"
-                                    name="password_confirmation"
-                                    autoComplete="new-password"
-                                    placeholder="Repite tu contraseña"
-                                    style={{ paddingLeft: '2.5rem' }}
-                                />
-                            </Box>
-                            <InputError message={errors.password_confirmation} />
-                        </Stack>
+                        <FormField
+                            label="Confirmar contraseña"
+                            error={errors.password_confirmation}
+                            required
+                        >
+                            <IconInput
+                                icon={KeyRound}
+                                type="password"
+                                name="password_confirmation"
+                                autoComplete="new-password"
+                                placeholder="Repite tu contraseña"
+                            />
+                        </FormField>
 
                         <Button
                             type="submit"

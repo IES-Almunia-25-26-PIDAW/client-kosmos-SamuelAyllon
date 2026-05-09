@@ -1,9 +1,23 @@
-import {
-    Textarea as ChakraTextarea,
-    type TextareaProps,
-} from '@chakra-ui/react';
+import { Textarea as ChakraTextarea, type TextareaProps } from '@chakra-ui/react';
+import * as React from 'react';
+import { useFormFieldIds } from '@/components/form-field';
 
-function Textarea(props: TextareaProps) {
+type Props = TextareaProps & {
+    id?: string;
+    'aria-invalid'?: React.AriaAttributes['aria-invalid'];
+    'aria-describedby'?: string;
+    'aria-required'?: React.AriaAttributes['aria-required'];
+};
+
+function Textarea({
+    id,
+    'aria-invalid': ariaInvalid,
+    'aria-describedby': ariaDescribedby,
+    'aria-required': ariaRequired,
+    ...props
+}: Props) {
+    const fieldCtx = useFormFieldIds();
+
     return (
         <ChakraTextarea
             data-slot="textarea"
@@ -13,6 +27,17 @@ function Textarea(props: TextareaProps) {
             borderColor="border"
             color="fg"
             minH="16"
+            id={id ?? fieldCtx?.inputId}
+            aria-invalid={ariaInvalid ?? (fieldCtx?.hasError ? true : undefined)}
+            aria-describedby={
+                ariaDescribedby ??
+                (fieldCtx?.hasError
+                    ? fieldCtx.errorId
+                    : fieldCtx?.hasDescription
+                      ? fieldCtx.descId
+                      : undefined)
+            }
+            aria-required={ariaRequired ?? (fieldCtx?.required ? true : undefined)}
             _placeholder={{ color: 'fg.subtle' }}
             _focusVisible={{
                 borderColor: 'brand.solid',

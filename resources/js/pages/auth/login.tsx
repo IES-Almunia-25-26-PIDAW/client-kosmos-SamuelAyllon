@@ -2,10 +2,11 @@ import { Box, Button as ChakraButton, Flex, Heading, Stack, Text } from '@chakra
 import { Form, Head } from '@inertiajs/react';
 import { AtSign, CheckCircle2, Lock } from 'lucide-react';
 import type { ReactNode } from 'react';
-import InputError from '@/components/input-error';
+import { FormField } from '@/components/form-field';
 import TextLink from '@/components/text-link';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
+import { FieldLabel } from '@/components/ui/field-label';
+import { IconInput } from '@/components/ui/icon-input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import AuthSplitLayout from '@/layouts/auth/auth-split-layout';
@@ -63,67 +64,57 @@ export default function Login({ status, canResetPassword, canRegister }: Props) 
                 {({ processing, errors }) => (
                     <>
                         <Stack gap="6">
-                            <Stack gap="2">
-                                <Label htmlFor="email">
-                                    <Text as="span" fontSize="11px" fontWeight="semibold" letterSpacing="widest" textTransform="uppercase" color="fg.muted">
-                                        Email
-                                    </Text>
-                                </Label>
-                                <Box position="relative">
-                                    <Box as={AtSign} position="absolute" left="4" top="50%" transform="translateY(-50%)" h="4" w="4" color="fg.muted" opacity={0.6} zIndex={1} />
-                                    <Input
-                                        id="email"
-                                        type="email"
-                                        name="email"
-                                        required
-                                        autoFocus
-                                        tabIndex={1}
-                                        autoComplete="email"
-                                        placeholder="dr.aris@kosmos.com"
-                                        borderRadius="full"
-                                        bg="bg.subtle"
-                                        borderWidth="0"
-                                        pl="10"
-                                        h="14"
-                                    />
-                                </Box>
-                                <InputError message={errors.email} />
-                            </Stack>
+                            <FormField
+                                label={<FieldLabel>Email</FieldLabel>}
+                                error={errors.email}
+                                required
+                            >
+                                <IconInput
+                                    icon={AtSign}
+                                    iconLeft="4"
+                                    type="email"
+                                    name="email"
+                                    required
+                                    autoFocus
+                                    tabIndex={1}
+                                    autoComplete="email"
+                                    placeholder="dr.aris@kosmos.com"
+                                    borderRadius="full"
+                                    bg="bg.subtle"
+                                    borderWidth="0"
+                                    h="14"
+                                />
+                            </FormField>
 
-                            <Stack gap="2">
-                                <Flex alignItems="center" justifyContent="space-between">
-                                    <Label htmlFor="password">
-                                        <Text as="span" fontSize="11px" fontWeight="semibold" letterSpacing="widest" textTransform="uppercase" color="fg.muted">
-                                            Contraseña
-                                        </Text>
-                                    </Label>
-                                    {canResetPassword && (
+                            <FormField
+                                label={<FieldLabel>Contraseña</FieldLabel>}
+                                labelAddon={
+                                    canResetPassword ? (
                                         <TextLink href={request()} tabIndex={5}>
                                             <Text as="span" fontSize="xs" fontWeight="semibold" color="brand.solid">
                                                 ¿Has olvidado tu contraseña?
                                             </Text>
                                         </TextLink>
-                                    )}
-                                </Flex>
-                                <Box position="relative">
-                                    <Box as={Lock} position="absolute" left="4" top="50%" transform="translateY(-50%)" h="4" w="4" color="fg.muted" opacity={0.6} zIndex={1} />
-                                    <Input
-                                        id="password"
-                                        type="password"
-                                        name="password"
-                                        required
-                                        tabIndex={2}
-                                        autoComplete="current-password"
-                                        placeholder="••••••••••"
-                                        borderRadius="full"
-                                        bg="bg.subtle"
-                                        borderWidth="0"
-                                        pl="10"
-                                        h="14"
-                                    />
-                                </Box>
-                                <InputError message={errors.password} />
-                            </Stack>
+                                    ) : undefined
+                                }
+                                error={errors.password}
+                                required
+                            >
+                                <IconInput
+                                    icon={Lock}
+                                    iconLeft="4"
+                                    type="password"
+                                    name="password"
+                                    required
+                                    tabIndex={2}
+                                    autoComplete="current-password"
+                                    placeholder="••••••••••"
+                                    borderRadius="full"
+                                    bg="bg.subtle"
+                                    borderWidth="0"
+                                    h="14"
+                                />
+                            </FormField>
 
                             <Flex alignItems="center" gap="3" px="1" py="2">
                                 <Checkbox id="remember" name="remember" tabIndex={3} />

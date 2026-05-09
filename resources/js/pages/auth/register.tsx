@@ -1,4 +1,4 @@
-import { Box, Button as ChakraButton, Flex, Grid, Heading, Stack, Text } from '@chakra-ui/react';
+import { Box, Button as ChakraButton, chakra, Flex, Grid, Heading, SimpleGrid, Stack, Text } from '@chakra-ui/react';
 import { Head, useForm } from '@inertiajs/react';
 import {
     Award,
@@ -15,11 +15,12 @@ import {
     UserPlus,
 } from 'lucide-react';
 import { useState, type FormEvent, type ReactNode } from 'react';
-import InputError from '@/components/input-error';
+import { FormField } from '@/components/form-field';
 import PasswordStrength from '@/components/password-strength';
 import TextLink from '@/components/text-link';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
+import { FieldLabel } from '@/components/ui/field-label';
+import { IconInput } from '@/components/ui/icon-input';
 import { Spinner } from '@/components/ui/spinner';
 import { Textarea } from '@/components/ui/textarea';
 import AuthSplitLayout from '@/layouts/auth/auth-split-layout';
@@ -143,9 +144,14 @@ export default function Register() {
                 </Stack>
 
                 {/* Form */}
-                <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                <chakra.form
+                    onSubmit={submit}
+                    display="flex"
+                    flexDirection="column"
+                    gap="6"
+                >
                     {/* User Type Selection */}
-                    <Grid templateColumns="repeat(2, 1fr)" gap="3">
+                    <SimpleGrid columns={2} gap="3">
                         <TypeButton
                             active={userType === 'professional'}
                             onClick={() => selectType('professional')}
@@ -158,288 +164,153 @@ export default function Register() {
                             icon={Heart}
                             label="Paciente"
                         />
-                    </Grid>
+                    </SimpleGrid>
 
                     {/* Form Fields */}
                     <Stack gap="4">
                         {/* Name Field */}
-                        <Stack gap="2">
-                            <Label htmlFor="name">
-                                <Text
-                                    as="span"
-                                    fontSize="11px"
-                                    fontWeight="semibold"
-                                    letterSpacing="widest"
-                                    textTransform="uppercase"
-                                    color="fg.muted"
-                                >
-                                    Nombre completo
-                                </Text>
-                            </Label>
-                            <Box position="relative">
-                                <Box
-                                    as={User}
-                                    position="absolute"
-                                    left="4"
-                                    top="50%"
-                                    transform="translateY(-50%)"
-                                    h="4"
-                                    w="4"
-                                    color="fg.muted"
-                                    opacity={0.6}
-                                    zIndex={1}
-                                />
-                                <Input
-                                    id="name"
-                                    type="text"
-                                    required
-                                    autoFocus
-                                    autoComplete="name"
-                                    name="name"
-                                    value={data.name}
-                                    onChange={(e) => setData('name', e.target.value)}
-                                    placeholder="Tu nombre"
-                                    borderRadius="full"
-                                    bg="bg.subtle"
-                                    borderWidth="0"
-                                    pl="10"
-                                    h="14"
-                                />
-                            </Box>
-                            <InputError message={errors.name} />
-                        </Stack>
+                        <FormField
+                            label={<FieldLabel>Nombre completo</FieldLabel>}
+                            error={errors.name}
+                            required
+                        >
+                            <IconInput
+                                icon={User}
+                                iconLeft="4"
+                                type="text"
+                                name="name"
+                                required
+                                autoFocus
+                                autoComplete="name"
+                                value={data.name}
+                                onChange={(e) => setData('name', e.target.value)}
+                                placeholder="Tu nombre"
+                                borderRadius="full"
+                                bg="bg.subtle"
+                                borderWidth="0"
+                                h="14"
+                            />
+                        </FormField>
 
                         {/* Email Field */}
-                        <Stack gap="2">
-                            <Label htmlFor="email">
-                                <Text
-                                    as="span"
-                                    fontSize="11px"
-                                    fontWeight="semibold"
-                                    letterSpacing="widest"
-                                    textTransform="uppercase"
-                                    color="fg.muted"
-                                >
-                                    Correo electrónico
-                                </Text>
-                            </Label>
-                            <Box position="relative">
-                                <Box
-                                    as={Mail}
-                                    position="absolute"
-                                    left="4"
-                                    top="50%"
-                                    transform="translateY(-50%)"
-                                    h="4"
-                                    w="4"
-                                    color="fg.muted"
-                                    opacity={0.6}
-                                    zIndex={1}
-                                />
-                                <Input
-                                    id="email"
-                                    type="email"
-                                    required
-                                    autoComplete="email"
-                                    name="email"
-                                    value={data.email}
-                                    onChange={(e) => setData('email', e.target.value)}
-                                    placeholder="email@ejemplo.com"
-                                    borderRadius="full"
-                                    bg="bg.subtle"
-                                    borderWidth="0"
-                                    pl="10"
-                                    h="14"
-                                />
-                            </Box>
-                            <InputError message={errors.email} />
-                        </Stack>
+                        <FormField
+                            label={<FieldLabel>Correo electrónico</FieldLabel>}
+                            error={errors.email}
+                            required
+                        >
+                            <IconInput
+                                icon={Mail}
+                                iconLeft="4"
+                                type="email"
+                                name="email"
+                                required
+                                autoComplete="email"
+                                value={data.email}
+                                onChange={(e) => setData('email', e.target.value)}
+                                placeholder="email@ejemplo.com"
+                                borderRadius="full"
+                                bg="bg.subtle"
+                                borderWidth="0"
+                                h="14"
+                            />
+                        </FormField>
 
                         {/* Phone Field */}
-                        <Stack gap="2">
-                            <Label htmlFor="phone">
-                                <Text
-                                    as="span"
-                                    fontSize="11px"
-                                    fontWeight="semibold"
-                                    letterSpacing="widest"
-                                    textTransform="uppercase"
-                                    color="fg.muted"
-                                >
+                        <FormField
+                            label={
+                                <FieldLabel>
                                     Teléfono{' '}
-                                    <Text
-                                        as="span"
-                                        color="fg.subtle"
-                                        fontWeight="normal"
-                                        textTransform="none"
-                                    >
+                                    <chakra.span color="fg.subtle" fontWeight="normal" textTransform="none">
                                         (opcional)
-                                    </Text>
-                                </Text>
-                            </Label>
-                            <Box position="relative">
-                                <Box
-                                    as={Phone}
-                                    position="absolute"
-                                    left="4"
-                                    top="50%"
-                                    transform="translateY(-50%)"
-                                    h="4"
-                                    w="4"
-                                    color="fg.muted"
-                                    opacity={0.6}
-                                    zIndex={1}
-                                />
-                                <Input
-                                    id="phone"
-                                    type="tel"
-                                    autoComplete="tel"
-                                    name="phone"
-                                    value={data.phone}
-                                    onChange={(e) => setData('phone', e.target.value)}
-                                    placeholder="+34 600 000 000"
-                                    borderRadius="full"
-                                    bg="bg.subtle"
-                                    borderWidth="0"
-                                    pl="10"
-                                    h="14"
-                                />
-                            </Box>
-                            <InputError message={errors.phone} />
-                        </Stack>
+                                    </chakra.span>
+                                </FieldLabel>
+                            }
+                            error={errors.phone}
+                        >
+                            <IconInput
+                                icon={Phone}
+                                iconLeft="4"
+                                type="tel"
+                                name="phone"
+                                autoComplete="tel"
+                                value={data.phone}
+                                onChange={(e) => setData('phone', e.target.value)}
+                                placeholder="+34 600 000 000"
+                                borderRadius="full"
+                                bg="bg.subtle"
+                                borderWidth="0"
+                                h="14"
+                            />
+                        </FormField>
 
                         {/* Professional-Only Fields */}
                         {userType === 'professional' && (
                             <>
-                                <Grid templateColumns="repeat(2, 1fr)" gap="3">
+                                <SimpleGrid columns={{ base: 1, sm: 2 }} gap="3">
                                     {/* Collegiate Number */}
-                                    <Stack gap="2">
-                                        <Label htmlFor="collegiate_number">
-                                            <Text
-                                                as="span"
-                                                fontSize="11px"
-                                                fontWeight="semibold"
-                                                letterSpacing="widest"
-                                                textTransform="uppercase"
-                                                color="fg.muted"
-                                            >
+                                    <FormField
+                                        label={
+                                            <FieldLabel>
                                                 Nº colegiado{' '}
-                                                <Text
-                                                    as="span"
-                                                    color="fg.subtle"
-                                                    fontWeight="normal"
-                                                    textTransform="none"
-                                                >
+                                                <chakra.span color="fg.subtle" fontWeight="normal" textTransform="none">
                                                     (opc.)
-                                                </Text>
-                                            </Text>
-                                        </Label>
-                                        <Box position="relative">
-                                            <Box
-                                                as={Award}
-                                                position="absolute"
-                                                left="4"
-                                                top="50%"
-                                                transform="translateY(-50%)"
-                                                h="4"
-                                                w="4"
-                                                color="fg.muted"
-                                                opacity={0.6}
-                                                zIndex={1}
-                                            />
-                                            <Input
-                                                id="collegiate_number"
-                                                type="text"
-                                                name="collegiate_number"
-                                                value={data.collegiate_number}
-                                                onChange={(e) => setData('collegiate_number', e.target.value)}
-                                                placeholder="M-12345"
-                                                borderRadius="full"
-                                                bg="bg.subtle"
-                                                borderWidth="0"
-                                                pl="10"
-                                                h="14"
-                                            />
-                                        </Box>
-                                        <InputError message={errors.collegiate_number} />
-                                    </Stack>
+                                                </chakra.span>
+                                            </FieldLabel>
+                                        }
+                                        error={errors.collegiate_number}
+                                    >
+                                        <IconInput
+                                            icon={Award}
+                                            iconLeft="4"
+                                            type="text"
+                                            name="collegiate_number"
+                                            value={data.collegiate_number}
+                                            onChange={(e) => setData('collegiate_number', e.target.value)}
+                                            placeholder="M-12345"
+                                            borderRadius="full"
+                                            bg="bg.subtle"
+                                            borderWidth="0"
+                                            h="14"
+                                        />
+                                    </FormField>
 
                                     {/* License Number */}
-                                    <Stack gap="2">
-                                        <Label htmlFor="license_number">
-                                            <Text
-                                                as="span"
-                                                fontSize="11px"
-                                                fontWeight="semibold"
-                                                letterSpacing="widest"
-                                                textTransform="uppercase"
-                                                color="fg.muted"
-                                            >
+                                    <FormField
+                                        label={
+                                            <FieldLabel>
                                                 Nº licencia{' '}
-                                                <Text
-                                                    as="span"
-                                                    color="fg.subtle"
-                                                    fontWeight="normal"
-                                                    textTransform="none"
-                                                >
+                                                <chakra.span color="fg.subtle" fontWeight="normal" textTransform="none">
                                                     (opc.)
-                                                </Text>
-                                            </Text>
-                                        </Label>
-                                        <Box position="relative">
-                                            <Box
-                                                as={BookOpen}
-                                                position="absolute"
-                                                left="4"
-                                                top="50%"
-                                                transform="translateY(-50%)"
-                                                h="4"
-                                                w="4"
-                                                color="fg.muted"
-                                                opacity={0.6}
-                                                zIndex={1}
-                                            />
-                                            <Input
-                                                id="license_number"
-                                                type="text"
-                                                name="license_number"
-                                                value={data.license_number}
-                                                onChange={(e) => setData('license_number', e.target.value)}
-                                                placeholder="LIC-12345"
-                                                borderRadius="full"
-                                                bg="bg.subtle"
-                                                borderWidth="0"
-                                                pl="10"
-                                                h="14"
-                                            />
-                                        </Box>
-                                        <InputError message={errors.license_number} />
-                                    </Stack>
-                                </Grid>
+                                                </chakra.span>
+                                            </FieldLabel>
+                                        }
+                                        error={errors.license_number}
+                                    >
+                                        <IconInput
+                                            icon={BookOpen}
+                                            iconLeft="4"
+                                            type="text"
+                                            name="license_number"
+                                            value={data.license_number}
+                                            onChange={(e) => setData('license_number', e.target.value)}
+                                            placeholder="LIC-12345"
+                                            borderRadius="full"
+                                            bg="bg.subtle"
+                                            borderWidth="0"
+                                            h="14"
+                                        />
+                                    </FormField>
+                                </SimpleGrid>
 
                                 {/* Specialties */}
-                                <Stack gap="2">
-                                    <Label>
-                                        <Text
-                                            as="span"
-                                            fontSize="11px"
-                                            fontWeight="semibold"
-                                            letterSpacing="widest"
-                                            textTransform="uppercase"
-                                            color="fg.muted"
-                                        >
-                                            Especialidades{' '}
-                                            <Text
-                                                as="span"
-                                                color="fg.subtle"
-                                                fontWeight="normal"
-                                                textTransform="none"
-                                            >
-                                                (opcional)
-                                            </Text>
-                                        </Text>
-                                    </Label>
-                                    <Grid templateColumns="repeat(2, 1fr)" gap="2">
+                                <Box spaceY="2">
+                                    <FieldLabel as="p">
+                                        Especialidades{' '}
+                                        <chakra.span color="fg.subtle" fontWeight="normal" textTransform="none">
+                                            (opcional)
+                                        </chakra.span>
+                                    </FieldLabel>
+                                    <Grid templateColumns={{ base: '1fr', sm: 'repeat(2, 1fr)' }} gap="2">
                                         {SPECIALTIES.map((s) => {
                                             const active = data.specialties.includes(s.value);
                                             return (
@@ -485,34 +356,29 @@ export default function Register() {
                                             );
                                         })}
                                     </Grid>
-                                    <InputError message={errors.specialties} />
-                                </Stack>
+                                    {errors.specialties && (
+                                        <chakra.p fontSize="xs" color="danger.fg" role="alert">
+                                            {errors.specialties}
+                                        </chakra.p>
+                                    )}
+                                </Box>
 
                                 {/* Bio */}
-                                <Stack gap="2">
-                                    <Label htmlFor="bio">
-                                        <Text
-                                            as="span"
-                                            fontSize="11px"
-                                            fontWeight="semibold"
-                                            letterSpacing="widest"
-                                            textTransform="uppercase"
-                                            color="fg.muted"
-                                        >
+                                <FormField
+                                    label={
+                                        <FieldLabel>
                                             Presentación{' '}
-                                            <Text
-                                                as="span"
-                                                color="fg.subtle"
-                                                fontWeight="normal"
-                                                textTransform="none"
-                                            >
+                                            <chakra.span color="fg.subtle" fontWeight="normal" textTransform="none">
                                                 (opcional)
-                                            </Text>
-                                        </Text>
-                                    </Label>
+                                            </chakra.span>
+                                        </FieldLabel>
+                                    }
+                                    error={errors.bio}
+                                >
                                     <Box position="relative">
                                         <Box
                                             as={FileText}
+                                            aria-hidden="true"
                                             position="absolute"
                                             left="4"
                                             top="4"
@@ -521,9 +387,9 @@ export default function Register() {
                                             color="fg.muted"
                                             opacity={0.6}
                                             zIndex={1}
+                                            pointerEvents="none"
                                         />
                                         <Textarea
-                                            id="bio"
                                             name="bio"
                                             rows={3}
                                             value={data.bio}
@@ -535,169 +401,91 @@ export default function Register() {
                                             borderRadius="xl"
                                         />
                                     </Box>
-                                    <InputError message={errors.bio} />
-                                </Stack>
+                                </FormField>
                             </>
                         )}
 
                         {/* Patient-Only Fields */}
                         {userType === 'patient' && (
-                            <Stack gap="2">
-                                <Label htmlFor="date_of_birth">
-                                    <Text
-                                        as="span"
-                                        fontSize="11px"
-                                        fontWeight="semibold"
-                                        letterSpacing="widest"
-                                        textTransform="uppercase"
-                                        color="fg.muted"
-                                    >
+                            <FormField
+                                label={
+                                    <FieldLabel>
                                         Fecha de nacimiento{' '}
-                                        <Text
-                                            as="span"
-                                            color="fg.subtle"
-                                            fontWeight="normal"
-                                            textTransform="none"
-                                        >
+                                        <chakra.span color="fg.subtle" fontWeight="normal" textTransform="none">
                                             (opcional)
-                                        </Text>
-                                    </Text>
-                                </Label>
-                                <Box position="relative">
-                                    <Box
-                                        as={Calendar}
-                                        position="absolute"
-                                        left="4"
-                                        top="50%"
-                                        transform="translateY(-50%)"
-                                        h="4"
-                                        w="4"
-                                        color="fg.muted"
-                                        opacity={0.6}
-                                        zIndex={1}
-                                    />
-                                    <Input
-                                        id="date_of_birth"
-                                        type="date"
-                                        name="date_of_birth"
-                                        value={data.date_of_birth}
-                                        onChange={(e) => setData('date_of_birth', e.target.value)}
-                                        borderRadius="full"
-                                        bg="bg.subtle"
-                                        borderWidth="0"
-                                        pl="10"
-                                        h="14"
-                                    />
-                                </Box>
-                                <InputError message={errors.date_of_birth} />
-                            </Stack>
+                                        </chakra.span>
+                                    </FieldLabel>
+                                }
+                                error={errors.date_of_birth}
+                            >
+                                <IconInput
+                                    icon={Calendar}
+                                    iconLeft="4"
+                                    type="date"
+                                    name="date_of_birth"
+                                    value={data.date_of_birth}
+                                    onChange={(e) => setData('date_of_birth', e.target.value)}
+                                    borderRadius="full"
+                                    bg="bg.subtle"
+                                    borderWidth="0"
+                                    h="14"
+                                />
+                            </FormField>
                         )}
 
                         {/* Password Field */}
-                        <Stack gap="2">
-                            <Label htmlFor="password">
-                                <Text
-                                    as="span"
-                                    fontSize="11px"
-                                    fontWeight="semibold"
-                                    letterSpacing="widest"
-                                    textTransform="uppercase"
-                                    color="fg.muted"
-                                >
-                                    Contraseña
-                                </Text>
-                            </Label>
-                            <Box position="relative">
-                                <Box
-                                    as={Lock}
-                                    position="absolute"
-                                    left="4"
-                                    top="50%"
-                                    transform="translateY(-50%)"
-                                    h="4"
-                                    w="4"
-                                    color="fg.muted"
-                                    opacity={0.6}
-                                    zIndex={1}
-                                />
-                                <Input
-                                    id="password"
+                        <FormField
+                            label={<FieldLabel>Contraseña</FieldLabel>}
+                            error={errors.password}
+                            required
+                        >
+                            <Stack gap="2">
+                                <IconInput
+                                    icon={Lock}
+                                    iconLeft="4"
                                     type="password"
+                                    name="password"
                                     required
                                     autoComplete="new-password"
-                                    name="password"
                                     value={data.password}
                                     onChange={(e) => setData('password', e.target.value)}
                                     placeholder="Mínimo 8 caracteres"
                                     borderRadius="full"
                                     bg="bg.subtle"
                                     borderWidth="0"
-                                    pl="10"
                                     h="14"
                                 />
-                            </Box>
-                            <PasswordStrength password={data.password} />
-                            <InputError message={errors.password} />
-                        </Stack>
+                                <PasswordStrength password={data.password} />
+                            </Stack>
+                        </FormField>
 
                         {/* Password Confirmation Field */}
-                        <Stack gap="2">
-                            <Label htmlFor="password_confirmation">
-                                <Text
-                                    as="span"
-                                    fontSize="11px"
-                                    fontWeight="semibold"
-                                    letterSpacing="widest"
-                                    textTransform="uppercase"
-                                    color="fg.muted"
-                                >
-                                    Confirmar contraseña
-                                </Text>
-                            </Label>
-                            <Box position="relative">
-                                <Box
-                                    as={KeyRound}
-                                    position="absolute"
-                                    left="4"
-                                    top="50%"
-                                    transform="translateY(-50%)"
-                                    h="4"
-                                    w="4"
-                                    color="fg.muted"
-                                    opacity={0.6}
-                                    zIndex={1}
-                                />
-                                <Input
-                                    id="password_confirmation"
-                                    type="password"
-                                    required
-                                    autoComplete="new-password"
-                                    name="password_confirmation"
-                                    value={data.password_confirmation}
-                                    onChange={(e) => setData('password_confirmation', e.target.value)}
-                                    placeholder="Repite tu contraseña"
-                                    borderRadius="full"
-                                    bg="bg.subtle"
-                                    borderWidth="0"
-                                    pl="10"
-                                    h="14"
-                                />
-                            </Box>
-                            <InputError message={errors.password_confirmation} />
-                        </Stack>
+                        <FormField
+                            label={<FieldLabel>Confirmar contraseña</FieldLabel>}
+                            error={errors.password_confirmation}
+                            required
+                        >
+                            <IconInput
+                                icon={KeyRound}
+                                iconLeft="4"
+                                type="password"
+                                name="password_confirmation"
+                                required
+                                autoComplete="new-password"
+                                value={data.password_confirmation}
+                                onChange={(e) => setData('password_confirmation', e.target.value)}
+                                placeholder="Repite tu contraseña"
+                                borderRadius="full"
+                                bg="bg.subtle"
+                                borderWidth="0"
+                                h="14"
+                            />
+                        </FormField>
 
                         {/* Consentimientos RGPD — solo paciente */}
                         {userType === 'patient' && (
                             <Stack gap="3">
-                                <Text
-                                    fontSize="11px"
-                                    fontWeight="semibold"
-                                    letterSpacing="widest"
-                                    textTransform="uppercase"
-                                    color="fg.muted"
-                                >
-                                    Consentimientos obligatorios
-                                </Text>
+                                <FieldLabel as="p">Consentimientos obligatorios</FieldLabel>
 
                                 {[
                                     {
@@ -718,25 +506,32 @@ export default function Register() {
                                     },
                                 ].map(({ field, label }) => (
                                     <Flex key={field} gap="3" alignItems="flex-start">
-                                        <input
-                                            type="checkbox"
+                                        <Checkbox
                                             id={field}
+                                            name={field}
                                             checked={data[field] as boolean}
-                                            onChange={(e) => setData(field, e.target.checked)}
-                                            style={{ marginTop: 3, flexShrink: 0, accentColor: 'var(--chakra-colors-brand-solid)' }}
+                                            onCheckedChange={(e) => setData(field, !!e.checked)}
+                                            aria-invalid={
+                                                !!(
+                                                    errors.consent_privacy_policy ||
+                                                    errors.consent_terms_of_service ||
+                                                    errors.consent_health_data ||
+                                                    errors.consent_recording_global
+                                                )
+                                            }
                                         />
-                                        <Label htmlFor={field}>
+                                        <chakra.label htmlFor={field} cursor="pointer">
                                             <Text as="span" fontSize="xs" color="fg.muted" lineHeight="tall">
                                                 {label}
                                             </Text>
-                                        </Label>
+                                        </chakra.label>
                                     </Flex>
                                 ))}
 
                                 {(errors.consent_privacy_policy || errors.consent_terms_of_service || errors.consent_health_data || errors.consent_recording_global) && (
-                                    <Text fontSize="xs" color="red.500">
+                                    <chakra.p fontSize="xs" color="danger.fg" role="alert">
                                         Debes aceptar todos los consentimientos obligatorios para registrarte.
-                                    </Text>
+                                    </chakra.p>
                                 )}
                             </Stack>
                         )}
@@ -777,7 +572,7 @@ export default function Register() {
                             )}
                         </ChakraButton>
                     </Stack>
-                </form>
+                </chakra.form>
 
                 {/* Login Link */}
                 <Text textAlign="center" fontSize="sm" color="fg.muted">
