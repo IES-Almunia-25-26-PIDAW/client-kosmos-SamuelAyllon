@@ -24,9 +24,9 @@ import { useIsMobile } from '@/hooks/use-mobile';
 
 const SIDEBAR_COOKIE_NAME = 'sidebar_state';
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
-const SIDEBAR_WIDTH = '16rem';
-const SIDEBAR_WIDTH_MOBILE = '18rem';
-const SIDEBAR_WIDTH_ICON = '3rem';
+const SIDEBAR_WIDTH = '18rem';
+const SIDEBAR_WIDTH_MOBILE = '20rem';
+const SIDEBAR_WIDTH_ICON = '3.5rem';
 const SIDEBAR_KEYBOARD_SHORTCUT = 'b';
 
 type SidebarContext = {
@@ -662,13 +662,10 @@ function SidebarMenuButton({
                     paddingRight: '2rem',
                 },
                 '[data-collapsible=icon] &': {
-                    width: '2rem !important',
-                    height: '2rem !important',
-                    padding: '0.5rem !important',
+                    width: size === 'lg' ? '3rem !important' : '2rem !important',
+                    height: size === 'lg' ? '3rem !important' : '2rem !important',
+                    padding: size === 'lg' ? '0.5rem !important' : '0.5rem !important',
                 },
-                ...(size === 'lg' && {
-                    '[data-collapsible=icon] &': { padding: '0 !important' },
-                }),
                 ...(variant === 'outline' && {
                     boxShadow: '0 0 0 1px var(--ck-colors-sidebar-border)',
                     '&:hover': {

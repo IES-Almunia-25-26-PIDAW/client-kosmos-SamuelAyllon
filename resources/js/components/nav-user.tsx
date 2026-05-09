@@ -22,16 +22,24 @@ export function NavUser() {
     return (
         <SidebarMenu>
             <SidebarMenuItem>
-                <DropdownMenu>
+                <DropdownMenu positioning={{ placement: 'top-end' }}>
                     <DropdownMenuTrigger asChild>
                         <SidebarMenuButton
                             size="lg"
                             color="sidebar.accentFg"
-                            css={{ '&[data-state=open]': { background: 'var(--ck-colors-sidebar-accent)' } }}
+                            css={{
+                                '&[data-state=open]': { background: 'var(--ck-colors-sidebar-accent)' },
+                                '[data-collapsible=icon] &': { justifyContent: 'center' },
+                            }}
                             data-test="sidebar-menu-button"
                         >
                             <UserInfo user={auth.user} />
-                            <ChevronIcon ml="auto" boxSize="4" />
+                            <ChevronIcon
+                                ml="auto"
+                                boxSize="4"
+                                flexShrink={0}
+                                css={{ '[data-collapsible=icon] &': { display: 'none' } }}
+                            />
                         </SidebarMenuButton>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent

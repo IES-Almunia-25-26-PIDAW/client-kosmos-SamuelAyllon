@@ -23,6 +23,8 @@ class ShowRoomAction extends Controller
 
         abort_unless($isPatient || $isProfessional, 403);
 
+        abort_if($appointment->status === 'completed', 410, 'Esta cita ya ha finalizado.');
+
         abort_unless($appointment->canBeJoinedNow(), 403, 'Fuera del horario permitido para esta cita.');
 
         $patientProfileId = $appointment->patient?->patientProfile?->id;

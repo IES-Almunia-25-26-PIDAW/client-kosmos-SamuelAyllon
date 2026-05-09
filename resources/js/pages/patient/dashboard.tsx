@@ -12,7 +12,7 @@ import AppLayout from '@/layouts/app-layout';
 const ChakraLink = chakra(Link);
 const ChakraImg = chakra('img');
 
-interface UpcomingAppointment {
+interface Appointment {
     id: number;
     scheduled_at: string;
     modality: string;
@@ -20,10 +20,13 @@ interface UpcomingAppointment {
     professional: {
         id: number;
         name: string;
+        specialty?: string | null;
         avatar_path: string | null;
     };
     service_name: string | null;
 }
+
+type UpcomingAppointment = Appointment;
 
 interface RecentInvoice {
     id: number;
@@ -42,6 +45,7 @@ interface Agreement {
 }
 
 interface Props {
+    todayAppointments: Appointment[];
     upcomingAppointments: UpcomingAppointment[];
     recentInvoices: RecentInvoice[];
     agreements?: Agreement[];
@@ -71,7 +75,15 @@ const getDueDays = (dueAt: string | null): number | null => {
 const formatInvoiceNumber = (id: number): string =>
     `#INV-${new Date().getFullYear()}-${String(id).padStart(3, '0')}`;
 
-export default function PatientDashboard({ upcomingAppointments, recentInvoices, agreements = [] }: Props) {
+const getStatusBadgeProps = (status: string): { bg: string; color: string; label: string } => {
+    const map: Record<string, { bg: string; color: string; label: string }> = {
+        confirmed: { bg: '#93f0e0', color: '#006f63', label: 'Confirmada' },
+        pending: { bg: 'rgba(0,97,86,0.1)', color: '#006153', label: 'Pendiente' },
+    };
+    return map[status] ?? { bg: 'bg.subtle', color: 'fg.muted', label: status };
+};
+
+export default function PatientDashboard({ todayAppointments = [], upcomingAppointments, recentInvoices, agreements = [] }: Props) {
     const nextAppointment = upcomingAppointments[0] ?? null;
 
     return (
@@ -116,6 +128,86 @@ export default function PatientDashboard({ upcomingAppointments, recentInvoices,
                         <Box as={Bell} w="5" h="5" aria-hidden={true} />
                     </Box>
                 </Flex>
+
+                {/* ── Today's sessions ── */}
+                {todayAppointments.length > 0 && (
+                    <Box as="section" aria-labelledby="heading-today">
+                        <Heading
+                            id="heading-today"
+                            as="h2"
+                            fontSize="2xl"
+                            fontWeight="bold"
+                            color="fg"
+                            letterSpacing="-0.48px"
+                            mb="4"
+                        >
+                            Citas de hoy
+                        </Heading>
+                        <Stack gap="3" role="list" aria-label="Citas de hoy sin completar">
+                            {todayAppointments.map((appointment) => {
+                                const badgeProps = getStatusBadgeProps(appointment.status);
+                                const isOnline = isOnlineModality(appointment.modality);
+                                return (
+                                    <ChakraLink
+                                        key={appointment.id}
+                                        href={AppointmentShowAction.url(appointment.id)}
+                                        role="listitem"
+                                        display="flex"
+                                        alignItems="center"
+                                        gap="4"
+                                        bg="bg.surface"
+                                        borderRadius="2xl"
+                                        p="5"
+                                        boxShadow="sm"
+                                        borderWidth="2px"
+                                        borderColor="border"
+                                        _hover={{ bg: 'bg.subtle', textDecoration: 'none' }}
+                                        transition="background 0.15s"
+                                        aria-label={`Cita con ${appointment.professional.name} hoy a las ${formatDateTime(appointment.scheduled_at)}`}
+                                    >
+                                        <Flex
+                                            w="10"
+                                            h="10"
+                                            borderRadius="xl"
+                                            bg="rgba(0,97,86,0.1)"
+                                            alignItems="center"
+                                            justifyContent="center"
+                                            flexShrink={0}
+                                            aria-hidden={true}
+                                        >
+                                            <Box as={isOnline ? Video : CalendarDays} w="5" h="5" color="brand.solid" />
+                                        </Flex>
+
+                                        <Stack gap="0.5" flex={1} minW={0}>
+                                            <Text fontSize="md" fontWeight="bold" color="fg" lineClamp={1}>
+                                                {appointment.professional.name}
+                                            </Text>
+                                            <Text fontSize="sm" color="fg.muted">
+                                                {formatDateTime(appointment.scheduled_at)}
+                                                {appointment.service_name ? ` · ${appointment.service_name}` : ''}
+                                            </Text>
+                                        </Stack>
+
+                                        <Badge
+                                            bg={badgeProps.bg}
+                                            color={badgeProps.color}
+                                            borderRadius="full"
+                                            px="3"
+                                            py="1"
+                                            fontSize="2xs"
+                                            fontWeight="bold"
+                                            textTransform="uppercase"
+                                            letterSpacing="wider"
+                                            flexShrink={0}
+                                        >
+                                            {badgeProps.label}
+                                        </Badge>
+                                    </ChakraLink>
+                                );
+                            })}
+                        </Stack>
+                    </Box>
+                )}
 
                 {/* ── Hero: Next Session ── */}
                 {nextAppointment ? (

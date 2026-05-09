@@ -358,35 +358,37 @@ export default function AppointmentShow({ appointment, lastClinicalNote }: Props
                             )}
                         </Box>
 
-                        <Stack gap="3" alignItems="center">
-                            {appointment.service?.duration_minutes && (
-                                <Text
-                                    fontSize="xs"
-                                    fontWeight="semibold"
-                                    textTransform="uppercase"
-                                    letterSpacing="wider"
-                                    color="fg.subtle"
-                                    fontVariantNumeric="tabular-nums"
-                                >
-                                    Duración: {appointment.service.duration_minutes} min
+                        {['confirmed', 'in_progress'].includes(appointment.status) && (
+                            <Stack gap="3" alignItems="center">
+                                {appointment.service?.duration_minutes && (
+                                    <Text
+                                        fontSize="xs"
+                                        fontWeight="semibold"
+                                        textTransform="uppercase"
+                                        letterSpacing="wider"
+                                        color="fg.subtle"
+                                        fontVariantNumeric="tabular-nums"
+                                    >
+                                        Duración: {appointment.service.duration_minutes} min
+                                    </Text>
+                                )}
+                                <Box w="full">
+                                    <Form
+                                        action={JoinWaitingRoomAction.url(appointment.id)}
+                                        method="post"
+                                        style={{ width: '100%' }}
+                                    >
+                                        <Button type="submit" variant="primary" size="lg" w="full">
+                                            <Box as={Play} w="4" h="4" fill="currentColor" />
+                                            Iniciar sesión
+                                        </Button>
+                                    </Form>
+                                </Box>
+                                <Text fontSize="xs" textAlign="center" color="fg.subtle">
+                                    Kosmo comenzará a transcribir y analizar una vez inicies la sesión.
                                 </Text>
-                            )}
-                            <Box w="full">
-                                <Form
-                                    action={JoinWaitingRoomAction.url(appointment.id)}
-                                    method="post"
-                                    style={{ width: '100%' }}
-                                >
-                                    <Button type="submit" variant="primary" size="lg" w="full">
-                                        <Box as={Play} w="4" h="4" fill="currentColor" />
-                                        Iniciar sesión
-                                    </Button>
-                                </Form>
-                            </Box>
-                            <Text fontSize="xs" textAlign="center" color="fg.subtle">
-                                Kosmo comenzará a transcribir y analizar una vez inicies la sesión.
-                            </Text>
-                        </Stack>
+                            </Stack>
+                        )}
                     </Stack>
                 </Grid>
 

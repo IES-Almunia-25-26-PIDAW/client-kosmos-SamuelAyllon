@@ -1,4 +1,4 @@
-import { chakra } from '@chakra-ui/react';
+import { Link } from '@inertiajs/react';
 import type { ComponentPropsWithoutRef } from 'react';
 import {
     SidebarGroup,
@@ -7,15 +7,8 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { toUrl } from '@/lib/utils';
+import { useCurrentUrl } from '@/hooks/use-current-url';
 import type { NavItem } from '@/types';
-
-const FooterLink = chakra('a', {
-    base: {
-        color: 'fg.muted',
-        _hover: { color: 'fg' },
-    },
-});
 
 export function NavFooter({
     items,
@@ -23,6 +16,8 @@ export function NavFooter({
 }: ComponentPropsWithoutRef<typeof SidebarGroup> & {
     items: NavItem[];
 }) {
+    const { isCurrentUrl } = useCurrentUrl();
+
     return (
         <SidebarGroup
             {...props}
@@ -32,15 +27,15 @@ export function NavFooter({
                 <SidebarMenu>
                     {items.map((item) => (
                         <SidebarMenuItem key={item.title}>
-                            <SidebarMenuButton asChild>
-                                <FooterLink
-                                    href={toUrl(item.href)}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                >
-                                    {item.icon && <item.icon size={20} />}
+                            <SidebarMenuButton
+                                asChild
+                                isActive={isCurrentUrl(item.href)}
+                                tooltip={{ children: item.title }}
+                            >
+                                <Link href={item.href} prefetch>
+                                    {item.icon && <item.icon />}
                                     <span>{item.title}</span>
-                                </FooterLink>
+                                </Link>
                             </SidebarMenuButton>
                         </SidebarMenuItem>
                     ))}

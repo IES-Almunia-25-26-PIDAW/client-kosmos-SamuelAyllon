@@ -14,7 +14,7 @@ export function UserInfo({
 
     return (
         <>
-            <Avatar>
+            <Avatar flexShrink={0}>
                 <AvatarImage src={user.avatar_path ?? undefined} alt={user.name} />
                 <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
             </Avatar>
@@ -24,6 +24,7 @@ export function UserInfo({
                 textAlign="left"
                 fontSize="sm"
                 lineHeight="tight"
+                css={{ '[data-collapsible=icon] &': { display: 'none' } }}
             >
                 <Text truncate fontWeight="medium">
                     {user.name}

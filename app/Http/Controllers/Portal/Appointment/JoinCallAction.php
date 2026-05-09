@@ -14,6 +14,8 @@ class JoinCallAction extends Controller
     {
         abort_if($appointment->patient_id !== $request->user()->id, 403);
 
+        abort_if($appointment->status === 'completed', 410, 'Esta cita ya ha finalizado.');
+
         abort_unless(
             $appointment->canBeJoinedNow(),
             403,
