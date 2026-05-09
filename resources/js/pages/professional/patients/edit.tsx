@@ -7,6 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/app-layout';
+import { patientSchema } from '@/lib/schemas/patient.schema';
+import { validateOrSetErrors } from '@/lib/validation';
 import type { Patient } from '@/types';
 
 interface Props {
@@ -18,7 +20,7 @@ export default function PatientEdit({ patient }: Props) {
     const initialReason = patient.consultation_reason ?? patient.service_scope ?? '';
     const initialApproach = patient.therapeutic_approach ?? patient.brand_tone ?? '';
 
-    const { data, setData, put, processing, errors } = useForm({
+    const { data, setData, put, processing, errors, setError } = useForm({
         project_name: initialName,
         email: patient.email ?? '',
         phone: patient.phone ?? '',
@@ -29,6 +31,14 @@ export default function PatientEdit({ patient }: Props) {
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
+        if (
+            !validateOrSetErrors(patientSchema, data, (errs) =>
+                Object.entries(errs).forEach(([k, v]) =>
+                    setError(k as keyof typeof data & string, v),
+                ),
+            )
+        )
+            return;
         put(PatientUpdateAction.url(patient.id));
     };
 

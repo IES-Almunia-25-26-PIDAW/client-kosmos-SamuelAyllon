@@ -24,6 +24,8 @@ import { IconInput } from '@/components/ui/icon-input';
 import { Spinner } from '@/components/ui/spinner';
 import { Textarea } from '@/components/ui/textarea';
 import AuthSplitLayout from '@/layouts/auth/auth-split-layout';
+import { registerSchema } from '@/lib/schemas/register.schema';
+import { validateOrSetErrors } from '@/lib/validation';
 import { login } from '@/routes';
 import { store } from '@/routes/register';
 
@@ -81,7 +83,7 @@ function TypeButton({ active, onClick, icon: Icon, label }: TypeButtonProps) {
 export default function Register() {
     const [userType, setUserType] = useState<UserType>('professional');
 
-    const { data, setData, post, processing, errors } = useForm({
+    const { data, setData, post, processing, errors, setError } = useForm({
         type: 'professional' as UserType,
         name: '',
         email: '',
@@ -114,6 +116,14 @@ export default function Register() {
 
     function submit(e: FormEvent) {
         e.preventDefault();
+        if (
+            !validateOrSetErrors(registerSchema, data, (errs) =>
+                Object.entries(errs).forEach(([k, v]) =>
+                    setError(k as keyof typeof data & string, v),
+                ),
+            )
+        )
+            return;
         post(store.url(), {
             onSuccess: () => {
                 setData((prev) => ({ ...prev, password: '', password_confirmation: '' }));

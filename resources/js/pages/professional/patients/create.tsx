@@ -7,6 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/app-layout';
+import { patientSchema } from '@/lib/schemas/patient.schema';
+import { validateOrSetErrors } from '@/lib/validation';
 
 interface FormData {
     project_name: string;
@@ -19,7 +21,7 @@ interface FormData {
 }
 
 export default function PatientCreate() {
-    const { data, setData, post, processing, errors } = useForm<FormData>({
+    const { data, setData, post, processing, errors, setError } = useForm<FormData>({
         project_name: '',
         email: '',
         phone: '',
@@ -30,6 +32,14 @@ export default function PatientCreate() {
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
+        if (
+            !validateOrSetErrors(patientSchema, data, (errs) =>
+                Object.entries(errs).forEach(([k, v]) =>
+                    setError(k as keyof typeof data & string, v),
+                ),
+            )
+        )
+            return;
         post(PatientStoreAction.url());
     };
 

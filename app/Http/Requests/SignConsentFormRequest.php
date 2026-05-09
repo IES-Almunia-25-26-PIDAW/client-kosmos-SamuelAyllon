@@ -14,8 +14,13 @@ class SignConsentFormRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'signature_data' => ['required', 'string'],
-            'signed_ip'      => ['nullable', 'ip'],
+            'signature_data' => [
+                'required',
+                'string',
+                // Validates data-URL format produced by canvas.toDataURL()
+                'regex:/^data:image\/(png|jpeg);base64,/',
+            ],
+            'signed_ip' => ['nullable', 'ip'],
         ];
     }
 }
