@@ -36,6 +36,7 @@ Registro de decisiones arquitectónicas del proyecto ClientKosmos. Formato Nygar
 | [0026](0026-remove-tailwind-migrate-to-chakra-v3.md) | Eliminación definitiva de Tailwind CSS y migración a Chakra UI v3 | Aceptado |
 | [0027](0027-zod-client-validation-critical-forms.md) | Adopción de Zod para validación cliente en formularios críticos | Aceptado |
 | [0028](0028-monetization-free-app-ads-premium-no-ads.md) | Cambio de modelo de monetización: app gratuita con anuncios + premium sin anuncios | Aceptado |
+| [0029](0029-data-integrity-without-triggers-or-stored-procedures.md) | Integridad de datos sin triggers ni stored procedures | Aceptado |
 
 ---
 
