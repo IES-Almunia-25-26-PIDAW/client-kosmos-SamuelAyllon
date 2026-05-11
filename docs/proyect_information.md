@@ -24,7 +24,7 @@
 | Campo | Valor |
 |-------|-------|
 | **Nombre** | ClientKosmos |
-| **Tipo** | Aplicación web SaaS multitenant |
+| **Tipo** | Aplicación web gratuita con publicidad y opción premium sin anuncios |
 | **Dominio** | Gestión de consulta profesional (salud y bienestar) |
 | **Autor** | Samuel Ayllón |
 | **Contexto** | Proyecto Intermodular 2º DAM |
@@ -36,7 +36,7 @@
 
 ## 2. Descripción general
 
-**ClientKosmos** es una plataforma web de gestión de consulta para profesionales autónomos de servicios (psicólogos, coaches, terapeutas, asesores). Permite centralizar toda la operativa de la consulta en una única herramienta:
+**ClientKosmos** es una aplicación web **gratuita** de gestión de consulta para profesionales autónomos de servicios (psicólogos, coaches, terapeutas, asesores). Todas las funcionalidades están disponibles sin coste y la aplicación se financia mediante **publicidad integrada**; el usuario puede realizar un **pago opcional para desactivar los anuncios** (modo *sin anuncios*). No existen planes, suscripciones, licencias por usuario ni tenancy: cada profesional usa la app con su propia cuenta. Permite centralizar toda la operativa de la consulta en una única herramienta:
 
 - **Ficha de pacientes** con historial completo
 - **Módulos anidados** por paciente: notas, acuerdos, pagos, documentos, consentimientos RGPD

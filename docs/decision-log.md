@@ -1017,3 +1017,32 @@ En su lugar, se expone el estado de pago como un atributo derivado `isPaid()` en
 - **Positivas:** separación de responsabilidades; el ciclo de vida clínico y el financiero son independientes; sin migraciones; sin riesgo de romper lógica existente.
 - **Negativas:** `isPaid()` requiere que `invoiceItems.invoice` esté eager-loaded; si se llama sin él, retornará `false` (colección vacía). Los controladores que necesiten el dato deben cargar explícitamente la relación.
 - Cualquier vista que necesite saber si una cita está pagada debe pasar por `Appointment::isPaid()` — no consultar `Invoice` directamente desde el frontend.
+
+
+---
+
+## ADR-0026 — Cambio de modelo de monetización: de SaaS multitenant a app gratuita con anuncios + premium sin anuncios
+
+- **Fecha:** 2026-05-11
+- **Estado:** Aceptado
+
+### Contexto
+
+ClientKosmos se había presentado en documentación y copy de marketing como una *aplicación web SaaS multitenant* con plan gratuito y features etiquetadas como “Premium/Solo”. Ese marco implica tenancy, suscripciones, planes por usuario y licencias por asiento, conceptos que nunca llegaron a implementarse y que no encajan con el público objetivo (profesionales autónomos individuales). Se decide reposicionar el producto.
+
+### Decisión
+
+ClientKosmos pasa a ser una **aplicación gratuita financiada por publicidad integrada**, con un **pago opcional** del usuario para desactivar los anuncios (modo *sin anuncios*).
+
+- No hay planes mensuales/anuales ni licencias por asiento.
+- No hay tenancy: cada profesional se registra como cuenta individual.
+- Todas las funcionalidades (incluidas Kosmo IA, Documentos y RGPD) son **gratuitas para todos los usuarios**.
+- La única diferenciación de pago es “sin anuncios”.
+- **El módulo de facturación profesional ↔ paciente** (`BillingService`, Stripe Checkout, dompdf, `PaymentReminderService`) se mantiene **intacto**: es una funcionalidad de dominio (el profesional cobra a sus pacientes), no la monetización de la plataforma.
+
+### Consecuencias
+
+- **Positivas:** alineación entre código y discurso (nunca hubo tenancy ni planes); narrativa más simple; reduce expectativas falsas en la documentación.
+- **Negativas / pendientes:** requiere integración futura de un proveedor de anuncios y un flag premium en el usuario (`is_ad_free` o similar). Esta iteración cubre solo la reescritura de documentación y copy; la implementación técnica se planificará en un ADR posterior.
+- La prop `isPremium` del componente `BentoCard` en `welcome.tsx` y `PricingFeature` se eliminan al no haber paywall de features.
+- El anchor `#pricing` del footer del landing se elimina hasta que exista una sección “sin anuncios” real.

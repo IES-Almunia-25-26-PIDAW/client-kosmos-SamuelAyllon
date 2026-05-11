@@ -198,6 +198,11 @@ Descripción obligatoria con:
 
 ## Estado actual del proyecto (2026-05)
 
+**Modelo de producto y monetización**
+- ClientKosmos es una **aplicación web gratuita** para profesionales autónomos. **No** es SaaS, **no** es multitenant, **no** hay planes ni suscripciones ni licencias por usuario.
+- La app se financia con **publicidad integrada**; el usuario puede activar un **modo sin anuncios** mediante pago opcional (ver ADR-0026 en [docs/decision-log.md](docs/decision-log.md)).
+- La facturación Stripe + dompdf existente es **profesional → paciente** (dominio de negocio del usuario), no la monetización de la plataforma.
+
 **Dominios productivos**
 - Pacientes, citas y disponibilidad (`AvailabilityService`, `CreateAppointment`).
 - Videoconsulta vía Google Meet con `room_id` generado en backend, recordings y limpieza de evento al colgar; estado HTTP 410 para salas completadas.

@@ -651,6 +651,8 @@ php artisan queue:work
 | Amortización hardware (año 1) | 273 € |
 | **TOTAL PROYECTO (año 1)** | **~7.089 €** |
 
+> **Modelo de monetización del producto:** ClientKosmos se distribuye como **aplicación gratuita con publicidad integrada**. Existe un **pago opcional** (one-shot o recurrente) para activar el modo *sin anuncios*. No se comercializan suscripciones, planes por usuario ni licencias por asiento; los costes de licencias e infraestructura listados arriba corresponden a software y servicios de terceros utilizados por la app, no a un modelo de cobro propio.
+
 ---
 
 ## 7. CONCLUSIONES

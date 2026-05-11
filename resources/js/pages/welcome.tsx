@@ -491,7 +491,7 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
                                 color="fg.muted"
                             >
                                 {[
-                                    { icon: CheckCircle2, text: 'Sin tarjeta de crédito' },
+                                    { icon: CheckCircle2, text: 'Gratis con anuncios' },
                                     { icon: Lock, text: 'RGPD integrado' },
                                     { icon: Shield, text: 'Datos protegidos' },
                                 ].map((item, i) => (
@@ -661,7 +661,7 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
                                 icon={<CalendarClock size={28} />}
                                 title="Pre y post sesión"
                                 description="Revisa el contexto antes de entrar y registra notas al terminar, con el flujo integrado en la ficha."
-                                badge="Gratis"
+                                badge="Incluido"
                                 delay={1}
                             />
 
@@ -669,7 +669,7 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
                                 icon={<NotebookPen size={28} />}
                                 title="Notas de sesión"
                                 description="Registra observaciones clínicas vinculadas al paciente. Historial ordenado y siempre accesible."
-                                badge="Gratis"
+                                badge="Incluido"
                                 delay={2}
                             />
 
@@ -678,7 +678,7 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
                                 icon={<CreditCard size={28} />}
                                 title="Pagos y facturación"
                                 description="Registra cobros por paciente (pendiente, pagado, vencido) con resumen de ingresos por período."
-                                badge="Gratis"
+                                badge="Incluido"
                                 delay={3}
                             />
 
@@ -686,8 +686,7 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
                                 icon={<FileText size={28} />}
                                 title="Documentos y RGPD"
                                 description="Adjunta archivos por paciente y gestiona consentimientos informados con plantilla RGPD personalizable."
-                                badge="Solo"
-                                isPremium
+                                badge="Incluido"
                                 delay={4}
                             />
 
@@ -695,8 +694,7 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
                                 icon={<Brain size={28} />}
                                 title="Kosmo IA"
                                 description="Briefings diarios automáticos y chat contextual. Entra a cada sesión informado, sin revisar notas a mano."
-                                badge="Solo"
-                                isPremium
+                                badge="Incluido"
                                 featured
                                 delay={5}
                             >
@@ -746,7 +744,7 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
                                                 mt="2"
                                             >
                                                 Regístrate gratis, añade el nombre de tu consulta, especialidad y configura
-                                                tu plantilla RGPD en minutos. Sin tarjeta de crédito.
+                                                tu plantilla RGPD en minutos. Sin coste ni suscripción.
                                             </Timeline.Description>
                                         </FadeInView>
                                     </Timeline.Content>
@@ -884,8 +882,9 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
                             <GradientText>como un profesional</GradientText>
                         </Heading>
                         <Text mx="auto" mb="12" maxW="xl" fontSize="lg" color="fg.muted" lineHeight="relaxed">
-                            Únete a profesionales que ya centralizan su consulta en ClientKosmos. El plan gratuito es
-                            para siempre y no requiere tarjeta.
+                            Únete a profesionales que ya centralizan su consulta en ClientKosmos. La app es gratis con
+                            anuncios y siempre lo será. Si quieres usarla sin publicidad, puedes activar el modo sin
+                            anuncios desde tu cuenta.
                         </Text>
                         <Flex
                             direction={{ base: 'column', sm: 'row' }}
@@ -919,7 +918,7 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
                         >
                             <HStack as="span" bg="bg.muted" borderRadius="full" px="4" py="2" gap="2">
                                 <Icon as={CheckCircle2} boxSize="4" color="brand.solid" />
-                                Sin tarjeta de crédito
+                                Gratis con anuncios
                             </HStack>
                             <HStack as="span" bg="bg.muted" borderRadius="full" px="4" py="2" gap="2">
                                 <Icon as={Lock} boxSize="4" color="brand.solid" />
@@ -958,7 +957,6 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
                                     {[
                                         { href: '#features', label: 'Funcionalidades' },
                                         { href: '#how-it-works', label: 'Cómo funciona' },
-                                        { href: '#pricing', label: 'Precios' },
                                         { href: '#testimonials', label: 'Testimonios' },
                                     ].map((item) => (
                                         <Box as="li" key={item.href}>
@@ -1049,7 +1047,6 @@ function BentoCard({
     gridColumn,
     gridRow,
     featured = false,
-    isPremium = false,
     delay = 0,
     children,
 }: {
@@ -1060,7 +1057,6 @@ function BentoCard({
     gridColumn?: BoxProps['gridColumn'];
     gridRow?: BoxProps['gridRow'];
     featured?: boolean;
-    isPremium?: boolean;
     delay?: number;
     children?: ReactNode;
 }) {
@@ -1086,20 +1082,13 @@ function BentoCard({
                         {icon}
                     </Box>
                     <Badge
-                        variant={isPremium ? 'solid' : 'subtle'}
+                        variant="subtle"
                         textTransform="uppercase"
                         fontSize="11px"
                         letterSpacing="wide"
                         fontWeight="semibold"
                     >
-                        {isPremium ? (
-                            <HStack gap="1">
-                                <Star size={12} />
-                                {badge}
-                            </HStack>
-                        ) : (
-                            badge
-                        )}
+                        {badge}
                     </Badge>
                 </Flex>
                 <Heading as="h3" fontWeight="bold" mb="2.5" fontSize={featured ? 'xl' : 'lg'}>
@@ -1169,19 +1158,6 @@ function TestimonialCard({
                 </HStack>
             </CardContent>
         </Card>
-    );
-}
-
-function PricingFeature({ text, highlight = false }: { text: string; highlight?: boolean }) {
-    return (
-        <HStack as="li" gap="3">
-            <Box flexShrink={0} borderRadius="full" p="0.5" bg={highlight ? 'brand.muted' : 'transparent'}>
-                <Icon as={CheckCircle2} boxSize="4" color={highlight ? 'brand.solid' : 'brand.solid/70'} />
-            </Box>
-            <Text as="span" fontWeight={highlight ? 'medium' : 'normal'}>
-                {text}
-            </Text>
-        </HStack>
     );
 }
 
