@@ -21,12 +21,15 @@
 
 **Backend**
 - PHP 8.4 · Laravel 12 · Inertia Laravel v2 · Fortify v1 · Wayfinder v0
-- Pest 3 · PHPUnit 11 · Pint 1 · Laravel Boost v2 · Pail v1 · Sail v1
+- Pest 3 · PHPUnit 11 · Pint 1 · **Larastan/PHPStan 3** · Laravel Boost v2 · Pail v1 · Sail v1
+- **Reverb 1** (websockets) · **Stripe PHP 20** (pagos) · **Google API Client 2** (Calendar/Meet) · **OpenAI PHP 0.19** (Kosmo + Whisper)
+- **Spatie:** `laravel-permission` 7, `laravel-activitylog` 5 · **barryvdh/laravel-dompdf** 3 (facturas)
 
 **Frontend**
-- React 19 · TypeScript 5.7 · Inertia React v2
+- React 19.2 · TypeScript 5.7 · Inertia React v2 · `@laravel/echo-react` (Reverb)
 - Chakra UI v3.34 — **único sistema visual** (Tailwind eliminado; Radix UI: restos pre-migración a reemplazar)
-- Vite 7 · ESLint 9 · Prettier 3
+- **Zod 4** (validación cliente) · **Vitest 2** + Testing Library (tests frontend)
+- Vite 7 · ESLint 9 · Prettier 3 · `babel-plugin-react-compiler`
 
 Fuente de verdad de versiones: [package.json](package.json) y [composer.json](composer.json). No asumir — leer.
 
@@ -76,7 +79,7 @@ Fuente de verdad de versiones: [package.json](package.json) y [composer.json](co
 - ❌ Desactivar, borrar o saltar tests sin aprobación explícita.
 - ❌ Crear archivos de documentación (`*.md`, README) sin petición del usuario.
 - ❌ Cambiar la estructura base de carpetas sin aprobación.
-- ❌ Push directo a `main`.
+- ⚠️ Push directo a `main`: permitido solo bajo el override solo-dev vigente (ver `workflow_main_branch.md`); en cuanto se incorpore otro colaborador, vuelve la regla de PR obligatorio.
 
 ---
 
@@ -143,17 +146,19 @@ Validar intención antes de codificar. Para cambios no triviales → **Plan Mode
 
 ```bash
 vendor/bin/pint --dirty --format agent
-php artisan test --compact
+vendor/bin/phpstan analyse           # Larastan — 0 errores
+php artisan test --compact           # Pest 3 (Feature + Unit)
 npm run lint
 npm run types
-npm run test
+npm run test                         # Vitest (componentes/hooks)
 npm run build
 ```
 
 - CI replica exactamente este gate.
-- Prohibido push directo a `main` — siempre PR con revisión.
 - Tests con factories; no crear modelos a mano en tests.
 - Tests de DB reales (no mockear DB) — ver feedback memories.
+- Frontend: Vitest + Testing Library con `jsdom` para componentes y validadores Zod.
+- Workflow: trabajar directo en `main` (override solo-dev — ver memoria `workflow_main_branch.md`).
 
 ---
 
@@ -191,10 +196,35 @@ Descripción obligatoria con:
 
 ---
 
+## Estado actual del proyecto (2026-05)
+
+**Dominios productivos**
+- Pacientes, citas y disponibilidad (`AvailabilityService`, `CreateAppointment`).
+- Videoconsulta vía Google Meet con `room_id` generado en backend, recordings y limpieza de evento al colgar; estado HTTP 410 para salas completadas.
+- Transcripción Whisper con filtrado de alucinaciones y VAD cliente.
+- Facturación: `BillingService` + `GenerateInvoiceForAppointment`, PDFs vía dompdf, **pago de paciente vía Stripe Checkout**, recordatorios (`PaymentReminderService`).
+- Notas, mensajería, notificaciones, acuerdos de colaboración, RGPD (`RgpdService`), asistente Kosmo (`KosmoService` + OpenAI).
+- Permisos vía Spatie, auditoría vía `laravel-activitylog`.
+
+**Iniciativas finalizadas (orden cronológico de fases UI/calidad)**
+- **Fase 1:** migración inicial Tailwind → Chakra UI v3 (welcome.tsx).
+- **Fase 2:** infraestructura ARIA y migración de formularios de auth (`d95b945`).
+- **Fase 3:** validación cliente con Zod + endurecimiento de Form Requests (`28bb0d4`).
+- **Fase 4:** sustitución de tokens de paleta hardcoded por tokens semánticos de `chakra-system.ts` (`ce27702`).
+- **Patrón emergente:** `SectionPanel` para layouts de detalle (estrenado en patient show).
+
+**En curso / pendiente visible**
+- WIP local sobre `welcome.tsx`, `badge.tsx`, `app.css` y `docs/clientkosmos-design-system.md` (rediseño/limpieza del design system doc).
+- Restos de Radix UI (`@radix-ui/react-navigation-menu`, `react-select`, `react-slot`) por reemplazar por equivalentes Chakra v3.
+- Mantener PHPStan en 0 errores tras la limpieza de `3776fad` (eloquent generics + property docblocks).
+
+---
+
 ## Artefactos vivos (mantener al día)
 
 - [docs/decision-log.md](docs/decision-log.md) — ADRs y excepciones a los estándares.
 - [docs/ai-usage-declaration.md](docs/ai-usage-declaration.md) — declaración por PR asistido por IA.
+- [docs/clientkosmos-design-system.md](docs/clientkosmos-design-system.md) — design system vivo (en rediseño).
 - [.claude/project-context/](.claude/project-context/) — tech-stack, ERD, schema (si existe).
 
 **Límite duro de este archivo:** 500 líneas. Si crece, mover reglas específicas a skills del registry.
