@@ -4,12 +4,15 @@ namespace App\Models;
 
 use App\Models\Concerns\BelongsToWorkspace;
 use Database\Factories\PatientProfileFactory;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
@@ -20,18 +23,21 @@ use Spatie\Activitylog\Support\LogOptions;
  * @property string $status
  * @property string|null $consultation_reason
  * @property string|null $therapeutic_approach
- * @property \Illuminate\Support\Carbon|null $first_session_at
- * @property \Illuminate\Support\Carbon|null $last_session_at
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \App\Models\User $user
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Appointment> $appointments
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Invoice> $invoices
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\ConsentForm> $consentForms
+ * @property Carbon|null $first_session_at
+ * @property Carbon|null $last_session_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read User $user
+ * @property-read Collection<int, Appointment> $appointments
+ * @property-read Collection<int, Invoice> $invoices
+ * @property-read Collection<int, ConsentForm> $consentForms
  */
 class PatientProfile extends Model
 {
-    use BelongsToWorkspace, HasFactory, LogsActivity, SoftDeletes;
+    use BelongsToWorkspace, LogsActivity, SoftDeletes;
+
+    /** @use HasFactory<PatientProfileFactory> */
+    use HasFactory;
 
     public function getActivitylogOptions(): LogOptions
     {
@@ -115,16 +121,19 @@ class PatientProfile extends Model
         return $this->hasMany(ConsentForm::class, 'patient_id');
     }
 
+    /** @return HasMany<KosmoBriefing, $this> */
     public function kosmoBriefings(): HasMany
     {
         return $this->hasMany(KosmoBriefing::class, 'patient_id');
     }
 
+    /** @return HasMany<CaseAssignment, $this> */
     public function caseAssignments(): HasMany
     {
         return $this->hasMany(CaseAssignment::class, 'patient_id', 'user_id');
     }
 
+    /** @return BelongsToMany<User, $this> */
     public function professionals(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'case_assignments', 'patient_id', 'professional_id', 'user_id')
@@ -132,33 +141,51 @@ class PatientProfile extends Model
             ->withTimestamps();
     }
 
+    /** @return HasMany<Referral, $this> */
     public function referrals(): HasMany
     {
         return $this->hasMany(Referral::class, 'patient_id');
     }
 
+    /** @return HasMany<PatientDelegation, $this> */
     public function delegations(): HasMany
     {
         return $this->hasMany(PatientDelegation::class);
     }
 
-    /** Recursos asociados al paciente (documents reused as resources). */
+    /**
+     * Recursos asociados al paciente (documents reused as resources).
+     *
+     * @return HasMany<Document, $this>
+     */
     public function resources(): HasMany
     {
         return $this->hasMany(Document::class, 'patient_id');
     }
 
-    public function scopeActive($query)
+    /**
+     * @param  Builder<self>  $query
+     * @return Builder<self>
+     */
+    public function scopeActive(Builder $query): Builder
     {
         return $query->where('status', 'active');
     }
 
-    public function scopeInactive($query)
+    /**
+     * @param  Builder<self>  $query
+     * @return Builder<self>
+     */
+    public function scopeInactive(Builder $query): Builder
     {
         return $query->where('status', 'inactive');
     }
 
-    public function scopeDischarged($query)
+    /**
+     * @param  Builder<self>  $query
+     * @return Builder<self>
+     */
+    public function scopeDischarged(Builder $query): Builder
     {
         return $query->where('status', 'discharged');
     }
