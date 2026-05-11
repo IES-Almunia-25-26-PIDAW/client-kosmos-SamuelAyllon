@@ -5,6 +5,7 @@ import {
     Heading,
     HStack,
     Icon,
+    Separator,
     SimpleGrid,
     Stack,
     Stat,
@@ -43,7 +44,6 @@ import logo from '@/assets/logo.svg';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
 import { dashboard } from '@/routes';
 import { login, register } from '@/routes';
 import type { Auth } from '@/types';
@@ -52,20 +52,21 @@ const NAV_ITEMS = [
     { href: '#features', label: 'Funcionalidades' },
     { href: '#how-it-works', label: 'Cómo funciona' },
     { href: '#testimonials', label: 'Testimonios' },
-    { href: '#pricing', label: 'Precios' },
 ];
 
 const GLOW_PRIMARY_SHADOW = '0 0 40px -10px var(--color-primary)';
+const GLOW_CARD_HOVER = '0 20px 50px -16px var(--color-primary)';
 
 function GradientText(props: TextProps) {
     return (
         <Text
             as="span"
-            bgGradient="linear(90deg, var(--color-primary) 0%, var(--primary-muted) 25%, var(--color-primary) 50%, var(--primary-muted) 75%, var(--color-primary) 100%)"
-            bgSize="200% auto"
-            bgClip="text"
+            backgroundImage="linear-gradient(90deg, var(--color-primary) 0%, var(--primary-muted) 25%, var(--color-primary) 50%, var(--primary-muted) 75%, var(--color-primary) 100%)"
+            backgroundSize="200% auto"
+            backgroundClip="text"
             color="transparent"
             animation="gradient-shift 3s linear infinite"
+            style={{ WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
             {...props}
         />
     );
@@ -74,6 +75,41 @@ function GradientText(props: TextProps) {
 /** Centered page section container — maxW 6xl with responsive horizontal padding */
 function PageCtn(props: BoxProps) {
     return <Box mx="auto" maxW="6xl" px={{ base: '4', md: '6' }} {...props} />;
+}
+
+function useInView(threshold = 0.12) {
+    const ref = useRef<HTMLDivElement>(null);
+    const [inView, setInView] = useState(false);
+    useEffect(() => {
+        const el = ref.current;
+        if (!el) return;
+        const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) setInView(true); }, { threshold });
+        obs.observe(el);
+        return () => obs.disconnect();
+    }, []);
+    return { ref, inView };
+}
+
+type FadeInViewProps = BoxProps & { delay?: number; from?: 'up' | 'left' | 'right' | 'scale' };
+function FadeInView({ delay = 0, from = 'up', children, ...props }: FadeInViewProps) {
+    const { ref, inView } = useInView();
+    const hiddenTransform =
+        from === 'left' ? 'translateX(-28px)' :
+        from === 'right' ? 'translateX(28px)' :
+        from === 'scale' ? 'scale(0.93)' :
+        'translateY(28px)';
+    return (
+        <Box
+            ref={ref}
+            opacity={inView ? 1 : 0}
+            transform={inView ? 'none' : hiddenTransform}
+            transition="opacity 0.6s cubic-bezier(0.16,1,0.3,1), transform 0.6s cubic-bezier(0.16,1,0.3,1)"
+            style={{ transitionDelay: `${delay}ms` }}
+            {...props}
+        >
+            {children}
+        </Box>
+    );
 }
 
 /** Shared badge + heading + description block used in every section */
@@ -90,26 +126,38 @@ function SectionHeader({
     description: string;
     mb?: string;
 }) {
+    const { ref, inView } = useInView(0.15);
+    const anim = (delay: number) => ({
+        opacity: inView ? 1 : 0,
+        transform: inView ? 'none' : 'translateY(18px)',
+        transition: 'opacity 0.55s cubic-bezier(0.16,1,0.3,1), transform 0.55s cubic-bezier(0.16,1,0.3,1)',
+        transitionDelay: `${delay}ms`,
+    });
     return (
-        <Box mb={mb} textAlign="center">
-            <Badge variant="outline" mb="6" px="4" py="1.5" fontSize="sm">
-                <HStack gap="1.5">
-                    {badgeIcon}
-                    {badge}
-                </HStack>
-            </Badge>
-            <Heading
-                as="h2"
-                mb="5"
-                fontSize={{ base: '3xl', sm: '4xl', lg: '5xl' }}
-                fontWeight="extrabold"
-                letterSpacing="tight"
-            >
-                {heading}
-            </Heading>
-            <Text mx="auto" maxW="2xl" fontSize="lg" color="fg.muted" lineHeight="relaxed">
-                {description}
-            </Text>
+        <Box ref={ref} mb={mb} textAlign="center">
+            <Box display="inline-block" mb="6" style={{ ...anim(0), transform: inView ? 'none' : 'translateY(12px) scale(0.96)' }}>
+                <Badge variant="outline" px="4" py="1.5" fontSize="sm">
+                    <HStack gap="1.5">
+                        {badgeIcon}
+                        {badge}
+                    </HStack>
+                </Badge>
+            </Box>
+            <Box mb="5" style={anim(80)}>
+                <Heading
+                    as="h2"
+                    fontSize={{ base: '3xl', sm: '4xl', lg: '5xl' }}
+                    fontWeight="extrabold"
+                    letterSpacing="tight"
+                >
+                    {heading}
+                </Heading>
+            </Box>
+            <Box style={anim(160)}>
+                <Text mx="auto" maxW="2xl" fontSize="lg" color="fg.muted" lineHeight="relaxed">
+                    {description}
+                </Text>
+            </Box>
         </Box>
     );
 }
@@ -122,7 +170,7 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
         <>
             <Head title="ClientKosmos — Gestión de consulta para profesionales de servicios" />
 
-            <Box minH="100vh" bg="bg" color="fg" overflowX="hidden">
+            <Box minH="100vh" bg="bg" color="fg" overflowX="hidden" scrollBehavior="smooth">
                 {/* Navbar */}
                 <chakra.header
                     position="sticky"
@@ -140,20 +188,22 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
                         justifyContent="space-between"
                         px={{ base: '4', md: '6' }}
                     >
-                        <HStack gap="2" cursor="pointer" role="group">
-                            <chakra.img
-                                src={logo}
-                                alt="ClientKosmos"
-                                h="8"
-                                w="auto"
-                                objectFit="contain"
-                                transition="transform 0.5s"
-                                _groupHover={{ transform: 'scale(1.1) rotate(6deg)' }}
-                            />
-                            <GradientText fontSize="xl" fontWeight="bold" letterSpacing="tight">
-                                ClientKosmos
-                            </GradientText>
-                        </HStack>
+                        <chakra.a href="/" _hover={{ textDecoration: 'none' }}>
+                            <HStack gap="2" cursor="pointer" role="group">
+                                <chakra.img
+                                    src={logo}
+                                    alt="ClientKosmos"
+                                    h="8"
+                                    w="auto"
+                                    objectFit="contain"
+                                    transition="transform 0.5s"
+                                    _groupHover={{ transform: 'scale(1.1) rotate(6deg)' }}
+                                />
+                                <GradientText fontSize="xl" fontWeight="bold" letterSpacing="tight">
+                                    ClientKosmos
+                                </GradientText>
+                            </HStack>
+                        </chakra.a>
 
                         <chakra.nav
                             display={{ base: 'none', md: 'flex' }}
@@ -216,7 +266,9 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
                                 size="icon"
                                 display={{ base: 'inline-flex', md: 'none' }}
                                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                                aria-label="Abrir menú"
+                                aria-label={isMobileMenuOpen ? 'Cerrar menú' : 'Abrir menú'}
+                                aria-expanded={isMobileMenuOpen}
+                                aria-controls="mobile-menu"
                             >
                                 {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
                             </Button>
@@ -225,6 +277,7 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
 
                     {isMobileMenuOpen && (
                         <Box
+                            id="mobile-menu"
                             display={{ md: 'none' }}
                             borderTopWidth="1px"
                             bg="bg/95"
@@ -251,11 +304,15 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
                                 {!auth.user && (
                                     <Stack mt="3" gap="2" borderTopWidth="1px" pt="4">
                                         <Button variant="outline" asChild w="full">
-                                            <Link href={login()}>Iniciar sesión</Link>
+                                            <Link href={login()} onClick={() => setIsMobileMenuOpen(false)}>
+                                                Iniciar sesión
+                                            </Link>
                                         </Button>
                                         {canRegister && (
                                             <Button asChild w="full">
-                                                <Link href={register()}>Empezar gratis</Link>
+                                                <Link href={register()} onClick={() => setIsMobileMenuOpen(false)}>
+                                                    Empezar gratis
+                                                </Link>
                                             </Button>
                                         )}
                                     </Stack>
@@ -277,25 +334,36 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
                     <Box position="absolute" inset="0" zIndex="-1" overflow="hidden">
                         <Box
                             position="absolute"
-                            top="20"
+                            top="10"
                             right="1/4"
-                            h="96"
-                            w="96"
-                            borderRadius="full"
+                            h={{ base: '72', lg: '96' }}
+                            w={{ base: '72', lg: '96' }}
                             bg="brand.muted"
-                            filter="blur(60px)"
-                            animation="orb-float-1 12s ease-in-out infinite"
+                            filter="blur(64px)"
+                            opacity={0.7}
+                            animation="blob-morph-1 10s ease-in-out infinite, orb-float-1 14s ease-in-out infinite"
                         />
                         <Box
                             position="absolute"
-                            bottom="20"
+                            bottom="16"
                             left="1/4"
-                            h="80"
-                            w="80"
-                            borderRadius="full"
+                            h={{ base: '56', lg: '72' }}
+                            w={{ base: '56', lg: '72' }}
                             bg="brand.muted"
-                            filter="blur(60px)"
-                            animation="orb-float-2 15s ease-in-out infinite"
+                            filter="blur(48px)"
+                            opacity={0.5}
+                            animation="blob-morph-2 8s ease-in-out infinite 2s, orb-float-2 18s ease-in-out infinite"
+                        />
+                        <Box
+                            position="absolute"
+                            top="1/3"
+                            left={{ base: '1/4', lg: '1/3' }}
+                            h="64"
+                            w="64"
+                            bg="kosmo.muted"
+                            filter="blur(80px)"
+                            opacity={0.25}
+                            animation="blob-morph-1 12s ease-in-out infinite 4s, orb-float-3 20s ease-in-out infinite"
                         />
                     </Box>
 
@@ -547,17 +615,25 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
                 >
                     <PageCtn>
                         <SimpleGrid columns={{ base: 2, md: 4 }} gap={{ base: '8', md: '6' }} alignItems="center">
-                            <TrustStat icon={Users} value="200+" label="Profesionales activos" />
-                            <TrustStat icon={CalendarClock} value="15k+" label="Sesiones gestionadas" />
-                            <TrustStat icon={Shield} value="100%" label="RGPD por diseño" />
-                            <TrustStat icon={Brain} value="24/7" label="Asistente Kosmo IA" />
+                            {([
+                                { icon: Users, value: '200+', label: 'Profesionales activos' },
+                                { icon: CalendarClock, value: '15k+', label: 'Sesiones gestionadas' },
+                                { icon: Shield, value: '100%', label: 'RGPD por diseño' },
+                                { icon: Brain, value: '24/7', label: 'Asistente Kosmo IA' },
+                            ] as const).map((s, i) => (
+                                <FadeInView key={s.label} delay={i * 90} from="up">
+                                    <TrustStat icon={s.icon} value={s.value} label={s.label} />
+                                </FadeInView>
+                            ))}
                         </SimpleGrid>
                     </PageCtn>
                 </chakra.section>
 
                 {/* Features Bento */}
                 <chakra.section id="features" position="relative" py="28" overflow="hidden">
-                    <PageCtn>
+                    <Box position="absolute" top="-16" right="-16" h="72" w="72" bg="brand.muted" filter="blur(80px)" opacity={0.3} animation="blob-morph-2 11s ease-in-out infinite, orb-float-3 19s ease-in-out infinite" pointerEvents="none" />
+                    <Box position="absolute" bottom="-8" left="-8" h="56" w="56" bg="kosmo.muted" filter="blur(64px)" opacity={0.2} animation="blob-morph-1 9s ease-in-out infinite 3s, orb-float-2 16s ease-in-out infinite" pointerEvents="none" />
+                    <PageCtn position="relative">
                         <SectionHeader
                             badge="Funcionalidades"
                             badgeIcon={<Sparkles size={14} color="var(--ck-colors-brand-solid)" />}
@@ -571,39 +647,20 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
                         />
 
                         <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} gap={{ base: '5', lg: '6' }}>
+                            {/* Fila 1 */}
                             <BentoCard
-                                colSpan={{ md: 2, lg: 2 }}
-                                icon={<Users size={32} />}
+                                icon={<Users size={28} />}
                                 title="Fichas de pacientes"
-                                description="Cada paciente tiene su propio expediente: notas de sesión, documentos, acuerdos, pagos y consentimientos. Retoma el contexto exacto de la última sesión."
+                                description="Expediente completo por paciente: notas, documentos, acuerdos, pagos y consentimientos RGPD en un solo lugar."
                                 badge="Core"
                                 featured
                                 delay={0}
-                            >
-                                <Flex mt="5" flexWrap="wrap" gap="2">
-                                    {[
-                                        { label: 'Ana García · TCC' },
-                                        { label: 'Carlos R. · Coaching' },
-                                        { label: 'Laura M. · Terapia' },
-                                    ].map((p, i) => (
-                                        <Badge
-                                            key={i}
-                                            borderRadius="full"
-                                            px="3"
-                                            py="1.5"
-                                            fontSize="xs"
-                                            fontWeight="semibold"
-                                        >
-                                            {p.label}
-                                        </Badge>
-                                    ))}
-                                </Flex>
-                            </BentoCard>
+                            />
 
                             <BentoCard
                                 icon={<CalendarClock size={28} />}
                                 title="Pre y post sesión"
-                                description="Revisa el contexto del paciente antes de entrar y registra notas justo al terminar, con el flujo integrado en la ficha."
+                                description="Revisa el contexto antes de entrar y registra notas al terminar, con el flujo integrado en la ficha."
                                 badge="Gratis"
                                 delay={1}
                             />
@@ -611,107 +668,39 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
                             <BentoCard
                                 icon={<NotebookPen size={28} />}
                                 title="Notas de sesión"
-                                description="Registra observaciones clínicas y apuntes vinculados al paciente. Historial ordenado y siempre accesible."
+                                description="Registra observaciones clínicas vinculadas al paciente. Historial ordenado y siempre accesible."
                                 badge="Gratis"
                                 delay={2}
                             />
 
-                            <BentoCard
-                                colSpan={{ md: 2, lg: 1 }}
-                                rowSpan={{ lg: 2 }}
-                                icon={<Brain size={32} />}
-                                title="Kosmo IA"
-                                description="Tu asistente inteligente con briefings diarios automáticos y chat contextual (Llama 3.3 70B). Entra a cada sesión informado, sin revisar notas manualmente."
-                                badge="Solo"
-                                isPremium
-                                featured
-                                delay={3}
-                            >
-                                <Stack mt="5" gap="3">
-                                    <HStack gap="2.5" alignItems="flex-start">
-                                        <Flex
-                                            h="7"
-                                            w="7"
-                                            borderRadius="full"
-                                            bg="brand.muted"
-                                            alignItems="center"
-                                            justifyContent="center"
-                                            flexShrink={0}
-                                        >
-                                            <Icon as={Brain} boxSize="3.5" color="brand.solid" />
-                                        </Flex>
-                                        <Box
-                                            bg="bg.muted"
-                                            borderRadius="2xl"
-                                            borderTopLeftRadius="sm"
-                                            px="3.5"
-                                            py="2.5"
-                                            flex="1"
-                                        >
-                                            <Text fontSize="xs" lineHeight="relaxed">
-                                                "Ana lleva 3 sesiones trabajando ansiedad. Última nota: progreso
-                                                notable en técnicas de respiración."
-                                            </Text>
-                                        </Box>
-                                    </HStack>
-                                    <Flex gap="2.5" alignItems="flex-start" justifyContent="flex-end">
-                                        <Box
-                                            bg="brand.muted"
-                                            borderRadius="2xl"
-                                            borderTopRightRadius="sm"
-                                            px="3.5"
-                                            py="2.5"
-                                        >
-                                            <Text fontSize="xs" lineHeight="relaxed">
-                                                "¿Qué trabajar hoy con Carlos?"
-                                            </Text>
-                                        </Box>
-                                    </Flex>
-                                    <HStack gap="2.5" alignItems="flex-start">
-                                        <Flex
-                                            h="7"
-                                            w="7"
-                                            borderRadius="full"
-                                            bg="brand.muted"
-                                            alignItems="center"
-                                            justifyContent="center"
-                                            flexShrink={0}
-                                        >
-                                            <Icon as={Brain} boxSize="3.5" color="brand.solid" />
-                                        </Flex>
-                                        <Box
-                                            bg="bg.muted"
-                                            borderRadius="2xl"
-                                            borderTopLeftRadius="sm"
-                                            px="3.5"
-                                            py="2.5"
-                                            flex="1"
-                                        >
-                                            <Text fontSize="xs" lineHeight="relaxed">
-                                                "Tiene pendiente revisar el acuerdo de sesiones. Sugiero abordar los
-                                                objetivos del mes."
-                                            </Text>
-                                        </Box>
-                                    </HStack>
-                                </Stack>
-                            </BentoCard>
-
+                            {/* Fila 2 */}
                             <BentoCard
                                 icon={<CreditCard size={28} />}
                                 title="Pagos y facturación"
-                                description="Registra cobros por paciente (pendiente, pagado, vencido) y consulta el resumen de ingresos con filtros por período."
+                                description="Registra cobros por paciente (pendiente, pagado, vencido) con resumen de ingresos por período."
                                 badge="Gratis"
-                                delay={4}
+                                delay={3}
                             />
 
                             <BentoCard
                                 icon={<FileText size={28} />}
                                 title="Documentos y RGPD"
-                                description="Adjunta archivos por paciente y gestiona consentimientos informados digitales con tu plantilla RGPD personalizable."
+                                description="Adjunta archivos por paciente y gestiona consentimientos informados con plantilla RGPD personalizable."
                                 badge="Solo"
                                 isPremium
-                                delay={5}
+                                delay={4}
                             />
+
+                            <BentoCard
+                                icon={<Brain size={28} />}
+                                title="Kosmo IA"
+                                description="Briefings diarios automáticos y chat contextual. Entra a cada sesión informado, sin revisar notas a mano."
+                                badge="Solo"
+                                isPremium
+                                featured
+                                delay={5}
+                            >
+                            </BentoCard>
                         </SimpleGrid>
                     </PageCtn>
                 </chakra.section>
@@ -746,18 +735,20 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
                                         </Timeline.Indicator>
                                     </Timeline.Connector>
                                     <Timeline.Content pb="8">
-                                        <Timeline.Title fontSize={{ base: 'lg', md: 'xl' }} fontWeight="bold">
-                                            01 · Configura tu consulta
-                                        </Timeline.Title>
-                                        <Timeline.Description
-                                            fontSize="sm"
-                                            color="fg.muted"
-                                            lineHeight="relaxed"
-                                            mt="2"
-                                        >
-                                            Regístrate gratis, añade el nombre de tu consulta, especialidad y configura
-                                            tu plantilla RGPD en minutos. Sin tarjeta de crédito.
-                                        </Timeline.Description>
+                                        <FadeInView from="right" delay={0}>
+                                            <Timeline.Title fontSize={{ base: 'lg', md: 'xl' }} fontWeight="bold">
+                                                01 · Configura tu consulta
+                                            </Timeline.Title>
+                                            <Timeline.Description
+                                                fontSize="sm"
+                                                color="fg.muted"
+                                                lineHeight="relaxed"
+                                                mt="2"
+                                            >
+                                                Regístrate gratis, añade el nombre de tu consulta, especialidad y configura
+                                                tu plantilla RGPD en minutos. Sin tarjeta de crédito.
+                                            </Timeline.Description>
+                                        </FadeInView>
                                     </Timeline.Content>
                                 </Timeline.Item>
 
@@ -769,18 +760,20 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
                                         </Timeline.Indicator>
                                     </Timeline.Connector>
                                     <Timeline.Content pb="8">
-                                        <Timeline.Title fontSize={{ base: 'lg', md: 'xl' }} fontWeight="bold">
-                                            02 · Añade tus pacientes
-                                        </Timeline.Title>
-                                        <Timeline.Description
-                                            fontSize="sm"
-                                            color="fg.muted"
-                                            lineHeight="relaxed"
-                                            mt="2"
-                                        >
-                                            Crea fichas con historial, notas de sesión, documentos, acuerdos y pagos.
-                                            Todo en el expediente de cada paciente, accesible al instante.
-                                        </Timeline.Description>
+                                        <FadeInView from="right" delay={150}>
+                                            <Timeline.Title fontSize={{ base: 'lg', md: 'xl' }} fontWeight="bold">
+                                                02 · Añade tus pacientes
+                                            </Timeline.Title>
+                                            <Timeline.Description
+                                                fontSize="sm"
+                                                color="fg.muted"
+                                                lineHeight="relaxed"
+                                                mt="2"
+                                            >
+                                                Crea fichas con historial, notas de sesión, documentos, acuerdos y pagos.
+                                                Todo en el expediente de cada paciente, accesible al instante.
+                                            </Timeline.Description>
+                                        </FadeInView>
                                     </Timeline.Content>
                                 </Timeline.Item>
 
@@ -792,18 +785,20 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
                                         </Timeline.Indicator>
                                     </Timeline.Connector>
                                     <Timeline.Content>
-                                        <Timeline.Title fontSize={{ base: 'lg', md: 'xl' }} fontWeight="bold">
-                                            03 · Gestiona con Kosmo IA
-                                        </Timeline.Title>
-                                        <Timeline.Description
-                                            fontSize="sm"
-                                            color="fg.muted"
-                                            lineHeight="relaxed"
-                                            mt="2"
-                                        >
-                                            Cada mañana Kosmo te prepara un briefing personalizado. Entra a cada sesión
-                                            con el contexto listo, sin revisar notas a mano.
-                                        </Timeline.Description>
+                                        <FadeInView from="right" delay={300}>
+                                            <Timeline.Title fontSize={{ base: 'lg', md: 'xl' }} fontWeight="bold">
+                                                03 · Gestiona con Kosmo IA
+                                            </Timeline.Title>
+                                            <Timeline.Description
+                                                fontSize="sm"
+                                                color="fg.muted"
+                                                lineHeight="relaxed"
+                                                mt="2"
+                                            >
+                                                Cada mañana Kosmo te prepara un briefing personalizado. Entra a cada sesión
+                                                con el contexto listo, sin revisar notas a mano.
+                                            </Timeline.Description>
+                                        </FadeInView>
                                     </Timeline.Content>
                                 </Timeline.Item>
                             </Timeline.Root>
@@ -813,7 +808,8 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
 
                 {/* Testimonials */}
                 <chakra.section id="testimonials" position="relative" py="28" overflow="hidden">
-                    <PageCtn>
+                    <Box position="absolute" top="1/4" right="-20" h="80" w="80" bg="brand.muted" filter="blur(80px)" opacity={0.25} animation="blob-morph-2 13s ease-in-out infinite, orb-float-1 17s ease-in-out infinite" pointerEvents="none" />
+                    <PageCtn position="relative">
                         <SectionHeader
                             badge="Testimonios"
                             badgeIcon={<Quote size={14} color="var(--ck-colors-brand-solid)" />}
@@ -827,266 +823,32 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
                         />
 
                         <SimpleGrid columns={{ base: 1, md: 3 }} gap="6">
-                            <TestimonialCard
-                                quote="Antes mezclaba cuadernos, hojas de Excel y carpetas de email. Con ClientKosmos tengo el expediente completo de cada paciente en segundos, incluyendo los consentimientos RGPD."
-                                author="María García"
-                                role="Psicóloga clínica autónoma"
-                                rating={5}
-                            />
-                            <TestimonialCard
-                                quote="Kosmo IA me da un briefing cada mañana con el estado de mis pacientes. Entro a cada sesión sabiendo exactamente dónde lo dejamos, sin revisar notas a mano."
-                                author="Carlos López"
-                                role="Coach de vida certificado"
-                                rating={5}
-                                featured
-                            />
-                            <TestimonialCard
-                                quote="El control de pagos por paciente me ha eliminado las facturas pendientes. El aviso de pago vencido me hace un recordatorio automático sin necesidad de revisar nada."
-                                author="Ana Martínez"
-                                role="Terapeuta y nutricionista"
-                                rating={5}
-                            />
+                            <FadeInView from="left" delay={0}>
+                                <TestimonialCard
+                                    quote="Antes mezclaba cuadernos, hojas de Excel y carpetas de email. Con ClientKosmos tengo el expediente completo de cada paciente en segundos, incluyendo los consentimientos RGPD."
+                                    author="María García"
+                                    role="Psicóloga clínica autónoma"
+                                    rating={5}
+                                />
+                            </FadeInView>
+                            <FadeInView from="up" delay={120}>
+                                <TestimonialCard
+                                    quote="Kosmo IA me da un briefing cada mañana con el estado de mis pacientes. Entro a cada sesión sabiendo exactamente dónde lo dejamos, sin revisar notas a mano."
+                                    author="Carlos López"
+                                    role="Coach de vida certificado"
+                                    rating={5}
+                                    featured
+                                />
+                            </FadeInView>
+                            <FadeInView from="right" delay={240}>
+                                <TestimonialCard
+                                    quote="El control de pagos por paciente me ha eliminado las facturas pendientes. El aviso de pago vencido me hace un recordatorio automático sin necesidad de revisar nada."
+                                    author="Ana Martínez"
+                                    role="Terapeuta y nutricionista"
+                                    rating={5}
+                                />
+                            </FadeInView>
                         </SimpleGrid>
-                    </PageCtn>
-                </chakra.section>
-
-                {/* Pricing */}
-                <chakra.section
-                    id="pricing"
-                    position="relative"
-                    borderTopWidth="1px"
-                    borderBottomWidth="1px"
-                >
-                    <PageCtn py="28">
-                        <SectionHeader
-                            badge="Precios"
-                            badgeIcon={<Star size={14} color="var(--ck-colors-brand-solid)" />}
-                            heading={
-                                <>
-                                    Elige tu <GradientText>plan ideal</GradientText>
-                                </>
-                            }
-                            description="Empieza gratis con un paciente y escala cuando tu consulta crezca."
-                        />
-
-                        <SimpleGrid columns={{ base: 1, lg: 3 }} gap="8" alignItems="flex-start">
-                            {/* Free */}
-                            <Card
-                                display="flex"
-                                flexDirection="column"
-                                overflow="hidden"
-                                transition="all 0.5s"
-                                _hover={{ transform: 'translateY(-12px)', boxShadow: '2xl' }}
-                            >
-                                <CardHeader>
-                                    <Flex
-                                        mb="4"
-                                        h="14"
-                                        w="14"
-                                        borderRadius="2xl"
-                                        bg="bg.muted"
-                                        alignItems="center"
-                                        justifyContent="center"
-                                    >
-                                        <Icon as={LayoutDashboard} boxSize="7" color="fg.muted" />
-                                    </Flex>
-                                    <CardTitle>Gratis</CardTitle>
-                                    <CardDescription>Para empezar a conocer la herramienta</CardDescription>
-                                    <Box pt="6" pb="2">
-                                        <Text as="span" fontSize="6xl" fontWeight="bold">
-                                            0 €
-                                        </Text>
-                                        <Text as="span" color="fg.muted" ml="2" fontSize="lg">
-                                            / mes
-                                        </Text>
-                                    </Box>
-                                    <Text fontSize="sm" color="fg.muted">
-                                        Para siempre, sin límites de tiempo
-                                    </Text>
-                                </CardHeader>
-                                <CardContent>
-                                    <Stack gap="8" flex="1" justifyContent="space-between">
-                                        <Stack as="ul" gap="4" fontSize="sm">
-                                            <PricingFeature text="1 paciente activo" />
-                                            <PricingFeature text="Notas de sesión ilimitadas" />
-                                            <PricingFeature text="Control de pagos básico" />
-                                            <PricingFeature text="Panel diario" />
-                                        </Stack>
-                                        {canRegister && (
-                                            <Button variant="outline" size="lg" w="full" asChild>
-                                                <Link href={register()}>
-                                                    <HStack gap="2" justifyContent="center">
-                                                        Empezar gratis
-                                                        <Icon as={ArrowRight} boxSize="4" />
-                                                    </HStack>
-                                                </Link>
-                                            </Button>
-                                        )}
-                                    </Stack>
-                                </CardContent>
-                            </Card>
-
-                            {/* Premium Mensual — Featured */}
-                            <Card
-                                borderWidth="2px"
-                                borderColor="brand.solid"
-                                boxShadow="2xl"
-                                transform={{ lg: 'scale(1.05)' }}
-                                position="relative"
-                                zIndex="10"
-                                overflow="visible"
-                            >
-                                <Box
-                                    position="absolute"
-                                    top="-3"
-                                    left="50%"
-                                    transform="translateX(-50%)"
-                                    bg="brand.solid"
-                                    color="brand.contrast"
-                                    px="4"
-                                    py="1"
-                                    borderRadius="full"
-                                    fontSize="xs"
-                                    fontWeight="bold"
-                                    letterSpacing="widest"
-                                    textTransform="uppercase"
-                                    boxShadow="md"
-                                    zIndex={1}
-                                    whiteSpace="nowrap"
-                                >
-                                    <HStack gap="1.5">
-                                        <Sparkles size={12} />
-                                        Más popular
-                                    </HStack>
-                                </Box>
-                                <CardHeader>
-                                    <Flex
-                                        mb="4"
-                                        h="14"
-                                        w="14"
-                                        borderRadius="2xl"
-                                        bg="brand.solid"
-                                        alignItems="center"
-                                        justifyContent="center"
-                                        boxShadow="xl"
-                                    >
-                                        <Icon as={Star} boxSize="7" color="brand.contrast" />
-                                    </Flex>
-                                    <CardTitle>Solo Mensual</CardTitle>
-                                    <CardDescription>Consulta completa, sin ataduras</CardDescription>
-                                    <Box pt="6" pb="2">
-                                        <Text as="span" fontSize="6xl" fontWeight="bold">
-                                            11,99 €
-                                        </Text>
-                                        <Text as="span" color="fg.muted" ml="2" fontSize="lg">
-                                            / mes
-                                        </Text>
-                                    </Box>
-                                    <Text fontSize="sm" color="brand.solid" fontWeight="medium">
-                                        Cancela cuando quieras
-                                    </Text>
-                                </CardHeader>
-                                <CardContent>
-                                    <Stack gap="8" flex="1" justifyContent="space-between">
-                                        <Stack as="ul" gap="4" fontSize="sm">
-                                            <PricingFeature text="Pacientes ilimitados" highlight />
-                                            <PricingFeature text="Sesiones pre y post ilimitadas" highlight />
-                                            <PricingFeature text="Notas y acuerdos ilimitados" />
-                                            <PricingFeature text="Documentos por paciente" />
-                                            <PricingFeature text="Consentimientos RGPD digitales" highlight />
-                                            <PricingFeature text="Kosmo IA — briefings y chat" highlight />
-                                            <PricingFeature text="Facturación consolidada" />
-                                        </Stack>
-                                        {canRegister && (
-                                            <Button size="lg" w="full" asChild boxShadow={GLOW_PRIMARY_SHADOW}>
-                                                <Link href={register()}>
-                                                    <HStack gap="2" justifyContent="center">
-                                                        Empezar ahora
-                                                        <Icon as={Sparkles} boxSize="5" />
-                                                    </HStack>
-                                                </Link>
-                                            </Button>
-                                        )}
-                                    </Stack>
-                                </CardContent>
-                            </Card>
-
-                            {/* Premium Anual */}
-                            <Card
-                                display="flex"
-                                flexDirection="column"
-                                overflow="hidden"
-                                transition="all 0.5s"
-                                _hover={{ transform: 'translateY(-12px)', boxShadow: '2xl' }}
-                                position="relative"
-                            >
-                                <CardHeader>
-                                    <Badge
-                                        variant="secondary"
-                                        position="absolute"
-                                        right="4"
-                                        top="4"
-                                        py="1"
-                                    >
-                                        <HStack gap="1">
-                                            <Zap size={14} />
-                                            Ahorra 17%
-                                        </HStack>
-                                    </Badge>
-                                    <Flex
-                                        mb="4"
-                                        h="14"
-                                        w="14"
-                                        borderRadius="2xl"
-                                        bg="bg.muted"
-                                        alignItems="center"
-                                        justifyContent="center"
-                                    >
-                                        <Icon as={Shield} boxSize="7" color="fg.muted" />
-                                    </Flex>
-                                    <CardTitle>Solo Anual</CardTitle>
-                                    <CardDescription>La opción más inteligente</CardDescription>
-                                    <Box pt="6" pb="2">
-                                        <Text as="span" fontSize="6xl" fontWeight="bold">
-                                            119 €
-                                        </Text>
-                                        <Text as="span" color="fg.muted" ml="2" fontSize="lg">
-                                            / año
-                                        </Text>
-                                    </Box>
-                                    <Text fontSize="sm" color="brand.solid" fontWeight="semibold">
-                                        ≈ 9,92 €/mes — Ahorro de 24,88 €
-                                    </Text>
-                                </CardHeader>
-                                <CardContent>
-                                    <Stack gap="8" flex="1" justifyContent="space-between">
-                                        <Stack as="ul" gap="4" fontSize="sm">
-                                            <PricingFeature text="Todo lo de Solo Mensual" highlight />
-                                            <PricingFeature text="Facturación anual con descuento" />
-                                            <PricingFeature text="Soporte prioritario" highlight />
-                                            <PricingFeature text="Acceso anticipado a novedades" />
-                                        </Stack>
-                                        {canRegister && (
-                                            <Button variant="outline" size="lg" w="full" asChild>
-                                                <Link href={register()}>
-                                                    <HStack gap="2" justifyContent="center">
-                                                        Empezar ahora
-                                                        <Icon as={ArrowRight} boxSize="4" />
-                                                    </HStack>
-                                                </Link>
-                                            </Button>
-                                        )}
-                                    </Stack>
-                                </CardContent>
-                            </Card>
-                        </SimpleGrid>
-
-                        <Text mt="12" textAlign="center" fontSize="sm" color="fg.muted">
-                            Todos los planes incluyen soporte por email y actualizaciones gratuitas.{' '}
-                            <Text as="span" color="brand.solid" fontWeight="medium">
-                                Sin sorpresas.
-                            </Text>
-                        </Text>
                     </PageCtn>
                 </chakra.section>
 
@@ -1189,64 +951,64 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
                             </Box>
 
                             <Box>
-                                <Heading as="h4" fontSize="md" fontWeight="semibold" mb="4">
+                                <Heading as="h4" fontSize="sm" fontWeight="semibold" letterSpacing="wider" textTransform="uppercase" color="fg.subtle" mb="5">
                                     Producto
                                 </Heading>
-                                <Stack as="ul" gap="3" fontSize="sm" color="fg.muted">
-                                    <li>
-                                        <chakra.a
-                                            href="#features"
-                                            transition="colors"
-                                            _hover={{ color: 'brand.solid' }}
-                                        >
-                                            Funcionalidades
-                                        </chakra.a>
-                                    </li>
-                                    <li>
-                                        <chakra.a
-                                            href="#how-it-works"
-                                            transition="colors"
-                                            _hover={{ color: 'brand.solid' }}
-                                        >
-                                            Cómo funciona
-                                        </chakra.a>
-                                    </li>
-                                    <li>
-                                        <chakra.a
-                                            href="#pricing"
-                                            transition="colors"
-                                            _hover={{ color: 'brand.solid' }}
-                                        >
-                                            Precios
-                                        </chakra.a>
-                                    </li>
-                                    <li>
-                                        <chakra.a
-                                            href="#testimonials"
-                                            transition="colors"
-                                            _hover={{ color: 'brand.solid' }}
-                                        >
-                                            Testimonios
-                                        </chakra.a>
-                                    </li>
+                                <Stack as="ul" listStyleType="none" gap="3">
+                                    {[
+                                        { href: '#features', label: 'Funcionalidades' },
+                                        { href: '#how-it-works', label: 'Cómo funciona' },
+                                        { href: '#pricing', label: 'Precios' },
+                                        { href: '#testimonials', label: 'Testimonios' },
+                                    ].map((item) => (
+                                        <Box as="li" key={item.href}>
+                                            <chakra.a
+                                                href={item.href}
+                                                display="inline-flex"
+                                                alignItems="center"
+                                                gap="1.5"
+                                                fontSize="sm"
+                                                color="fg.muted"
+                                                fontWeight="medium"
+                                                transition="color 0.2s ease, transform 0.2s ease"
+                                                _hover={{ color: 'brand.solid', transform: 'translateX(4px)' }}
+                                            >
+                                                <Icon as={ArrowRight} boxSize="3" flexShrink={0} />
+                                                {item.label}
+                                            </chakra.a>
+                                        </Box>
+                                    ))}
                                 </Stack>
                             </Box>
 
                             <Box>
-                                <Heading as="h4" fontSize="md" fontWeight="semibold" mb="4">
+                                <Heading as="h4" fontSize="sm" fontWeight="semibold" letterSpacing="wider" textTransform="uppercase" color="fg.subtle" mb="5">
                                     Empezar
                                 </Heading>
-                                <Stack as="ul" gap="3" fontSize="sm" color="fg.muted">
-                                    <li>
-                                        <chakra.span _hover={{ color: 'brand.solid' }} transition="colors">
-                                            <Link href={register()}>Crear cuenta</Link>
-                                        </chakra.span>
-                                    </li>
-                                    <li>
-                                        <chakra.span _hover={{ color: 'brand.solid' }} transition="colors">
-                                            <Link href={login()}>Iniciar sesión</Link>
-                                        </chakra.span>
-                                    </li>
+                                <Stack as="ul" listStyleType="none" gap="3">
+                                    {[
+                                        { href: register(), label: 'Crear cuenta' },
+                                        { href: login(), label: 'Iniciar sesión' },
+                                    ].map((item) => (
+                                        <Box as="li" key={item.label}>
+                                            <chakra.a
+                                                display="inline-flex"
+                                                alignItems="center"
+                                                gap="1.5"
+                                                fontSize="sm"
+                                                color="fg.muted"
+                                                fontWeight="medium"
+                                                transition="color 0.2s ease, transform 0.2s ease"
+                                                _hover={{ color: 'brand.solid', transform: 'translateX(4px)' }}
+                                                asChild
+                                            >
+                                                <Link href={item.href}>
+                                                    <Icon as={ArrowRight} boxSize="3" flexShrink={0} />
+                                                    {item.label}
+                                                </Link>
+                                            </chakra.a>
+                                        </Box>
+                                    ))}
                                 </Stack>
                             </Box>
                         </SimpleGrid>
@@ -1284,8 +1046,8 @@ function BentoCard({
     title,
     description,
     badge,
-    colSpan,
-    rowSpan,
+    gridColumn,
+    gridRow,
     featured = false,
     isPremium = false,
     delay = 0,
@@ -1295,90 +1057,60 @@ function BentoCard({
     title: string;
     description: string;
     badge: string;
-    colSpan?: { md?: number; lg?: number };
-    rowSpan?: { lg?: number };
+    gridColumn?: BoxProps['gridColumn'];
+    gridRow?: BoxProps['gridRow'];
     featured?: boolean;
     isPremium?: boolean;
     delay?: number;
     children?: ReactNode;
 }) {
-    const cardRef = useRef<HTMLDivElement>(null);
-    const [isVisible, setIsVisible] = useState(false);
-
-    useEffect(() => {
-        if (!cardRef.current) return;
-        const observer = new IntersectionObserver(
-            ([entry]) => {
-                if (entry.isIntersecting) setIsVisible(true);
-            },
-            { threshold: 0.15 },
-        );
-        observer.observe(cardRef.current);
-        return () => observer.disconnect();
-    }, []);
-
     return (
-        <Box
-            ref={cardRef}
-            gridColumn={
-                colSpan
-                    ? {
-                          md: colSpan.md ? `span ${colSpan.md}` : undefined,
-                          lg: colSpan.lg ? `span ${colSpan.lg}` : undefined,
-                      }
-                    : undefined
-            }
-            gridRow={rowSpan ? { lg: rowSpan.lg ? `span ${rowSpan.lg}` : undefined } : undefined}
-            transition="all 0.7s ease-out"
-            opacity={isVisible ? 1 : 0}
-            transform={isVisible ? 'translateY(0)' : 'translateY(32px)'}
-            style={{ transitionDelay: `${delay * 100}ms` }}
+        <Card
+            gridColumn={gridColumn}
+            gridRow={gridRow}
+            position="relative"
+            overflow="hidden"
+            borderWidth={featured ? '2px' : '1px'}
+            borderColor={featured ? 'brand.muted' : 'border'}
+            animation={`fade-in-up 0.55s cubic-bezier(0.16,1,0.3,1) ${delay * 90}ms both`}
+            transition="transform 0.3s cubic-bezier(0.16,1,0.3,1), box-shadow 0.3s ease, border-color 0.2s ease"
+            _hover={{
+                transform: 'translateY(-5px)',
+                boxShadow: GLOW_CARD_HOVER,
+                borderColor: 'brand.solid',
+            }}
         >
-            <Card
-                position="relative"
-                overflow="hidden"
-                transition="all 0.5s"
-                h="full"
-                borderWidth={featured ? '2px' : '1px'}
-                borderColor={featured ? 'brand.muted' : 'border'}
-                _hover={{
-                    transform: 'translateY(-8px)',
-                    boxShadow: '2xl',
-                    borderColor: 'brand.solid',
-                }}
-            >
-                <CardContent p={featured ? '8' : '6'} h="full">
-                    <Flex alignItems="flex-start" justifyContent="space-between" mb="5">
-                        <Box borderRadius="2xl" bg="brand.muted" p="3.5" color="brand.solid" transition="all 0.5s">
-                            {icon}
-                        </Box>
-                        <Badge
-                            variant={isPremium ? 'default' : 'secondary'}
-                            textTransform="uppercase"
-                            fontSize="11px"
-                            letterSpacing="wide"
-                            fontWeight="semibold"
-                        >
-                            {isPremium ? (
-                                <HStack gap="1">
-                                    <Star size={12} />
-                                    {badge}
-                                </HStack>
-                            ) : (
-                                badge
-                            )}
-                        </Badge>
-                    </Flex>
-                    <Heading as="h3" fontWeight="bold" mb="2.5" fontSize={featured ? 'xl' : 'lg'} transition="colors">
-                        {title}
-                    </Heading>
-                    <Text fontSize="sm" color="fg.muted" lineHeight="relaxed">
-                        {description}
-                    </Text>
-                    {children}
-                </CardContent>
-            </Card>
-        </Box>
+            <CardContent p={featured ? '8' : '6'}>
+                <Flex alignItems="flex-start" justifyContent="space-between" mb="5">
+                    <Box borderRadius="2xl" bg="brand.muted" p="3.5" color="brand.solid">
+                        {icon}
+                    </Box>
+                    <Badge
+                        variant={isPremium ? 'solid' : 'subtle'}
+                        textTransform="uppercase"
+                        fontSize="11px"
+                        letterSpacing="wide"
+                        fontWeight="semibold"
+                    >
+                        {isPremium ? (
+                            <HStack gap="1">
+                                <Star size={12} />
+                                {badge}
+                            </HStack>
+                        ) : (
+                            badge
+                        )}
+                    </Badge>
+                </Flex>
+                <Heading as="h3" fontWeight="bold" mb="2.5" fontSize={featured ? 'xl' : 'lg'}>
+                    {title}
+                </Heading>
+                <Text fontSize="sm" color="fg.muted" lineHeight="relaxed">
+                    {description}
+                </Text>
+                {children}
+            </CardContent>
+        </Card>
     );
 }
 
@@ -1399,7 +1131,7 @@ function TestimonialCard({
         <Card
             position="relative"
             overflow="hidden"
-            transition="all 0.5s"
+            transition="transform 0.35s cubic-bezier(0.16,1,0.3,1), box-shadow 0.35s ease, border-color 0.25s ease"
             borderWidth={featured ? '2px' : '1px'}
             borderColor={featured ? 'brand.solid' : 'border'}
             boxShadow={featured ? 'lg' : 'sm'}
@@ -1407,8 +1139,8 @@ function TestimonialCard({
             zIndex={featured ? 10 : undefined}
             bg={featured ? 'bg.surface' : 'bg'}
             _hover={{
-                transform: featured ? { md: 'scale(1.06) translateY(-4px)' } : 'translateY(-8px)',
-                boxShadow: 'xl',
+                transform: featured ? { md: 'scale(1.07) translateY(-4px)' } : 'translateY(-7px)',
+                boxShadow: GLOW_CARD_HOVER,
                 borderColor: 'brand.solid',
             }}
         >

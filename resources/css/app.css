@@ -424,6 +424,11 @@ code, pre, kbd, samp {
     font-family: 'JetBrains Mono', 'Courier New', monospace;
 }
 
+/* Chakra preflight está desactivado — resetear subrayados de enlace manualmente */
+a {
+    text-decoration: none;
+}
+
 /* ── ClientKosmos Custom Animations ── */
 @keyframes float {
     0%, 100% {
@@ -617,6 +622,24 @@ code, pre, kbd, samp {
     to {
         transform: translateX(100%);
     }
+}
+
+@keyframes blob-morph-1 {
+    0%, 100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+    33%  { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
+    66%  { border-radius: 50% 40% 60% 40% / 30% 60% 40% 60%; }
+}
+
+@keyframes blob-morph-2 {
+    0%, 100% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; }
+    33%  { border-radius: 70% 30% 40% 60% / 60% 40% 60% 40%; }
+    66%  { border-radius: 30% 60% 60% 40% / 50% 40% 50% 60%; }
+}
+
+@keyframes orb-float-3 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33%  { transform: translate(-25px, -35px) scale(1.06); }
+    66%  { transform: translate(35px, -15px) scale(0.94); }
 }
 
 .animate-float {
