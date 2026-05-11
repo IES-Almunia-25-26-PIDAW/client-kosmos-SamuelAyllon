@@ -1,6 +1,6 @@
-import { Box, Button as ChakraButton, Flex, Heading, Stack, Text } from '@chakra-ui/react';
+import { Alert, Button as ChakraButton, Flex, Heading, Stack, Text } from '@chakra-ui/react';
 import { Form, Head } from '@inertiajs/react';
-import { AtSign, CheckCircle2, Lock } from 'lucide-react';
+import { AtSign, Lock } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { FormField } from '@/components/form-field';
 import TextLink from '@/components/text-link';
@@ -25,34 +25,29 @@ export default function Login({ status, canResetPassword, canRegister }: Props) 
         <>
             <Head title="Iniciar sesión" />
 
-            <Heading
-                as="h1"
-                fontFamily="heading"
-                fontWeight="extrabold"
-                fontSize="4xl"
-                letterSpacing="-0.025em"
-                color="fg"
-                mb="2"
-            >
-                ClientKosmos
-            </Heading>
+            <Stack gap="1">
+                <Heading
+                    as="h1"
+                    fontFamily="heading"
+                    fontWeight="extrabold"
+                    fontSize={{ base: '2xl', md: '3xl' }}
+                    letterSpacing="-0.025em"
+                    color="fg"
+                >
+                    Bienvenido de vuelta
+                </Heading>
+                <Text fontSize="sm" color="fg.muted">
+                    Inicia sesión para continuar en ClientKosmos.
+                </Text>
+            </Stack>
 
             {status && (
-                <Flex
-                    alignItems="center"
-                    gap="3"
-                    borderRadius="xl"
-                    borderWidth="2px"
-                    borderColor="success.subtle"
-                    bg="success.subtle"
-                    px="4"
-                    py="3"
-                >
-                    <Flex h="8" w="8" alignItems="center" justifyContent="center" borderRadius="lg" bg="success.subtle">
-                        <Box as={CheckCircle2} h="4" w="4" color="success.fg" />
-                    </Flex>
-                    <Text fontSize="sm" fontWeight="medium" color="success.fg">{status}</Text>
-                </Flex>
+                <Alert.Root status="success" variant="subtle" borderRadius="xl">
+                    <Alert.Indicator />
+                    <Alert.Content>
+                        <Alert.Title fontSize="sm">{status}</Alert.Title>
+                    </Alert.Content>
+                </Alert.Root>
             )}
 
             <Form

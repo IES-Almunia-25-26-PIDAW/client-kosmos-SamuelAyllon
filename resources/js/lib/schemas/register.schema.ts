@@ -5,7 +5,13 @@ export const registerSchema = z
         type: z.enum(['professional', 'patient']),
         name: z.string().min(1, 'El nombre es obligatorio'),
         email: z.string().email('Introduce un email válido'),
-        password: z.string().min(8, 'La contraseña debe tener al menos 8 caracteres'),
+        password: z
+            .string()
+            .min(8, 'Al menos 8 caracteres')
+            .regex(/[A-Z]/, 'Debe contener una letra mayúscula')
+            .regex(/[a-z]/, 'Debe contener una letra minúscula')
+            .regex(/[0-9]/, 'Debe contener un número')
+            .regex(/[^A-Za-z0-9]/, 'Debe contener un símbolo (!@#$...)'),
         password_confirmation: z.string().min(1, 'Confirma tu contraseña'),
         phone: z.string().max(50, 'Máximo 50 caracteres').optional().or(z.literal('')),
         license_number: z.string().max(100).optional().or(z.literal('')),
