@@ -1,5 +1,4 @@
 import { Box, Flex, Heading, Stack, Text } from '@chakra-ui/react';
-import { Transition } from '@headlessui/react';
 import { Form, Head } from '@inertiajs/react';
 import { CheckCircle2, KeyRound, Lock } from 'lucide-react';
 import type { ReactNode } from 'react';
@@ -131,18 +130,20 @@ export default function Password() {
                                             )}
                                         </Button>
 
-                                        <Transition
-                                            show={recentlySuccessful}
-                                            enter="transition ease-in-out"
-                                            enterFrom="opacity-0"
-                                            leave="transition ease-in-out"
-                                            leaveTo="opacity-0"
+                                        <Flex
+                                            role="status"
+                                            aria-live="polite"
+                                            alignItems="center"
+                                            gap="1.5"
+                                            fontSize="sm"
+                                            color="success.fg"
+                                            opacity={recentlySuccessful ? 1 : 0}
+                                            transition="opacity 200ms ease-in-out"
+                                            pointerEvents={recentlySuccessful ? 'auto' : 'none'}
                                         >
-                                            <Flex alignItems="center" gap="1.5" fontSize="sm" color="success.fg">
-                                                <Box as={CheckCircle2} h="4" w="4" />
-                                                Guardado
-                                            </Flex>
-                                        </Transition>
+                                            <Box as={CheckCircle2} h="4" w="4" />
+                                            Guardado
+                                        </Flex>
                                     </Flex>
                                 </>
                             )}
