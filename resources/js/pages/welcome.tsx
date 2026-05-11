@@ -43,7 +43,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import logo from '@/assets/logo.svg';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { dashboard } from '@/routes';
 import { login, register } from '@/routes';
 import type { Auth } from '@/types';
@@ -86,7 +86,7 @@ function useInView(threshold = 0.12) {
         const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) setInView(true); }, { threshold });
         obs.observe(el);
         return () => obs.disconnect();
-    }, []);
+    }, [threshold]);
     return { ref, inView };
 }
 
