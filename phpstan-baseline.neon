@@ -23,9 +23,3 @@ parameters:
 			identifier: property.notFound
 			count: 1
 			path: app/Models/User.php
-
-		-
-			message: '#^Method App\\Services\\RgpdService\:\:getExpiringConsents\(\) return type with generic class Illuminate\\Support\\Collection does not specify its types\: TKey, TValue$#'
-			identifier: missingType.generics
-			count: 1
-			path: app/Services/RgpdService.php
