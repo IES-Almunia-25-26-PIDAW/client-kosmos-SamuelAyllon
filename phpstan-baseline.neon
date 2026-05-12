@@ -103,24 +103,6 @@ parameters:
 			path: app/Models/Availability.php
 
 		-
-			message: '#^Class App\\Models\\ConsentForm uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
-			identifier: missingType.generics
-			count: 1
-			path: app/Models/ConsentForm.php
-
-		-
-			message: '#^Method App\\Models\\ConsentForm\:\:patient\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Models/ConsentForm.php
-
-		-
-			message: '#^Method App\\Models\\ConsentForm\:\:user\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Models/ConsentForm.php
-
-		-
 			message: '#^Class App\\Models\\InvoiceItem uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
 			identifier: missingType.generics
 			count: 1
