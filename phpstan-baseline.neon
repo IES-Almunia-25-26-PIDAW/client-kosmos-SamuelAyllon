@@ -427,42 +427,6 @@ parameters:
 			path: app/Models/User.php
 
 		-
-			message: '#^Class App\\Models\\Workspace uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
-			identifier: missingType.generics
-			count: 1
-			path: app/Models/Workspace.php
-
-		-
-			message: '#^Method App\\Models\\Workspace\:\:appointments\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
-			identifier: missingType.generics
-			count: 1
-			path: app/Models/Workspace.php
-
-		-
-			message: '#^Method App\\Models\\Workspace\:\:collaborationAgreements\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
-			identifier: missingType.generics
-			count: 1
-			path: app/Models/Workspace.php
-
-		-
-			message: '#^Method App\\Models\\Workspace\:\:creator\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
-			identifier: missingType.generics
-			count: 1
-			path: app/Models/Workspace.php
-
-		-
-			message: '#^Method App\\Models\\Workspace\:\:invoices\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
-			identifier: missingType.generics
-			count: 1
-			path: app/Models/Workspace.php
-
-		-
-			message: '#^Method App\\Models\\Workspace\:\:messages\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
-			identifier: missingType.generics
-			count: 1
-			path: app/Models/Workspace.php
-
-		-
 			message: '#^Method App\\Notifications\\InvoiceOverdueNotification\:\:via\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
