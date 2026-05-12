@@ -157,24 +157,6 @@ parameters:
 			path: app/Models/SessionRecording.php
 
 		-
-			message: '#^Class App\\Models\\TranscriptionSegment uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
-			identifier: missingType.generics
-			count: 1
-			path: app/Models/TranscriptionSegment.php
-
-		-
-			message: '#^Method App\\Models\\TranscriptionSegment\:\:sessionRecording\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
-			identifier: missingType.generics
-			count: 1
-			path: app/Models/TranscriptionSegment.php
-
-		-
-			message: '#^Method App\\Models\\TranscriptionSegment\:\:speaker\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
-			identifier: missingType.generics
-			count: 1
-			path: app/Models/TranscriptionSegment.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
 			identifier: property.notFound
 			count: 1
