@@ -193,36 +193,6 @@ parameters:
 			path: app/Models/Document.php
 
 		-
-			message: '#^Class App\\Models\\Invoice uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
-			identifier: missingType.generics
-			count: 1
-			path: app/Models/Invoice.php
-
-		-
-			message: '#^Method App\\Models\\Invoice\:\:items\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
-			identifier: missingType.generics
-			count: 1
-			path: app/Models/Invoice.php
-
-		-
-			message: '#^Method App\\Models\\Invoice\:\:patient\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
-			identifier: missingType.generics
-			count: 1
-			path: app/Models/Invoice.php
-
-		-
-			message: '#^Method App\\Models\\Invoice\:\:professional\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
-			identifier: missingType.generics
-			count: 1
-			path: app/Models/Invoice.php
-
-		-
-			message: '#^Method App\\Models\\Invoice\:\:workspace\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
-			identifier: missingType.generics
-			count: 1
-			path: app/Models/Invoice.php
-
-		-
 			message: '#^Class App\\Models\\InvoiceItem uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
 			identifier: missingType.generics
 			count: 1
