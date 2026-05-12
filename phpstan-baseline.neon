@@ -109,30 +109,6 @@ parameters:
 			path: app/Mail/InvoiceIssuedMail.php
 
 		-
-			message: '#^Class App\\Models\\Agreement uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
-			identifier: missingType.generics
-			count: 1
-			path: app/Models/Agreement.php
-
-		-
-			message: '#^Method App\\Models\\Agreement\:\:appointment\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Models/Agreement.php
-
-		-
-			message: '#^Method App\\Models\\Agreement\:\:patient\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Models/Agreement.php
-
-		-
-			message: '#^Method App\\Models\\Agreement\:\:user\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Models/Agreement.php
-
-		-
 			message: '#^Class App\\Models\\Availability uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
 			identifier: missingType.generics
 			count: 1
