@@ -2,17 +2,20 @@
 
 namespace App\Models;
 
+use Database\Factories\ProfessionalProfileFactory;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * @property-read \App\Models\User $user
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\OfferedConsultation> $offeredConsultations
+ * @property-read User $user
+ * @property-read Collection<int, OfferedConsultation> $offeredConsultations
  */
 class ProfessionalProfile extends Model
 {
+    /** @use HasFactory<ProfessionalProfileFactory> */
     use HasFactory;
 
     protected $table = 'professional_profiles';
@@ -30,6 +33,7 @@ class ProfessionalProfile extends Model
         ];
     }
 
+    /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
