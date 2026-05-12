@@ -7,6 +7,7 @@ use App\Models\Appointment;
 use App\Models\Invoice;
 use App\Models\KosmoBriefing;
 use App\Models\PatientProfile;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -24,7 +25,7 @@ class IndexAction extends Controller
         return $this->professionalDashboard($user);
     }
 
-    private function professionalDashboard($user): Response
+    private function professionalDashboard(User $user): Response
     {
         $activePatientProfiles = PatientProfile::withoutGlobalScopes()
             ->where('professional_id', $user->id)
@@ -62,9 +63,9 @@ class IndexAction extends Controller
                     'session_number' => $sessionNumber,
                     'total_sessions' => max($totalSessions, $sessionNumber),
                     'patient' => [
-                        'id' => $patientProfile?->id ?? $appointment->patient_id,
+                        'id' => $patientProfile->id ?? $appointment->patient_id,
                         'patient_user_id' => $appointment->patient_id,
-                        'name' => $appointment->patient?->name ?? 'Paciente',
+                        'name' => $appointment->patient->name ?? 'Paciente',
                         'avatar_path' => $appointment->patient?->avatar_path,
                     ],
                     'service_name' => $appointment->service?->name,
@@ -142,7 +143,7 @@ class IndexAction extends Controller
         ]);
     }
 
-    private function patientDashboard($user): Response
+    private function patientDashboard(User $user): Response
     {
         $mapAppointment = fn ($appointment) => [
             'id' => $appointment->id,
