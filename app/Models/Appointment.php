@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Database\Factories\AppointmentFactory;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -42,7 +43,10 @@ use Illuminate\Support\Carbon;
  */
 class Appointment extends Model
 {
-    use HasFactory, SoftDeletes;
+    /** @use HasFactory<AppointmentFactory> */
+    use HasFactory;
+
+    use SoftDeletes;
 
     protected $fillable = [
         'workspace_id', 'patient_id', 'professional_id', 'service_id',
@@ -63,31 +67,37 @@ class Appointment extends Model
         ];
     }
 
+    /** @return BelongsTo<Workspace, $this> */
     public function workspace(): BelongsTo
     {
         return $this->belongsTo(Workspace::class);
     }
 
+    /** @return BelongsTo<User, $this> */
     public function patient(): BelongsTo
     {
         return $this->belongsTo(User::class, 'patient_id');
     }
 
+    /** @return BelongsTo<User, $this> */
     public function professional(): BelongsTo
     {
         return $this->belongsTo(User::class, 'professional_id');
     }
 
+    /** @return BelongsTo<OfferedConsultation, $this> */
     public function service(): BelongsTo
     {
         return $this->belongsTo(OfferedConsultation::class, 'service_id');
     }
 
+    /** @return BelongsTo<OfferedConsultation, $this> */
     public function offeredConsultation(): BelongsTo
     {
         return $this->belongsTo(OfferedConsultation::class, 'service_id');
     }
 
+    /** @return HasOne<SessionRecording, $this> */
     public function sessionRecording(): HasOne
     {
         return $this->hasOne(SessionRecording::class);
@@ -99,6 +109,7 @@ class Appointment extends Model
         return $this->hasMany(InvoiceItem::class);
     }
 
+    /** @return BelongsTo<User, $this> */
     public function cancelledBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'cancelled_by');
@@ -116,6 +127,7 @@ class Appointment extends Model
         return $this->hasMany(Agreement::class);
     }
 
+    /** @return HasMany<KosmoBriefing, $this> */
     public function kosmoBriefings(): HasMany
     {
         return $this->hasMany(KosmoBriefing::class);
