@@ -5,6 +5,8 @@ import {
     Flex,
     Grid,
     Heading,
+    HStack,
+    Separator,
     SimpleGrid,
     Stack,
     Text,
@@ -26,6 +28,7 @@ import {
 } from 'lucide-react';
 import { useState, type FormEvent, type ReactNode } from 'react';
 import { FormField } from '@/components/form-field';
+import { GoogleSignInButton } from '@/components/google-sign-in-button';
 import { PasswordStrengthPopover } from '@/components/password-strength';
 import TextLink from '@/components/text-link';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -312,6 +315,23 @@ export default function Register() {
                                     label="Paciente"
                                 />
                             </SimpleGrid>
+
+                            <GoogleSignInButton
+                                intent="register"
+                                role={userType}
+                                label={
+                                    userType === 'professional'
+                                        ? 'Registrarme como profesional con Google'
+                                        : 'Registrarme como paciente con Google'
+                                }
+                            />
+                            <HStack>
+                                <Separator flex="1" />
+                                <Text fontSize="xs" color="fg.muted" px="2">
+                                    o con email y contraseña
+                                </Text>
+                                <Separator flex="1" />
+                            </HStack>
 
                             <FormField
                                 label={<FieldLabel>Nombre completo</FieldLabel>}

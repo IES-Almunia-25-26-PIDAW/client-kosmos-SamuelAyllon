@@ -1,8 +1,9 @@
-import { Alert, Button as ChakraButton, Flex, Heading, Stack, Text } from '@chakra-ui/react';
-import { Form, Head } from '@inertiajs/react';
+import { Alert, Button as ChakraButton, Flex, HStack, Heading, Separator, Stack, Text } from '@chakra-ui/react';
+import { Form, Head, usePage } from '@inertiajs/react';
 import { AtSign, Lock } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { FormField } from '@/components/form-field';
+import { GoogleSignInButton } from '@/components/google-sign-in-button';
 import TextLink from '@/components/text-link';
 import { Checkbox } from '@/components/ui/checkbox';
 import { FieldLabel } from '@/components/ui/field-label';
@@ -21,6 +22,9 @@ type Props = {
 };
 
 export default function Login({ status, canResetPassword, canRegister }: Props) {
+    const pageErrors = usePage().props.errors as Record<string, string> | undefined;
+    const googleError = pageErrors?.google;
+
     return (
         <>
             <Head title="Iniciar sesión" />
@@ -49,6 +53,26 @@ export default function Login({ status, canResetPassword, canRegister }: Props) 
                     </Alert.Content>
                 </Alert.Root>
             )}
+
+            {googleError && (
+                <Alert.Root status="error" variant="subtle" borderRadius="xl">
+                    <Alert.Indicator />
+                    <Alert.Content>
+                        <Alert.Title fontSize="sm">{googleError}</Alert.Title>
+                    </Alert.Content>
+                </Alert.Root>
+            )}
+
+            <Stack gap="4">
+                <GoogleSignInButton intent="login" />
+                <HStack>
+                    <Separator flex="1" />
+                    <Text fontSize="xs" color="fg.muted" px="2">
+                        o con tu email
+                    </Text>
+                    <Separator flex="1" />
+                </HStack>
+            </Stack>
 
             <Form
                 action={store.url()}

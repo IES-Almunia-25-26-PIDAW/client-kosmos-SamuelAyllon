@@ -31,7 +31,7 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $appends = ['role'];
 
     protected $fillable = [
-        'name', 'email', 'password',
+        'name', 'email', 'google_id', 'password',
         'avatar_path', 'phone', 'date_of_birth', 'address',
         'patient_notes',
         'stripe_customer_id', 'google_refresh_token',
