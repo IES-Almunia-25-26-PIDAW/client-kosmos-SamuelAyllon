@@ -14,7 +14,7 @@ class StoreAction extends Controller
     {
         $validated = $request->validated();
 
-        $patient = PatientProfile::findOrFail($validated['patient_id']);
+        $patient = PatientProfile::findOrFail((int) $validated['patient_id']);
 
         // Ensure the patient belongs to the authenticated professional's workspace.
         abort_unless(

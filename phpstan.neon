@@ -6,7 +6,7 @@ parameters:
     paths:
         - app
 
-    level: 6
+    level: 7
 
     excludePaths:
         - app/Actions/Fortify

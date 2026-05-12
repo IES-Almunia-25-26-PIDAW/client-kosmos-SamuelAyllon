@@ -21,8 +21,10 @@ class BookAction extends Controller
             'service_id' => ['nullable', 'integer'],
         ]);
 
-        $profile = ProfessionalProfile::with('user:id,name,avatar_path')
-            ->find($validated['professional_id']);
+        $profile = ProfessionalProfile::query()
+            ->with('user:id,name,avatar_path')
+            ->whereKey($validated['professional_id'])
+            ->first();
 
         if (! $profile || ! $profile->user_id) {
             return redirect()

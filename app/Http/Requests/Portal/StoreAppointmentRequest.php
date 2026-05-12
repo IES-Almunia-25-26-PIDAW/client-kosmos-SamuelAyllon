@@ -23,4 +23,21 @@ class StoreAppointmentRequest extends FormRequest
             'notes' => ['nullable', 'string', 'max:1000'],
         ];
     }
+
+    /**
+     * @return array{professional_id: int, service_id: int, starts_at: string, modality: string, notes?: string|null}
+     */
+    public function appointmentData(): array
+    {
+        /** @var array<string, mixed> $validated */
+        $validated = $this->validated();
+
+        return [
+            'professional_id' => (int) $validated['professional_id'],
+            'service_id' => (int) $validated['service_id'],
+            'starts_at' => (string) $validated['starts_at'],
+            'modality' => (string) $validated['modality'],
+            'notes' => isset($validated['notes']) ? (string) $validated['notes'] : null,
+        ];
+    }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\CollaborationAgreement;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateCollaborationAgreementRequest extends FormRequest
@@ -25,7 +26,7 @@ class UpdateCollaborationAgreementRequest extends FormRequest
                         return;
                     }
                     $agreement = $this->route('collaboration_agreement');
-                    if ($agreement && $value < $agreement->start_date) {
+                    if ($agreement instanceof CollaborationAgreement && $value < $agreement->start_date) {
                         $fail('La fecha de fin no puede ser anterior a la fecha de inicio del acuerdo.');
                     }
                 },
