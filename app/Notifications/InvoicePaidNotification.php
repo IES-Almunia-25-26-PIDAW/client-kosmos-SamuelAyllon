@@ -14,6 +14,7 @@ class InvoicePaidNotification extends Notification
 
     public function __construct(public readonly Invoice $invoice) {}
 
+    /** @return array<int, string> */
     public function via(object $notifiable): array
     {
         return ['mail'];

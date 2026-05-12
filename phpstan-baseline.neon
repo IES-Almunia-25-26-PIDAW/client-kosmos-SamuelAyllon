@@ -43,30 +43,6 @@ parameters:
 			path: app/Models/User.php
 
 		-
-			message: '#^Method App\\Notifications\\InvoiceOverdueNotification\:\:via\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Notifications/InvoiceOverdueNotification.php
-
-		-
-			message: '#^Method App\\Notifications\\InvoicePaidNotification\:\:via\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Notifications/InvoicePaidNotification.php
-
-		-
-			message: '#^Method App\\Notifications\\ProfessionalApprovedNotification\:\:toDatabase\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Notifications/ProfessionalApprovedNotification.php
-
-		-
-			message: '#^Method App\\Notifications\\ProfessionalApprovedNotification\:\:via\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Notifications/ProfessionalApprovedNotification.php
-
-		-
 			message: '#^Method App\\Services\\PatientContextService\:\:getPreSessionContext\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1

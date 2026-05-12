@@ -10,6 +10,7 @@ class ProfessionalApprovedNotification extends Notification
 {
     use Queueable;
 
+    /** @return array<int, string> */
     public function via(object $notifiable): array
     {
         return ['mail', 'database'];
@@ -25,6 +26,7 @@ class ProfessionalApprovedNotification extends Notification
             ->line('Si tienes cualquier duda, responde a este correo y te ayudaremos.');
     }
 
+    /** @return array<string, mixed> */
     public function toDatabase(object $notifiable): array
     {
         return [
