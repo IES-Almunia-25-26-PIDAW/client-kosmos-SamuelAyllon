@@ -139,24 +139,6 @@ parameters:
 			path: app/Models/ProfessionalProfile.php
 
 		-
-			message: '#^Class App\\Models\\SessionRecording uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
-			identifier: missingType.generics
-			count: 1
-			path: app/Models/SessionRecording.php
-
-		-
-			message: '#^Method App\\Models\\SessionRecording\:\:appointment\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
-			identifier: missingType.generics
-			count: 1
-			path: app/Models/SessionRecording.php
-
-		-
-			message: '#^Method App\\Models\\SessionRecording\:\:transcriptionSegments\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Models/SessionRecording.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
 			identifier: property.notFound
 			count: 1
