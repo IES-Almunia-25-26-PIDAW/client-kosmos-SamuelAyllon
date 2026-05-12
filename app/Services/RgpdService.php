@@ -93,6 +93,7 @@ class RgpdService
     /**
      * Return consent forms expiring within $daysAhead days for the given patient.
      */
+    /** @return Collection<int, ConsentForm> */
     public function getExpiringConsents(PatientProfile $patient, int $daysAhead = 30): Collection
     {
         return $patient->consentForms()

@@ -114,7 +114,7 @@ it('forbids joining outside the 10-min-before / 15-min-after window', function (
         ->assertForbidden();
 });
 
-it('forbids joining a completed appointment', function () {
+it('returns 410 when joining a completed appointment', function () {
     $appointment = joinableAppointment([
         'status' => 'completed',
         'meeting_url' => 'https://meet.google.com/abc-defg-hij',
@@ -122,7 +122,7 @@ it('forbids joining a completed appointment', function () {
 
     $this->actingAs($appointment->patient)
         ->postJson(route('patient.appointments.join', $appointment))
-        ->assertForbidden();
+        ->assertStatus(410);
 });
 
 // ─── Authorization ──────────────────────────────────────────────────────────

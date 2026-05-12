@@ -11,11 +11,12 @@ class StoreNoteRequest extends FormRequest
         return true;
     }
 
+    /** @return array<string, mixed> */
     public function rules(): array
     {
         return [
-            'content'               => ['required', 'string', 'min:1'],
-            'type'                  => ['required', 'in:quick_note,session_note,observation,followup'],
+            'content' => ['required', 'string', 'min:1'],
+            'type' => ['required', 'in:quick_note,session_note,observation,followup'],
             'appointment_id' => ['nullable', 'exists:appointments,id'],
         ];
     }

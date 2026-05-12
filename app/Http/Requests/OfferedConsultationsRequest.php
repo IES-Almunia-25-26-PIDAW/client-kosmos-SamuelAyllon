@@ -12,6 +12,7 @@ class OfferedConsultationsRequest extends FormRequest
         return $this->user() !== null && $this->user()->isProfessional();
     }
 
+    /** @return array<string, mixed> */
     public function rules(): array
     {
         return [
@@ -35,13 +36,21 @@ class OfferedConsultationsRequest extends FormRequest
     }
 
     /**
-     * @return array<string,mixed>
+     * @return array{name:string,description?:?string,duration_minutes:int,price?:?numeric,color?:?string,is_active?:bool,modality?:string}
      */
     public function dataForPersistence(): array
     {
+        /** @var array<string, mixed> $data */
         $data = $this->validated();
-        $data['is_active'] = $this->boolean('is_active', true);
 
-        return $data;
+        return [
+            'name' => (string) $data['name'],
+            'description' => isset($data['description']) ? (string) $data['description'] : null,
+            'duration_minutes' => (int) $data['duration_minutes'],
+            'price' => isset($data['price']) && is_numeric($data['price']) ? (float) $data['price'] : null,
+            'color' => isset($data['color']) ? (string) $data['color'] : null,
+            'is_active' => $this->boolean('is_active', true),
+            'modality' => isset($data['modality']) ? (string) $data['modality'] : 'both',
+        ];
     }
 }

@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use Database\Factories\InvoiceFactory;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
@@ -20,18 +23,21 @@ use Spatie\Activitylog\Support\LogOptions;
  * @property string|null $stripe_checkout_session_id
  * @property string|null $notes
  * @property string $total
- * @property \Illuminate\Support\Carbon|null $issued_at
- * @property \Illuminate\Support\Carbon|null $due_at
- * @property \Illuminate\Support\Carbon|null $paid_at
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \App\Models\User|null $patient
- * @property-read \App\Models\User|null $professional
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\InvoiceItem> $items
+ * @property Carbon|null $issued_at
+ * @property Carbon|null $due_at
+ * @property Carbon|null $paid_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read User|null $patient
+ * @property-read User|null $professional
+ * @property-read Collection<int, InvoiceItem> $items
  */
 class Invoice extends Model
 {
-    use HasFactory, LogsActivity, SoftDeletes;
+    /** @use HasFactory<InvoiceFactory> */
+    use HasFactory;
+
+    use LogsActivity, SoftDeletes;
 
     public function getActivitylogOptions(): LogOptions
     {
@@ -61,21 +67,25 @@ class Invoice extends Model
         ];
     }
 
+    /** @return BelongsTo<Workspace, $this> */
     public function workspace(): BelongsTo
     {
         return $this->belongsTo(Workspace::class);
     }
 
+    /** @return BelongsTo<User, $this> */
     public function patient(): BelongsTo
     {
         return $this->belongsTo(User::class, 'patient_id');
     }
 
+    /** @return BelongsTo<User, $this> */
     public function professional(): BelongsTo
     {
         return $this->belongsTo(User::class, 'professional_id');
     }
 
+    /** @return HasMany<InvoiceItem, $this> */
     public function items(): HasMany
     {
         return $this->hasMany(InvoiceItem::class);

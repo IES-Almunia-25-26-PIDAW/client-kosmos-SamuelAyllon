@@ -197,7 +197,7 @@ export default function ProfessionalShow({ professional, services }: Props) {
                                                 as={Star}
                                                 w="3.5"
                                                 h="3.5"
-                                                color={i <= 4 ? 'yellow.400' : 'fg.subtle'}
+                                                color={i <= 4 ? 'warning.solid' : 'fg.subtle'}
                                                 fill={i <= 4 ? 'currentColor' : 'none'}
                                                 aria-hidden
                                             />

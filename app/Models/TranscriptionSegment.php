@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use Database\Factories\TranscriptionSegmentFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class TranscriptionSegment extends Model
 {
+    /** @use HasFactory<TranscriptionSegmentFactory> */
     use HasFactory;
 
     protected $fillable = [
@@ -25,11 +27,13 @@ class TranscriptionSegment extends Model
         ];
     }
 
+    /** @return BelongsTo<SessionRecording, $this> */
     public function sessionRecording(): BelongsTo
     {
         return $this->belongsTo(SessionRecording::class);
     }
 
+    /** @return BelongsTo<User, $this> */
     public function speaker(): BelongsTo
     {
         return $this->belongsTo(User::class, 'speaker_user_id');

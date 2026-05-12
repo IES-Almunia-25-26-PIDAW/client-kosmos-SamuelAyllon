@@ -10,11 +10,6 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import {
-    NavigationMenu,
-    NavigationMenuItem,
-    NavigationMenuList,
-} from '@/components/ui/navigation-menu';
-import {
     Sheet,
     SheetContent,
     SheetHeader,
@@ -140,52 +135,48 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
 
                     {/* Desktop navigation */}
                     <Box display={{ base: 'none', lg: 'flex' }} ml="6" h="full" alignItems="center" gap="6">
-                        <NavigationMenu>
-                            <NavigationMenuList>
-                                {mainNavItems.map((item, index) => (
-                                    <NavigationMenuItem key={index}>
-                                        <Box position="relative" display="flex" h="16" alignItems="center">
-                                            <ChakraLink
-                                                href={item.href}
-                                                display="inline-flex"
-                                                h="9"
-                                                alignItems="center"
-                                                justifyContent="center"
-                                                borderRadius="md"
-                                                bg="transparent"
-                                                color="fg.DEFAULT"
-                                                px="3"
-                                                py="2"
-                                                fontSize="sm"
-                                                fontWeight="medium"
-                                                cursor="pointer"
-                                                _hover={{ bg: 'transparent' }}
-                                                _focusVisible={{
-                                                    outline: 'none',
-                                                    boxShadow: '0 0 0 3px var(--ck-colors-brand-focusRing)',
-                                                }}
-                                            >
-                                                {item.icon && (
-                                                    <item.icon size={16} style={{ marginRight: '0.5rem' }} />
-                                                )}
-                                                {item.title}
-                                            </ChakraLink>
-                                            {isCurrentUrl(item.href) && (
-                                                <Box
-                                                    position="absolute"
-                                                    bottom={0}
-                                                    left={0}
-                                                    h="0.5"
-                                                    w="full"
-                                                    bg="fg.DEFAULT"
-                                                    style={{ transform: 'translateY(1px)' }}
-                                                />
-                                            )}
-                                        </Box>
-                                    </NavigationMenuItem>
-                                ))}
-                            </NavigationMenuList>
-                        </NavigationMenu>
+                        <Flex as="nav" aria-label="Main" m="0" p="0" gap="1">
+                            {mainNavItems.map((item, index) => (
+                                <Box key={index} position="relative" display="flex" h="16" alignItems="center">
+                                    <ChakraLink
+                                        href={item.href}
+                                        display="inline-flex"
+                                        h="9"
+                                        alignItems="center"
+                                        justifyContent="center"
+                                        borderRadius="md"
+                                        bg="transparent"
+                                        color="fg.DEFAULT"
+                                        px="3"
+                                        py="2"
+                                        fontSize="sm"
+                                        fontWeight="medium"
+                                        cursor="pointer"
+                                        _hover={{ bg: 'transparent' }}
+                                        _focusVisible={{
+                                            outline: 'none',
+                                            boxShadow: '0 0 0 3px var(--ck-colors-brand-focusRing)',
+                                        }}
+                                    >
+                                        {item.icon && (
+                                            <item.icon size={16} style={{ marginRight: '0.5rem' }} />
+                                        )}
+                                        {item.title}
+                                    </ChakraLink>
+                                    {isCurrentUrl(item.href) && (
+                                        <Box
+                                            position="absolute"
+                                            bottom={0}
+                                            left={0}
+                                            h="0.5"
+                                            w="full"
+                                            bg="fg.DEFAULT"
+                                            style={{ transform: 'translateY(1px)' }}
+                                        />
+                                    )}
+                                </Box>
+                            ))}
+                        </Flex>
                     </Box>
 
                     {/* Right actions */}

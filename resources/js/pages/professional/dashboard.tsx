@@ -1,10 +1,11 @@
-import { Badge, Box, Flex, Grid, Heading, Stack, Text, chakra } from '@chakra-ui/react';
+import { Badge, Box, Container, Flex, Grid, Heading, Stack, Text, chakra } from '@chakra-ui/react';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { ArrowRight, CalendarDays, Receipt } from 'lucide-react';
 import type { ReactNode } from 'react';
 import professionalAppointmentsIndex from '@/actions/App/Http/Controllers/Appointment/IndexAction';
 import AppointmentShowAction from '@/actions/App/Http/Controllers/Appointment/ShowAction';
 import PatientShowAction from '@/actions/App/Http/Controllers/Patient/ShowAction';
+import { EmptyState } from '@/components/empty-state';
 import { KosmoBriefing as KosmoBriefingComponent } from '@/components/kosmo/kosmo-briefing';
 import { NotificationsBanner } from '@/components/notifications/notifications-banner';
 import { Button } from '@/components/ui/button';
@@ -147,15 +148,16 @@ export default function ProfessionalDashboard({
         <>
             <Head title="Hoy — ClientKosmos" />
 
-            <Stack gap="6" p={{ base: '6', lg: '8' }}>
+            <Container maxW="7xl" px={{ base: '4', md: '6', lg: '8' }} py={{ base: '6', lg: '8' }}>
+              <Stack gap="6">
 
                 <NotificationsBanner />
 
                 <Box>
-                    <Heading as="h1" fontSize="3xl" fontWeight="bold" color="fg">
+                    <Heading as="h1" fontSize={{ base: '2xl', md: '3xl' }} fontWeight="bold" color="fg" lineHeight="shorter">
                         {greeting()}, {auth.user.name.split(' ')[0]}
                     </Heading>
-                    <Text mt="0.5" fontSize="md" color="fg.muted" textTransform="capitalize">
+                    <Text mt="1" fontSize="sm" color="fg.muted" textTransform="capitalize">
                         {formatDate()}
                     </Text>
                 </Box>
@@ -173,40 +175,27 @@ export default function ProfessionalDashboard({
                     />
                 )}
 
-                <Grid templateColumns={{ base: '1fr', lg: 'repeat(3, 1fr)' }} gap="6">
+                <Grid templateColumns={{ base: '1fr', lg: 'repeat(3, 1fr)' }} gap={{ base: '4', lg: '6' }}>
 
-                    <Box gridColumn={{ lg: 'span 2' }}>
-                        <Flex alignItems="center" justifyContent="space-between" mb="4">
-                            <Heading as="h2" fontSize="xl" fontWeight="semibold" color="fg">
+                    <Box gridColumn={{ lg: 'span 2' }} minW={0}>
+                        <Flex alignItems="center" justifyContent="space-between" mb="4" gap="3" flexWrap="wrap">
+                            <Heading as="h2" fontSize="lg" fontWeight="semibold" color="fg">
                                 Agenda del día
                             </Heading>
-                            <ChakraLink
-                                href={professionalAppointmentsIndex.url()}
-                                fontSize="sm"
-                                fontWeight="medium"
-                                color="brand.solid"
-                                _hover={{ textDecoration: 'underline' }}
-                                display="flex"
-                                alignItems="center"
-                                gap="1"
-                            >
-                                Ver calendario completo <Box as={ArrowRight} w="3.5" h="3.5" />
-                            </ChakraLink>
+                            <Button asChild variant="link" size="sm">
+                                <ChakraLink href={professionalAppointmentsIndex.url()} display="inline-flex" alignItems="center" gap="1">
+                                    Ver calendario completo <Box as={ArrowRight} w="3.5" h="3.5" />
+                                </ChakraLink>
+                            </Button>
                         </Flex>
 
                         {todayAppointments.length === 0 ? (
-                            <Box
-                                borderRadius="lg"
-                                borderWidth="1px"
-                                borderColor="border"
-                                bg="bg.surface"
-                                p="10"
-                                textAlign="center"
-                            >
-                                <Box as={CalendarDays} w="8" h="8" mx="auto" mb="3" color="fg.subtle" />
-                                <Text fontSize="sm" color="fg.muted">
-                                    No hay sesiones programadas para hoy.
-                                </Text>
+                            <Box borderRadius="lg" borderWidth="1px" borderColor="border" bg="bg.surface">
+                                <EmptyState
+                                    icon={CalendarDays}
+                                    title="Sin sesiones hoy"
+                                    description="No hay sesiones programadas para hoy. Disfruta del día o revisa tu calendario."
+                                />
                             </Box>
                         ) : (
                             <Stack gap="3">
@@ -219,15 +208,16 @@ export default function ProfessionalDashboard({
                                         <Flex
                                             key={session.id}
                                             alignItems="center"
-                                            gap="4"
+                                            gap={{ base: '3', md: '4' }}
                                             borderRadius="lg"
                                             borderWidth="1px"
                                             borderColor={isNext ? 'brand.solid' : 'border'}
                                             bg="bg.surface"
-                                            p="4"
-                                            boxShadow={isNext ? 'sm' : undefined}
-                                            _hover={isNext ? undefined : { boxShadow: 'sm' }}
-                                            transition="box-shadow 0.2s"
+                                            p={{ base: '3', md: '4' }}
+                                            boxShadow={isNext ? 'sm' : 'xs'}
+                                            _hover={{ boxShadow: 'md', borderColor: isNext ? 'brand.solid' : 'border.emphasized' }}
+                                            transition="box-shadow 0.15s ease, border-color 0.15s ease"
+                                            flexWrap={{ base: 'wrap', sm: 'nowrap' }}
                                         >
                                             <Box
                                                 w="2.5"
@@ -270,19 +260,21 @@ export default function ProfessionalDashboard({
                                                 </Flex>
                                             </Box>
 
-                                            {isNext ? (
-                                                <Button asChild variant="primary" size="sm" flexShrink={0}>
-                                                    <ChakraLink href={AppointmentShowAction.url(session.id)}>
-                                                        Preparar sesión
-                                                    </ChakraLink>
-                                                </Button>
-                                            ) : (
-                                                <Button asChild variant="outline" size="sm" flexShrink={0}>
-                                                    <ChakraLink href={PatientShowAction.url(session.patient.id)}>
-                                                        Ver ficha
-                                                    </ChakraLink>
-                                                </Button>
-                                            )}
+                                            <Box flexShrink={0} w={{ base: 'full', sm: 'auto' }} ml={{ base: '8', sm: '0' }}>
+                                                {isNext ? (
+                                                    <Button asChild variant="primary" size="sm" w={{ base: 'full', sm: 'auto' }}>
+                                                        <ChakraLink href={AppointmentShowAction.url(session.id)}>
+                                                            Preparar sesión
+                                                        </ChakraLink>
+                                                    </Button>
+                                                ) : (
+                                                    <Button asChild variant="outline" size="sm" w={{ base: 'full', sm: 'auto' }}>
+                                                        <ChakraLink href={PatientShowAction.url(session.patient.id)}>
+                                                            Ver ficha
+                                                        </ChakraLink>
+                                                    </Button>
+                                                )}
+                                            </Box>
                                         </Flex>
                                     );
                                 })}
@@ -321,9 +313,11 @@ export default function ProfessionalDashboard({
                                         justifyContent="space-between"
                                         px="4"
                                         py="3"
+                                        minH="12"
                                         borderTopWidth={index > 0 ? '1px' : undefined}
                                         borderColor="border"
                                         _hover={{ bg: 'bg.subtle' }}
+                                        _focusVisible={{ outline: '2px solid', outlineColor: 'brand.solid', outlineOffset: '-2px' }}
                                         transition="background 0.2s"
                                     >
                                         <Flex alignItems="flex-start" gap="2.5" minW={0}>
@@ -417,7 +411,8 @@ export default function ProfessionalDashboard({
                     </Stack>
 
                 </Grid>
-            </Stack>
+              </Stack>
+            </Container>
         </>
     );
 }

@@ -2,11 +2,10 @@ import { Box, Flex, Stack, Text } from '@chakra-ui/react';
 import { Form, Head } from '@inertiajs/react';
 import { ArrowLeft, CheckCircle2, LoaderCircle, Mail } from 'lucide-react';
 import type { ReactNode } from 'react';
-import InputError from '@/components/input-error';
+import { FormField } from '@/components/form-field';
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { IconInput } from '@/components/ui/icon-input';
 import AuthLayout from '@/layouts/auth-layout';
 import { login } from '@/routes';
 import { email } from '@/routes/password';
@@ -42,25 +41,20 @@ export default function ForgotPassword({ status }: { status?: string }) {
                 <Form action={email.url()} method="post">
                     {({ processing, errors }) => (
                         <>
-                            <Stack gap="2">
-                                <Label htmlFor="email">
-                                    <Text as="span" fontSize="sm" fontWeight="semibold">Correo electrónico</Text>
-                                </Label>
-                                <Box position="relative">
-                                    <Box as={Mail} position="absolute" left="3" top="50%" transform="translateY(-50%)" h="4" w="4" color="fg.muted" />
-                                    <Input
-                                        id="email"
-                                        type="email"
-                                        name="email"
-                                        autoComplete="off"
-                                        autoFocus
-                                        placeholder="email@ejemplo.com"
-                                        style={{ paddingLeft: '2.5rem' }}
-                                    />
-                                </Box>
-
-                                <InputError message={errors.email} />
-                            </Stack>
+                            <FormField
+                                label="Correo electrónico"
+                                error={errors.email}
+                                required
+                            >
+                                <IconInput
+                                    icon={Mail}
+                                    type="email"
+                                    name="email"
+                                    autoComplete="off"
+                                    autoFocus
+                                    placeholder="email@ejemplo.com"
+                                />
+                            </FormField>
 
                             <Flex my="6" alignItems="center" justifyContent="flex-start">
                                 <Button

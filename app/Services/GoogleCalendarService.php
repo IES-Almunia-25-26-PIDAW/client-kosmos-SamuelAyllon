@@ -115,6 +115,37 @@ class GoogleCalendarService
     }
 
     /**
+     * Delete the Google Calendar event (and its Meet link) for an appointment.
+     * Failures are logged but never thrown, so finalization is never blocked
+     * by a transient Google outage.
+     */
+    public function deleteMeetEvent(Appointment $appointment): void
+    {
+        if ($appointment->external_calendar_event_id === null) {
+            return;
+        }
+
+        $appointment->loadMissing('professional');
+        $professional = $appointment->professional;
+
+        if ($professional === null || $professional->google_refresh_token === null) {
+            return;
+        }
+
+        try {
+            $client = $this->makeClient($professional);
+            $service = new Calendar($client);
+            $service->events->delete('primary', $appointment->external_calendar_event_id);
+        } catch (Throwable $e) {
+            Log::warning('Google Meet event delete failed', [
+                'appointment_id' => $appointment->id,
+                'event_id' => $appointment->external_calendar_event_id,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
      * Build the OAuth authorization URL with a CSRF state parameter.
      */
     public function getAuthorizationUrl(string $state): string

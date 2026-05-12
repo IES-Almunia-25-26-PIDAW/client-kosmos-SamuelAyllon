@@ -8,8 +8,8 @@
 [![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=black)](https://react.dev)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![PHP](https://img.shields.io/badge/PHP-8.4+-777BB4?style=flat-square&logo=php&logoColor=white)](https://www.php.net)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.0-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
-[![Tests](https://img.shields.io/badge/Tests-97_casos-brightgreen?style=flat-square&logo=checkmarx&logoColor=white)]()
+[![Chakra UI](https://img.shields.io/badge/Chakra_UI-v3-319795?style=flat-square&logo=chakraui&logoColor=white)](https://chakra-ui.com)
+[![Tests](https://img.shields.io/badge/Tests-389_casos-brightgreen?style=flat-square&logo=checkmarx&logoColor=white)]()
 [![Docker](https://img.shields.io/badge/Docker-samue45%2Fclient--kosmos-2496ED?style=flat-square&logo=docker&logoColor=white)](https://hub.docker.com/r/samue45/client-kosmos)
 [![License](https://img.shields.io/badge/License-MIT-green.svg?style=flat-square)](LICENSE)
 
@@ -33,6 +33,7 @@
 - [Docker](#docker)
 - [Variables de Entorno](#variables-de-entorno)
 - [Troubleshooting](#troubleshooting)
+- [API pública y contrato HTTP](#api-pública-y-contrato-http)
 - [Documentación](#documentación)
 - [Licencia](#licencia)
 
@@ -175,21 +176,29 @@ Tras ejecutar `php artisan migrate:fresh --seed`:
 | Tecnología | Versión | Propósito |
 |-----------|---------|----------|
 | Laravel | 12 | Framework principal |
-| Laravel Fortify | 1.x | Autenticación (login, registro, 2FA, reset password, verificación email) |
-| Spatie Permission | 7.2 | Roles (`admin`, `professional`) y middleware de acceso |
-| openai-php/client | 0.19 | Cliente SDK para la API de Groq (compatible con OpenAI) |
-| Laravel Wayfinder | 0.1.9 | Rutas tipadas para TypeScript |
-| Pest | 3.x | Framework de testing (97 test cases, 487 aserciones) |
+| Laravel Fortify | 1.30+ | Autenticación (login, registro, 2FA, reset password, verificación email) |
+| Laravel Reverb | 1.10+ | WebSockets para notificaciones y videoconsulta en tiempo real |
+| Laravel Wayfinder | 0.1.9 | Rutas tipadas generadas hacia TypeScript |
+| Spatie Permission | 7.2+ | Roles (`admin`, `professional`) y middleware de acceso |
+| Spatie ActivityLog | 5.x | Auditoría de acciones sensibles |
+| Stripe PHP | 20.x | Cobros profesional → paciente (Checkout + webhooks) |
+| Google API Client | 2.19+ | Integración con Google Calendar / Meet para videoconsulta |
+| openai-php/client | 0.19 | SDK Kosmo (chat) y Whisper (transcripción), compatible con Groq |
+| barryvdh/laravel-dompdf | 3.x | Generación de facturas PDF |
+| Pest | 3.x | Framework de testing (389 tests, 1.535 aserciones) |
+| Larastan / PHPStan | 3.x | Análisis estático nivel 7, 0 errores |
 
 ### Frontend
 
 | Tecnología | Versión | Propósito |
 |-----------|---------|----------|
-| React | 19 | UI interactiva con React Compiler |
+| React | 19.2 | UI interactiva con React Compiler |
 | TypeScript | 5.7 | Tipado estático |
-| Inertia.js | 2.3 | Puente Laravel–React (SPA monolítica sin API REST) |
-| Tailwind CSS | 4.0 | Estilos utility-first con design system propio |
-| shadcn/ui | — | Componentes UI accesibles (Radix UI + Tailwind) |
+| Inertia.js | 2.x | Puente Laravel–React (SPA monolítica sin API REST) |
+| Chakra UI | v3.34 | Sistema visual único — tokens semánticos en `resources/js/lib/chakra-system.ts` |
+| Zod | 4.x | Validación de formularios en cliente |
+| `@laravel/echo-react` | 2.x | Cliente de WebSockets para Reverb |
+| Vitest + Testing Library | 2.x | Tests de componentes y hooks |
 | Vite | 7 | Bundler |
 | Lucide React | 0.475 | Iconografía |
 
@@ -415,29 +424,26 @@ DELETE      /admin/users/{user}
 php artisan test --testsuite=Feature   # Ejecutar todos los Feature tests
 ```
 
-**97 test cases** — **487 aserciones** — todas en verde ✅
+**389 test cases** — **1.535 aserciones** — todas en verde ✅
 
-| Módulo | Tests | Cobertura |
-|--------|:-----:|-----------|
-| AdminController | 11 | CRUD usuarios, restricción de roles |
-| AuthController | 6 | Redirecciones post-login por rol, onboarding |
-| Auth/Authentication | 6 | Login, logout, rate limiting, 2FA redirect |
-| Auth/EmailVerification | 6 | Flujo completo de verificación de email |
-| Auth/PasswordConfirmation | 2 | Pantalla de confirmación |
-| Auth/PasswordReset | 5 | Reset de contraseña por email |
-| Auth/Registration | 3 | Registro + asignación de rol |
-| Auth/TwoFactorChallenge | 2 | Desafío 2FA |
-| Auth/VerificationNotification | 2 | Reenvío de email de verificación |
-| BillingController | 6 | Vista, estadísticas, filtros, aislamiento de datos |
-| DashboardController | 7 | Props, métricas, alertas, acceso por rol |
-| KosmoController | 7 | Briefings, chat, marcar leídos, autenticación |
-| PatientController | 15 | CRUD completo, ownership, pre/post sesión |
-| SettingsController | 7 | Vista, actualización de configuración |
-| Settings/PasswordUpdate | 3 | Actualización de contraseña |
-| Settings/ProfileUpdate | 5 | Perfil, email, eliminación de cuenta |
-| Settings/TwoFactorAuthentication | 4 | Configuración 2FA |
+Áreas cubiertas por la suite Feature:
 
-Framework: **Pest 3** con `RefreshDatabase`, helpers `createAdmin()` / `createProfessional()` y `withoutVite()` global en `TestCase`.
+- **Autenticación Fortify:** login, logout, registro, rate limiting, 2FA, reset y verificación de email.
+- **Autorización:** policies de ownership por paciente, middleware `admin` / `professional`.
+- **Dominio:** pacientes (CRUD, pre/post sesión), citas y disponibilidad, notas, acuerdos, documentos, consentimientos RGPD.
+- **Facturación:** generación de facturas, PDF dompdf, recordatorios, Stripe Checkout y webhook de pago.
+- **Videoconsulta:** creación de sala Google Meet, estados 410 para salas completadas, limpieza de evento.
+- **Kosmo IA:** briefings, chat, marcar leídos.
+- **Admin:** CRUD usuarios y cambio de rol.
+- **Ajustes:** perfil, password, 2FA, datos de consulta.
+
+Listar tests reales:
+
+```bash
+php artisan test --list-tests
+```
+
+Framework: **Pest 3** con `RefreshDatabase`, helpers `createAdmin()` / `createProfessional()` y `withoutVite()` global en `TestCase`. Frontend cubierto adicionalmente con **Vitest** (`npm run test`).
 
 ---
 
@@ -564,6 +570,36 @@ Invoke-WebRequest -Uri "https://curl.se/ca/cacert.pem" -OutFile "C:\certs\cacert
 | Frontend no actualiza | Caché de Vite | Reiniciar `npm run dev` o Ctrl+Shift+R |
 | La app tarda en arrancar (Docker) | MySQL inicializando | Normal. Espera ~60 s y observa `docker compose logs -f app` |
 | Sesiones se invalidan (Docker) | `APP_KEY` cambia en cada contenedor | Fija la `APP_KEY` en el `docker-compose.yml` |
+
+---
+
+## API pública y contrato HTTP
+
+ClientKosmos **no expone una API REST de uso público**. Es una **SPA monolítica con [Inertia.js v2](https://inertiajs.com)**: el frontend React no consume JSON por `fetch`/`axios`, sino que recibe props tipadas servidas directamente por los controladores Laravel. La negociación de contenido (`X-Inertia: true` ⇒ JSON con la página; petición normal ⇒ HTML inicial) la gestiona el adaptador y no constituye un contrato versionado.
+
+Por ese motivo **no se incluye OpenAPI/Swagger** del front: documentar contratos Inertia con Swagger sería redundante (las props son el contrato y están **tipadas en TypeScript** vía Wayfinder en [resources/js/actions/](resources/js/actions/) y [resources/js/routes/](resources/js/routes/), generados a partir de las rutas Laravel).
+
+### Fuentes de verdad del contrato HTTP
+
+| Capa | Dónde mirar | Qué define |
+|------|-------------|------------|
+| Rutas HTTP | [routes/web.php](routes/web.php), [routes/settings.php](routes/settings.php) | Verbo, URI, middleware, controlador. Listables con `php artisan route:list`. |
+| Tipos cliente | [resources/js/actions/](resources/js/actions/), [resources/js/routes/](resources/js/routes/) | URLs y payloads tipados por Wayfinder — refrescar con `php artisan wayfinder:generate`. |
+| Validación de payload | `app/Http/Requests/**` | Reglas por endpoint (auth, payload, ownership). |
+| Autorización | `app/Policies/**` + middleware `auth`, `verified`, `admin`, `professional` | Quién puede invocar qué. |
+| Eventos WebSocket | [routes/channels.php](routes/channels.php) | Canales privados/presence servidos por Reverb. |
+
+### Endpoints REST reales (no-Inertia)
+
+Los únicos endpoints que **sí actúan como API HTTP pura** son integraciones de terceros y broadcasting. Estos sí requieren un contrato escrito:
+
+| Método | URI | Auth | Propósito |
+|--------|-----|------|-----------|
+| `POST` | `/webhooks/stripe` | Firma Stripe (sin CSRF, sin sesión) | Recibe eventos de Checkout/PaymentIntent. Lógica en `App\Http\Controllers\Webhook\StripeWebhookAction`. |
+| `POST` | `/broadcasting/auth` | `auth` (sesión) | Handshake de canales privados Reverb (cliente `@laravel/echo-react`). |
+| `GET`/`POST` | Callback OAuth Google | Sesión + state | Devolución del consentimiento Google Calendar / Meet. |
+
+> Si en el futuro se publica una API de terceros (móvil, integraciones externas), la decisión arquitectónica deberá registrarse como **ADR** en [docs/decision-log.md](docs/decision-log.md) y entonces se incorporará Scribe u OpenAPI para generar el contrato.
 
 ---
 

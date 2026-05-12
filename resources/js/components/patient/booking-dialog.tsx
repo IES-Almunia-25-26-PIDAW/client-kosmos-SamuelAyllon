@@ -290,7 +290,7 @@ function ServiceStep({
                             w="full"
                         >
                             <Flex align="center" gap="3">
-                                <Box w="3" h="3" borderRadius="full" bg={s.color ?? 'gray.400'} flexShrink={0} />
+                                <Box w="3" h="3" borderRadius="full" bg={s.color ?? 'border'} flexShrink={0} />
                                 <Stack gap="0.5" flex="1" minW={0}>
                                     <Text fontWeight="semibold" color="fg" lineClamp={1}>{s.name}</Text>
                                     <HStack fontSize="xs" color="fg.muted" gap="2">

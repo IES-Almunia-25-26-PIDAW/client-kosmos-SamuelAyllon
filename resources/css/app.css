@@ -1,14 +1,6 @@
-@import 'tailwindcss';
-
-@import 'tw-animate-css';
-
-@source '../views';
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-
-@custom-variant dark (&:is(.dark *));
-
-@theme {
-    /* ClientKosmos typography — Inter for body & UI, Satoshi for headings, JetBrains Mono for code */
+/* ── ClientKosmos Design System — global CSS variables ── */
+:root {
+    /* Typography — Inter for body & UI, Satoshi for headings, JetBrains Mono for code */
     --font-sans:
         'Inter', system-ui, -apple-system, sans-serif,
         'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
@@ -18,7 +10,7 @@
     --font-mono:
         'JetBrains Mono', 'Courier New', monospace;
 
-    /* ClientKosmos radius tokens: sm=4px, md=8px, lg=12px, xl=20px */
+    /* Radius tokens: sm=4px, md=8px, lg=12px, xl=20px */
     --radius-lg: 0.75rem;
     --radius-md: 0.5rem;
     --radius-sm: 0.25rem;
@@ -56,71 +48,6 @@
     --easing-standard: cubic-bezier(0.4, 0.0, 0.2, 1);
     --easing-enter: cubic-bezier(0.0, 0.0, 0.2, 1);
     --easing-exit: cubic-bezier(0.4, 0.0, 1, 1);
-
-    /* Semantic color tokens */
-    --color-indigo: var(--indigo);
-    --color-indigo-subtle: var(--indigo-subtle);
-    --color-indigo-fg: var(--indigo-fg);
-
-    --color-orange: var(--orange);
-    --color-orange-subtle: var(--orange-subtle);
-    --color-orange-fg: var(--orange-fg);
-
-    --color-kosmo: var(--kosmo);
-    --color-kosmo-surface: var(--kosmo-surface);
-    --color-kosmo-border: var(--kosmo-border);
-
-    --color-background: var(--background);
-    --color-foreground: var(--foreground);
-
-    --color-card: var(--card);
-    --color-card-foreground: var(--card-foreground);
-
-    --color-popover: var(--popover);
-    --color-popover-foreground: var(--popover-foreground);
-
-    --color-primary: var(--primary);
-    --color-primary-foreground: var(--primary-foreground);
-
-    --color-secondary: var(--secondary);
-    --color-secondary-foreground: var(--secondary-foreground);
-
-    --color-muted: var(--muted);
-    --color-muted-foreground: var(--muted-foreground);
-
-    --color-accent: var(--accent);
-    --color-accent-foreground: var(--accent-foreground);
-
-    --color-destructive: var(--destructive);
-    --color-destructive-foreground: var(--destructive-foreground);
-
-    --color-border: var(--border);
-    --color-input: var(--input);
-    --color-ring: var(--ring);
-
-    --color-chart-1: var(--chart-1);
-    --color-chart-2: var(--chart-2);
-    --color-chart-3: var(--chart-3);
-    --color-chart-4: var(--chart-4);
-    --color-chart-5: var(--chart-5);
-
-    --color-sidebar: var(--sidebar);
-    --color-sidebar-foreground: var(--sidebar-foreground);
-    --color-sidebar-primary: var(--sidebar-primary);
-    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-    --color-sidebar-accent: var(--sidebar-accent);
-    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-    --color-sidebar-border: var(--sidebar-border);
-    --color-sidebar-ring: var(--sidebar-ring);
-
-    --color-warning: var(--warning);
-    --color-warning-foreground: var(--warning-foreground);
-    --color-success: var(--success);
-    --color-success-foreground: var(--success-foreground);
-    --color-info: var(--info);
-    --color-info-foreground: var(--info-foreground);
-    --color-ai-surface: var(--ai-surface);
-    --color-ai-border: var(--ai-border);
 }
 
 :root {
@@ -217,11 +144,10 @@
     --chart-5: #B83A3A;
 
     /* Sidebar */
-    --sidebar: #F5F2ED;
+    --sidebar: #007b6a63;
     --sidebar-foreground: #2C2825;
     --sidebar-primary: #1A7B6E;
     --sidebar-primary-foreground: #FFFFFF;
-    --sidebar-accent: #ECF7F5;
     --sidebar-accent-foreground: #2C2825;
     --sidebar-border: #E0DBD3;
     --sidebar-ring: #1A7B6E;
@@ -472,29 +398,39 @@
     --color-kosmo-border: #2A4A42;
 }
 
-@layer base {
-    * {
-        @apply border-border;
-    }
+/* Base styles — el reseteo de bordes/colores lo aplica Chakra v3 (chakra-system.ts globalCss) */
+* {
+    border-color: var(--border);
+}
 
-    body {
-        @apply bg-background text-foreground;
-    }
+html, body {
+    margin: 0;
+    padding: 0;
+}
 
-    /* Satoshi para títulos (Design System v1.0) */
-    h1, h2, h3 {
-        font-family: 'Satoshi', system-ui, -apple-system, sans-serif;
-    }
+body {
+    background-color: var(--background);
+    color: var(--foreground);
+}
 
-    /* Inter para botones y labels de UI */
-    button, [role="button"], label {
-        font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    }
+/* Satoshi para títulos (Design System v1.0) */
+h1, h2, h3 {
+    font-family: 'Satoshi', system-ui, -apple-system, sans-serif;
+}
 
-    /* JetBrains Mono para código */
-    code, pre, kbd, samp {
-        font-family: 'JetBrains Mono', 'Courier New', monospace;
-    }
+/* Inter para botones y labels de UI */
+button, [role="button"], label {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* JetBrains Mono para código */
+code, pre, kbd, samp {
+    font-family: 'JetBrains Mono', 'Courier New', monospace;
+}
+
+/* Chakra preflight está desactivado — resetear subrayados de enlace manualmente */
+a {
+    text-decoration: none;
 }
 
 /* ── ClientKosmos Custom Animations ── */
@@ -678,6 +614,11 @@
     }
 }
 
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+
 @keyframes shine {
     from {
         transform: translateX(-100%);
@@ -685,6 +626,24 @@
     to {
         transform: translateX(100%);
     }
+}
+
+@keyframes blob-morph-1 {
+    0%, 100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+    33%  { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
+    66%  { border-radius: 50% 40% 60% 40% / 30% 60% 40% 60%; }
+}
+
+@keyframes blob-morph-2 {
+    0%, 100% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; }
+    33%  { border-radius: 70% 30% 40% 60% / 60% 40% 60% 40%; }
+    66%  { border-radius: 30% 60% 60% 40% / 50% 40% 50% 60%; }
+}
+
+@keyframes orb-float-3 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33%  { transform: translate(-25px, -35px) scale(1.06); }
+    66%  { transform: translate(35px, -15px) scale(0.94); }
 }
 
 .animate-float {

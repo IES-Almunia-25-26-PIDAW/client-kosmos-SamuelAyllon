@@ -27,7 +27,7 @@ class ImpersonationController extends Controller
         $adminId = $request->session()->pull('impersonating_id');
         abort_if(! $adminId, 403);
 
-        auth()->login(User::findOrFail($adminId));
+        auth()->login(User::findOrFail((int) $adminId));
 
         return redirect()->route('admin.users.index')
             ->with('success', 'Impersonación finalizada.');

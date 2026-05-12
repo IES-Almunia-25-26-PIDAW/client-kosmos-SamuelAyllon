@@ -11,6 +11,8 @@ class PatientContextService
      *
      * Eager-loads: last 3 completed sessions (with notes), 5 recent notes,
      * open agreements, last invoice, and current valid (signed, non-expired) consent.
+     *
+     * @return array<string, mixed>
      */
     public function getPreSessionContext(PatientProfile $patient): array
     {

@@ -4,10 +4,11 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class LogTranscriptionAccess
 {
-    public function handle(Request $request, Closure $next, ?string $action = null)
+    public function handle(Request $request, Closure $next, ?string $action = null): Response
     {
         $response = $next($request);
 

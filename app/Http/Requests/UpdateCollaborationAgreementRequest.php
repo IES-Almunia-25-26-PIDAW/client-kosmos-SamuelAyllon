@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\CollaborationAgreement;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateCollaborationAgreementRequest extends FormRequest
@@ -11,11 +12,25 @@ class UpdateCollaborationAgreementRequest extends FormRequest
         return true;
     }
 
+    /** @return array<string, mixed> */
     public function rules(): array
     {
         return [
             'status' => ['sometimes', 'in:pending,active,ended,cancelled'],
-            'end_date' => ['sometimes', 'nullable', 'date'],
+            'end_date' => [
+                'sometimes',
+                'nullable',
+                'date',
+                function ($attribute, $value, $fail) {
+                    if ($value === null) {
+                        return;
+                    }
+                    $agreement = $this->route('collaboration_agreement');
+                    if ($agreement instanceof CollaborationAgreement && $value < $agreement->start_date) {
+                        $fail('La fecha de fin no puede ser anterior a la fecha de inicio del acuerdo.');
+                    }
+                },
+            ],
             'terms' => ['sometimes', 'nullable', 'array'],
         ];
     }

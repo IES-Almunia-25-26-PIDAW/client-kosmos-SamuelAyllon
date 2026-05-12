@@ -2,9 +2,12 @@
 
 namespace App\Models;
 
+use Database\Factories\SessionRecordingFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
@@ -12,13 +15,16 @@ use Spatie\Activitylog\Support\LogOptions;
  * @property int $appointment_id
  * @property string|null $ai_summary
  * @property string|null $transcription
- * @property \Illuminate\Support\Carbon|null $patient_consent_given_at
- * @property \Illuminate\Support\Carbon|null $summarized_at
- * @property-read \App\Models\Appointment|null $appointment
+ * @property Carbon|null $patient_consent_given_at
+ * @property Carbon|null $summarized_at
+ * @property-read Appointment|null $appointment
  */
 class SessionRecording extends Model
 {
-    use HasFactory, LogsActivity;
+    /** @use HasFactory<SessionRecordingFactory> */
+    use HasFactory;
+
+    use LogsActivity;
 
     public function getActivitylogOptions(): LogOptions
     {
@@ -45,12 +51,14 @@ class SessionRecording extends Model
         ];
     }
 
+    /** @return BelongsTo<Appointment, $this> */
     public function appointment(): BelongsTo
     {
         return $this->belongsTo(Appointment::class);
     }
 
-    public function transcriptionSegments()
+    /** @return HasMany<TranscriptionSegment, $this> */
+    public function transcriptionSegments(): HasMany
     {
         return $this->hasMany(TranscriptionSegment::class)->orderBy('started_at_ms');
     }

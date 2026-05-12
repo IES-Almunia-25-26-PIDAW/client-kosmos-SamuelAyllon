@@ -1,18 +1,27 @@
-import { Text } from '@chakra-ui/react';
-import type { ComponentProps } from 'react';
+import { chakra } from '@chakra-ui/react';
+import * as React from 'react';
 
-type Props = Omit<ComponentProps<typeof Text>, 'children'> & {
+type Props = {
     message?: string;
+    id?: string;
+    className?: string;
 };
 
-export default function InputError({ message, ...props }: Props) {
+export default function InputError({ message, id, className }: Props) {
+    const uid = React.useId();
     if (!message) {
         return null;
     }
 
     return (
-        <Text fontSize="sm" color="danger.fg" {...props}>
+        <chakra.p
+            id={id ?? uid}
+            role="alert"
+            fontSize="sm"
+            color="danger.fg"
+            className={className}
+        >
             {message}
-        </Text>
+        </chakra.p>
     );
 }

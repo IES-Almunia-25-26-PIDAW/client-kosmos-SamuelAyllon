@@ -16,25 +16,35 @@ class IndexAction extends Controller
     {
         $user = $request->user();
 
+        $mapAppointment = fn ($appointment) => [
+            'id' => $appointment->id,
+            'scheduled_at' => $appointment->starts_at,
+            'modality' => $appointment->modality,
+            'status' => $appointment->status,
+            'service_name' => $appointment->service?->name,
+            'professional' => [
+                'id' => $appointment->professional->id,
+                'name' => $appointment->professional->name,
+                'avatar_path' => $appointment->professional->avatar_path,
+            ],
+        ];
+
+        $todayAppointments = Appointment::where('patient_id', $user->id)
+            ->whereIn('status', ['pending', 'confirmed'])
+            ->whereDate('starts_at', today())
+            ->with(['professional:id,name,avatar_path', 'service:id,name'])
+            ->orderBy('starts_at')
+            ->get()
+            ->map($mapAppointment);
+
         $upcomingAppointments = Appointment::where('patient_id', $user->id)
             ->whereIn('status', ['pending', 'confirmed'])
-            ->where('starts_at', '>=', now())
+            ->where('starts_at', '>', today()->endOfDay())
             ->with(['professional:id,name,avatar_path', 'service:id,name'])
             ->orderBy('starts_at')
             ->limit(5)
             ->get()
-            ->map(fn ($appointment) => [
-                'id' => $appointment->id,
-                'scheduled_at' => $appointment->starts_at,
-                'modality' => $appointment->modality,
-                'status' => $appointment->status,
-                'service_name' => $appointment->service?->name,
-                'professional' => [
-                    'id' => $appointment->professional->id,
-                    'name' => $appointment->professional->name,
-                    'avatar_path' => $appointment->professional->avatar_path,
-                ],
-            ]);
+            ->map($mapAppointment);
 
         $recentInvoices = Invoice::where('patient_id', $user->id)
             ->whereIn('status', ['sent', 'overdue'])
@@ -47,6 +57,7 @@ class IndexAction extends Controller
             ->count();
 
         return Inertia::render('patient/dashboard', [
+            'todayAppointments' => $todayAppointments,
             'upcomingAppointments' => $upcomingAppointments,
             'recentInvoices' => $recentInvoices,
             'unreadMessages' => $unreadMessages,

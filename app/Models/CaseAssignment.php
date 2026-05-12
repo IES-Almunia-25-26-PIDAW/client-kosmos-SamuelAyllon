@@ -2,11 +2,16 @@
 
 namespace App\Models;
 
+use Database\Factories\CaseAssignmentFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 
 class CaseAssignment extends Model
 {
+    /** @use HasFactory<CaseAssignmentFactory> */
     use HasFactory;
 
     protected $table = 'case_assignments';
@@ -21,26 +26,30 @@ class CaseAssignment extends Model
         return [
             'is_primary' => 'boolean',
             'started_at' => 'date',
-            'ended_at'   => 'date',
+            'ended_at' => 'date',
         ];
     }
 
-    public function patient()
+    /** @return BelongsTo<User, $this> */
+    public function patient(): BelongsTo
     {
         return $this->belongsTo(User::class, 'patient_id');
     }
 
-    public function professional()
+    /** @return BelongsTo<User, $this> */
+    public function professional(): BelongsTo
     {
         return $this->belongsTo(User::class, 'professional_id');
     }
 
-    public function workspace()
+    /** @return BelongsTo<Workspace, $this> */
+    public function workspace(): BelongsTo
     {
         return $this->belongsTo(Workspace::class);
     }
 
-    public function patientProfile()
+    /** @return HasOneThrough<PatientProfile, User, $this> */
+    public function patientProfile(): HasOneThrough
     {
         return $this->hasOneThrough(
             PatientProfile::class,
@@ -52,12 +61,20 @@ class CaseAssignment extends Model
         );
     }
 
-    public function scopeActive($query)
+    /**
+     * @param  Builder<self>  $query
+     * @return Builder<self>
+     */
+    public function scopeActive(Builder $query): Builder
     {
         return $query->where('status', 'active');
     }
 
-    public function scopePrimary($query)
+    /**
+     * @param  Builder<self>  $query
+     * @return Builder<self>
+     */
+    public function scopePrimary(Builder $query): Builder
     {
         return $query->where('is_primary', true);
     }

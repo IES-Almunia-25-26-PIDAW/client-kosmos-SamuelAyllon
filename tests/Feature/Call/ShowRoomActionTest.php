@@ -89,13 +89,13 @@ it('cita cancelada devuelve 403', function () {
         ->assertForbidden();
 });
 
-it('cita completada devuelve 403', function () {
+it('cita completada devuelve 410', function () {
     $appointment = makeActiveAppointment(['status' => 'completed']);
     $professional = \App\Models\User::find($appointment->professional_id);
 
     $this->actingAs($professional)
         ->get(route('call.room', ['roomId' => $appointment->meeting_room_id]))
-        ->assertForbidden();
+        ->assertStatus(410);
 });
 
 it('sala inexistente devuelve 404', function () {

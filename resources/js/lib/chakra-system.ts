@@ -103,7 +103,6 @@ const config = defineConfig({
                     fg: { value: 'var(--sidebar-foreground)' },
                     primary: { value: 'var(--sidebar-primary)' },
                     primaryFg: { value: 'var(--sidebar-primary-foreground)' },
-                    accent: { value: 'var(--sidebar-accent)' },
                     accentFg: { value: 'var(--sidebar-accent-foreground)' },
                     border: { value: 'var(--sidebar-border)' },
                     ring: { value: 'var(--sidebar-ring)' },

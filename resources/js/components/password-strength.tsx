@@ -1,5 +1,6 @@
 import { Box, Flex, HStack, Stack, Text } from '@chakra-ui/react';
 import { Check, X } from 'lucide-react';
+import { useState, type ReactNode } from 'react';
 
 interface Rule {
     label: string;
@@ -30,18 +31,100 @@ const strengthConfig: { label: string; bar: Token; text: Token }[] = [
     { label: 'Muy fuerte', bar: 'success.solid', text: 'success.fg' },
 ];
 
-interface PasswordStrengthProps {
+interface PasswordStrengthPopoverProps {
     password: string;
+    children: ReactNode;
 }
 
-export default function PasswordStrength({ password }: PasswordStrengthProps) {
-    if (!password) return null;
-
+export function PasswordStrengthPopover({ password, children }: PasswordStrengthPopoverProps) {
+    const [focused, setFocused] = useState(false);
     const strength = getStrength(password);
     const config = strengthConfig[strength];
 
     return (
-        <Stack mt="2" gap="2">
+        <Box position="relative">
+            <Box
+                onFocusCapture={() => setFocused(true)}
+                onBlurCapture={() => setFocused(false)}
+            >
+                {children}
+            </Box>
+
+            {focused && (
+                <Box
+                    position="absolute"
+                    top={{ base: 'calc(100% + 8px)', lg: '50%' }}
+                    left={{ base: '0', lg: 'calc(100% + 12px)' }}
+                    transform={{ base: 'none', lg: 'translateY(-50%)' }}
+                    w={{ base: 'full', lg: '210px' }}
+                    zIndex={50}
+                    p="4"
+                    bg="bg.surface"
+                    borderWidth="1px"
+                    borderColor="border.subtle"
+                    borderRadius="xl"
+                    boxShadow="lg"
+                    pointerEvents="none"
+                >
+                    <Stack gap="3">
+                        {/* Strength bar — solo si hay texto */}
+                        {password && (
+                            <Stack gap="1.5">
+                                <Flex gap="1">
+                                    {[1, 2, 3, 4, 5].map((level) => (
+                                        <Box
+                                            key={level}
+                                            h="1.5"
+                                            flex="1"
+                                            rounded="full"
+                                            transition="all 300ms"
+                                            bg={strength >= level ? config.bar : 'bg.muted'}
+                                        />
+                                    ))}
+                                </Flex>
+                                {config.label && (
+                                    <Text fontSize="xs" fontWeight="semibold" color={config.text}>
+                                        {config.label}
+                                    </Text>
+                                )}
+                            </Stack>
+                        )}
+
+                        {/* Checklist de requisitos */}
+                        <Stack as="ul" gap="1.5" listStyleType="none">
+                            {rules.map((rule) => {
+                                const passed = password ? rule.test(password) : false;
+                                return (
+                                    <HStack
+                                        as="li"
+                                        key={rule.label}
+                                        gap="2"
+                                        fontSize="xs"
+                                        color={passed ? 'success.fg' : 'fg.muted'}
+                                        transition="color 200ms"
+                                    >
+                                        <Box flexShrink={0}>
+                                            {passed ? <Check size={12} /> : <X size={12} />}
+                                        </Box>
+                                        <span>{rule.label}</span>
+                                    </HStack>
+                                );
+                            })}
+                        </Stack>
+                    </Stack>
+                </Box>
+            )}
+        </Box>
+    );
+}
+
+export default function PasswordStrength({ password }: { password: string }) {
+    if (!password) return null;
+    const strength = getStrength(password);
+    const config = strengthConfig[strength];
+
+    return (
+        <Stack mt="1" gap="1.5">
             <Flex gap="1">
                 {[1, 2, 3, 4, 5].map((level) => (
                     <Box
@@ -54,34 +137,11 @@ export default function PasswordStrength({ password }: PasswordStrengthProps) {
                     />
                 ))}
             </Flex>
-
             {config.label && (
                 <Text fontSize="xs" fontWeight="medium" color={config.text}>
                     {config.label}
                 </Text>
             )}
-
-            <Stack as="ul" gap="1" listStyleType="none">
-                {rules.map((rule) => {
-                    const passed = rule.test(password);
-                    return (
-                        <HStack
-                            as="li"
-                            key={rule.label}
-                            gap="1.5"
-                            fontSize="xs"
-                            color={passed ? 'success.fg' : 'fg.muted'}
-                        >
-                            {passed ? (
-                                <Check size={12} style={{ flexShrink: 0 }} />
-                            ) : (
-                                <X size={12} style={{ flexShrink: 0 }} />
-                            )}
-                            <span>{rule.label}</span>
-                        </HStack>
-                    );
-                })}
-            </Stack>
         </Stack>
     );
 }

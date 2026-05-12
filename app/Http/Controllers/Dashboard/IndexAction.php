@@ -7,6 +7,7 @@ use App\Models\Appointment;
 use App\Models\Invoice;
 use App\Models\KosmoBriefing;
 use App\Models\PatientProfile;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -24,7 +25,7 @@ class IndexAction extends Controller
         return $this->professionalDashboard($user);
     }
 
-    private function professionalDashboard($user): Response
+    private function professionalDashboard(User $user): Response
     {
         $activePatientProfiles = PatientProfile::withoutGlobalScopes()
             ->where('professional_id', $user->id)
@@ -37,7 +38,7 @@ class IndexAction extends Controller
         $todaySessions = $user->professionalAppointments()
             ->with(['patient:id,name,avatar_path', 'service:id,name'])
             ->whereDate('starts_at', today())
-            ->whereNotIn('status', ['cancelled'])
+            ->whereNotIn('status', ['cancelled', 'completed'])
             ->orderBy('starts_at')
             ->get()
             ->map(function (Appointment $appointment) use ($user, $patientProfileMap) {
@@ -62,9 +63,9 @@ class IndexAction extends Controller
                     'session_number' => $sessionNumber,
                     'total_sessions' => max($totalSessions, $sessionNumber),
                     'patient' => [
-                        'id' => $patientProfile?->id ?? $appointment->patient_id,
+                        'id' => $patientProfile->id ?? $appointment->patient_id,
                         'patient_user_id' => $appointment->patient_id,
-                        'name' => $appointment->patient?->name ?? 'Paciente',
+                        'name' => $appointment->patient->name ?? 'Paciente',
                         'avatar_path' => $appointment->patient?->avatar_path,
                     ],
                     'service_name' => $appointment->service?->name,
@@ -142,28 +143,38 @@ class IndexAction extends Controller
         ]);
     }
 
-    private function patientDashboard($user): Response
+    private function patientDashboard(User $user): Response
     {
+        $mapAppointment = fn ($appointment) => [
+            'id' => $appointment->id,
+            'scheduled_at' => $appointment->starts_at,
+            'modality' => $appointment->modality ?? 'presencial',
+            'status' => $appointment->status,
+            'professional' => [
+                'id' => $appointment->professional_id,
+                'name' => $appointment->professional->name ?? 'Profesional',
+                'specialty' => $appointment->professional?->specialty,
+                'avatar_path' => $appointment->professional?->avatar_path,
+            ],
+            'service_name' => $appointment->service?->name,
+        ];
+
+        $todayAppointments = $user->appointments()
+            ->with(['professional:id,name,avatar_path,specialty', 'service:id,name'])
+            ->whereDate('starts_at', today())
+            ->whereNotIn('status', ['cancelled', 'completed'])
+            ->orderBy('starts_at')
+            ->get()
+            ->map($mapAppointment);
+
         $upcomingAppointments = $user->appointments()
             ->with(['professional:id,name,avatar_path,specialty', 'service:id,name'])
-            ->where('starts_at', '>=', now())
-            ->whereNotIn('status', ['cancelled'])
+            ->whereNotIn('status', ['cancelled', 'completed'])
+            ->where('starts_at', '>', today()->endOfDay())
             ->orderBy('starts_at')
             ->take(5)
             ->get()
-            ->map(fn ($appointment) => [
-                'id' => $appointment->id,
-                'scheduled_at' => $appointment->starts_at,
-                'modality' => $appointment->modality ?? 'presencial',
-                'status' => $appointment->status,
-                'professional' => [
-                    'id' => $appointment->professional_id,
-                    'name' => $appointment->professional->name ?? 'Profesional',
-                    'specialty' => $appointment->professional?->specialty,
-                    'avatar_path' => $appointment->professional?->avatar_path,
-                ],
-                'service_name' => $appointment->service?->name,
-            ]);
+            ->map($mapAppointment);
 
         $recentInvoices = $user->invoices()
             ->orderByDesc('created_at')
@@ -179,8 +190,8 @@ class IndexAction extends Controller
 
         $stats = [
             'upcoming_appointments' => $user->appointments()
-                ->where('starts_at', '>=', now())
-                ->whereNotIn('status', ['cancelled'])
+                ->whereDate('starts_at', today())
+                ->whereNotIn('status', ['cancelled', 'completed'])
                 ->count(),
             'completed_sessions' => $user->appointments()
                 ->where('status', 'completed')
@@ -191,6 +202,7 @@ class IndexAction extends Controller
         ];
 
         return Inertia::render('patient/dashboard', [
+            'todayAppointments' => $todayAppointments,
             'upcomingAppointments' => $upcomingAppointments,
             'recentInvoices' => $recentInvoices,
             'stats' => $stats,

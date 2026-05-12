@@ -2,16 +2,15 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
 /**
- * @property \Illuminate\Support\Carbon|null $specific_date
+ * @property Carbon|null $specific_date
  */
 class Availability extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
         'professional_id', 'workspace_id', 'specific_date', 'day_of_week',
         'start_time', 'end_time', 'slot_duration_minutes', 'is_active',
@@ -27,12 +26,14 @@ class Availability extends Model
         ];
     }
 
-    public function professional()
+    /** @return BelongsTo<User, $this> */
+    public function professional(): BelongsTo
     {
         return $this->belongsTo(User::class, 'professional_id');
     }
 
-    public function workspace()
+    /** @return BelongsTo<Workspace, $this> */
+    public function workspace(): BelongsTo
     {
         return $this->belongsTo(Workspace::class);
     }

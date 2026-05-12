@@ -11,7 +11,7 @@ class StoreAction extends Controller
 {
     public function __invoke(StoreAppointmentRequest $request, CreateAppointment $createAppointment): RedirectResponse
     {
-        $createAppointment($request->user(), $request->validated());
+        $createAppointment($request->user(), $request->appointmentData());
 
         return redirect()->route('patient.appointments.book-success');
     }

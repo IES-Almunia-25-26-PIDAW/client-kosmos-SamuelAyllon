@@ -1,6 +1,6 @@
 import { Box, Flex, Grid, Heading, Separator, Stack, Table, Text, Textarea } from '@chakra-ui/react';
 import { Head, router, useForm } from '@inertiajs/react';
-import { CalendarClock, CheckCircle, FileText, Pencil, Receipt, Shield, Sparkles, Trash2, User } from 'lucide-react';
+import { CalendarClock, CheckCircle, Download, FileText, Pencil, Receipt, Shield, Sparkles, Trash2, User } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useState } from 'react';
 import AgreementDestroyAction from '@/actions/App/Http/Controllers/Agreement/DestroyAction';
@@ -39,57 +39,62 @@ const formatDateTime = (d: string) =>
 const formatCurrency = (amount: number | string) =>
     `€${Number(amount).toLocaleString('es-ES', { minimumFractionDigits: 2 })}`;
 
-interface SectionHeaderProps {
-    icon: React.ElementType;
+interface SectionPanelProps {
     title: string;
-    action?: ReactNode;
+    children: ReactNode;
+    onAdd?: () => void;
 }
 
-const SectionHeader = ({ icon: Icon, title, action }: SectionHeaderProps) => (
-    <Flex alignItems="center" justifyContent="space-between" gap="3">
-        <Flex alignItems="center" gap="2">
-            <Flex
-                w="7"
-                h="7"
-                borderRadius="md"
-                bg="brand.subtle"
-                color="brand.fg"
-                alignItems="center"
-                justifyContent="center"
-            >
-                <Box as={Icon} w="4" h="4" />
+const SectionPanel = ({ title, children, onAdd }: SectionPanelProps) => (
+    <Box borderRadius="xl" overflow="hidden" borderWidth="1px" borderColor="border.subtle" boxShadow="sm">
+        <Box bg="brand.solid" px="5" py="3.5">
+            <Flex justifyContent="space-between" alignItems="center">
+                <Text fontFamily="heading" fontSize="xl" fontWeight="bold" color="white" letterSpacing="-0.01em">
+                    {title}
+                </Text>
+                {onAdd && (
+                    <Box
+                        as="button"
+                        w="7"
+                        h="7"
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="center"
+                        borderRadius="md"
+                        color="white"
+                        fontSize="xl"
+                        fontWeight="bold"
+                        transition="background-color 150ms"
+                        _hover={{ bg: 'rgba(255,255,255,0.15)' }}
+                        onClick={onAdd}
+                        aria-label={`Añadir ${title}`}
+                    >
+                        +
+                    </Box>
+                )}
             </Flex>
-            <Heading
-                as="h3"
-                fontSize="lg"
-                fontWeight="semibold"
-                fontFamily="heading"
-                color="fg"
-                letterSpacing="-0.01em"
-            >
-                {title}
-            </Heading>
-        </Flex>
-        {action}
-    </Flex>
+        </Box>
+        <Box borderRightWidth="3px" borderRightColor="brand.solid">
+            {children}
+        </Box>
+    </Box>
 );
 
-interface SectionCardProps {
-    children: ReactNode;
-    p?: string | number;
-}
-
-const SectionCard = ({ children, p = '5' }: SectionCardProps) => (
+const AgreementStatusBadge = ({ isCompleted }: { isCompleted: boolean }) => (
     <Box
-        borderRadius="xl"
-        borderWidth="1px"
-        borderColor="border.subtle"
-        bg="bg.surface"
-        p={p}
-        boxShadow="sm"
-        transition="box-shadow 200ms, border-color 200ms"
+        as="span"
+        display="inline-block"
+        fontSize="9px"
+        fontWeight="semibold"
+        letterSpacing="wide"
+        textTransform="uppercase"
+        px="2"
+        py="0.5"
+        borderRadius="sm"
+        bg={isCompleted ? 'success.subtle' : 'warning.subtle'}
+        color={isCompleted ? 'success.fg' : 'warning.fg'}
     >
-        {children}
+        {isCompleted ? 'Completado' : 'En progreso'}
     </Box>
 );
 
@@ -110,7 +115,7 @@ export default function PatientShow({ patient }: Props) {
         { key: 'resumen', label: 'Resumen', icon: User },
         { key: 'acuerdos', label: 'Acuerdos', icon: CheckCircle, count: patient.agreements.length },
         { key: 'notas', label: 'Notas', icon: FileText, count: patient.notes.length },
-        { key: 'documentos', label: 'Documentos', icon: Shield, count: patient.documents.length },
+        { key: 'documentos', label: 'Recursos', icon: Shield, count: patient.documents.length },
         { key: 'cobros', label: 'Cobros', icon: Receipt, count: patient.payments.length },
     ];
 
@@ -148,11 +153,19 @@ export default function PatientShow({ patient }: Props) {
         router.delete(DocumentDestroyAction.url({ patient: patient.id, document: documentId }));
     };
 
-    const upcomingSession = patient.sessions[0];
-    const recentSessions = patient.sessions.slice(0, 3);
     const totalPaid = patient.payments
         .filter((p) => p.status === 'paid')
         .reduce((acc, p) => acc + Number(p.amount), 0);
+
+    const totalPending = patient.payments
+        .filter((p) => p.status === 'pending')
+        .reduce((acc, p) => acc + Number(p.amount), 0);
+
+    const paidCount = patient.payments.filter((p) => p.status === 'paid').length;
+
+    const aiSummary = patient.sessions.find((s) => s.ai_summary)?.ai_summary;
+
+    const upcomingSession = patient.sessions[0];
 
     return (
         <>
@@ -161,6 +174,7 @@ export default function PatientShow({ patient }: Props) {
             <Flex direction="column" minH="100vh" bg="bg">
                 <PatientHeader patient={patient} />
 
+                {/* Tab nav */}
                 <Box
                     borderBottomWidth="1px"
                     borderColor="border.subtle"
@@ -171,7 +185,7 @@ export default function PatientShow({ patient }: Props) {
                     zIndex="sticky"
                     backdropFilter="saturate(180%) blur(8px)"
                 >
-                    <Flex gap="1" overflowX="auto" role="tablist" aria-label="Secciones del paciente">
+                    <Flex gap="0" overflowX="auto" role="tablist" aria-label="Secciones del paciente">
                         {tabs.map((tab) => {
                             const isActive = activeTab === tab.key;
                             return (
@@ -183,16 +197,18 @@ export default function PatientShow({ patient }: Props) {
                                     onClick={() => setActiveTab(tab.key)}
                                     alignItems="center"
                                     gap="2"
-                                    px="4"
-                                    py="3"
-                                    fontSize="sm"
-                                    fontWeight="medium"
+                                    px="5"
+                                    py="3.5"
+                                    fontSize="xs"
+                                    fontWeight="semibold"
+                                    letterSpacing="wider"
+                                    textTransform="uppercase"
                                     whiteSpace="nowrap"
                                     borderBottomWidth="2px"
                                     borderColor={isActive ? 'brand.solid' : 'transparent'}
                                     color={isActive ? 'brand.solid' : 'fg.muted'}
-                                    transition="color 200ms, border-color 200ms, background-color 200ms"
-                                    _hover={{ color: isActive ? 'brand.solid' : 'fg', bg: isActive ? undefined : 'bg.subtle' }}
+                                    transition="color 200ms, border-color 200ms"
+                                    _hover={{ color: isActive ? 'brand.solid' : 'fg' }}
                                     _focusVisible={{
                                         outline: '2px solid',
                                         outlineColor: 'brand.solid',
@@ -200,12 +216,10 @@ export default function PatientShow({ patient }: Props) {
                                         borderRadius: 'sm',
                                     }}
                                 >
-                                    <Box as={tab.icon} w="4" h="4" />
                                     {tab.label}
                                     {typeof tab.count === 'number' && tab.count > 0 && (
                                         <Box
                                             as="span"
-                                            ml="0.5"
                                             px="1.5"
                                             minW="5"
                                             h="5"
@@ -229,21 +243,254 @@ export default function PatientShow({ patient }: Props) {
 
                 <Box
                     p={{ base: '5', lg: '8' }}
-                    maxW="5xl"
+                    maxW="7xl"
                     mx="auto"
                     w="full"
                     role="tabpanel"
                 >
+                    {/* ── RESUMEN ─────────────────────────────────── */}
                     {activeTab === 'resumen' && (
-                        <Grid templateColumns={{ base: '1fr', lg: 'minmax(0, 1fr) minmax(0, 1fr)' }} gap="6">
+                        <Grid
+                            templateColumns={{ base: '1fr', xl: '1fr 320px' }}
+                            gap="8"
+                            alignItems="flex-start"
+                        >
+                            {/* Left: clinical summary + agreements & resources */}
                             <Stack gap="6">
-                                <SectionCard>
+                                {/* AI clinical summary */}
+                                {aiSummary && (
+                                    <Box
+                                        bg="brand.subtle"
+                                        borderLeftWidth="4px"
+                                        borderLeftColor="brand.solid"
+                                        borderRightRadius="xl"
+                                        px="6"
+                                        py="5"
+                                        position="relative"
+                                        overflow="hidden"
+                                    >
+                                        <Flex gap="2" alignItems="center" mb="3">
+                                            <Box as={Sparkles} w="4" h="4" color="brand.solid" />
+                                            <Text
+                                                fontSize="xs"
+                                                fontWeight="semibold"
+                                                color="brand.solid"
+                                                textTransform="uppercase"
+                                                letterSpacing="wider"
+                                            >
+                                                Resumen clínico
+                                            </Text>
+                                        </Flex>
+                                        <Text fontSize="md" fontStyle="italic" color="fg.muted" lineHeight="tall">
+                                            "{aiSummary}"
+                                        </Text>
+                                    </Box>
+                                )}
+
+                                {/* Agreements + Resources two-column panels */}
+                                <Grid templateColumns={{ base: '1fr', md: '1fr 1fr' }} gap="5" alignItems="flex-start">
+                                    {/* Agreements panel */}
+                                    <SectionPanel title="Acuerdos Terapéuticos">
+                                        {patient.agreements.length === 0 ? (
+                                            <Box p="5">
+                                                <Text fontSize="sm" color="fg.subtle">
+                                                    Aún no hay acuerdos registrados.
+                                                </Text>
+                                            </Box>
+                                        ) : (
+                                            <Stack gap="0">
+                                                {patient.agreements.map((agreement, idx) => (
+                                                    <Box
+                                                        key={agreement.id}
+                                                        p="4"
+                                                        borderTopWidth={idx > 0 ? '1px' : undefined}
+                                                        borderColor="border.subtle"
+                                                        bg="bg.surface"
+                                                        transition="background-color 150ms"
+                                                        _hover={{ bg: 'bg.subtle' }}
+                                                    >
+                                                        <Flex justifyContent="space-between" alignItems="flex-start" mb="1.5">
+                                                            <Text
+                                                                fontSize="10px"
+                                                                fontWeight="semibold"
+                                                                color="fg.subtle"
+                                                                textTransform="uppercase"
+                                                                letterSpacing="wide"
+                                                            >
+                                                                {formatDate(agreement.created_at)}
+                                                            </Text>
+                                                            <AgreementStatusBadge isCompleted={agreement.is_completed} />
+                                                        </Flex>
+                                                        <Text
+                                                            fontSize="sm"
+                                                            fontWeight="semibold"
+                                                            color={agreement.is_completed ? 'brand.solid' : 'fg'}
+                                                            lineHeight="short"
+                                                            textDecoration={agreement.is_completed ? 'line-through' : undefined}
+                                                        >
+                                                            {agreement.content}
+                                                        </Text>
+                                                    </Box>
+                                                ))}
+                                            </Stack>
+                                        )}
+                                    </SectionPanel>
+
+                                    {/* Resources panel */}
+                                    <SectionPanel title="Recursos">
+                                        {patient.documents.length === 0 ? (
+                                            <Box p="5">
+                                                <Text fontSize="sm" color="fg.subtle">
+                                                    Sin documentos archivados.
+                                                </Text>
+                                            </Box>
+                                        ) : (
+                                            <Stack gap="0">
+                                                {patient.documents.map((doc, idx) => (
+                                                    <Flex
+                                                        key={doc.id}
+                                                        alignItems="center"
+                                                        gap="3"
+                                                        px="4"
+                                                        py="3.5"
+                                                        borderTopWidth={idx > 0 ? '1px' : undefined}
+                                                        borderColor="border.subtle"
+                                                        bg="bg.surface"
+                                                        transition="background-color 150ms"
+                                                        _hover={{ bg: 'bg.subtle' }}
+                                                    >
+                                                        <Flex
+                                                            w="8"
+                                                            h="8"
+                                                            borderRadius="md"
+                                                            bg="bg.subtle"
+                                                            alignItems="center"
+                                                            justifyContent="center"
+                                                            flexShrink={0}
+                                                        >
+                                                            <Box as={FileText} w="4" h="4" color="fg.muted" />
+                                                        </Flex>
+                                                        <Box flex="1" minW="0">
+                                                            <Text fontSize="sm" fontWeight="medium" color="fg" overflow="hidden" textOverflow="ellipsis" whiteSpace="nowrap">
+                                                                {doc.name}
+                                                            </Text>
+                                                            <Text fontSize="xs" color="fg.subtle" mt="0.5">
+                                                                {formatDate(doc.created_at)}
+                                                            </Text>
+                                                        </Box>
+                                                        <Box as={Download} w="4" h="4" color="fg.subtle" flexShrink={0} />
+                                                    </Flex>
+                                                ))}
+                                            </Stack>
+                                        )}
+                                    </SectionPanel>
+                                </Grid>
+                            </Stack>
+
+                            {/* Right sidebar */}
+                            <Stack gap="5">
+                                {/* Billing summary */}
+                                <Box bg="brand.solid" borderRadius="3xl" p="7">
+                                    <Flex justifyContent="space-between" alignItems="flex-start" mb="5">
+                                        <Heading fontFamily="heading" fontSize="lg" fontWeight="bold" color="white">
+                                            Resumen de cobros
+                                        </Heading>
+                                        <Box as={Receipt} w="5" h="5" color="white" opacity={0.6} flexShrink={0} />
+                                    </Flex>
+                                    <Text
+                                        fontSize="xs"
+                                        fontWeight="semibold"
+                                        color="white"
+                                        opacity={0.7}
+                                        textTransform="uppercase"
+                                        letterSpacing="wider"
+                                        mb="1"
+                                    >
+                                        Total cobrado
+                                    </Text>
+                                    <Text
+                                        fontSize="4xl"
+                                        fontWeight="bold"
+                                        color="white"
+                                        letterSpacing="-0.04em"
+                                        lineHeight="1"
+                                        mb="6"
+                                        fontVariantNumeric="tabular-nums"
+                                    >
+                                        {formatCurrency(totalPaid)}
+                                    </Text>
+                                    <Stack gap="0" mb="6">
+                                        <Flex
+                                            justifyContent="space-between"
+                                            alignItems="center"
+                                            py="2.5"
+                                            borderBottomWidth="1px"
+                                            borderColor="rgba(255,255,255,0.12)"
+                                        >
+                                            <Text fontSize="sm" color="white" opacity={0.8}>
+                                                Pagos completados
+                                            </Text>
+                                            <Text fontSize="sm" fontWeight="semibold" color="white">
+                                                {paidCount}
+                                            </Text>
+                                        </Flex>
+                                        <Flex
+                                            justifyContent="space-between"
+                                            alignItems="center"
+                                            py="2.5"
+                                            borderBottomWidth="1px"
+                                            borderColor="rgba(255,255,255,0.12)"
+                                        >
+                                            <Text fontSize="sm" color="white" opacity={0.8}>
+                                                Pendiente
+                                            </Text>
+                                            <Text fontSize="sm" fontWeight="semibold" color="white" fontVariantNumeric="tabular-nums">
+                                                {formatCurrency(totalPending)}
+                                            </Text>
+                                        </Flex>
+                                    </Stack>
+                                    <Box
+                                        as="button"
+                                        w="full"
+                                        bg="white"
+                                        borderRadius="xl"
+                                        py="3.5"
+                                        textAlign="center"
+                                        boxShadow="md"
+                                        transition="opacity 150ms"
+                                        _hover={{ opacity: 0.9 }}
+                                        onClick={() => setActiveTab('cobros')}
+                                    >
+                                        <Text fontSize="xs" fontWeight="semibold" color="brand.solid" textTransform="uppercase" letterSpacing="wider">
+                                            Ver todos los cobros
+                                        </Text>
+                                    </Box>
+                                </Box>
+
+                                {/* Patient data */}
+                                <Box bg="bg.surface" borderRadius="3xl" borderWidth="1px" borderColor="border.subtle" p="6" boxShadow="sm">
                                     <Stack gap="4">
-                                        <SectionHeader icon={User} title="Datos del paciente" />
-                                        <Stack as="dl" gap="3.5">
+                                        <Flex alignItems="center" gap="2" mb="1">
+                                            <Flex
+                                                w="7"
+                                                h="7"
+                                                borderRadius="md"
+                                                bg="brand.subtle"
+                                                color="brand.fg"
+                                                alignItems="center"
+                                                justifyContent="center"
+                                                flexShrink={0}
+                                            >
+                                                <Box as={User} w="4" h="4" />
+                                            </Flex>
+                                            <Heading fontSize="md" fontWeight="semibold" fontFamily="heading" color="fg">
+                                                Datos del paciente
+                                            </Heading>
+                                        </Flex>
+                                        <Stack as="dl" gap="3">
                                             {(patient.consultation_reason ?? patient.service_scope) && (
                                                 <Box>
-                                                    <Text as="dt" fontSize="xs" color="fg.muted" textTransform="uppercase" letterSpacing="wider" fontWeight="medium">
+                                                    <Text as="dt" fontSize="10px" color="fg.subtle" textTransform="uppercase" letterSpacing="wider" fontWeight="semibold">
                                                         Motivo de consulta
                                                     </Text>
                                                     <Text as="dd" fontSize="sm" color="fg" mt="1" lineHeight="short">
@@ -253,7 +500,7 @@ export default function PatientShow({ patient }: Props) {
                                             )}
                                             {(patient.therapeutic_approach ?? patient.brand_tone) && (
                                                 <Box>
-                                                    <Text as="dt" fontSize="xs" color="fg.muted" textTransform="uppercase" letterSpacing="wider" fontWeight="medium">
+                                                    <Text as="dt" fontSize="10px" color="fg.subtle" textTransform="uppercase" letterSpacing="wider" fontWeight="semibold">
                                                         Enfoque terapéutico
                                                     </Text>
                                                     <Text as="dd" fontSize="sm" color="fg" mt="1" lineHeight="short">
@@ -261,112 +508,48 @@ export default function PatientShow({ patient }: Props) {
                                                     </Text>
                                                 </Box>
                                             )}
+                                            {upcomingSession && (
+                                                <Box>
+                                                    <Text as="dt" fontSize="10px" color="fg.subtle" textTransform="uppercase" letterSpacing="wider" fontWeight="semibold">
+                                                        Próxima sesión
+                                                    </Text>
+                                                    <Flex alignItems="center" gap="2" mt="1">
+                                                        <Box as={CalendarClock} w="4" h="4" color="brand.solid" />
+                                                        <Text as="dd" fontSize="sm" color="fg" fontWeight="medium">
+                                                            {formatDateTime(upcomingSession.scheduled_at)}
+                                                        </Text>
+                                                    </Flex>
+                                                </Box>
+                                            )}
                                             {patient.last_session_at && (
                                                 <Box>
-                                                    <Text as="dt" fontSize="xs" color="fg.muted" textTransform="uppercase" letterSpacing="wider" fontWeight="medium">
+                                                    <Text as="dt" fontSize="10px" color="fg.subtle" textTransform="uppercase" letterSpacing="wider" fontWeight="semibold">
                                                         Última sesión
                                                     </Text>
-                                                    <Text as="dd" fontSize="sm" color="fg" mt="1" lineHeight="short">
+                                                    <Text as="dd" fontSize="sm" color="fg" mt="1">
                                                         {formatDate(patient.last_session_at)}
                                                     </Text>
                                                 </Box>
                                             )}
                                         </Stack>
                                     </Stack>
-                                </SectionCard>
-
-                            </Stack>
-
-                            <Stack gap="6">
-                                {upcomingSession && (
-                                    <SectionCard>
-                                        <Stack gap="3">
-                                            <SectionHeader icon={CalendarClock} title="Próxima sesión" />
-                                            <Flex alignItems="baseline" gap="3" flexWrap="wrap">
-                                                <Text fontSize="xl" fontWeight="semibold" color="fg" fontFamily="heading">
-                                                    {formatDateTime(upcomingSession.scheduled_at)}
-                                                </Text>
-                                                <Text
-                                                    fontSize="xs"
-                                                    px="2"
-                                                    py="0.5"
-                                                    borderRadius="full"
-                                                    bg="bg.subtle"
-                                                    color="fg.muted"
-                                                    fontWeight="medium"
-                                                >
-                                                    {upcomingSession.duration_minutes ?? 50} min
-                                                </Text>
-                                            </Flex>
-                                        </Stack>
-                                    </SectionCard>
-                                )}
-
-                                {recentSessions.length > 0 ? (
-                                    <SectionCard p="0">
-                                        <Box px="5" pt="5" pb="3">
-                                            <SectionHeader icon={FileText} title="Últimas sesiones" />
-                                        </Box>
-                                        <Stack gap="0">
-                                            {recentSessions.map((session) => (
-                                                <Box
-                                                    key={session.id}
-                                                    px="5"
-                                                    py="4"
-                                                    borderTopWidth="1px"
-                                                    borderColor="border.subtle"
-                                                >
-                                                    <Flex alignItems="center" justifyContent="space-between" gap="3">
-                                                        <Text fontSize="sm" fontWeight="semibold" color="fg">
-                                                            {formatDateTime(session.scheduled_at)}
-                                                        </Text>
-                                                        <Text
-                                                            fontSize="xs"
-                                                            px="2"
-                                                            py="0.5"
-                                                            borderRadius="full"
-                                                            bg="bg.subtle"
-                                                            color="fg.muted"
-                                                            fontWeight="medium"
-                                                            flexShrink={0}
-                                                        >
-                                                            {session.duration_minutes ?? 50} min
-                                                        </Text>
-                                                    </Flex>
-                                                    {session.ai_summary && (
-                                                        <Flex
-                                                            alignItems="flex-start"
-                                                            gap="2"
-                                                            mt="2.5"
-                                                            p="2.5"
-                                                            borderRadius="md"
-                                                            bg="kosmo.subtle"
-                                                        >
-                                                            <Box as={Sparkles} w="4" h="4" mt="0.5" color="kosmo.solid" flexShrink={0} />
-                                                            <Text fontSize="sm" color="fg.muted" lineClamp={2} lineHeight="short">
-                                                                {session.ai_summary}
-                                                            </Text>
-                                                        </Flex>
-                                                    )}
-                                                </Box>
-                                            ))}
-                                        </Stack>
-                                    </SectionCard>
-                                ) : (
-                                    <SectionCard>
-                                        <SectionHeader icon={FileText} title="Últimas sesiones" />
-                                        <Text fontSize="sm" color="fg.muted" mt="3">
-                                            Las sesiones aparecerán aquí conforme las vayas completando.
-                                        </Text>
-                                    </SectionCard>
-                                )}
+                                </Box>
                             </Stack>
                         </Grid>
                     )}
 
+                    {/* ── ACUERDOS ────────────────────────────────── */}
                     {activeTab === 'acuerdos' && (
-                        <Stack gap="5">
-                            <SectionHeader icon={CheckCircle} title="Acuerdos terapéuticos" />
+                        <Stack gap="5" maxW="3xl">
+                            <Flex alignItems="center" gap="2">
+                                <Flex w="7" h="7" borderRadius="md" bg="brand.subtle" color="brand.fg" alignItems="center" justifyContent="center">
+                                    <Box as={CheckCircle} w="4" h="4" />
+                                </Flex>
+                                <Heading fontSize="lg" fontWeight="semibold" fontFamily="heading" color="fg">
+                                    Acuerdos terapéuticos
+                                </Heading>
+                            </Flex>
+
                             {patient.agreements.length === 0 ? (
                                 <EmptyState
                                     icon={CheckCircle}
@@ -374,100 +557,126 @@ export default function PatientShow({ patient }: Props) {
                                     description="Los acuerdos terapéuticos aparecerán aquí."
                                 />
                             ) : (
-                                <SectionCard p="0">
-                                    {patient.agreements.map((agreement, idx) => (
-                                        <Flex
-                                            key={agreement.id}
-                                            alignItems="flex-start"
-                                            gap="3"
-                                            p="4"
-                                            borderTopWidth={idx > 0 ? '1px' : undefined}
-                                            borderColor="border.subtle"
-                                            transition="background-color 150ms"
-                                            _hover={{ bg: 'bg.subtle' }}
-                                        >
-                                            <Box mt="0.5">
-                                                <Checkbox
-                                                    checked={agreement.is_completed}
-                                                    onCheckedChange={() =>
-                                                        router.patch(AgreementUpdateAction.url({ patient: patient.id, agreement: agreement.id }), {
-                                                            is_completed: !agreement.is_completed,
-                                                        })
-                                                    }
-                                                />
-                                            </Box>
-                                            <Box flex="1" minW="0">
-                                                {editingAgreementId === agreement.id ? (
-                                                    <Stack gap="2">
-                                                        <Textarea
-                                                            value={editingAgreementContent}
-                                                            onChange={(e) => setEditingAgreementContent(e.target.value)}
-                                                            autoFocus
-                                                            minH="80px"
-                                                            fontSize="sm"
-                                                            resize="vertical"
-                                                        />
-                                                        <Flex gap="2">
-                                                            <Button size="sm" variant="primary" onClick={() => saveAgreement(agreement.id)} disabled={!editingAgreementContent.trim()}>
-                                                                Guardar
-                                                            </Button>
-                                                            <Button size="sm" variant="secondary" onClick={() => setEditingAgreementId(null)}>
-                                                                Cancelar
-                                                            </Button>
-                                                        </Flex>
-                                                    </Stack>
-                                                ) : (
-                                                    <>
-                                                        <Text
-                                                            fontSize="sm"
-                                                            color={agreement.is_completed ? 'fg.subtle' : 'fg'}
-                                                            textDecoration={agreement.is_completed ? 'line-through' : undefined}
-                                                            lineHeight="short"
+                                <Box borderRadius="xl" overflow="hidden" borderWidth="1px" borderColor="border.subtle" boxShadow="sm">
+                                    <Box bg="brand.solid" px="5" py="3.5">
+                                        <Text fontFamily="heading" fontSize="xl" fontWeight="bold" color="white">
+                                            Acuerdos Terapéuticos
+                                        </Text>
+                                    </Box>
+                                    <Box borderRightWidth="3px" borderRightColor="brand.solid">
+                                        {patient.agreements.map((agreement, idx) => (
+                                            <Flex
+                                                key={agreement.id}
+                                                alignItems="flex-start"
+                                                gap="3"
+                                                p="4"
+                                                borderTopWidth={idx > 0 ? '1px' : undefined}
+                                                borderColor="border.subtle"
+                                                bg="bg.surface"
+                                                transition="background-color 150ms"
+                                                _hover={{ bg: 'bg.subtle' }}
+                                            >
+                                                <Box mt="0.5">
+                                                    <Checkbox
+                                                        checked={agreement.is_completed}
+                                                        onCheckedChange={() =>
+                                                            router.patch(AgreementUpdateAction.url({ patient: patient.id, agreement: agreement.id }), {
+                                                                is_completed: !agreement.is_completed,
+                                                            })
+                                                        }
+                                                    />
+                                                </Box>
+                                                <Box flex="1" minW="0">
+                                                    {editingAgreementId === agreement.id ? (
+                                                        <Stack gap="2">
+                                                            <Textarea
+                                                                value={editingAgreementContent}
+                                                                onChange={(e) => setEditingAgreementContent(e.target.value)}
+                                                                autoFocus
+                                                                minH="80px"
+                                                                fontSize="sm"
+                                                                resize="vertical"
+                                                            />
+                                                            <Flex gap="2">
+                                                                <Button size="sm" variant="primary" onClick={() => saveAgreement(agreement.id)} disabled={!editingAgreementContent.trim()}>
+                                                                    Guardar
+                                                                </Button>
+                                                                <Button size="sm" variant="secondary" onClick={() => setEditingAgreementId(null)}>
+                                                                    Cancelar
+                                                                </Button>
+                                                            </Flex>
+                                                        </Stack>
+                                                    ) : (
+                                                        <>
+                                                            <Flex justifyContent="space-between" alignItems="flex-start" mb="1.5">
+                                                                <Text
+                                                                    fontSize="10px"
+                                                                    fontWeight="semibold"
+                                                                    color="fg.subtle"
+                                                                    textTransform="uppercase"
+                                                                    letterSpacing="wide"
+                                                                >
+                                                                    {formatDate(agreement.created_at)}
+                                                                </Text>
+                                                                <AgreementStatusBadge isCompleted={agreement.is_completed} />
+                                                            </Flex>
+                                                            <Text
+                                                                fontSize="sm"
+                                                                fontWeight="semibold"
+                                                                color={agreement.is_completed ? 'brand.solid' : 'fg'}
+                                                                textDecoration={agreement.is_completed ? 'line-through' : undefined}
+                                                                lineHeight="short"
+                                                            >
+                                                                {agreement.content}
+                                                            </Text>
+                                                        </>
+                                                    )}
+                                                </Box>
+                                                {editingAgreementId !== agreement.id && (
+                                                    <Flex gap="1" flexShrink={0} mt="0.5">
+                                                        <Box
+                                                            as="button"
+                                                            p="1.5"
+                                                            borderRadius="md"
+                                                            color="fg.muted"
+                                                            _hover={{ color: 'fg', bg: 'bg.muted' }}
+                                                            onClick={() => { setEditingAgreementId(agreement.id); setEditingAgreementContent(agreement.content); }}
+                                                            aria-label="Editar acuerdo"
                                                         >
-                                                            {agreement.content}
-                                                        </Text>
-                                                        <Text fontSize="xs" color="fg.subtle" mt="1.5">
-                                                            {formatDate(agreement.created_at)}
-                                                        </Text>
-                                                    </>
+                                                            <Box as={Pencil} w="3.5" h="3.5" />
+                                                        </Box>
+                                                        <Box
+                                                            as="button"
+                                                            p="1.5"
+                                                            borderRadius="md"
+                                                            color="fg.muted"
+                                                            _hover={{ color: 'danger.fg', bg: 'danger.subtle' }}
+                                                            onClick={() => deleteAgreement(agreement.id)}
+                                                            aria-label="Eliminar acuerdo"
+                                                        >
+                                                            <Box as={Trash2} w="3.5" h="3.5" />
+                                                        </Box>
+                                                    </Flex>
                                                 )}
-                                            </Box>
-                                            {editingAgreementId !== agreement.id && (
-                                                <Flex gap="1" flexShrink={0}>
-                                                    <Box
-                                                        as="button"
-                                                        p="1.5"
-                                                        borderRadius="md"
-                                                        color="fg.muted"
-                                                        _hover={{ color: 'fg', bg: 'bg.muted' }}
-                                                        onClick={() => { setEditingAgreementId(agreement.id); setEditingAgreementContent(agreement.content); }}
-                                                        aria-label="Editar acuerdo"
-                                                    >
-                                                        <Box as={Pencil} w="3.5" h="3.5" />
-                                                    </Box>
-                                                    <Box
-                                                        as="button"
-                                                        p="1.5"
-                                                        borderRadius="md"
-                                                        color="fg.muted"
-                                                        _hover={{ color: 'red.fg', bg: 'red.subtle' }}
-                                                        onClick={() => deleteAgreement(agreement.id)}
-                                                        aria-label="Eliminar acuerdo"
-                                                    >
-                                                        <Box as={Trash2} w="3.5" h="3.5" />
-                                                    </Box>
-                                                </Flex>
-                                            )}
-                                        </Flex>
-                                    ))}
-                                </SectionCard>
+                                            </Flex>
+                                        ))}
+                                    </Box>
+                                </Box>
                             )}
                         </Stack>
                     )}
 
+                    {/* ── NOTAS ───────────────────────────────────── */}
                     {activeTab === 'notas' && (
-                        <Stack gap="5">
-                            <SectionHeader icon={FileText} title="Notas de sesión" />
+                        <Stack gap="5" maxW="3xl">
+                            <Flex alignItems="center" gap="2">
+                                <Flex w="7" h="7" borderRadius="md" bg="brand.subtle" color="brand.fg" alignItems="center" justifyContent="center">
+                                    <Box as={FileText} w="4" h="4" />
+                                </Flex>
+                                <Heading fontSize="lg" fontWeight="semibold" fontFamily="heading" color="fg">
+                                    Notas de sesión
+                                </Heading>
+                            </Flex>
 
                             <form onSubmit={submitNote}>
                                 <Box
@@ -531,7 +740,7 @@ export default function PatientShow({ patient }: Props) {
                                     description="Aquí irán tus notas de sesión y observaciones clave."
                                 />
                             ) : (
-                                <SectionCard p="0">
+                                <Box borderRadius="xl" borderWidth="1px" borderColor="border.subtle" bg="bg.surface" boxShadow="sm" overflow="hidden">
                                     {patient.notes.map((note, idx) => (
                                         <Box
                                             key={note.id}
@@ -585,7 +794,7 @@ export default function PatientShow({ patient }: Props) {
                                                             p="1.5"
                                                             borderRadius="md"
                                                             color="fg.muted"
-                                                            _hover={{ color: 'red.fg', bg: 'red.subtle' }}
+                                                            _hover={{ color: 'danger.fg', bg: 'danger.subtle' }}
                                                             onClick={() => deleteNote(note.id)}
                                                             aria-label="Eliminar nota"
                                                         >
@@ -596,14 +805,23 @@ export default function PatientShow({ patient }: Props) {
                                             )}
                                         </Box>
                                     ))}
-                                </SectionCard>
+                                </Box>
                             )}
                         </Stack>
                     )}
 
+                    {/* ── RECURSOS/DOCUMENTOS ─────────────────────── */}
                     {activeTab === 'documentos' && (
-                        <Stack gap="5">
-                            <SectionHeader icon={Shield} title="Documentos" />
+                        <Stack gap="5" maxW="3xl">
+                            <Flex alignItems="center" gap="2">
+                                <Flex w="7" h="7" borderRadius="md" bg="brand.subtle" color="brand.fg" alignItems="center" justifyContent="center">
+                                    <Box as={Shield} w="4" h="4" />
+                                </Flex>
+                                <Heading fontSize="lg" fontWeight="semibold" fontFamily="heading" color="fg">
+                                    Recursos
+                                </Heading>
+                            </Flex>
+
                             {patient.documents.length === 0 ? (
                                 <EmptyState
                                     icon={Shield}
@@ -611,90 +829,106 @@ export default function PatientShow({ patient }: Props) {
                                     description="Guarda aquí los consentimientos RGPD, informes y documentos del paciente."
                                 />
                             ) : (
-                                <SectionCard p="0">
-                                    {patient.documents.map((doc, idx) => (
-                                        <Flex
-                                            key={doc.id}
-                                            alignItems="center"
-                                            justifyContent="space-between"
-                                            gap="3"
-                                            p="4"
-                                            borderTopWidth={idx > 0 ? '1px' : undefined}
-                                            borderColor="border.subtle"
-                                            transition="background-color 150ms"
-                                            _hover={{ bg: 'bg.subtle' }}
-                                        >
-                                            <Flex alignItems="center" gap="3" minW="0">
-                                                <Flex
-                                                    w="9"
-                                                    h="9"
-                                                    borderRadius="md"
-                                                    bg="bg.subtle"
-                                                    alignItems="center"
-                                                    justifyContent="center"
-                                                    flexShrink={0}
-                                                    color="fg.muted"
-                                                >
-                                                    <Box as={FileText} w="4" h="4" />
-                                                </Flex>
-                                                <Box minW="0">
-                                                    <Text fontSize="sm" fontWeight="medium" color="fg" truncate>
-                                                        {doc.name}
-                                                    </Text>
-                                                    <Text fontSize="xs" color="fg.subtle" mt="0.5">
-                                                        {formatDate(doc.created_at)}
-                                                    </Text>
-                                                </Box>
-                                            </Flex>
-                                            <Flex gap="2" alignItems="center" flexShrink={0}>
-                                                {doc.is_rgpd && (
-                                                    <Text
-                                                        fontSize="xs"
-                                                        fontWeight="medium"
-                                                        px="2"
-                                                        py="0.5"
-                                                        borderRadius="full"
-                                                        bg="purple.subtle"
-                                                        color="purple.fg"
+                                <Box borderRadius="xl" overflow="hidden" borderWidth="1px" borderColor="border.subtle" boxShadow="sm">
+                                    <Box bg="brand.solid" px="5" py="3.5">
+                                        <Text fontFamily="heading" fontSize="xl" fontWeight="bold" color="white">
+                                            Recursos
+                                        </Text>
+                                    </Box>
+                                    <Box borderRightWidth="3px" borderRightColor="brand.solid">
+                                        {patient.documents.map((doc, idx) => (
+                                            <Flex
+                                                key={doc.id}
+                                                alignItems="center"
+                                                justifyContent="space-between"
+                                                gap="3"
+                                                px="4"
+                                                py="3.5"
+                                                borderTopWidth={idx > 0 ? '1px' : undefined}
+                                                borderColor="border.subtle"
+                                                bg="bg.surface"
+                                                transition="background-color 150ms"
+                                                _hover={{ bg: 'bg.subtle' }}
+                                            >
+                                                <Flex alignItems="center" gap="3" minW="0">
+                                                    <Flex
+                                                        w="9"
+                                                        h="9"
+                                                        borderRadius="md"
+                                                        bg="bg.subtle"
+                                                        alignItems="center"
+                                                        justifyContent="center"
+                                                        flexShrink={0}
+                                                        color="fg.muted"
                                                     >
-                                                        RGPD
-                                                    </Text>
-                                                )}
-                                                <Box
-                                                    as="button"
-                                                    p="1.5"
-                                                    borderRadius="md"
-                                                    color="fg.muted"
-                                                    _hover={{ color: 'red.fg', bg: 'red.subtle' }}
-                                                    onClick={() => deleteDocument(doc.id)}
-                                                    aria-label="Eliminar documento"
-                                                >
-                                                    <Box as={Trash2} w="3.5" h="3.5" />
-                                                </Box>
+                                                        <Box as={FileText} w="4" h="4" />
+                                                    </Flex>
+                                                    <Box minW="0">
+                                                        <Text fontSize="sm" fontWeight="medium" color="fg" overflow="hidden" textOverflow="ellipsis" whiteSpace="nowrap">
+                                                            {doc.name}
+                                                        </Text>
+                                                        <Text fontSize="xs" color="fg.subtle" mt="0.5">
+                                                            {formatDate(doc.created_at)}
+                                                        </Text>
+                                                    </Box>
+                                                </Flex>
+                                                <Flex gap="2" alignItems="center" flexShrink={0}>
+                                                    {doc.is_rgpd && (
+                                                        <Text
+                                                            fontSize="xs"
+                                                            fontWeight="medium"
+                                                            px="2"
+                                                            py="0.5"
+                                                            borderRadius="full"
+                                                            bg="indigo.subtle"
+                                                            color="indigo.fg"
+                                                        >
+                                                            RGPD
+                                                        </Text>
+                                                    )}
+                                                    <Box as={Download} w="4" h="4" color="fg.muted" flexShrink={0} />
+                                                    <Box
+                                                        as="button"
+                                                        p="1.5"
+                                                        borderRadius="md"
+                                                        color="fg.muted"
+                                                        _hover={{ color: 'danger.fg', bg: 'danger.subtle' }}
+                                                        onClick={() => deleteDocument(doc.id)}
+                                                        aria-label="Eliminar documento"
+                                                    >
+                                                        <Box as={Trash2} w="3.5" h="3.5" />
+                                                    </Box>
+                                                </Flex>
                                             </Flex>
-                                        </Flex>
-                                    ))}
-                                </SectionCard>
+                                        ))}
+                                    </Box>
+                                </Box>
                             )}
                         </Stack>
                     )}
 
+                    {/* ── COBROS ──────────────────────────────────── */}
                     {activeTab === 'cobros' && (
                         <Stack gap="5">
-                            <SectionHeader
-                                icon={Receipt}
-                                title="Cobros"
-                                action={
-                                    patient.payments.length > 0 ? (
-                                        <Text fontSize="sm" color="fg.muted">
-                                            Total cobrado{' '}
-                                            <Text as="span" color="fg" fontWeight="semibold" fontVariantNumeric="tabular-nums">
-                                                {formatCurrency(totalPaid)}
-                                            </Text>
+                            <Flex alignItems="center" justifyContent="space-between">
+                                <Flex alignItems="center" gap="2">
+                                    <Flex w="7" h="7" borderRadius="md" bg="brand.subtle" color="brand.fg" alignItems="center" justifyContent="center">
+                                        <Box as={Receipt} w="4" h="4" />
+                                    </Flex>
+                                    <Heading fontSize="lg" fontWeight="semibold" fontFamily="heading" color="fg">
+                                        Cobros
+                                    </Heading>
+                                </Flex>
+                                {patient.payments.length > 0 && (
+                                    <Text fontSize="sm" color="fg.muted">
+                                        Total cobrado{' '}
+                                        <Text as="span" color="fg" fontWeight="semibold" fontVariantNumeric="tabular-nums">
+                                            {formatCurrency(totalPaid)}
                                         </Text>
-                                    ) : undefined
-                                }
-                            />
+                                    </Text>
+                                )}
+                            </Flex>
+
                             {patient.payments.length === 0 ? (
                                 <EmptyState
                                     icon={Receipt}
@@ -702,7 +936,7 @@ export default function PatientShow({ patient }: Props) {
                                     description="Aquí verás el historial de pagos de este paciente."
                                 />
                             ) : (
-                                <SectionCard p="0">
+                                <Box borderRadius="xl" overflow="hidden" borderWidth="1px" borderColor="border.subtle" boxShadow="sm">
                                     <Table.Root size="sm" variant="line">
                                         <Table.Header>
                                             <Table.Row bg="bg.subtle">
@@ -752,7 +986,7 @@ export default function PatientShow({ patient }: Props) {
                                             {formatCurrency(totalPaid)}
                                         </Text>
                                     </Flex>
-                                </SectionCard>
+                                </Box>
                             )}
                         </Stack>
                     )}

@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use Database\Factories\WorkspaceFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
@@ -16,14 +18,17 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string $name
  * @property array<string, mixed>|null $settings
  * @property string|null $location_address
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  * @property-read int|null $members_count
- * @property-read \App\Models\User $creator
+ * @property-read User $creator
  */
 class Workspace extends Model
 {
-    use HasFactory, SoftDeletes;
+    /** @use HasFactory<WorkspaceFactory> */
+    use HasFactory;
+
+    use SoftDeletes;
 
     public const TYPE_PERSONAL = 'personal';
 
@@ -61,6 +66,7 @@ class Workspace extends Model
         return $this->members()->count() > 1;
     }
 
+    /** @return BelongsTo<User, $this> */
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'creator_id');
@@ -74,21 +80,25 @@ class Workspace extends Model
             ->withTimestamps();
     }
 
+    /** @return HasMany<Appointment, $this> */
     public function appointments(): HasMany
     {
         return $this->hasMany(Appointment::class);
     }
 
+    /** @return HasMany<Invoice, $this> */
     public function invoices(): HasMany
     {
         return $this->hasMany(Invoice::class);
     }
 
+    /** @return HasMany<Message, $this> */
     public function messages(): HasMany
     {
         return $this->hasMany(Message::class);
     }
 
+    /** @return HasMany<CollaborationAgreement, $this> */
     public function collaborationAgreements(): HasMany
     {
         return $this->hasMany(CollaborationAgreement::class);

@@ -126,7 +126,7 @@ export default function CallRoom({ appointment, exitUrl }: Props) {
                             )}
 
                             {recorder.error && (
-                                <Text fontSize="xs" color="red.300">
+                                <Text fontSize="xs" color="danger.muted">
                                     {recorder.error}
                                 </Text>
                             )}

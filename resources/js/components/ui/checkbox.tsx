@@ -14,7 +14,9 @@ function Checkbox(props: RootProps) {
             <ChakraCheckbox.HiddenInput />
             <ChakraCheckbox.Control
                 data-slot="checkbox-control"
-                borderColor="border"
+                borderColor="fg.muted"
+                borderWidth="2px"
+                bg="bg.surface"
                 rounded="sm"
                 _checked={{
                     bg: 'brand.solid',

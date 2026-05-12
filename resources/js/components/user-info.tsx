@@ -14,22 +14,25 @@ export function UserInfo({
 
     return (
         <>
-            <Avatar>
+            <Avatar flexShrink={0}>
                 <AvatarImage src={user.avatar_path ?? undefined} alt={user.name} />
                 <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
             </Avatar>
             <Box
-                display="grid"
+                display="flex"
+                flexDirection="column"
                 flex="1"
+                minW="0"
                 textAlign="left"
                 fontSize="sm"
                 lineHeight="tight"
+                css={{ '[data-collapsible=icon] &': { display: 'none' } }}
             >
-                <Text truncate fontWeight="medium">
+                <Text truncate fontWeight="medium" maxW="full">
                     {user.name}
                 </Text>
                 {showEmail && (
-                    <Text truncate fontSize="xs" color="fg.muted">
+                    <Text truncate fontSize="xs" color="fg.muted" maxW="full">
                         {user.email}
                     </Text>
                 )}

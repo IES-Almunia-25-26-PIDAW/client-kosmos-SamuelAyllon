@@ -26,7 +26,7 @@ export default function OfferedConsultationsShow({ consultation }: Props) {
 
                 <Flex align="center" gap="4" justify="space-between" flexWrap="wrap">
                     <HStack gap="3">
-                        <Box w="5" h="5" borderRadius="full" bg={consultation.color ?? 'gray.400'} />
+                        <Box w="5" h="5" borderRadius="full" bg={consultation.color ?? 'border'} />
                         <Heading as="h1" fontSize="3xl" fontWeight="bold" color="fg">
                             {consultation.name}
                         </Heading>

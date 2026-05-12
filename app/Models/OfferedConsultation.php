@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Database\Factories\OfferedConsultationFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -18,10 +19,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string|null $color
  * @property bool $is_active
  * @property string $modality
- * @property-read \App\Models\ProfessionalProfile $professionalProfile
+ * @property-read ProfessionalProfile $professionalProfile
  */
 class OfferedConsultation extends Model
 {
+    /** @use HasFactory<OfferedConsultationFactory> */
     use HasFactory;
 
     protected $fillable = [
@@ -44,21 +46,31 @@ class OfferedConsultation extends Model
         ];
     }
 
+    /** @return BelongsTo<ProfessionalProfile, $this> */
     public function professionalProfile(): BelongsTo
     {
         return $this->belongsTo(ProfessionalProfile::class);
     }
 
+    /** @return HasMany<Appointment, $this> */
     public function appointments(): HasMany
     {
         return $this->hasMany(Appointment::class, 'service_id');
     }
 
+    /**
+     * @param  Builder<self>  $query
+     * @return Builder<self>
+     */
     public function scopeActive(Builder $query): Builder
     {
         return $query->where('is_active', true);
     }
 
+    /**
+     * @param  Builder<self>  $query
+     * @return Builder<self>
+     */
     public function scopeForProfile(Builder $query, int $professionalProfileId): Builder
     {
         return $query->where('professional_profile_id', $professionalProfileId);
