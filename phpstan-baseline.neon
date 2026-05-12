@@ -223,30 +223,6 @@ parameters:
 			path: app/Models/KosmoBriefing.php
 
 		-
-			message: '#^Class App\\Models\\Note uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
-			identifier: missingType.generics
-			count: 1
-			path: app/Models/Note.php
-
-		-
-			message: '#^Method App\\Models\\Note\:\:appointment\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Models/Note.php
-
-		-
-			message: '#^Method App\\Models\\Note\:\:patient\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Models/Note.php
-
-		-
-			message: '#^Method App\\Models\\Note\:\:user\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Models/Note.php
-
-		-
 			message: '#^Class App\\Models\\ProfessionalProfile uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
 			identifier: missingType.generics
 			count: 1
