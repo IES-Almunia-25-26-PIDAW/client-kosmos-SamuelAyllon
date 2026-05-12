@@ -167,8 +167,7 @@ class User extends Authenticatable implements MustVerifyEmail
     protected function role(): Attribute
     {
         return Attribute::make(
-            /** @phpstan-ignore nullsafe.neverNull */
-            get: fn () => $this->roles->first()?->name ?? 'professional',
+            get: fn (): string => $this->roles->pluck('name')->first() ?? 'professional',
         );
     }
 
