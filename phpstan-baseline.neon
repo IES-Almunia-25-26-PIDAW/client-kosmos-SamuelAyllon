@@ -313,48 +313,6 @@ parameters:
 			path: app/Models/Note.php
 
 		-
-			message: '#^Class App\\Models\\OfferedConsultation uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
-			identifier: missingType.generics
-			count: 1
-			path: app/Models/OfferedConsultation.php
-
-		-
-			message: '#^Method App\\Models\\OfferedConsultation\:\:appointments\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
-			identifier: missingType.generics
-			count: 1
-			path: app/Models/OfferedConsultation.php
-
-		-
-			message: '#^Method App\\Models\\OfferedConsultation\:\:professionalProfile\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
-			identifier: missingType.generics
-			count: 1
-			path: app/Models/OfferedConsultation.php
-
-		-
-			message: '#^Method App\\Models\\OfferedConsultation\:\:scopeActive\(\) has parameter \$query with generic class Illuminate\\Database\\Eloquent\\Builder but does not specify its types\: TModel$#'
-			identifier: missingType.generics
-			count: 1
-			path: app/Models/OfferedConsultation.php
-
-		-
-			message: '#^Method App\\Models\\OfferedConsultation\:\:scopeActive\(\) return type with generic class Illuminate\\Database\\Eloquent\\Builder does not specify its types\: TModel$#'
-			identifier: missingType.generics
-			count: 1
-			path: app/Models/OfferedConsultation.php
-
-		-
-			message: '#^Method App\\Models\\OfferedConsultation\:\:scopeForProfile\(\) has parameter \$query with generic class Illuminate\\Database\\Eloquent\\Builder but does not specify its types\: TModel$#'
-			identifier: missingType.generics
-			count: 1
-			path: app/Models/OfferedConsultation.php
-
-		-
-			message: '#^Method App\\Models\\OfferedConsultation\:\:scopeForProfile\(\) return type with generic class Illuminate\\Database\\Eloquent\\Builder does not specify its types\: TModel$#'
-			identifier: missingType.generics
-			count: 1
-			path: app/Models/OfferedConsultation.php
-
-		-
 			message: '#^Method App\\Models\\PatientDelegation\:\:fromProfessional\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
 			identifier: missingType.generics
 			count: 1
