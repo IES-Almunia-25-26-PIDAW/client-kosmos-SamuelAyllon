@@ -31,12 +31,6 @@ parameters:
 			path: app/Http/Controllers/Dashboard/IndexAction.php
 
 		-
-			message: '#^Relation ''patient'' is not found in App\\Models\\Referral model\.$#'
-			identifier: larastan.relationExistence
-			count: 2
-			path: app/Http/Controllers/Referral/IndexAction.php
-
-		-
 			message: '#^Method App\\Http\\Middleware\\LogTranscriptionAccess\:\:handle\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -347,42 +341,6 @@ parameters:
 			identifier: missingType.generics
 			count: 1
 			path: app/Models/ProfessionalProfile.php
-
-		-
-			message: '#^Class App\\Models\\Referral uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
-			identifier: missingType.generics
-			count: 1
-			path: app/Models/Referral.php
-
-		-
-			message: '#^Method App\\Models\\Referral\:\:fromProfessional\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Models/Referral.php
-
-		-
-			message: '#^Method App\\Models\\Referral\:\:patient\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Models/Referral.php
-
-		-
-			message: '#^Method App\\Models\\Referral\:\:scopePending\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Models/Referral.php
-
-		-
-			message: '#^Method App\\Models\\Referral\:\:scopePending\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Models/Referral.php
-
-		-
-			message: '#^Method App\\Models\\Referral\:\:toProfessional\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Models/Referral.php
 
 		-
 			message: '#^Class App\\Models\\SessionRecording uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
