@@ -11,12 +11,13 @@ class StorePaymentRequest extends FormRequest
         return true;
     }
 
+    /** @return array<string, mixed> */
     public function rules(): array
     {
         return [
-            'amount'         => ['required', 'numeric', 'min:0'],
-            'due_at'         => ['required', 'date'],
-            'notes'          => ['nullable', 'string'],
+            'amount' => ['required', 'numeric', 'min:0'],
+            'due_at' => ['required', 'date'],
+            'notes' => ['nullable', 'string'],
             'payment_method' => ['nullable', 'in:cash,bizum,transfer,card,stripe,other'],
             'appointment_id' => ['nullable', 'exists:appointments,id'],
         ];

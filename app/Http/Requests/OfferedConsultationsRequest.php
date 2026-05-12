@@ -12,6 +12,7 @@ class OfferedConsultationsRequest extends FormRequest
         return $this->user() !== null && $this->user()->isProfessional();
     }
 
+    /** @return array<string, mixed> */
     public function rules(): array
     {
         return [

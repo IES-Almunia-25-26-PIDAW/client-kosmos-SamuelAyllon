@@ -12,6 +12,7 @@ class StoreAppointmentRequest extends FormRequest
         return $this->user() !== null && $this->user()->isPatient();
     }
 
+    /** @return array<string, mixed> */
     public function rules(): array
     {
         return [

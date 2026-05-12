@@ -11,6 +11,7 @@ class StoreWorkspaceRequest extends FormRequest
         return $this->user()?->isProfessional() ?? false;
     }
 
+    /** @return array<string, mixed> */
     public function rules(): array
     {
         return [
