@@ -1,4 +1,4 @@
-import { Box, Flex, Grid, Heading, Stack, Text, chakra } from '@chakra-ui/react';
+import { Box, Container, Flex, Grid, Heading, Stack, Text, chakra } from '@chakra-ui/react';
 import { Form, Head, Link } from '@inertiajs/react';
 import { ArrowLeft, FileText, MessageSquare, Paperclip, Play } from 'lucide-react';
 import type { ReactNode } from 'react';
@@ -126,30 +126,30 @@ export default function AppointmentShow({ appointment, lastClinicalNote }: Props
         <>
             <Head title={`Sesión — ${patient?.name ?? 'Paciente'}`} />
 
-            <Stack gap="6" p={{ base: '6', lg: '8' }}>
+            <Container maxW="6xl" px={{ base: '4', md: '6', lg: '8' }} py={{ base: '6', lg: '8' }}>
+              <Stack gap="6">
                 <Box>
                     <ChakraLink
                         href={DashboardIndexAction.url()}
                         display="inline-flex"
                         alignItems="center"
                         gap="1.5"
-                        fontSize="xs"
-                        fontWeight="semibold"
-                        textTransform="uppercase"
-                        letterSpacing="wider"
+                        fontSize="sm"
+                        fontWeight="medium"
                         color="fg.muted"
-                        mb="3"
-                        transition="colors 0.2s"
+                        mb="4"
+                        transition="color 0.15s ease"
                         _hover={{ color: 'fg' }}
+                        _focusVisible={{ outline: '2px solid', outlineColor: 'brand.solid', outlineOffset: '2px', borderRadius: 'sm' }}
                     >
-                        <Box as={ArrowLeft} w="3.5" h="3.5" />
+                        <Box as={ArrowLeft} w="4" h="4" />
                         Volver al dashboard
                     </ChakraLink>
                     <Flex alignItems="baseline" justifyContent="space-between" gap="4" flexWrap="wrap">
-                        <Heading as="h1" fontSize="3xl" fontWeight="bold" color="fg">
+                        <Heading as="h1" fontSize={{ base: '2xl', md: '3xl' }} fontWeight="bold" color="fg" lineHeight="shorter">
                             {patient?.name ?? 'Paciente'}
                         </Heading>
-                        <Text fontSize="md" color="fg.muted" fontVariantNumeric="tabular-nums">
+                        <Text fontSize="lg" fontWeight="semibold" color="fg" fontVariantNumeric="tabular-nums">
                             {formatTime(appointment.starts_at)}
                             {appointment.ends_at && ` — ${formatTime(appointment.ends_at)}`}
                         </Text>
@@ -157,14 +157,17 @@ export default function AppointmentShow({ appointment, lastClinicalNote }: Props
                     <Box mt="4" borderBottomWidth="1px" borderColor="border.subtle" />
                 </Box>
 
-                <Grid templateColumns={{ base: '1fr', lg: 'repeat(3, 1fr)' }} gap="6">
+                <Grid templateColumns={{ base: '1fr', lg: 'repeat(3, 1fr)' }} gap={{ base: '4', lg: '6' }}>
                     <Box
                         as="section"
                         gridColumn={{ lg: 'span 2' }}
                         borderRadius="lg"
+                        borderWidth="1px"
+                        borderColor="border"
                         overflow="hidden"
                         boxShadow="sm"
-                        bg="bg.subtle"
+                        bg="bg.surface"
+                        minW={0}
                     >
                         <Flex
                             as="header"
@@ -172,21 +175,23 @@ export default function AppointmentShow({ appointment, lastClinicalNote }: Props
                             justifyContent="space-between"
                             px="5"
                             py="3"
-                            bg="brand.solid"
-                            color="brand.contrast"
+                            bg="bg.subtle"
+                            borderBottomWidth="1px"
+                            borderColor="border.subtle"
+                            gap="3"
                         >
-                            <Flex alignItems="center" gap="2">
-                                <Box as={MessageSquare} w="3.5" h="3.5" />
+                            <Flex alignItems="center" gap="2" minW={0}>
+                                <Box as={MessageSquare} w="4" h="4" color="brand.solid" flexShrink={0} />
                                 <Text
-                                    fontSize="xs"
+                                    fontSize="sm"
                                     fontWeight="semibold"
-                                    textTransform="uppercase"
-                                    letterSpacing="wider"
+                                    color="fg"
+                                    truncate
                                 >
                                     Resumen clínico automático
                                 </Text>
                             </Flex>
-                            <Text fontSize="2xs" opacity={0.8}>
+                            <Text fontSize="2xs" color="fg.subtle" flexShrink={0}>
                                 {formatSyncedAt()}
                             </Text>
                         </Flex>
@@ -328,7 +333,7 @@ export default function AppointmentShow({ appointment, lastClinicalNote }: Props
                                     description="Aún no has añadido recursos para este paciente."
                                 />
                             ) : (
-                                <Stack as="ul" gap="0" maxH="360px" overflowY="auto" listStyleType="none">
+                                <Stack as="ul" gap="0" listStyleType="none">
                                     {resources.map((doc, idx) => {
                                         const { Icon, subtitle } = resourceMeta(doc);
                                         return (
@@ -359,7 +364,18 @@ export default function AppointmentShow({ appointment, lastClinicalNote }: Props
                         </Box>
 
                         {['confirmed', 'in_progress'].includes(appointment.status) && (
-                            <Stack gap="3" alignItems="center">
+                            <Stack
+                                gap="3"
+                                alignItems="center"
+                                position={{ base: 'static', lg: 'sticky' }}
+                                top={{ lg: '6' }}
+                                borderRadius="lg"
+                                borderWidth="1px"
+                                borderColor="border"
+                                bg="bg.surface"
+                                p="5"
+                                boxShadow="sm"
+                            >
                                 {appointment.service?.duration_minutes && (
                                     <Text
                                         fontSize="xs"
@@ -402,7 +418,8 @@ export default function AppointmentShow({ appointment, lastClinicalNote }: Props
                 >
                     Kosmo IA puede cometer errores
                 </Text>
-            </Stack>
+              </Stack>
+            </Container>
         </>
     );
 }

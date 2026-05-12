@@ -27,6 +27,7 @@ export function NavUser() {
                         <SidebarMenuButton
                             size="lg"
                             color="sidebar.accentFg"
+                            tooltip={{ children: auth.user.name }}
                             css={{
                                 '&[data-state=open]': { background: 'var(--ck-colors-sidebar-accent)' },
                                 '[data-collapsible=icon] &': { justifyContent: 'center' },

@@ -13,8 +13,17 @@ export function SidebarMenu({ ...props }: React.ComponentProps<'ul'>) {
             w="full"
             minW="0"
             flexDirection="column"
-            gap="1"
+            gap="0.5"
             listStyle="none"
+            m="0"
+            paddingInlineStart="1"
+            alignItems={{ base: 'stretch' }}
+            css={{
+                '[data-collapsible=icon] &': {
+                    paddingInlineStart: '0',
+                    alignItems: 'center',
+                },
+            }}
             {...props}
         />
     );
@@ -93,7 +102,10 @@ export function SidebarMenuButton({
                     width: size === 'lg' ? '3rem !important' : '2rem !important',
                     height: size === 'lg' ? '3rem !important' : '2rem !important',
                     padding: size === 'lg' ? '0.5rem !important' : '0.5rem !important',
+                    justifyContent: 'center',
+                    gap: '0',
                 },
+                '[data-collapsible=icon] & > span': { display: 'none' },
                 ...(variant === 'outline' && {
                     boxShadow: '0 0 0 1px var(--ck-colors-sidebar-border)',
                     '&:hover': {

@@ -144,11 +144,10 @@
     --chart-5: #B83A3A;
 
     /* Sidebar */
-    --sidebar: #F5F2ED;
+    --sidebar: #007b6a63;
     --sidebar-foreground: #2C2825;
     --sidebar-primary: #1A7B6E;
     --sidebar-primary-foreground: #FFFFFF;
-    --sidebar-accent: #ECF7F5;
     --sidebar-accent-foreground: #2C2825;
     --sidebar-border: #E0DBD3;
     --sidebar-ring: #1A7B6E;

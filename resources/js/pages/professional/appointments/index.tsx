@@ -1,4 +1,4 @@
-import { Badge, Box, Flex, Heading, Stack, Text, chakra } from '@chakra-ui/react';
+import { Badge, Box, Container, Flex, Heading, Stack, Text, chakra } from '@chakra-ui/react';
 
 import { Head, Link, router } from '@inertiajs/react';
 import { CalendarDays, Clock } from 'lucide-react';
@@ -7,6 +7,7 @@ import IndexAction from '@/actions/App/Http/Controllers/Appointment/IndexAction'
 import ShowAction from '@/actions/App/Http/Controllers/Appointment/ShowAction';
 import PatientShowAction from '@/actions/App/Http/Controllers/Patient/ShowAction';
 import { EmptyState } from '@/components/empty-state';
+import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 
 const ChakraLink = chakra(Link);
@@ -77,37 +78,60 @@ export default function AppointmentsIndex({ appointments, filters }: Props) {
         <>
             <Head title="Citas — ClientKosmos" />
 
-            <Stack gap="6" p={{ base: '6', lg: '8' }}>
+            <Container maxW="6xl" px={{ base: '4', md: '6', lg: '8' }} py={{ base: '6', lg: '8' }}>
+              <Stack gap="6">
 
-                <Box>
-                    <Heading as="h1" fontSize="3xl" fontWeight="bold" color="fg">
-                        Listado de citas
-                    </Heading>
-                    <Text mt="1" fontSize="md" color="fg.muted">
-                        Historial y gestión de todas tus citas
-                    </Text>
-                </Box>
+                <Flex alignItems="flex-end" justifyContent="space-between" gap="3" flexWrap="wrap">
+                    <Box>
+                        <Heading as="h1" fontSize={{ base: '2xl', md: '3xl' }} fontWeight="bold" color="fg" lineHeight="shorter">
+                            Listado de citas
+                        </Heading>
+                        <Text mt="1" fontSize="sm" color="fg.muted">
+                            Historial y gestión de todas tus citas
+                        </Text>
+                    </Box>
+                    <Badge variant="subtle" colorPalette="gray" borderRadius="full" px="3" py="1" fontSize="xs">
+                        {appointments.total} {appointments.total === 1 ? 'cita' : 'citas'}
+                    </Badge>
+                </Flex>
 
-                <Flex gap="2" flexWrap="wrap">
+                <Flex
+                    gap="1"
+                    flexWrap="wrap"
+                    role="tablist"
+                    aria-label="Filtrar por estado"
+                    p="1"
+                    bg="bg.subtle"
+                    borderRadius="full"
+                    w="fit-content"
+                    maxW="full"
+                    overflowX="auto"
+                >
                     {statusFilters.map((f) => {
                         const isActive = (filters.status ?? '') === f.value;
                         return (
-                            <Box
-                                as="button"
+                            <chakra.button
                                 key={f.value}
+                                role="tab"
+                                aria-selected={isActive}
                                 onClick={() => setFilter(f.value)}
-                                px="3"
+                                px="3.5"
                                 py="1.5"
+                                minH="8"
                                 borderRadius="full"
                                 fontSize="xs"
                                 fontWeight="medium"
-                                transition="colors 0.2s"
-                                bg={isActive ? 'brand.solid' : 'bg.subtle'}
-                                color={isActive ? 'brand.contrast' : 'fg.muted'}
-                                _hover={isActive ? undefined : { bg: 'border' }}
+                                whiteSpace="nowrap"
+                                transition="all 0.15s ease"
+                                bg={isActive ? 'bg.surface' : 'transparent'}
+                                color={isActive ? 'fg' : 'fg.muted'}
+                                boxShadow={isActive ? 'xs' : undefined}
+                                cursor="pointer"
+                                _hover={isActive ? undefined : { color: 'fg' }}
+                                _focusVisible={{ outline: '2px solid', outlineColor: 'brand.solid', outlineOffset: '2px' }}
                             >
                                 {f.label}
-                            </Box>
+                            </chakra.button>
                         );
                     })}
                 </Flex>
@@ -128,38 +152,40 @@ export default function AppointmentsIndex({ appointments, filters }: Props) {
                             return (
                                 <Flex
                                     key={appt.id}
-                                    alignItems="center"
-                                    gap="4"
+                                    alignItems={{ base: 'flex-start', md: 'center' }}
+                                    gap={{ base: '3', md: '4' }}
                                     borderRadius="lg"
                                     borderWidth="1px"
                                     borderColor="border"
                                     bg="bg.surface"
-                                    px="4"
-                                    py="3"
-                                    transition="box-shadow 0.2s"
-                                    _hover={{ boxShadow: 'sm' }}
+                                    px={{ base: '3', md: '4' }}
+                                    py={{ base: '3', md: '3' }}
+                                    transition="box-shadow 0.15s ease, border-color 0.15s ease"
+                                    _hover={{ boxShadow: 'sm', borderColor: 'border.emphasized' }}
+                                    flexWrap={{ base: 'wrap', md: 'nowrap' }}
                                 >
                                     <Box
                                         w="2.5"
                                         h="2.5"
+                                        mt={{ base: '1.5', md: '0' }}
                                         borderRadius="full"
                                         flexShrink={0}
                                         bg={`${cfg.palette}.solid`}
                                     />
 
-                                    <Box w="28" flexShrink={0}>
+                                    <Box w={{ base: 'auto', md: '28' }} flexShrink={0}>
                                         <Text fontSize="xs" fontWeight="medium" color="fg.muted" textTransform="capitalize">
                                             {date}
                                         </Text>
                                         <Flex alignItems="center" gap="1" mt="0.5">
                                             <Box as={Clock} w="3" h="3" color="fg.subtle" />
-                                            <Text fontSize="sm" fontWeight="semibold" color="fg">
+                                            <Text fontSize="sm" fontWeight="semibold" color="fg" fontVariantNumeric="tabular-nums">
                                                 {time}
                                             </Text>
                                         </Flex>
                                     </Box>
 
-                                    <Box flex="1" minW="0">
+                                    <Box flex="1" minW="0" w={{ base: 'full', md: 'auto' }}>
                                         <Text fontSize="sm" fontWeight="semibold" color="fg" truncate>
                                             {appt.patient?.name ?? 'Paciente'}
                                         </Text>
@@ -170,67 +196,52 @@ export default function AppointmentsIndex({ appointments, filters }: Props) {
                                         )}
                                     </Box>
 
-                                    <Badge
-                                        flexShrink={0}
-                                        variant="subtle"
-                                        colorPalette={online ? 'gray' : 'green'}
-                                        borderRadius="full"
-                                        px="2"
-                                        py="0.5"
-                                        fontSize="2xs"
-                                        fontWeight="semibold"
-                                        textTransform="uppercase"
-                                        letterSpacing="wider"
-                                    >
-                                        {modalityLabel[appt.modality?.toLowerCase()] ?? appt.modality ?? 'Presencial'}
-                                    </Badge>
+                                    <Flex gap="1.5" flexShrink={0} flexWrap="wrap">
+                                        <Badge
+                                            variant="subtle"
+                                            colorPalette={online ? 'gray' : 'green'}
+                                            borderRadius="full"
+                                            px="2"
+                                            py="0.5"
+                                            fontSize="2xs"
+                                            fontWeight="semibold"
+                                            textTransform="uppercase"
+                                            letterSpacing="wider"
+                                        >
+                                            {modalityLabel[appt.modality?.toLowerCase()] ?? appt.modality ?? 'Presencial'}
+                                        </Badge>
 
-                                    <Badge
-                                        flexShrink={0}
-                                        variant="subtle"
-                                        colorPalette={cfg.palette}
-                                        borderRadius="full"
-                                        px="2"
-                                        py="0.5"
-                                        fontSize="xs"
-                                        fontWeight="medium"
-                                    >
-                                        {cfg.label}
-                                    </Badge>
+                                        <Badge
+                                            variant="subtle"
+                                            colorPalette={cfg.palette}
+                                            borderRadius="full"
+                                            px="2"
+                                            py="0.5"
+                                            fontSize="2xs"
+                                            fontWeight="semibold"
+                                            textTransform="uppercase"
+                                            letterSpacing="wider"
+                                        >
+                                            {cfg.label}
+                                        </Badge>
+                                    </Flex>
 
-                                    <Flex alignItems="center" gap="2" flexShrink={0}>
+                                    <Flex
+                                        alignItems="center"
+                                        gap="2"
+                                        flexShrink={0}
+                                        w={{ base: 'full', md: 'auto' }}
+                                        justifyContent={{ base: 'flex-end', md: 'flex-start' }}
+                                    >
                                         {appt.status !== 'completed' && appt.status !== 'cancelled' && (
-                                            <ChakraLink
-                                                href={ShowAction.url(appt.id)}
-                                                borderRadius="md"
-                                                bg="brand.solid"
-                                                px="3"
-                                                py="1.5"
-                                                fontSize="xs"
-                                                fontWeight="medium"
-                                                color="brand.contrast"
-                                                transition="colors 0.2s"
-                                                _hover={{ bg: 'brand.emphasized' }}
-                                            >
-                                                Ver sesión
-                                            </ChakraLink>
+                                            <Button asChild variant="primary" size="sm">
+                                                <ChakraLink href={ShowAction.url(appt.id)}>Ver sesión</ChakraLink>
+                                            </Button>
                                         )}
                                         {appt.patient && (
-                                            <ChakraLink
-                                                href={PatientShowAction.url(appt.patient.id)}
-                                                borderRadius="md"
-                                                borderWidth="1px"
-                                                borderColor="border"
-                                                px="3"
-                                                py="1.5"
-                                                fontSize="xs"
-                                                fontWeight="medium"
-                                                color="fg"
-                                                transition="colors 0.2s"
-                                                _hover={{ bg: 'bg.subtle' }}
-                                            >
-                                                Ver ficha
-                                            </ChakraLink>
+                                            <Button asChild variant="outline" size="sm">
+                                                <ChakraLink href={PatientShowAction.url(appt.patient.id)}>Ver ficha</ChakraLink>
+                                            </Button>
                                         )}
                                     </Flex>
                                 </Flex>
@@ -240,32 +251,40 @@ export default function AppointmentsIndex({ appointments, filters }: Props) {
                 )}
 
                 {appointments.last_page > 1 && (
-                    <Flex alignItems="center" justifyContent="space-between">
+                    <Flex alignItems="center" justifyContent="space-between" gap="3" flexWrap="wrap" pt="2">
                         <Text fontSize="xs" color="fg.muted">
-                            {appointments.total} citas · Página {appointments.current_page} de {appointments.last_page}
+                            Página {appointments.current_page} de {appointments.last_page}
                         </Text>
-                        <Flex gap="1">
+                        <Flex gap="1" as="nav" aria-label="Paginación">
                             {appointments.links.map((link, i) => (
                                 <chakra.button
                                     key={i}
                                     disabled={!link.url}
+                                    aria-current={link.active ? 'page' : undefined}
                                     onClick={() => link.url && router.get(link.url)}
+                                    minW="9"
+                                    minH="9"
                                     px="3"
-                                    py="1"
                                     fontSize="xs"
-                                    borderRadius="sm"
-                                    transition="colors 0.2s"
-                                    bg={link.active ? 'brand.solid' : undefined}
-                                    color={link.active ? 'brand.contrast' : link.url ? 'fg.muted' : 'fg.subtle'}
+                                    fontWeight="medium"
+                                    borderRadius="md"
+                                    transition="all 0.15s ease"
+                                    bg={link.active ? 'brand.solid' : 'transparent'}
+                                    color={link.active ? 'brand.contrast' : link.url ? 'fg' : 'fg.subtle'}
+                                    borderWidth="1px"
+                                    borderColor={link.active ? 'brand.solid' : 'border'}
                                     cursor={link.url ? 'pointer' : 'not-allowed'}
-                                    _hover={link.active || !link.url ? undefined : { bg: 'border' }}
+                                    opacity={link.url || link.active ? 1 : 0.5}
+                                    _hover={link.active || !link.url ? undefined : { bg: 'bg.subtle', borderColor: 'border.emphasized' }}
+                                    _focusVisible={{ outline: '2px solid', outlineColor: 'brand.solid', outlineOffset: '2px' }}
                                     dangerouslySetInnerHTML={{ __html: link.label }}
                                 />
                             ))}
                         </Flex>
                     </Flex>
                 )}
-            </Stack>
+              </Stack>
+            </Container>
         </>
     );
 }

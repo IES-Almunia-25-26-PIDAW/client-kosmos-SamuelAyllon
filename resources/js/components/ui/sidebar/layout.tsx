@@ -140,7 +140,6 @@ export function Sidebar({
                           }),
                     ...(isFloatingOrInset
                         ? {
-                              padding: '0.5rem',
                               '[data-collapsible=icon] &': {
                                   width: 'calc(var(--sidebar-width-icon) + var(--spacing, 1rem) + 2px)',
                               },
@@ -158,9 +157,11 @@ export function Sidebar({
                     display="flex"
                     h="full"
                     w="full"
+                    minW="0"
                     flexDirection="column"
-                    bg="transparent"
+                    overflow="hidden"
                     css={{
+                        backgroundColor: 'var(--sidebar)',
                         '[data-variant=floating] &': {
                             borderRadius: 'var(--radii-lg)',
                             border: '1px solid var(--ck-colors-sidebar-border)',
@@ -273,8 +274,12 @@ export function SidebarHeader({ ...props }: React.ComponentProps<'div'>) {
             data-sidebar="header"
             display="flex"
             flexDirection="column"
-            gap="2"
-            p="2"
+            gap="1"
+            px="2"
+            py="1.5"
+            w="full"
+            minW="0"
+            overflow="hidden"
             {...props}
         />
     );
@@ -287,8 +292,12 @@ export function SidebarFooter({ ...props }: React.ComponentProps<'div'>) {
             data-sidebar="footer"
             display="flex"
             flexDirection="column"
-            gap="2"
-            p="2"
+            gap="1"
+            px="2"
+            py="1.5"
+            w="full"
+            minW="0"
+            overflow="hidden"
             {...props}
         />
     );
@@ -317,8 +326,13 @@ export function SidebarContent({ ...props }: React.ComponentProps<'div'>) {
             flex="1"
             flexDirection="column"
             gap="2"
-            overflow="auto"
+            overflowY="auto"
+            overflowX="hidden"
+            overscrollBehavior="contain"
             css={{
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none',
+                '&::-webkit-scrollbar': { width: 0, height: 0, display: 'none' },
                 '[data-collapsible=icon] &': { overflow: 'hidden' },
             }}
             {...props}
