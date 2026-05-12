@@ -157,54 +157,6 @@ parameters:
 			path: app/Models/Availability.php
 
 		-
-			message: '#^Class App\\Models\\CollaborationAgreement uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
-			identifier: missingType.generics
-			count: 1
-			path: app/Models/CollaborationAgreement.php
-
-		-
-			message: '#^Method App\\Models\\CollaborationAgreement\:\:professionalA\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
-			identifier: missingType.generics
-			count: 1
-			path: app/Models/CollaborationAgreement.php
-
-		-
-			message: '#^Method App\\Models\\CollaborationAgreement\:\:professionalB\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
-			identifier: missingType.generics
-			count: 1
-			path: app/Models/CollaborationAgreement.php
-
-		-
-			message: '#^Method App\\Models\\CollaborationAgreement\:\:scopeActive\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Models/CollaborationAgreement.php
-
-		-
-			message: '#^Method App\\Models\\CollaborationAgreement\:\:scopeActive\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Models/CollaborationAgreement.php
-
-		-
-			message: '#^Method App\\Models\\CollaborationAgreement\:\:scopeForProfessional\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Models/CollaborationAgreement.php
-
-		-
-			message: '#^Method App\\Models\\CollaborationAgreement\:\:scopeForProfessional\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Models/CollaborationAgreement.php
-
-		-
-			message: '#^Method App\\Models\\CollaborationAgreement\:\:workspace\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
-			identifier: missingType.generics
-			count: 1
-			path: app/Models/CollaborationAgreement.php
-
-		-
 			message: '#^Class App\\Models\\ConsentForm uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
 			identifier: missingType.generics
 			count: 1
