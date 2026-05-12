@@ -247,30 +247,6 @@ parameters:
 			path: app/Models/Note.php
 
 		-
-			message: '#^Method App\\Models\\PatientDelegation\:\:fromProfessional\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
-			identifier: missingType.generics
-			count: 1
-			path: app/Models/PatientDelegation.php
-
-		-
-			message: '#^Method App\\Models\\PatientDelegation\:\:patientProfile\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
-			identifier: missingType.generics
-			count: 1
-			path: app/Models/PatientDelegation.php
-
-		-
-			message: '#^Method App\\Models\\PatientDelegation\:\:toProfessional\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
-			identifier: missingType.generics
-			count: 1
-			path: app/Models/PatientDelegation.php
-
-		-
-			message: '#^Method App\\Models\\PatientDelegation\:\:workspace\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
-			identifier: missingType.generics
-			count: 1
-			path: app/Models/PatientDelegation.php
-
-		-
 			message: '#^Class App\\Models\\ProfessionalProfile uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
 			identifier: missingType.generics
 			count: 1

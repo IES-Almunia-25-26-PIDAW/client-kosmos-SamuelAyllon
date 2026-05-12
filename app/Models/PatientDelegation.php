@@ -25,21 +25,25 @@ class PatientDelegation extends Model
         ];
     }
 
+    /** @return BelongsTo<PatientProfile, $this> */
     public function patientProfile(): BelongsTo
     {
         return $this->belongsTo(PatientProfile::class);
     }
 
+    /** @return BelongsTo<User, $this> */
     public function fromProfessional(): BelongsTo
     {
         return $this->belongsTo(User::class, 'from_professional_id');
     }
 
+    /** @return BelongsTo<User, $this> */
     public function toProfessional(): BelongsTo
     {
         return $this->belongsTo(User::class, 'to_professional_id');
     }
 
+    /** @return BelongsTo<Workspace, $this> */
     public function workspace(): BelongsTo
     {
         return $this->belongsTo(Workspace::class);
