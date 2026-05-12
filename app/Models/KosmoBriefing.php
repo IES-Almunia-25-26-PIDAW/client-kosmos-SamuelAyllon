@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use Database\Factories\KosmoBriefingFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class KosmoBriefing extends Model
 {
+    /** @use HasFactory<KosmoBriefingFactory> */
     use HasFactory;
 
     protected $fillable = [
@@ -15,22 +18,25 @@ class KosmoBriefing extends Model
     ];
 
     protected $casts = [
-        'content'  => 'array',
-        'is_read'  => 'boolean',
+        'content' => 'array',
+        'is_read' => 'boolean',
         'for_date' => 'date',
     ];
 
-    public function user()
+    /** @return BelongsTo<User, $this> */
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function patient()
+    /** @return BelongsTo<PatientProfile, $this> */
+    public function patient(): BelongsTo
     {
         return $this->belongsTo(PatientProfile::class, 'patient_id');
     }
 
-    public function appointment()
+    /** @return BelongsTo<Appointment, $this> */
+    public function appointment(): BelongsTo
     {
         return $this->belongsTo(Appointment::class);
     }

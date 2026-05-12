@@ -199,30 +199,6 @@ parameters:
 			path: app/Models/InvoiceItem.php
 
 		-
-			message: '#^Class App\\Models\\KosmoBriefing uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
-			identifier: missingType.generics
-			count: 1
-			path: app/Models/KosmoBriefing.php
-
-		-
-			message: '#^Method App\\Models\\KosmoBriefing\:\:appointment\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Models/KosmoBriefing.php
-
-		-
-			message: '#^Method App\\Models\\KosmoBriefing\:\:patient\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Models/KosmoBriefing.php
-
-		-
-			message: '#^Method App\\Models\\KosmoBriefing\:\:user\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Models/KosmoBriefing.php
-
-		-
 			message: '#^Class App\\Models\\ProfessionalProfile uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
 			identifier: missingType.generics
 			count: 1
