@@ -48,6 +48,7 @@ class TranscriptionSegmentCreated implements ShouldBroadcast
         return 'transcription.segment.created';
     }
 
+    /** @return array<string, mixed> */
     public function broadcastWith(): array
     {
         return [
