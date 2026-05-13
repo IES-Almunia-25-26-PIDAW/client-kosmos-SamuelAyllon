@@ -3,7 +3,7 @@
 > Documento de plan y trazabilidad de pruebas del proyecto. Complementa la [sección 8 de la justificación](justificate_implementation.md#8-estrategia-de-testing) con la matriz **requisito → caso de prueba** y el procedimiento para ejecutar y archivar resultados.
 
 **Última revisión:** 2026-05-13
-**Versión de la suite:** 82 archivos · 409 casos Pest · 4 tests Vitest (medido con `./vendor/bin/pest --list-tests`).
+**Versión de la suite:** 95 archivos · 492 casos Pest · 7 tests Vitest (medido con `./vendor/bin/pest --list-tests`). Cobertura líneas: 68.1%.
 
 ---
 
@@ -202,10 +202,10 @@ Replicado en [.github/workflows/tests.yml](../.github/workflows/tests.yml):
 - Build de assets (Vite).
 - Vitest.
 - PHPStan.
-- `./vendor/bin/pest --coverage --coverage-clover=coverage.xml --coverage-text=coverage-summary.txt --log-junit=junit.xml --min=61`.
+- `./vendor/bin/pest --coverage --coverage-clover=coverage.xml --coverage-text=coverage-summary.txt --log-junit=junit.xml --min=63`.
 - Upload de `coverage.xml` y `junit.xml` como artefacto `test-reports` (retención 30 días).
 
-**Umbral de cobertura actual:** **61%** sobre líneas (medido en CI run del commit `7cfb190` = 66.84% real, margen de 5 puntos sobre el `floor`). Revisable al alza conforme suba la cobertura tras nuevos tests Unit/Vitest.
+**Umbral de cobertura actual:** **63%** sobre líneas (medido en CI run posterior a `738f710` = 68.1% real, margen de 5 puntos sobre el `floor`). Revisado al alza tras los 54 tests Unit añadidos (Events, Notifications, Policies). Próxima revisión cuando se cubran Jobs/Listeners/Observers (esperado salto a ~75% Lines).
 
 ---
 
@@ -224,7 +224,7 @@ Replicado en [.github/workflows/tests.yml](../.github/workflows/tests.yml):
 5. Para reproducir localmente con cobertura:
 
    ```bash
-   ./vendor/bin/pest --coverage --coverage-html=coverage-html --min=61
+   ./vendor/bin/pest --coverage --coverage-html=coverage-html --min=63
    npm run test -- --coverage
    ```
 

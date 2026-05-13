@@ -314,7 +314,7 @@ Ventaja: el usuario puede consultar el briefing varias veces sin consumir petici
 
 ### 8.2 Cobertura backend (Pest 3)
 
-**Cifra actual (medida con `./vendor/bin/pest --list-tests`): 82 archivos de test, 409 casos.** La suite se distribuye así por dominio (un módulo agrupa todos los archivos bajo ese namespace):
+**Cifra actual (medida con `./vendor/bin/pest --list-tests`): 95 archivos de test, 492 casos. Cobertura líneas: 68.1% (CI sobre `main`).** La suite se distribuye así por dominio (un módulo agrupa todos los archivos bajo ese namespace):
 
 | Dominio | Tests | Qué verifica |
 |---|---|---|
@@ -348,6 +348,10 @@ Ventaja: el usuario puede consultar el briefing varias veces sin consumir petici
 | Document, Onboarding | 3 c/u | Destroy doc / Index onboarding |
 | Services, Referral | 2 c/u | GeneratePostSessionBriefing / IndexAction |
 | Listeners | 1 | GeneratePostSessionBriefingOnSummarized |
+| **Unit/Services** (nuevos 2026-05) | 29 | AvailabilityService, BillingService, RgpdService, KosmoService — slots/overlaps, numeración FAC, consentimiento RGPD, parseo Groq |
+| **Unit/Events** (nuevos 2026-05) | 7 | SessionSummarized, TranscriptionSegmentCreated — canales, payload, `fromSegment` |
+| **Unit/Notifications** (nuevos 2026-05) | 11 | InvoicePaid (payer vs professional), InvoiceOverdue, ProfessionalApproved (toMail + toDatabase) |
+| **Unit/Policies** (nuevos 2026-05) | 36 | Admin, Appointment, Payment, SessionRecording, Patient, Document, OfferedConsultation |
 
 ### 8.3 Cobertura frontend (Vitest)
 
@@ -369,7 +373,7 @@ Brecha conocida: la cobertura de validadores Zod (ADR-0027) y formularios críti
 - **Helpers globales** `createAdmin()`, `createProfessional()` en [tests/Pest.php](../tests/Pest.php) reducen duplicación.
 - **Roles sembrados** antes de cada test mediante `RoleSeeder`.
 - **Stripe doblado** vía [tests/Support/FakeStripeGateway.php](../tests/Support/FakeStripeGateway.php) y fixtures en [tests/Fixtures/stripe/](../tests/Fixtures/stripe/).
-- **Gate CI** ([.github/workflows/tests.yml](../.github/workflows/tests.yml)): `pest --coverage --min=60 --coverage-clover --log-junit`, con artefacto `test-reports` retenido 30 días.
+- **Gate CI** ([.github/workflows/tests.yml](../.github/workflows/tests.yml)): `pest --coverage --min=63 --coverage-clover --log-junit`, con artefacto `test-reports` retenido 30 días.
 
 ---
 
