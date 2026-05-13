@@ -45,7 +45,10 @@ return [
     'google' => [
         'client_id' => env('GOOGLE_CLIENT_ID'),
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
-        'redirect_uri' => env('GOOGLE_REDIRECT_URI'),
+        // OAuth de login / registro (App\Services\GoogleAuthService)
+        'auth_redirect_uri' => env('GOOGLE_AUTH_REDIRECT_URI', env('APP_URL').'/auth/google/callback'),
+        // OAuth de conexión de Google Calendar desde Settings (App\Services\GoogleCalendarService)
+        'calendar_redirect_uri' => env('GOOGLE_CALENDAR_REDIRECT_URI', env('GOOGLE_REDIRECT_URI')),
     ],
 
     'stripe' => [

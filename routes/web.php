@@ -27,6 +27,9 @@ use App\Http\Controllers\Appointment\TranscribeAction;
 use App\Http\Controllers\Appointment\UpdateAction as AppointmentUpdateAction;
 use App\Http\Controllers\Appointment\UpdateStatusAction;
 use App\Http\Controllers\Appointment\WaitingShowAction;
+use App\Http\Controllers\Auth\Google\CallbackAction as GoogleCallbackAction;
+use App\Http\Controllers\Auth\Google\PatientConsentsAction as GooglePatientConsentsAction;
+use App\Http\Controllers\Auth\Google\RedirectAction as GoogleRedirectAction;
 use App\Http\Controllers\Call\ShowRoomAction as CallShowRoomAction;
 use App\Http\Controllers\CollaborationAgreement\DestroyAction as CollaborationDestroyAction;
 use App\Http\Controllers\CollaborationAgreement\IndexAction as CollaborationIndexAction;
@@ -359,6 +362,23 @@ Route::middleware(['auth', 'verified'])
             ->middleware('throttle:30,1')
             ->name('appointments.transcribe');
     });
+
+// ─── Google OAuth (login + registro profesional/paciente) ────────────────────
+Route::middleware('guest')->group(function () {
+    Route::get('/auth/google/redirect', GoogleRedirectAction::class)
+        ->middleware('throttle:10,1')
+        ->name('auth.google.redirect');
+
+    Route::get('/auth/google/callback', GoogleCallbackAction::class)
+        ->middleware('throttle:10,1')
+        ->name('auth.google.callback');
+
+    Route::get('/auth/google/patient-consents', [GooglePatientConsentsAction::class, 'show'])
+        ->name('auth.google.patient-consents');
+
+    Route::post('/auth/google/patient-consents', [GooglePatientConsentsAction::class, 'store'])
+        ->name('auth.google.patient-consents.store');
+});
 
 // ─── Stripe webhook (público, sin auth ni CSRF — ver bootstrap/app.php) ───────
 Route::post('/webhooks/stripe', StripeWebhookAction::class)->name('webhooks.stripe');

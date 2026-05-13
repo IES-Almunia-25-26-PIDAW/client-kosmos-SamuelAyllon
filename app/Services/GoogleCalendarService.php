@@ -23,7 +23,7 @@ class GoogleCalendarService
         $client = new GoogleClient;
         $client->setClientId(config('services.google.client_id'));
         $client->setClientSecret(config('services.google.client_secret'));
-        $client->setRedirectUri(config('services.google.redirect_uri'));
+        $client->setRedirectUri(config('services.google.calendar_redirect_uri'));
         $client->addScope(Calendar::CALENDAR_EVENTS);
         $client->setAccessType('offline');
 

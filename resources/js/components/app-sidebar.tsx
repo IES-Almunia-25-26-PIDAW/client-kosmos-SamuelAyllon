@@ -25,6 +25,12 @@ import {
     SidebarMenu,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
+import { dashboard as portalDashboard } from '@/routes/patient';
+import { index as portalAppointmentsIndex } from '@/routes/patient/appointments';
+import { index as portalConsentFormsIndex } from '@/routes/patient/consent-forms';
+import { index as portalInvoicesIndex } from '@/routes/patient/invoices';
+import { index as portalMessagesIndex } from '@/routes/patient/messages';
+import { index as portalProfessionalsIndex } from '@/routes/patient/professionals';
 import { dashboard, kosmo, settings } from '@/routes/professional';
 import { index as invoicesIndex } from '@/routes/professional/invoices';
 import { index as messagesIndex } from '@/routes/professional/messages';
@@ -34,12 +40,6 @@ import { index as scheduleIndex } from '@/routes/professional/schedule';
 import { index as teamIndex } from '@/routes/professional/workspace/team';
 import type { Auth, NavItem } from '@/types';
 import AppLogo from './app-logo';
-import { dashboard as portalDashboard } from '@/routes/patient';
-import { index as portalAppointmentsIndex } from '@/routes/patient/appointments';
-import { index as portalConsentFormsIndex } from '@/routes/patient/consent-forms';
-import { index as portalInvoicesIndex } from '@/routes/patient/invoices';
-import { index as portalMessagesIndex } from '@/routes/patient/messages';
-import { index as portalProfessionalsIndex } from '@/routes/patient/professionals';
 
 const footerNavItems: NavItem[] = [
     {

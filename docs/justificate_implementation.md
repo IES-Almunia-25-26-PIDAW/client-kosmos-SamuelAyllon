@@ -312,34 +312,68 @@ Ventaja: el usuario puede consultar el briefing varias veces sin consumir petici
 - Integración con PHPUnit para compatibilidad total con el ecosistema Laravel
 - `beforeEach` global en `Pest.php` para configuración común (roles, Vite fake)
 
-### 8.2 Cobertura de los 97 tests
+### 8.2 Cobertura backend (Pest 3)
 
-| Módulo | Tests | Qué verifica |
-|--------|-------|--------------|
-| AdminController | 11 | CRUD usuarios, restricción de roles |
-| AuthController | 6 | Redirecciones post-login por rol |
-| Authentication | 6 | Login, logout, rate limiting, 2FA |
-| EmailVerification | 6 | Flujo completo de verificación |
-| PasswordConfirmation | 2 | Pantalla de confirmación |
-| PasswordReset | 5 | Reset por email |
-| Registration | 3 | Registro + asignación de rol |
-| TwoFactorChallenge | 2 | Desafío 2FA |
-| VerificationNotification | 2 | Reenvío de email |
-| BillingController | 6 | Vista, estadísticas, filtros, aislamiento |
-| DashboardController | 7 | Props, métricas, alertas, acceso por rol |
-| KosmoController | 7 | Vista, briefings, chat, marcar leídos |
-| PatientController | 15 | CRUD completo, ownership, pre/post sesión |
-| SettingsController | 7 | Vista, actualización de configuración |
-| PasswordUpdate | 3 | Actualización de contraseña |
-| ProfileUpdate | 5 | Perfil, email, eliminación de cuenta |
-| TwoFactorAuthentication | 4 | Configuración 2FA |
+**Cifra actual (medida con `./vendor/bin/pest --list-tests`): 95 archivos de test, 492 casos. Cobertura líneas: 68.1% (CI sobre `main`).** La suite se distribuye así por dominio (un módulo agrupa todos los archivos bajo ese namespace):
 
-### 8.3 Principios de los tests
+| Dominio | Tests | Qué verifica |
+|---|---|---|
+| Appointment (sesiones, llamada) | 53 | Crear/cancelar cita, autorización show, ventana de unión, start/end call, autosummarize, room cleanup, channel auth, agregación de transcripción, transcribe action, transcribe chunk job |
+| Portal (vista paciente) | 44 | Reserva, confirmación, join call, post-sesión, recording consent, primer booking enlaza paciente, índice profesionales, factura del portal |
+| Auth & Fortify | 42 | Login/logout, rate-limit, registro, password reset/update, email verification, 2FA challenge, password confirmation, Google OAuth (cliente y profesional), redirecciones por rol |
+| Security & RGPD | 21 | EncryptedCasts (tokens, perfil clínico, notas, transcripciones), Policy (invoices), consentimiento RGPD, revocación de consentimiento, transcribe chunk consent, log de accesos RGPD |
+| Settings | 19 | Vista, profile/password update, 2FA, Google connect (CSRF state, revoke), eliminación de cuenta |
+| Sprint2 (billing + ventana) | 17 | Numeración secuencial FAC-YEAR-XXXXX, generación PDF, send invoice job, ventana de unión 10/15/20 min, no-show automático |
+| Call (Meet) | 14 | ShowRoomAction (room_id 410 para sesiones completadas), enlace Meet generado en backend |
+| Sprint3 (post-sesión + RGPD) | 13 | Cleanup audio chunks, consent revoke, finalize & notify pipeline, signed document URL, transcribe rate-limit (30 req/min) |
+| Schedule | 13 | Index professional, availability store, availability index, validaciones de slots |
+| Professional (aprobación) | 13 | Flujo de aprobación admin, bloqueo de no verificados |
+| Message | 12 | Mensajería profesional ↔ paciente (portal y app) |
+| AdminController | 14 | CRUD usuarios, verificación/rechazo, no-self-delete, restricción de roles |
+| Models (Unit) | 13 | AppointmentJoinWindow, AppointmentStatus |
+| PatientController | 15 | CRUD completo, ownership, páginas pre/post-sesión |
+| DashboardController | 8 | Props, métricas, alertas (invoice/consent), redirecciones por rol |
+| BillingController | 7 | Stats, filtros, aislamiento por profesional, pending billing |
+| Invoice | 7 | Edit, stats |
+| KosmoController | 7 | Vista, briefings, marcar leídos, autorización |
+| OfferedConsultations | 6 | CRUD |
+| CollaborationAgreement | 6 | Controller |
+| AuthController | 6 | Redirecciones post-login |
+| StripeCheckout | 5 | Creación de sesión, validación de estado y ownership |
+| StripeWebhook | 5 | Firma válida/inválida, idempotencia, event types |
+| Jobs | 5 | GeneratePreSessionBriefing, SummarizeSessionJob retry |
+| Patient (Action) | 5 | CreateOrUpdateProfessionalPatient |
+| SettingsController | 5 | Vista y actualización |
+| Note, Notification, Billing, Agreement, Workspace | 4 c/u | Acciones puntuales por dominio |
+| Document, Onboarding | 3 c/u | Destroy doc / Index onboarding |
+| Services, Referral | 2 c/u | GeneratePostSessionBriefing / IndexAction |
+| Listeners | 1 | GeneratePostSessionBriefingOnSummarized |
+| **Unit/Services** (nuevos 2026-05) | 29 | AvailabilityService, BillingService, RgpdService, KosmoService — slots/overlaps, numeración FAC, consentimiento RGPD, parseo Groq |
+| **Unit/Events** (nuevos 2026-05) | 7 | SessionSummarized, TranscriptionSegmentCreated — canales, payload, `fromSegment` |
+| **Unit/Notifications** (nuevos 2026-05) | 11 | InvoicePaid (payer vs professional), InvoiceOverdue, ProfessionalApproved (toMail + toDatabase) |
+| **Unit/Policies** (nuevos 2026-05) | 36 | Admin, Appointment, Payment, SessionRecording, Patient, Document, OfferedConsultation |
 
-- **RefreshDatabase** en cada test para aislamiento total
-- **`withoutVite()`** en el `TestCase.php` base para evitar dependencia del build de assets
-- **Helpers de usuarios** (`createAdmin()`, `createProfessional()`) para reducir duplicación
-- **Roles sembrados** antes de cada test mediante `RoleSeeder`
+### 8.3 Cobertura frontend (Vitest)
+
+Fuente de verdad: ADR-0022 (adopción de Vitest + Testing Library + jsdom).
+
+| Archivo | Qué verifica |
+|---|---|
+| [resources/js/components/recording-indicator.test.tsx](../resources/js/components/recording-indicator.test.tsx) | Render del indicador de grabación según estado de consentimiento |
+| [resources/js/components/join-call-button.test.tsx](../resources/js/components/join-call-button.test.tsx) | Habilitación/deshabilitación según ventana temporal |
+| [resources/js/hooks/use-countdown.test.ts](../resources/js/hooks/use-countdown.test.ts) | Hook de cuenta atrás (timers fake) |
+| [resources/js/hooks/use-professional-tab-recorder.test.ts](../resources/js/hooks/use-professional-tab-recorder.test.ts) | Captura de pestaña profesional con MediaRecorder |
+
+Brecha conocida: la cobertura de validadores Zod (ADR-0027) y formularios críticos del portal está pendiente — abordada en el plan QA de mayo 2026 (paso 4).
+
+### 8.4 Principios de los tests
+
+- **RefreshDatabase** en cada test Feature para aislamiento total.
+- **`withoutVite()`** en [tests/TestCase.php](../tests/TestCase.php) para no depender del build de assets.
+- **Helpers globales** `createAdmin()`, `createProfessional()` en [tests/Pest.php](../tests/Pest.php) reducen duplicación.
+- **Roles sembrados** antes de cada test mediante `RoleSeeder`.
+- **Stripe doblado** vía [tests/Support/FakeStripeGateway.php](../tests/Support/FakeStripeGateway.php) y fixtures en [tests/Fixtures/stripe/](../tests/Fixtures/stripe/).
+- **Gate CI** ([.github/workflows/tests.yml](../.github/workflows/tests.yml)): `pest --coverage --min=63 --coverage-clover --log-junit`, con artefacto `test-reports` retenido 30 días.
 
 ---
 

@@ -6,11 +6,46 @@ use App\Http\Controllers\Controller;
 use App\Models\Appointment;
 use App\Models\Invoice;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class IndexAction extends Controller
 {
+    public static function statsCacheKey(int $professionalId): string
+    {
+        return "invoice-stats:{$professionalId}:".now()->format('Y-m');
+    }
+
+    /**
+     * @return array{total_paid: float, total_pending: float, total_overdue: float}
+     */
+    /**
+     * @return array{total_paid: float, total_pending: float, total_overdue: float}
+     */
+    private static function computeStats(int $professionalId): array
+    {
+        $monthStart = now()->startOfMonth();
+        $nextMonthStart = now()->startOfMonth()->addMonth();
+
+        $row = Invoice::query()
+            ->where('professional_id', $professionalId)
+            ->selectRaw(
+                "COALESCE(SUM(CASE WHEN status = 'paid'
+                    AND paid_at >= ? AND paid_at < ? THEN total END), 0) AS total_paid,
+                COALESCE(SUM(CASE WHEN status IN ('draft', 'sent') THEN total END), 0) AS total_pending,
+                COALESCE(SUM(CASE WHEN status = 'overdue' THEN total END), 0) AS total_overdue",
+                [$monthStart, $nextMonthStart]
+            )
+            ->first();
+
+        return [
+            'total_paid' => (float) ($row->total_paid ?? 0),
+            'total_pending' => (float) ($row->total_pending ?? 0),
+            'total_overdue' => (float) ($row->total_overdue ?? 0),
+        ];
+    }
+
     public function __invoke(Request $request): Response
     {
         $user = $request->user();
@@ -23,19 +58,11 @@ class IndexAction extends Controller
             ->paginate(20)
             ->withQueryString();
 
-        $stats = [
-            'total_paid' => Invoice::where('professional_id', $user->id)
-                ->where('status', 'paid')
-                ->whereYear('paid_at', now()->year)
-                ->whereMonth('paid_at', now()->month)
-                ->sum('total'),
-            'total_pending' => Invoice::where('professional_id', $user->id)
-                ->whereIn('status', ['draft', 'sent'])
-                ->sum('total'),
-            'total_overdue' => Invoice::where('professional_id', $user->id)
-                ->where('status', 'overdue')
-                ->sum('total'),
-        ];
+        $stats = Cache::remember(
+            self::statsCacheKey($user->id),
+            now()->addMinutes(5),
+            fn () => self::computeStats($user->id),
+        );
 
         $payments = $invoices->through(fn (Invoice $invoice) => [
             'id' => $invoice->id,

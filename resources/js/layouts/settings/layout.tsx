@@ -6,12 +6,12 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { useCurrentUrl } from '@/hooks/use-current-url';
 import { toUrl } from '@/lib/utils';
-import { show } from '@/routes/two-factor';
-import type { NavItem } from '@/types';
 import { edit as editAppearance } from '@/routes/appearance';
 import { edit } from '@/routes/profile';
 import { edit as editGoogle } from '@/routes/settings/google';
+import { show } from '@/routes/two-factor';
 import { edit as editPassword } from '@/routes/user-password';
+import type { NavItem } from '@/types';
 
 const ChakraLink = chakra(Link);
 

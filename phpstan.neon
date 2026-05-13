@@ -10,3 +10,6 @@ parameters:
 
     excludePaths:
         - app/Actions/Fortify
+
+    parallel:
+        maximumNumberOfProcesses: 2

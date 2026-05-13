@@ -6,7 +6,7 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
         {{-- Inline script to detect system dark mode preference and apply it immediately --}}
-        <script>
+        <script @if(isset($cspNonce)) nonce="{{ $cspNonce }}" @endif>
             (function() {
                 const appearance = '{{ $appearance ?? "system" }}';
 
@@ -21,7 +21,7 @@
         </script>
 
         {{-- Inline style to set the HTML background color based on our theme in app.css --}}
-        <style>
+        <style @if(isset($cspNonce)) nonce="{{ $cspNonce }}" @endif>
             html, body {
                 background-color: #FAF8F5;
             }
@@ -75,7 +75,7 @@
         @inertia
 
         {{-- Loading spinner visible mientras React hidrata la app --}}
-        <script>
+        <script @if(isset($cspNonce)) nonce="{{ $cspNonce }}" @endif>
             (function() {
                 var el = document.getElementById('app');
                 if (el && !el.hasChildNodes()) {

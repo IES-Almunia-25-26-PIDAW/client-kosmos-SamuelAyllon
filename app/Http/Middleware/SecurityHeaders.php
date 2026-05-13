@@ -4,12 +4,19 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\Vite;
+use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 
 class SecurityHeaders
 {
     public function handle(Request $request, Closure $next): Response
     {
+        $nonce = Str::random(32);
+        Vite::useCspNonce($nonce);
+        View::share('cspNonce', $nonce);
+
         $response = $next($request);
 
         $response->headers->set('X-Frame-Options', 'SAMEORIGIN');
@@ -18,13 +25,13 @@ class SecurityHeaders
         $response->headers->set('Permissions-Policy', 'camera=(self), microphone=(self), display-capture=(self), geolocation=()');
 
         if (! app()->environment('local') && ! $response->headers->has('Content-Security-Policy')) {
-            $response->headers->set('Content-Security-Policy', $this->csp());
+            $response->headers->set('Content-Security-Policy', $this->csp($nonce));
         }
 
         return $response;
     }
 
-    private function csp(): string
+    private function csp(string $nonce): string
     {
         $reverbHost = config('broadcasting.connections.reverb.options.host', 'localhost');
         $reverbPort = config('broadcasting.connections.reverb.options.port', 8080);
@@ -33,7 +40,7 @@ class SecurityHeaders
 
         return implode('; ', [
             "default-src 'self'",
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+            "script-src 'self' 'nonce-{$nonce}' 'strict-dynamic'",
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://api.fontshare.com",
             "font-src 'self' https://fonts.gstatic.com https://api.fontshare.com data:",
             "img-src 'self' data: blob: https:",
