@@ -35,23 +35,31 @@ class IndexAction extends Controller
 
         $patientProfileMap = $activePatientProfiles->keyBy('user_id');
 
+        $completedBeforeSub = Appointment::query()
+            ->selectRaw('COUNT(*)')
+            ->whereColumn('patient_id', 'appointments.patient_id')
+            ->where('professional_id', $user->id)
+            ->where('status', 'completed')
+            ->whereColumn('starts_at', '<', 'appointments.starts_at');
+
+        $totalNotCancelledSub = Appointment::query()
+            ->selectRaw('COUNT(*)')
+            ->whereColumn('patient_id', 'appointments.patient_id')
+            ->where('professional_id', $user->id)
+            ->whereNotIn('status', ['cancelled']);
+
         $todaySessions = $user->professionalAppointments()
             ->with(['patient:id,name,avatar_path', 'service:id,name'])
             ->whereDate('starts_at', today())
             ->whereNotIn('status', ['cancelled', 'completed'])
             ->orderBy('starts_at')
+            ->select('appointments.*')
+            ->selectSub($completedBeforeSub, 'completed_before_count')
+            ->selectSub($totalNotCancelledSub, 'total_not_cancelled_count')
             ->get()
-            ->map(function (Appointment $appointment) use ($user, $patientProfileMap) {
-                $sessionNumber = Appointment::where('professional_id', $user->id)
-                    ->where('patient_id', $appointment->patient_id)
-                    ->where('status', 'completed')
-                    ->where('starts_at', '<', $appointment->starts_at)
-                    ->count() + 1;
-
-                $totalSessions = Appointment::where('professional_id', $user->id)
-                    ->where('patient_id', $appointment->patient_id)
-                    ->whereNotIn('status', ['cancelled'])
-                    ->count();
+            ->map(function (Appointment $appointment) use ($patientProfileMap) {
+                $sessionNumber = ((int) $appointment->getAttribute('completed_before_count')) + 1;
+                $totalSessions = (int) $appointment->getAttribute('total_not_cancelled_count');
 
                 $patientProfile = $patientProfileMap->get($appointment->patient_id);
 

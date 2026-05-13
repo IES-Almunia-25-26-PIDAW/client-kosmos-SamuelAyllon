@@ -167,7 +167,9 @@ class User extends Authenticatable implements MustVerifyEmail
     protected function role(): Attribute
     {
         return Attribute::make(
-            get: fn (): string => $this->roles->pluck('name')->first() ?? 'professional',
+            get: fn (): string => $this->relationLoaded('roles')
+                ? ($this->roles->pluck('name')->first() ?? 'professional')
+                : 'professional',
         );
     }
 
