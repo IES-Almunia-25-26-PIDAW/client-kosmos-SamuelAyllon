@@ -1,5 +1,5 @@
 import { Box, Container, Flex, Grid, Heading, Stack, Text, chakra } from '@chakra-ui/react';
-import { Form, Head, Link } from '@inertiajs/react';
+import { Deferred, Form, Head, Link } from '@inertiajs/react';
 import { ArrowLeft, FileText, MessageSquare, Paperclip, Play } from 'lucide-react';
 import type { ReactNode } from 'react';
 import JoinWaitingRoomAction from '@/actions/App/Http/Controllers/Appointment/JoinWaitingRoomAction';
@@ -7,6 +7,7 @@ import DashboardIndexAction from '@/actions/App/Http/Controllers/Dashboard/Index
 import PatientShowAction from '@/actions/App/Http/Controllers/Patient/ShowAction';
 import { EmptyState } from '@/components/empty-state';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import AppLayout from '@/layouts/app-layout';
 
 const ChakraLink = chakra(Link);
@@ -43,7 +44,6 @@ interface PatientProfile {
     id: number;
     diagnosis: string | null;
     clinical_notes: string | null;
-    documents: Document[];
 }
 
 interface ClinicalNote {
@@ -66,7 +66,8 @@ interface Appointment {
 
 interface Props {
     appointment: Appointment;
-    lastClinicalNote: ClinicalNote | null;
+    documents?: Document[];
+    lastClinicalNote?: ClinicalNote | null;
 }
 
 const formatTime = (dt: string) =>
@@ -117,10 +118,10 @@ const resourceMeta = (doc: Document): { Icon: typeof Paperclip; subtitle: string
     return { Icon: Paperclip, subtitle: size ? `${extFromMime(doc.mime_type)} · ${size}` : extFromMime(doc.mime_type) };
 };
 
-export default function AppointmentShow({ appointment, lastClinicalNote }: Props) {
+export default function AppointmentShow({ appointment, documents, lastClinicalNote }: Props) {
     const patient = appointment.patient;
     const profile = patient?.patient_profile ?? null;
-    const resources = profile?.documents ?? [];
+    const resources = documents ?? [];
 
     return (
         <>
@@ -266,35 +267,37 @@ export default function AppointmentShow({ appointment, lastClinicalNote }: Props
                                         </Text>
                                     )}
                                 </Flex>
-                                {lastClinicalNote ? (
-                                    <>
-                                        <Text fontSize="md" fontStyle="italic" color="fg" lineHeight="relaxed" whiteSpace="pre-wrap">
-                                            {lastClinicalNote.content}
+                                <Deferred data="lastClinicalNote" fallback={<Skeleton h="16" />}>
+                                    {lastClinicalNote ? (
+                                        <>
+                                            <Text fontSize="md" fontStyle="italic" color="fg" lineHeight="relaxed" whiteSpace="pre-wrap">
+                                                {lastClinicalNote.content}
+                                            </Text>
+                                            {patient?.patient_profile && (
+                                                <ChakraLink
+                                                    href={PatientShowAction.url(patient.patient_profile?.id)}
+                                                    mt="3"
+                                                    display="inline-flex"
+                                                    alignItems="center"
+                                                    gap="1"
+                                                    fontSize="xs"
+                                                    fontWeight="semibold"
+                                                    textTransform="uppercase"
+                                                    letterSpacing="wider"
+                                                    color="brand.solid"
+                                                    transition="colors 0.2s"
+                                                    _hover={{ color: 'brand.emphasized' }}
+                                                >
+                                                    Ver historial completo
+                                                </ChakraLink>
+                                            )}
+                                        </>
+                                    ) : (
+                                        <Text fontSize="sm" fontStyle="italic" color="fg.muted">
+                                            Sin notas clínicas registradas.
                                         </Text>
-                                        {patient?.patient_profile && (
-                                            <ChakraLink
-                                                href={PatientShowAction.url(patient.patient_profile?.id)}
-                                                mt="3"
-                                                display="inline-flex"
-                                                alignItems="center"
-                                                gap="1"
-                                                fontSize="xs"
-                                                fontWeight="semibold"
-                                                textTransform="uppercase"
-                                                letterSpacing="wider"
-                                                color="brand.solid"
-                                                transition="colors 0.2s"
-                                                _hover={{ color: 'brand.emphasized' }}
-                                            >
-                                                Ver historial completo
-                                            </ChakraLink>
-                                        )}
-                                    </>
-                                ) : (
-                                    <Text fontSize="sm" fontStyle="italic" color="fg.muted">
-                                        Sin notas clínicas registradas.
-                                    </Text>
-                                )}
+                                    )}
+                                </Deferred>
                             </Box>
                         </Stack>
                     </Box>
@@ -326,41 +329,43 @@ export default function AppointmentShow({ appointment, lastClinicalNote }: Props
                                     Recursos del cliente
                                 </Text>
                             </Box>
-                            {resources.length === 0 ? (
-                                <EmptyState
-                                    icon={FileText}
-                                    title="Sin recursos"
-                                    description="Aún no has añadido recursos para este paciente."
-                                />
-                            ) : (
-                                <Stack as="ul" gap="0" listStyleType="none">
-                                    {resources.map((doc, idx) => {
-                                        const { Icon, subtitle } = resourceMeta(doc);
-                                        return (
-                                            <Flex
-                                                as="li"
-                                                key={doc.id}
-                                                alignItems="center"
-                                                gap="3"
-                                                px="4"
-                                                py="3"
-                                                borderTopWidth={idx > 0 ? '1px' : undefined}
-                                                borderColor="border.subtle"
-                                            >
-                                                <Box as={Icon} w="4" h="4" flexShrink={0} color="fg.muted" />
-                                                <Box minW="0" flex="1">
-                                                    <Text fontSize="sm" fontWeight="medium" color="fg" truncate>
-                                                        {doc.name}
-                                                    </Text>
-                                                    <Text fontSize="2xs" color="fg.subtle" truncate>
-                                                        {subtitle}
-                                                    </Text>
-                                                </Box>
-                                            </Flex>
-                                        );
-                                    })}
-                                </Stack>
-                            )}
+                            <Deferred data="documents" fallback={<Stack p="4" gap="2"><Skeleton h="6" /><Skeleton h="6" /></Stack>}>
+                                {resources.length === 0 ? (
+                                    <EmptyState
+                                        icon={FileText}
+                                        title="Sin recursos"
+                                        description="Aún no has añadido recursos para este paciente."
+                                    />
+                                ) : (
+                                    <Stack as="ul" gap="0" listStyleType="none">
+                                        {resources.map((doc, idx) => {
+                                            const { Icon, subtitle } = resourceMeta(doc);
+                                            return (
+                                                <Flex
+                                                    as="li"
+                                                    key={doc.id}
+                                                    alignItems="center"
+                                                    gap="3"
+                                                    px="4"
+                                                    py="3"
+                                                    borderTopWidth={idx > 0 ? '1px' : undefined}
+                                                    borderColor="border.subtle"
+                                                >
+                                                    <Box as={Icon} w="4" h="4" flexShrink={0} color="fg.muted" />
+                                                    <Box minW="0" flex="1">
+                                                        <Text fontSize="sm" fontWeight="medium" color="fg" truncate>
+                                                            {doc.name}
+                                                        </Text>
+                                                        <Text fontSize="2xs" color="fg.subtle" truncate>
+                                                            {subtitle}
+                                                        </Text>
+                                                    </Box>
+                                                </Flex>
+                                            );
+                                        })}
+                                    </Stack>
+                                )}
+                            </Deferred>
                         </Box>
 
                         {['confirmed', 'in_progress'].includes(appointment.status) && (

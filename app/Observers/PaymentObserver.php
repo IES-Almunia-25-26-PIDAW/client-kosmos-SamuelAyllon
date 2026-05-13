@@ -2,8 +2,10 @@
 
 namespace App\Observers;
 
+use App\Http\Controllers\Invoice\IndexAction;
 use App\Models\Invoice;
 use App\Notifications\InvoicePaidNotification;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
@@ -11,6 +13,8 @@ class PaymentObserver
 {
     public function saved(Invoice $invoice): void
     {
+        Cache::forget(IndexAction::statsCacheKey($invoice->professional_id));
+
         if (! $invoice->wasChanged('status')) {
             return;
         }

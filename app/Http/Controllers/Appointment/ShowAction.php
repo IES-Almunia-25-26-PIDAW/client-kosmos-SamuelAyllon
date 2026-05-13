@@ -11,25 +11,26 @@ class ShowAction extends Controller
 {
     public function __invoke(Appointment $appointment): Response
     {
+        $this->authorize('view', $appointment);
+
         $appointment->load([
             'patient',
             'patient.patientProfile',
-            'patient.patientProfile.documents',
             'professional',
             'service',
-            'sessionRecording',
-            'notes',
             'agreements',
-            'invoiceItems.invoice',
         ]);
-
-        $lastClinicalNote = $appointment->patient?->patientProfile?->notes()
-            ->latest('created_at')
-            ->first();
 
         return Inertia::render('professional/appointments/show', [
             'appointment' => $appointment,
-            'lastClinicalNote' => $lastClinicalNote,
+            'documents' => Inertia::defer(
+                fn () => $appointment->patient?->patientProfile?->documents()->get() ?? []
+            ),
+            'lastClinicalNote' => Inertia::defer(
+                fn () => $appointment->patient?->patientProfile?->notes()
+                    ->latest('created_at')
+                    ->first()
+            ),
         ]);
     }
 }

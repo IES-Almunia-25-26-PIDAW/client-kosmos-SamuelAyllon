@@ -19,6 +19,7 @@ use App\Observers\AppointmentObserver;
 use App\Observers\PatientObserver;
 use App\Observers\PaymentObserver;
 use App\Policies\AdminPolicy;
+use App\Policies\AppointmentPolicy;
 use App\Policies\DocumentPolicy;
 use App\Policies\OfferedConsultationPolicy;
 use App\Policies\PatientPolicy;
@@ -86,6 +87,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(User::class, AdminPolicy::class);
         Gate::policy(PatientProfile::class, PatientPolicy::class);
         Gate::policy(Invoice::class, PaymentPolicy::class);
+        Gate::policy(Appointment::class, AppointmentPolicy::class);
         Gate::policy(Document::class, DocumentPolicy::class);
         Gate::policy(SessionRecording::class, SessionRecordingPolicy::class);
         Gate::policy(OfferedConsultation::class, OfferedConsultationPolicy::class);
