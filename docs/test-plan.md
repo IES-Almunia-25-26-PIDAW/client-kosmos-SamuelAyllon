@@ -202,10 +202,10 @@ Replicado en [.github/workflows/tests.yml](../.github/workflows/tests.yml):
 - Build de assets (Vite).
 - Vitest.
 - PHPStan.
-- `./vendor/bin/pest --coverage --coverage-clover=coverage.xml --coverage-text --log-junit=junit.xml --min=60`.
+- `./vendor/bin/pest --coverage --coverage-clover=coverage.xml --coverage-text=coverage-summary.txt --log-junit=junit.xml --min=61`.
 - Upload de `coverage.xml` y `junit.xml` como artefacto `test-reports` (retención 30 días).
 
-**Umbral de cobertura actual:** 60% (ver ADR-0030/0031 sobre PHPStan baseline). Revisable a 70% cuando se cierren los pasos 3 y 4 del plan QA 2026-05.
+**Umbral de cobertura actual:** **61%** sobre líneas (medido en CI run del commit `7cfb190` = 66.84% real, margen de 5 puntos sobre el `floor`). Revisable al alza conforme suba la cobertura tras nuevos tests Unit/Vitest.
 
 ---
 
@@ -224,7 +224,7 @@ Replicado en [.github/workflows/tests.yml](../.github/workflows/tests.yml):
 5. Para reproducir localmente con cobertura:
 
    ```bash
-   ./vendor/bin/pest --coverage --coverage-html=coverage-html --min=60
+   ./vendor/bin/pest --coverage --coverage-html=coverage-html --min=61
    npm run test -- --coverage
    ```
 

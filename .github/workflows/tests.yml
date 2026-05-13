@@ -75,7 +75,7 @@ jobs:
         run: composer analyse
 
       - name: Tests
-        run: ./vendor/bin/pest --coverage --coverage-clover=coverage.xml --coverage-text=coverage-summary.txt --log-junit=junit.xml --min=60
+        run: ./vendor/bin/pest --coverage --coverage-clover=coverage.xml --coverage-text=coverage-summary.txt --log-junit=junit.xml --min=61
 
       - name: Render coverage summary markdown
         if: always()
