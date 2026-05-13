@@ -212,18 +212,23 @@ Replicado en [.github/workflows/tests.yml](../.github/workflows/tests.yml):
 ## 4. Procedimiento de archivo de evidencias
 
 1. Cada push a `main` ejecuta el workflow `tests` en GitHub Actions.
-2. Al finalizar, el artefacto `test-reports` queda accesible desde la pestaña *Actions* del run correspondiente:
-   - `coverage.xml` — formato Clover (consumible por herramientas externas).
+2. Al finalizar, el artefacto **`test-reports`** queda accesible desde la pestaña *Actions* del run correspondiente y contiene:
+   - `coverage.xml` — formato Clover (consumible por SonarQube, Codecov, etc.).
+   - `coverage-summary.txt` — salida plana de `pest --coverage-text` (porcentaje por clase/método).
+   - `coverage-summary.md` — primeras ~60 líneas del summary envueltas en Markdown, con commit SHA y timestamp UTC. Útil para pegar en una PR o release.
    - `junit.xml` — listado completo de casos con estado, tiempo y stack trace en caso de fallo.
-3. **Convención de retención:** GitHub conserva 30 días. Para releases (etiquetas `v*`) se debe descargar manualmente y archivar fuera del repo (no comitear binarios).
-4. Para reproducir localmente con cobertura:
+3. **Cómo descargar:**
+   - GitHub web → *Actions* → run del commit → sección *Artifacts* → `test-reports`.
+   - CLI: `gh run download <run-id> -n test-reports`.
+4. **Convención de retención:** GitHub conserva el artefacto 30 días. Para releases (etiquetas `v*`) se debe descargar manualmente y archivar fuera del repo (no comitear binarios).
+5. Para reproducir localmente con cobertura:
 
    ```bash
    ./vendor/bin/pest --coverage --coverage-html=coverage-html --min=60
    npm run test -- --coverage
    ```
 
-5. Cualquier fallo del gate bloquea el merge. La política es **fix forward** — corregir el test o el código en un commit nuevo, nunca `--no-verify`.
+6. Cualquier fallo del gate bloquea el merge. La política es **fix forward** — corregir el test o el código en un commit nuevo, nunca `--no-verify`.
 
 ---
 
