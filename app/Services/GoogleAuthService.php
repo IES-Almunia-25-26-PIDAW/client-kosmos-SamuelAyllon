@@ -10,14 +10,11 @@ use RuntimeException;
 class GoogleAuthService
 {
     /** @var list<string> */
-    private const BASE_SCOPES = ['openid', 'email', 'profile'];
+    private const SCOPES = ['openid', 'email', 'profile', Calendar::CALENDAR_EVENTS];
 
-    /** @var list<string> */
-    private const PROFESSIONAL_EXTRA_SCOPES = [Calendar::CALENDAR_EVENTS];
-
-    public function createAuthUrl(string $state, bool $includeCalendar): string
+    public function createAuthUrl(string $state): string
     {
-        $client = $this->newClient($includeCalendar);
+        $client = $this->newClient();
         $client->setState($state);
         $client->setAccessType('offline');
         $client->setIncludeGrantedScopes(true);
@@ -27,7 +24,7 @@ class GoogleAuthService
     }
 
     /**
-     * Exchange the authorization code for user info and (optionally) a refresh token.
+     * Exchange the authorization code for user info and a refresh token.
      *
      * @return array{
      *   google_id: string,
@@ -38,9 +35,9 @@ class GoogleAuthService
      *   refresh_token: ?string
      * }
      */
-    public function handleCallback(string $code, bool $includeCalendar): array
+    public function handleCallback(string $code): array
     {
-        $client = $this->newClient($includeCalendar);
+        $client = $this->newClient();
         $token = $client->fetchAccessTokenWithAuthCode($code);
 
         if (isset($token['error'])) {
@@ -67,20 +64,15 @@ class GoogleAuthService
         ];
     }
 
-    private function newClient(bool $includeCalendar): GoogleClient
+    private function newClient(): GoogleClient
     {
         $client = new GoogleClient;
         $client->setClientId((string) config('services.google.client_id'));
         $client->setClientSecret((string) config('services.google.client_secret'));
         $client->setRedirectUri((string) config('services.google.auth_redirect_uri'));
 
-        foreach (self::BASE_SCOPES as $scope) {
+        foreach (self::SCOPES as $scope) {
             $client->addScope($scope);
-        }
-        if ($includeCalendar) {
-            foreach (self::PROFESSIONAL_EXTRA_SCOPES as $scope) {
-                $client->addScope($scope);
-            }
         }
 
         return $client;

@@ -61,6 +61,7 @@ class IndexAction extends Controller
             'upcomingAppointments' => $upcomingAppointments,
             'recentInvoices' => $recentInvoices,
             'unreadMessages' => $unreadMessages,
+            'googleCalendarConnected' => $user->google_refresh_token !== null,
         ]);
     }
 }

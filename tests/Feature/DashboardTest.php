@@ -87,6 +87,28 @@ it('authenticated patient can visit dashboard and sees patient view', function (
         );
 });
 
+it('patient dashboard exposes googleCalendarConnected reflecting refresh token state', function () {
+    $unlinked = createPatient();
+    $unlinked->forceFill(['google_refresh_token' => null])->save();
+
+    $this->actingAs($unlinked)
+        ->get(route('patient.dashboard'))
+        ->assertInertia(fn ($page) => $page
+            ->component('patient/dashboard')
+            ->where('googleCalendarConnected', false)
+        );
+
+    $linked = createPatient();
+    $linked->forceFill(['google_refresh_token' => 'rt-abc'])->save();
+
+    $this->actingAs($linked)
+        ->get(route('patient.dashboard'))
+        ->assertInertia(fn ($page) => $page
+            ->component('patient/dashboard')
+            ->where('googleCalendarConnected', true)
+        );
+});
+
 it('admin is redirected away from professional dashboard', function () {
     $admin = createAdmin();
 

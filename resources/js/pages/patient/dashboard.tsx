@@ -8,6 +8,7 @@ import InvoiceIndexAction from '@/actions/App/Http/Controllers/Portal/Invoice/In
 import InvoiceShowAction from '@/actions/App/Http/Controllers/Portal/Invoice/ShowAction';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
+import { edit as googleSettingsEdit } from '@/routes/settings/google';
 
 const ChakraLink = chakra(Link);
 const ChakraImg = chakra('img');
@@ -49,6 +50,7 @@ interface Props {
     upcomingAppointments: UpcomingAppointment[];
     recentInvoices: RecentInvoice[];
     agreements?: Agreement[];
+    googleCalendarConnected?: boolean;
 }
 
 const formatDateTime = (dt: string): string => {
@@ -83,7 +85,13 @@ const getStatusBadgeProps = (status: string): { bg: string; color: string; label
     return map[status] ?? { bg: 'bg.subtle', color: 'fg.muted', label: status };
 };
 
-export default function PatientDashboard({ todayAppointments = [], upcomingAppointments, recentInvoices, agreements = [] }: Props) {
+export default function PatientDashboard({
+    todayAppointments = [],
+    upcomingAppointments,
+    recentInvoices,
+    agreements = [],
+    googleCalendarConnected = true,
+}: Props) {
     const nextAppointment = upcomingAppointments[0] ?? null;
 
     return (
@@ -128,6 +136,52 @@ export default function PatientDashboard({ todayAppointments = [], upcomingAppoi
                         <Box as={Bell} w="5" h="5" aria-hidden={true} />
                     </Box>
                 </Flex>
+
+                {!googleCalendarConnected && (
+                    <Flex
+                        as="section"
+                        role="region"
+                        aria-label="Vincular Google Calendar"
+                        gap="4"
+                        alignItems={{ base: 'stretch', md: 'center' }}
+                        justifyContent="space-between"
+                        flexDirection={{ base: 'column', md: 'row' }}
+                        bg="bg.surface"
+                        borderWidth="1px"
+                        borderColor="border"
+                        borderLeftWidth="4px"
+                        borderLeftColor="brand.solid"
+                        borderRadius="xl"
+                        p="5"
+                    >
+                        <Flex gap="3" alignItems="flex-start">
+                            <Box as={CalendarDays} w="5" h="5" color="brand.solid" mt="0.5" aria-hidden={true} />
+                            <Stack gap="1">
+                                <Text fontWeight="semibold" color="fg">Conecta tu Google Calendar</Text>
+                                <Text fontSize="sm" color="fg.muted">
+                                    Vincula tu cuenta para sincronizar tus citas con tu calendario personal.
+                                </Text>
+                            </Stack>
+                        </Flex>
+                        <ChakraLink
+                            href={googleSettingsEdit.url()}
+                            display="inline-flex"
+                            alignItems="center"
+                            justifyContent="center"
+                            bg="brand.solid"
+                            color="brand.contrast"
+                            fontWeight="medium"
+                            fontSize="sm"
+                            px="4"
+                            py="2"
+                            borderRadius="lg"
+                            whiteSpace="nowrap"
+                            _hover={{ bg: 'brand.emphasized', textDecoration: 'none' }}
+                        >
+                            Vincular Calendar
+                        </ChakraLink>
+                    </Flex>
+                )}
 
                 {/* ── Today's sessions ── */}
                 {todayAppointments.length > 0 && (
