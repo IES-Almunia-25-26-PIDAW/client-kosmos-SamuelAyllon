@@ -8,6 +8,7 @@ import {
     Handshake,
     Home,
     MessageSquare,
+    Receipt,
     Sparkles,
     Users,
 } from 'lucide-react';
