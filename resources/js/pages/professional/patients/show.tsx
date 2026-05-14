@@ -49,7 +49,7 @@ const SectionPanel = ({ title, children, onAdd }: SectionPanelProps) => (
     <Box borderRadius="xl" overflow="hidden" borderWidth="1px" borderColor="border.subtle" boxShadow="sm">
         <Box bg="brand.solid" px="5" py="3.5">
             <Flex justifyContent="space-between" alignItems="center">
-                <Text fontFamily="heading" fontSize="xl" fontWeight="bold" color="white" letterSpacing="-0.01em">
+                <Text fontFamily="heading" fontSize="xl" fontWeight="bold" color="white" letterSpacing="-0.01em" marginTop="2" marginBottom="2">
                     {title}
                 </Text>
                 {onAdd && (
@@ -171,17 +171,17 @@ export default function PatientShow({ patient }: Props) {
         <>
             <Head title={`${patient.name ?? patient.project_name ?? 'Paciente'} — ClientKosmos`} />
 
-            <Flex direction="column" minH="100vh" bg="bg">
+            <Flex direction="column" flex="1" w="full">
                 <PatientHeader patient={patient} />
 
                 {/* Tab nav */}
                 <Box
                     borderBottomWidth="1px"
                     borderColor="border.subtle"
-                    bg="bg.surface"
                     px={{ base: '4', lg: '8' }}
                     position="sticky"
                     top="73px"
+                    mt="4"
                     zIndex="sticky"
                     backdropFilter="saturate(180%) blur(8px)"
                 >
@@ -290,10 +290,10 @@ export default function PatientShow({ patient }: Props) {
                                 {/* Agreements + Resources two-column panels */}
                                 <Grid templateColumns={{ base: '1fr', md: '1fr 1fr' }} gap="5" alignItems="flex-start">
                                     {/* Agreements panel */}
-                                    <SectionPanel title="Acuerdos Terapéuticos">
+                                    <SectionPanel title="Acuerdos Terapéuticos" >
                                         {patient.agreements.length === 0 ? (
                                             <Box p="5">
-                                                <Text fontSize="sm" color="fg.subtle">
+                                                <Text fontSize="sm" color="fg.subtle" >
                                                     Aún no hay acuerdos registrados.
                                                 </Text>
                                             </Box>
@@ -368,7 +368,7 @@ export default function PatientShow({ patient }: Props) {
                                                             justifyContent="center"
                                                             flexShrink={0}
                                                         >
-                                                            <Box as={FileText} w="4" h="4" color="fg.muted" />
+                                                            <Box as={FileText} w="4" h="4" color="fg" />
                                                         </Flex>
                                                         <Box flex="1" minW="0">
                                                             <Text fontSize="sm" fontWeight="medium" color="fg" overflow="hidden" textOverflow="ellipsis" whiteSpace="nowrap">
@@ -378,7 +378,7 @@ export default function PatientShow({ patient }: Props) {
                                                                 {formatDate(doc.created_at)}
                                                             </Text>
                                                         </Box>
-                                                        <Box as={Download} w="4" h="4" color="fg.subtle" flexShrink={0} />
+                                                        <Box as={Download} w="4" h="4" color="fg" flexShrink={0} />
                                                     </Flex>
                                                 ))}
                                             </Stack>
@@ -395,7 +395,6 @@ export default function PatientShow({ patient }: Props) {
                                         <Heading fontFamily="heading" fontSize="lg" fontWeight="bold" color="white">
                                             Resumen de cobros
                                         </Heading>
-                                        <Box as={Receipt} w="5" h="5" color="white" opacity={0.6} flexShrink={0} />
                                     </Flex>
                                     <Text
                                         fontSize="xs"
@@ -414,20 +413,21 @@ export default function PatientShow({ patient }: Props) {
                                         color="white"
                                         letterSpacing="-0.04em"
                                         lineHeight="1"
-                                        mb="6"
+                                        mb="0"
+                                        mt="0"
                                         fontVariantNumeric="tabular-nums"
                                     >
                                         {formatCurrency(totalPaid)}
                                     </Text>
-                                    <Stack gap="0" mb="6">
+                                    <Stack gap="0" mb="3" mt="3">
                                         <Flex
                                             justifyContent="space-between"
                                             alignItems="center"
-                                            py="2.5"
                                             borderBottomWidth="1px"
+                                            height="10"
                                             borderColor="rgba(255,255,255,0.12)"
                                         >
-                                            <Text fontSize="sm" color="white" opacity={0.8}>
+                                            <Text fontSize="sm" color="white" opacity={0.8} mb="0" mt="0">
                                                 Pagos completados
                                             </Text>
                                             <Text fontSize="sm" fontWeight="semibold" color="white">
@@ -437,11 +437,11 @@ export default function PatientShow({ patient }: Props) {
                                         <Flex
                                             justifyContent="space-between"
                                             alignItems="center"
-                                            py="2.5"
                                             borderBottomWidth="1px"
+                                            height="8"
                                             borderColor="rgba(255,255,255,0.12)"
                                         >
-                                            <Text fontSize="sm" color="white" opacity={0.8}>
+                                            <Text fontSize="sm" color="white" opacity={0.8} mb="0" mt="0">
                                                 Pendiente
                                             </Text>
                                             <Text fontSize="sm" fontWeight="semibold" color="white" fontVariantNumeric="tabular-nums">
@@ -461,7 +461,7 @@ export default function PatientShow({ patient }: Props) {
                                         _hover={{ opacity: 0.9 }}
                                         onClick={() => setActiveTab('cobros')}
                                     >
-                                        <Text fontSize="xs" fontWeight="semibold" color="brand.solid" textTransform="uppercase" letterSpacing="wider">
+                                        <Text fontSize="xs" fontWeight="semibold" color="brand.solid" textTransform="uppercase" letterSpacing="wider" mt="0" mb="0">
                                             Ver todos los cobros
                                         </Text>
                                     </Box>
@@ -469,21 +469,21 @@ export default function PatientShow({ patient }: Props) {
 
                                 {/* Patient data */}
                                 <Box bg="bg.surface" borderRadius="3xl" borderWidth="1px" borderColor="border.subtle" p="6" boxShadow="sm">
-                                    <Stack gap="4">
+                                    <Stack gap="3">
                                         <Flex alignItems="center" gap="2" mb="1">
                                             <Flex
                                                 w="7"
                                                 h="7"
                                                 borderRadius="md"
                                                 bg="brand.subtle"
-                                                color="brand.fg"
+                                                color="brand.solid"
                                                 alignItems="center"
                                                 justifyContent="center"
                                                 flexShrink={0}
                                             >
                                                 <Box as={User} w="4" h="4" />
                                             </Flex>
-                                            <Heading fontSize="md" fontWeight="semibold" fontFamily="heading" color="fg">
+                                            <Heading fontSize="md" fontWeight="semibold" fontFamily="heading" color="fg" mt="0" mb="0">
                                                 Datos del paciente
                                             </Heading>
                                         </Flex>
@@ -515,7 +515,7 @@ export default function PatientShow({ patient }: Props) {
                                                     </Text>
                                                     <Flex alignItems="center" gap="2" mt="1">
                                                         <Box as={CalendarClock} w="4" h="4" color="brand.solid" />
-                                                        <Text as="dd" fontSize="sm" color="fg" fontWeight="medium">
+                                                        <Text as="dd" fontSize="sm" color="fg" fontWeight="medium" ml="0">
                                                             {formatDateTime(upcomingSession.scheduled_at)}
                                                         </Text>
                                                     </Flex>
@@ -526,9 +526,12 @@ export default function PatientShow({ patient }: Props) {
                                                     <Text as="dt" fontSize="10px" color="fg.subtle" textTransform="uppercase" letterSpacing="wider" fontWeight="semibold">
                                                         Última sesión
                                                     </Text>
-                                                    <Text as="dd" fontSize="sm" color="fg" mt="1">
-                                                        {formatDate(patient.last_session_at)}
-                                                    </Text>
+                                                    <Flex alignItems="center" gap="2" mt="1">
+                                                        <Box as={CalendarClock} w="4" h="4" color="brand.solid" />
+                                                        <Text as="dd" fontSize="sm" color="fg" fontWeight="medium" ml="0">
+                                                            {formatDate(patient.last_session_at)}
+                                                        </Text>
+                                                    </Flex>
                                                 </Box>
                                             )}
                                         </Stack>
@@ -540,9 +543,9 @@ export default function PatientShow({ patient }: Props) {
 
                     {/* ── ACUERDOS ────────────────────────────────── */}
                     {activeTab === 'acuerdos' && (
-                        <Stack gap="5" maxW="3xl">
+                        <Stack gap="5">
                             <Flex alignItems="center" gap="2">
-                                <Flex w="7" h="7" borderRadius="md" bg="brand.subtle" color="brand.fg" alignItems="center" justifyContent="center">
+                                <Flex w="7" h="7" borderRadius="md" bg="brand.subtle" color="brand.solid" alignItems="center" justifyContent="center">
                                     <Box as={CheckCircle} w="4" h="4" />
                                 </Flex>
                                 <Heading fontSize="lg" fontWeight="semibold" fontFamily="heading" color="fg">
@@ -638,7 +641,7 @@ export default function PatientShow({ patient }: Props) {
                                                             as="button"
                                                             p="1.5"
                                                             borderRadius="md"
-                                                            color="fg.muted"
+                                                            color="fg"
                                                             _hover={{ color: 'fg', bg: 'bg.muted' }}
                                                             onClick={() => { setEditingAgreementId(agreement.id); setEditingAgreementContent(agreement.content); }}
                                                             aria-label="Editar acuerdo"
@@ -649,7 +652,7 @@ export default function PatientShow({ patient }: Props) {
                                                             as="button"
                                                             p="1.5"
                                                             borderRadius="md"
-                                                            color="fg.muted"
+                                                            color="fg"
                                                             _hover={{ color: 'danger.fg', bg: 'danger.subtle' }}
                                                             onClick={() => deleteAgreement(agreement.id)}
                                                             aria-label="Eliminar acuerdo"
@@ -668,9 +671,9 @@ export default function PatientShow({ patient }: Props) {
 
                     {/* ── NOTAS ───────────────────────────────────── */}
                     {activeTab === 'notas' && (
-                        <Stack gap="5" maxW="3xl">
+                        <Stack gap="5">
                             <Flex alignItems="center" gap="2">
-                                <Flex w="7" h="7" borderRadius="md" bg="brand.subtle" color="brand.fg" alignItems="center" justifyContent="center">
+                                <Flex w="7" h="7" borderRadius="md" bg="brand.subtle" color="brand.solid" alignItems="center" justifyContent="center">
                                     <Box as={FileText} w="4" h="4" />
                                 </Flex>
                                 <Heading fontSize="lg" fontWeight="semibold" fontFamily="heading" color="fg">
@@ -782,7 +785,7 @@ export default function PatientShow({ patient }: Props) {
                                                             as="button"
                                                             p="1.5"
                                                             borderRadius="md"
-                                                            color="fg.muted"
+                                                            color="fg"
                                                             _hover={{ color: 'fg', bg: 'bg.muted' }}
                                                             onClick={() => { setEditingNoteId(note.id); setEditingNoteContent(note.content); }}
                                                             aria-label="Editar nota"
@@ -793,7 +796,7 @@ export default function PatientShow({ patient }: Props) {
                                                             as="button"
                                                             p="1.5"
                                                             borderRadius="md"
-                                                            color="fg.muted"
+                                                            color="fg"
                                                             _hover={{ color: 'danger.fg', bg: 'danger.subtle' }}
                                                             onClick={() => deleteNote(note.id)}
                                                             aria-label="Eliminar nota"
@@ -812,9 +815,9 @@ export default function PatientShow({ patient }: Props) {
 
                     {/* ── RECURSOS/DOCUMENTOS ─────────────────────── */}
                     {activeTab === 'documentos' && (
-                        <Stack gap="5" maxW="3xl">
+                        <Stack gap="5">
                             <Flex alignItems="center" gap="2">
-                                <Flex w="7" h="7" borderRadius="md" bg="brand.subtle" color="brand.fg" alignItems="center" justifyContent="center">
+                                <Flex w="7" h="7" borderRadius="md" bg="brand.subtle" color="brand.solid" alignItems="center" justifyContent="center">
                                     <Box as={Shield} w="4" h="4" />
                                 </Flex>
                                 <Heading fontSize="lg" fontWeight="semibold" fontFamily="heading" color="fg">
@@ -859,7 +862,7 @@ export default function PatientShow({ patient }: Props) {
                                                         alignItems="center"
                                                         justifyContent="center"
                                                         flexShrink={0}
-                                                        color="fg.muted"
+                                                        color="fg"
                                                     >
                                                         <Box as={FileText} w="4" h="4" />
                                                     </Flex>
@@ -886,12 +889,12 @@ export default function PatientShow({ patient }: Props) {
                                                             RGPD
                                                         </Text>
                                                     )}
-                                                    <Box as={Download} w="4" h="4" color="fg.muted" flexShrink={0} />
+                                                    <Box as={Download} w="4" h="4" color="fg" flexShrink={0} />
                                                     <Box
                                                         as="button"
                                                         p="1.5"
                                                         borderRadius="md"
-                                                        color="fg.muted"
+                                                        color="fg"
                                                         _hover={{ color: 'danger.fg', bg: 'danger.subtle' }}
                                                         onClick={() => deleteDocument(doc.id)}
                                                         aria-label="Eliminar documento"
@@ -912,7 +915,7 @@ export default function PatientShow({ patient }: Props) {
                         <Stack gap="5">
                             <Flex alignItems="center" justifyContent="space-between">
                                 <Flex alignItems="center" gap="2">
-                                    <Flex w="7" h="7" borderRadius="md" bg="brand.subtle" color="brand.fg" alignItems="center" justifyContent="center">
+                                    <Flex w="7" h="7" borderRadius="md" bg="brand.subtle" color="brand.solid" alignItems="center" justifyContent="center">
                                         <Box as={Receipt} w="4" h="4" />
                                     </Flex>
                                     <Heading fontSize="lg" fontWeight="semibold" fontFamily="heading" color="fg">

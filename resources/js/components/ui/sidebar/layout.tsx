@@ -233,18 +233,10 @@ export function SidebarInset({ ...props }: HTMLChakraProps<'main'>) {
             flex="1"
             flexDirection="column"
             css={{
-                '[data-slot=sidebar][data-variant=inset] ~ &': {
-                    minHeight: 'calc(100svh - var(--spacing, 1rem))',
-                },
                 '@media (min-width: 768px)': {
                     '[data-slot=sidebar][data-variant=inset] ~ &': {
-                        margin: '0.5rem',
-                        marginLeft: '0',
-                        borderRadius: 'var(--radii-xl)',
+                        borderRadius: '0',
                         boxShadow: 'var(--shadows-sm)',
-                    },
-                    '[data-slot=sidebar][data-variant=inset][data-state=collapsed] ~ &': {
-                        marginLeft: '0',
                     },
                 },
             }}

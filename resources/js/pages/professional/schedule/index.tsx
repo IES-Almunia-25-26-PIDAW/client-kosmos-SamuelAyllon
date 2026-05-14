@@ -1,6 +1,7 @@
-import { Box, Flex, Heading, Icon, Stack, Text, chakra } from '@chakra-ui/react';
+import { Badge, Box, Card, Container, Flex, Heading, HStack, Icon, IconButton, SegmentGroup, Separator, Stack, Text, VStack, chakra } from '@chakra-ui/react';
 import { Head, router, useForm } from '@inertiajs/react';
-import { ChevronLeft, ChevronRight, Plus, Trash2 } from 'lucide-react';
+import { CalendarDays, ChevronLeft, ChevronRight, Clock, MapPin, Plus, Trash2, Video } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import type { ReactNode } from 'react';
 import { useState } from 'react';
 import DestroyAction from '@/actions/App/Http/Controllers/Appointment/DestroyAction';
@@ -58,8 +59,9 @@ interface CalendarEvent {
 }
 
 const HOUR_START = 7;
-const HOUR_END = 20;
-const HOUR_HEIGHT = 64;
+const HOUR_END_COMPACT = 18;
+const HOUR_END_EXTENDED = 21;
+const HOUR_HEIGHT = 44;
 
 type StatusCfg = { label: string; palette: string; showDot?: boolean };
 
@@ -174,42 +176,62 @@ function EventBlock({ event, onClick }: { event: CalendarEvent; onClick: () => v
     const startMins  = timeToMinutes(event.startTime);
     const endMins    = timeToMinutes(event.endTime);
     const topOffset  = ((startMins - HOUR_START * 60) / 60) * HOUR_HEIGHT;
-    const height     = Math.max(((endMins - startMins) / 60) * HOUR_HEIGHT, 20);
+    const height     = Math.max(((endMins - startMins) / 60) * HOUR_HEIGHT, 22);
     const cfg        = event.status ? (statusConfig[event.status] ?? statusConfig.pending) : null;
     const isSlot     = event.type === 'slot';
     const palette    = isSlot ? 'brand' : (cfg?.palette ?? 'brand');
+    const isCompact  = height < 40;
+    const modality   = event.appointment?.modality;
+    const ModIcon    = modality === 'video_call' ? Video : modality === 'in_person' ? MapPin : null;
 
     return (
-        <chakra.button
-            onClick={onClick}
-            colorPalette={palette}
-            position="absolute"
-            left="1"
-            right="1"
-            borderRadius="sm"
-            borderLeftWidth="2px"
-            borderColor="colorPalette.solid"
-            bg="colorPalette.subtle"
-            color="colorPalette.fg"
-            px="1.5"
-            py="0.5"
-            textAlign="left"
-            transition="opacity"
-            _hover={{ opacity: 0.8 }}
-            style={{ top: topOffset, height, minHeight: 20, zIndex: 10 }}
-        >
-            {cfg?.showDot && (
-                <Box as="span" mr="1" display="inline-block" boxSize="1.5" borderRadius="full" bg="colorPalette.solid" />
-            )}
-            {isSlot && <Text as="span" mr="1" fontSize="10px" fontWeight="semibold" textTransform="uppercase" letterSpacing="wide" opacity={0.7}>HUECO</Text>}
-            {!isSlot && event.status && (
-                <Text as="span" mr="1" fontSize="10px" fontWeight="semibold" textTransform="uppercase" letterSpacing="wide">
-                    {statusConfig[event.status]?.label ?? event.status}
-                </Text>
-            )}
-            <Text display="block" truncate fontSize="xs" fontWeight="medium" lineHeight="tight">{event.label}</Text>
-            <Text fontSize="10px" opacity={0.7}>{event.startTime} - {event.endTime}</Text>
-        </chakra.button>
+        <Tooltip openDelay={300} positioning={{ placement: 'right' }}>
+            <TooltipTrigger asChild>
+                <chakra.button
+                    onClick={onClick}
+                    colorPalette={palette}
+                    position="absolute"
+                    left="1"
+                    right="1"
+                    borderRadius="md"
+                    borderLeftWidth="3px"
+                    borderColor="colorPalette.solid"
+                    bg="colorPalette.subtle"
+                    color="colorPalette.fg"
+                    px="2"
+                    py="1"
+                    textAlign="left"
+                    overflow="hidden"
+                    transition="all 0.15s"
+                    boxShadow="xs"
+                    _hover={{ boxShadow: 'md', transform: 'translateY(-1px)', bg: 'colorPalette.muted' }}
+                    _focusVisible={{ outline: '2px solid', outlineColor: 'colorPalette.solid', outlineOffset: '1px' }}
+                    style={{ top: topOffset, height, minHeight: 22, zIndex: 10 }}
+                >
+                    <HStack gap="1" mb={isCompact ? '0' : '0.5'} alignItems="center">
+                        <Box boxSize="1.5" borderRadius="full" bg="colorPalette.solid" flexShrink="0" />
+                        <Text truncate fontSize="xs" fontWeight="semibold" lineHeight="tight" flex="1">{event.label}</Text>
+                        {ModIcon && !isCompact && <Icon as={ModIcon} boxSize="3" opacity={0.7} />}
+                    </HStack>
+                    {!isCompact && (
+                        <Text fontSize="10px" opacity={0.75} lineHeight="tight">
+                            {event.startTime} – {event.endTime}
+                        </Text>
+                    )}
+                </chakra.button>
+            </TooltipTrigger>
+            <TooltipContent>
+                <VStack alignItems="start" gap="0.5">
+                    <Text fontWeight="semibold">{event.label}</Text>
+                    <Text opacity={0.85}>{event.startTime} – {event.endTime}</Text>
+                    {isSlot ? (
+                        <Badge size="xs" colorPalette="brand" variant="subtle">Hueco disponible</Badge>
+                    ) : cfg && (
+                        <Badge size="xs" colorPalette={cfg.palette} variant="subtle">{cfg.label}</Badge>
+                    )}
+                </VStack>
+            </TooltipContent>
+        </Tooltip>
     );
 }
 
@@ -545,64 +567,115 @@ function EventDetailDialog({
 function WeeklyCalendar({
     days,
     events,
+    hourEnd,
     onEventClick,
 }: {
     days: Date[];
     events: CalendarEvent[];
+    hourEnd: number;
     onEventClick: (e: CalendarEvent) => void;
 }) {
-    const today   = toDateStr(new Date());
-    const hours   = Array.from({ length: HOUR_END - HOUR_START + 1 }, (_, i) => HOUR_START + i);
-    const dayKeys = days.map(toDateStr);
+    const now            = new Date();
+    const today          = toDateStr(now);
+    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+    const hours          = Array.from({ length: hourEnd - HOUR_START + 1 }, (_, i) => HOUR_START + i);
+    const dayKeys        = days.map(toDateStr);
+    const inWorkRange    = currentMinutes >= HOUR_START * 60 && currentMinutes <= hourEnd * 60;
+    const nowTop         = ((currentMinutes - HOUR_START * 60) / 60) * HOUR_HEIGHT;
 
     return (
-        <Box overflowX="auto" borderRadius="lg" borderWidth="1px" borderColor="border" bg="bg.surface">
-            <Box display="grid" borderBottomWidth="1px" borderColor="border" style={{ gridTemplateColumns: `64px repeat(7, 1fr)` }}>
-                <Box borderRightWidth="1px" borderColor="border" py="3" />
+        <Card.Root overflow="hidden" variant="outline" size="sm">
+            <Box display="grid" borderBottomWidth="1px" borderColor="border" bg="var(--color-primary)" style={{ gridTemplateColumns: `56px repeat(7, 1fr)` }}>
+                <Flex alignItems="center" justifyContent="center" borderRightWidth="1px" borderColor="whiteAlpha.300" py="2.5">
+                    <Icon as={Clock} boxSize="3.5" color="whiteAlpha.700" />
+                </Flex>
                 {days.map((day, i) => {
-                    const isToday = toDateStr(day) === today;
+                    const isToday  = toDateStr(day) === today;
+                    const isWeekend = i >= 5;
                     return (
-                        <Box
+                        <VStack
                             key={i}
+                            gap="0.5"
+                            justifyContent="center"
                             borderRightWidth="1px"
-                            borderColor="border"
-                            py="3"
-                            textAlign="center"
+                            borderColor="whiteAlpha.300"
+                            py="2"
                             _last={{ borderRightWidth: '0' }}
-                            bg={isToday ? 'brand.muted' : undefined}
+                            bg={isToday ? 'whiteAlpha.200' : undefined}
                         >
-                            <Text fontSize="xs" fontWeight="medium" textTransform="uppercase" letterSpacing="wide" color={isToday ? 'brand.solid' : 'fg.subtle'}>
+                            <Text
+                                fontSize="10px"
+                                fontWeight="bold"
+                                textTransform="uppercase"
+                                letterSpacing="wider"
+                                color={isToday ? 'white' : isWeekend ? 'whiteAlpha.700' : 'whiteAlpha.900'}
+                            >
                                 {DAYS_ES[i]}
                             </Text>
-                            <Text fontSize="lg" fontWeight="semibold" lineHeight="tight" color={isToday ? 'brand.solid' : 'fg'}>
+                            <Flex
+                                alignItems="center"
+                                justifyContent="center"
+                                boxSize="7"
+                                borderRadius="full"
+                                bg={isToday ? 'white' : 'transparent'}
+                                color={isToday ? 'var(--color-primary)' : 'white'}
+                                fontSize="sm"
+                                fontWeight="bold"
+                                boxShadow={isToday ? 'sm' : undefined}
+                            >
                                 {day.getDate()}
-                            </Text>
-                        </Box>
+                            </Flex>
+                        </VStack>
                     );
                 })}
             </Box>
 
-            <Box position="relative" display="grid" style={{ gridTemplateColumns: `64px repeat(7, 1fr)` }}>
-                <Box>
-                    {hours.map((h) => (
-                        <Box
-                            key={h}
-                            borderBottomWidth="1px"
-                            borderRightWidth="1px"
-                            borderColor="border.subtle"
-                            pr="2"
-                            textAlign="right"
-                            style={{ height: HOUR_HEIGHT }}
-                        >
-                            <Text fontSize="11px" color="fg.subtle">
-                                {String(h).padStart(2, '0')}:00
-                            </Text>
-                        </Box>
-                    ))}
+            <Box position="relative" display="grid" overflowY="auto" maxH="calc(100vh - 280px)" style={{ gridTemplateColumns: `56px repeat(7, 1fr)` }}>
+                <Box
+                    borderRightWidth="1px"
+                    borderColor="border"
+                    bg="bg.muted/20"
+                    display="grid"
+                    style={{ gridTemplateRows: `repeat(${hours.length}, ${HOUR_HEIGHT}px)` }}
+                >
+                    {hours.map((h) => {
+                        const isCurrentHour = inWorkRange && h === Math.floor(currentMinutes / 60);
+                        return (
+                            <Box
+                                key={h}
+                                position="relative"
+                                pr="2"
+                                textAlign="right"
+                            >
+                                <Text
+                                    position="relative"
+                                    top="-1.5"
+                                    fontSize="10px"
+                                    fontWeight={isCurrentHour ? 'bold' : 'medium'}
+                                    color={isCurrentHour ? 'red.solid' : 'fg.subtle'}
+                                    letterSpacing="tight"
+                                >
+                                    {String(h).padStart(2, '0')}:00
+                                </Text>
+                                <Box
+                                    position="absolute"
+                                    right="0"
+                                    top="0"
+                                    w="1.5"
+                                    h="1px"
+                                    bg="border"
+                                />
+                            </Box>
+                        );
+                    })}
                 </Box>
 
                 {dayKeys.map((dateKey, colIdx) => {
                     const dayEvents = events.filter((e) => e.date === dateKey);
+                    const isToday   = dateKey === today;
+                    const dayDate   = parseLocalDate(dateKey);
+                    const dow       = (dayDate.getDay() + 6) % 7;
+                    const isWeekend = dow >= 5;
                     return (
                         <Box
                             key={colIdx}
@@ -610,19 +683,52 @@ function WeeklyCalendar({
                             borderRightWidth="1px"
                             borderColor="border"
                             _last={{ borderRightWidth: '0' }}
-                            style={{ height: (HOUR_END - HOUR_START + 1) * HOUR_HEIGHT }}
+                            bg={isToday ? 'brand.muted/20' : isWeekend ? 'bg.muted/30' : undefined}
                         >
-                            {hours.map((h) => (
+                            <Box
+                                display="grid"
+                                style={{ gridTemplateRows: `repeat(${hours.length}, ${HOUR_HEIGHT}px)` }}
+                            >
+                                {hours.map((h) => {
+                                    const isLunch    = h === 13;
+                                    const isPastHour = isToday && h < Math.floor(currentMinutes / 60);
+                                    return (
+                                        <Box
+                                            key={h}
+                                            position="relative"
+                                            cursor="pointer"
+                                            transition="background 0.12s"
+                                            bg={isPastHour ? 'bg.muted/40' : isLunch ? 'amber.muted/20' : undefined}
+                                            borderBottomWidth="1px"
+                                            borderColor="border.subtle"
+                                            _hover={{ bg: 'brand.muted/40' }}
+                                        >
+                                            <Box
+                                                position="absolute"
+                                                top="50%"
+                                                left="3"
+                                                right="3"
+                                                borderBottomWidth="1px"
+                                                borderColor="border.subtle"
+                                                opacity={0.4}
+                                            />
+                                        </Box>
+                                    );
+                                })}
+                            </Box>
+                            {isToday && inWorkRange && (
                                 <Box
-                                    key={h}
                                     position="absolute"
                                     left="0"
                                     right="0"
-                                    borderBottomWidth="1px"
-                                    borderColor="border.subtle"
-                                    style={{ top: (h - HOUR_START) * HOUR_HEIGHT, height: HOUR_HEIGHT }}
-                                />
-                            ))}
+                                    pointerEvents="none"
+                                    zIndex="20"
+                                    style={{ top: nowTop }}
+                                >
+                                    <Box position="absolute" left="-4px" top="-4px" boxSize="2" borderRadius="full" bg="red.solid" boxShadow="0 0 0 3px var(--chakra-colors-red-muted)" />
+                                    <Box borderBottomWidth="2px" borderColor="red.solid" />
+                                </Box>
+                            )}
                             {dayEvents.map((ev, ei) => (
                                 <EventBlock key={`${ev.type}-${ev.id}-${ei}`} event={ev} onClick={() => onEventClick(ev)} />
                             ))}
@@ -630,7 +736,7 @@ function WeeklyCalendar({
                     );
                 })}
             </Box>
-        </Box>
+        </Card.Root>
     );
 }
 
@@ -649,25 +755,28 @@ function MonthlyCalendar({
     const today = toDateStr(new Date());
 
     return (
-        <Box overflow="hidden" borderRadius="lg" borderWidth="1px" borderColor="border" bg="bg.surface">
-            <Box display="grid" gridTemplateColumns="repeat(7, 1fr)" borderBottomWidth="1px" borderColor="border">
-                {DAYS_ES.map((d) => (
-                    <Box
-                        key={d}
-                        borderRightWidth="1px"
-                        borderColor="border"
-                        py="2"
-                        textAlign="center"
-                        fontSize="xs"
-                        fontWeight="medium"
-                        textTransform="uppercase"
-                        letterSpacing="wide"
-                        color="fg.subtle"
-                        _last={{ borderRightWidth: '0' }}
-                    >
-                        {d}
-                    </Box>
-                ))}
+        <Card.Root overflow="hidden" variant="outline" size="sm">
+            <Box display="grid" gridTemplateColumns="repeat(7, 1fr)" borderBottomWidth="1px" borderColor="border" bg="var(--color-primary)">
+                {DAYS_ES.map((d, idx) => {
+                    const isWeekend = idx >= 5;
+                    return (
+                        <Box
+                            key={d}
+                            borderRightWidth="1px"
+                            borderColor="whiteAlpha.300"
+                            py="2"
+                            textAlign="center"
+                            fontSize="xs"
+                            fontWeight="bold"
+                            textTransform="uppercase"
+                            letterSpacing="wider"
+                            color={isWeekend ? 'whiteAlpha.700' : 'whiteAlpha.900'}
+                            _last={{ borderRightWidth: '0' }}
+                        >
+                            {d}
+                        </Box>
+                    );
+                })}
             </Box>
 
             <Box display="grid" gridTemplateColumns="repeat(7, 1fr)">
@@ -688,17 +797,20 @@ function MonthlyCalendar({
                     const dateKey  = toDateStr(day);
                     const isToday  = dateKey === today;
                     const dayEvts  = events.filter((e) => e.date === dateKey);
+                    const row      = Math.floor(i / 7);
+                    const col      = i % 7;
+                    const isAlt    = (row + col) % 2 === 1;
 
                     return (
                         <Box
                             key={i}
-                            minH="24"
+                            minH="20"
                             borderBottomWidth="1px"
                             borderRightWidth="1px"
                             borderColor="border"
                             p="1.5"
                             _last={{ borderRightWidth: '0' }}
-                            bg={isToday ? 'brand.muted' : undefined}
+                            bg={isToday ? 'brand.muted' : (isAlt ? 'bg.muted/40' : undefined)}
                         >
                             <Text
                                 mb="1"
@@ -748,7 +860,7 @@ function MonthlyCalendar({
                     );
                 })}
             </Box>
-        </Box>
+        </Card.Root>
     );
 }
 
@@ -756,6 +868,8 @@ export default function ScheduleIndex({ appointments, recurringSlots, specificSl
     const [view, setView]                   = useState<ViewMode>(initialView);
     const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
     const [createOpen, setCreateOpen]       = useState(false);
+    const [extendedHours, setExtendedHours] = useState(false);
+    const hourEnd                           = extendedHours ? HOUR_END_EXTENDED : HOUR_END_COMPACT;
 
     const fromDate  = parseLocalDate(from);
     const weekDays  = getWeekDays(from);
@@ -794,140 +908,126 @@ export default function ScheduleIndex({ appointments, recurringSlots, specificSl
     return (
         <>
             <Head title="Calendario — ClientKosmos" />
+            <Container maxW="7xl" px={{ base: '4', md: '6', lg: '8' }} py={{ base: '6', lg: '8' }}>
+                <Stack gap="4">
+                    <Flex flexWrap="wrap" alignItems="center" justifyContent="space-between" gap="3">
+                        <HStack gap="3" alignItems="center">
+                            <Flex alignItems="center" justifyContent="center" boxSize="10" borderRadius="lg" bg="brand.muted" color="brand.solid">
+                                <Icon as={CalendarDays} boxSize="5" />
+                            </Flex>
+                            <Box>
+                                <Heading as="h1" fontSize="2xl" color="fg" lineHeight="tight">Calendario</Heading>
+                                <Text fontSize="sm" color="fg.muted">Organiza tus horas de disponibilidad</Text>
+                            </Box>
+                        </HStack>
 
-            <Stack gap="6" p={{ base: '6', lg: '8' }}>
-                <Box>
-                    <Heading as="h1" fontSize="3xl" color="fg">Calendario</Heading>
-                    <Text mt="1" fontSize="md" color="fg.muted">Organiza tus horas de disponibilidad</Text>
-                </Box>
+                        <HStack gap="2">
+                            <SegmentGroup.Root
+                                size="sm"
+                                value={view}
+                                onValueChange={({ value }) => {
+                                    if (!value) { return; }
+                                    const nextView = value as ViewMode;
+                                    setView(nextView);
+                                    if (nextView === 'semanal') {
+                                        router.get(schedule.index.url({ query: { from: toDateStr(fromDate), to, view: 'semanal' } }), {}, { preserveState: false });
+                                    } else {
+                                        const newFrom = toDateStr(new Date(monthYear, monthIdx, 1));
+                                        const newTo   = toDateStr(new Date(monthYear, monthIdx + 1, 0));
+                                        router.get(schedule.index.url({ query: { from: newFrom, to: newTo, view: 'mensual' } }), {}, { preserveState: false });
+                                    }
+                                }}
+                            >
+                                <SegmentGroup.Indicator />
+                                <SegmentGroup.Items items={[
+                                    { value: 'semanal', label: 'Semanal' },
+                                    { value: 'mensual', label: 'Mensual' },
+                                ]} />
+                            </SegmentGroup.Root>
 
-                <Flex flexWrap="wrap" justifyContent="center" alignItems="center" gap="3">
-                    <Flex alignItems="center" borderRadius="full" borderWidth="1px" borderColor="border" bg="bg.surface" p="1">
-                        <chakra.button
-                            onClick={() => {
-                                setView('semanal');
-                                router.get(schedule.index.url({ query: { from: toDateStr(fromDate), to, view: 'semanal' } }), {}, { preserveState: false });
-                            }}
-                            borderRadius="full"
-                            px="4"
-                            py="1.5"
-                            fontSize="sm"
-                            fontWeight="medium"
-                            transition="colors"
-                            bg={view === 'semanal' ? 'bg.surface' : 'transparent'}
-                            boxShadow={view === 'semanal' ? 'sm' : undefined}
-                            color={view === 'semanal' ? 'fg' : 'fg.muted'}
-                            _hover={view !== 'semanal' ? { color: 'fg' } : undefined}
-                        >
-                            Semanal
-                        </chakra.button>
-                        <chakra.button
-                            onClick={() => {
-                                setView('mensual');
-                                const newFrom = toDateStr(new Date(monthYear, monthIdx, 1));
-                                const newTo   = toDateStr(new Date(monthYear, monthIdx + 1, 0));
-                                router.get(schedule.index.url({ query: { from: newFrom, to: newTo, view: 'mensual' } }), {}, { preserveState: false });
-                            }}
-                            borderRadius="full"
-                            px="4"
-                            py="1.5"
-                            fontSize="sm"
-                            fontWeight="medium"
-                            transition="colors"
-                            bg={view === 'mensual' ? 'bg.surface' : 'transparent'}
-                            boxShadow={view === 'mensual' ? 'sm' : undefined}
-                            color={view === 'mensual' ? 'fg' : 'fg.muted'}
-                            _hover={view !== 'mensual' ? { color: 'fg' } : undefined}
-                        >
-                            Mensual
-                        </chakra.button>
+                            <IconButton
+                                aria-label="Añadir hueco"
+                                colorPalette="brand"
+                                onClick={() => setCreateOpen(true)}
+                                size="sm"
+                                rounded="full"
+                            >
+                                <Plus />
+                            </IconButton>
+                        </HStack>
                     </Flex>
 
-                    <chakra.button
-                        onClick={() => setCreateOpen(true)}
-                        display="flex"
-                        boxSize="9"
-                        alignItems="center"
-                        justifyContent="center"
-                        borderRadius="full"
-                        bg="brand.solid"
-                        color="brand.contrast"
-                        boxShadow="sm"
-                        transition="colors"
-                        _hover={{ bg: 'brand.emphasized' }}
-                        aria-label="Añadir hueco"
-                    >
-                        <Icon as={Plus} boxSize="5" />
-                    </chakra.button>
-                </Flex>
 
-                <Flex alignItems="center" justifyContent="space-between">
-                    <Flex alignItems="center" gap="2">
-                        <chakra.button
-                            onClick={() => navigate(-1)}
-                            display="flex"
-                            boxSize="8"
-                            alignItems="center"
-                            justifyContent="center"
-                            borderRadius="full"
-                            borderWidth="1px"
-                            borderColor="border"
-                            _hover={{ bg: 'bg.muted' }}
-                        >
-                            <Icon as={ChevronLeft} boxSize="4" />
-                        </chakra.button>
-                        <chakra.button
-                            onClick={() => navigate(1)}
-                            display="flex"
-                            boxSize="8"
-                            alignItems="center"
-                            justifyContent="center"
-                            borderRadius="full"
-                            borderWidth="1px"
-                            borderColor="border"
-                            _hover={{ bg: 'bg.muted' }}
-                        >
-                            <Icon as={ChevronRight} boxSize="4" />
-                        </chakra.button>
-                        <Text fontSize="md" fontWeight="semibold" color="fg">
-                            {view === 'semanal' ? weekLabel : monthLabel}
-                        </Text>
+                    <Flex alignItems="center" justifyContent="space-between" flexWrap="wrap" gap="2">
+                        <HStack gap="2">
+                            <IconButton
+                                aria-label="Anterior"
+                                variant="outline"
+                                size="sm"
+                                rounded="full"
+                                onClick={() => navigate(-1)}
+                            >
+                                <ChevronLeft />
+                            </IconButton>
+                            <IconButton
+                                aria-label="Siguiente"
+                                variant="outline"
+                                size="sm"
+                                rounded="full"
+                                onClick={() => navigate(1)}
+                            >
+                                <ChevronRight />
+                            </IconButton>
+                            <Heading as="h2" fontSize="md" fontWeight="semibold" color="fg">
+                                {view === 'semanal' ? weekLabel : monthLabel}
+                            </Heading>
+                        </HStack>
+
+                        <Badge size="sm" variant="solid" colorPalette="brand" textTransform="uppercase" letterSpacing="wider">
+                            {view === 'semanal' ? `${MONTHS_ES[monthIdx]} ${monthYear}` : String(monthYear)}
+                        </Badge>
                     </Flex>
 
-                    <Text
-                        borderRadius="full"
-                        borderWidth="1px"
-                        borderColor="border"
-                        px="3"
-                        py="1"
-                        fontSize="xs"
-                        fontWeight="medium"
-                        textTransform="uppercase"
-                        letterSpacing="wide"
-                        color="fg.muted"
-                    >
-                        {view === 'semanal' ? `${MONTHS_ES[monthIdx].toUpperCase()} ${monthYear}` : String(monthYear)}
-                    </Text>
-                </Flex>
+                    {view === 'semanal' && (
+                        <Stack gap="2">
+                            <WeeklyCalendar
+                                days={weekDays}
+                                events={allEvents}
+                                hourEnd={hourEnd}
+                                onEventClick={setSelectedEvent}
+                            />
+                            <Flex justifyContent="center">
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => setExtendedHours((v) => !v)}
+                                >
+                                    {extendedHours ? (
+                                        <>
+                                            <Icon as={ChevronLeft} boxSize="3.5" style={{ transform: 'rotate(90deg)' }} />
+                                            Mostrar hasta las 18:00
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Icon as={ChevronRight} boxSize="3.5" style={{ transform: 'rotate(90deg)' }} />
+                                            Mostrar hasta las 21:00
+                                        </>
+                                    )}
+                                </Button>
+                            </Flex>
+                        </Stack>
+                    )}
 
-                {view === 'semanal' && (
-                    <WeeklyCalendar
-                        days={weekDays}
-                        events={allEvents}
-                        onEventClick={setSelectedEvent}
-                    />
-                )}
-
-                {view === 'mensual' && (
-                    <MonthlyCalendar
-                        year={monthYear}
-                        month={monthIdx}
-                        events={allEvents}
-                        onEventClick={setSelectedEvent}
-                    />
-                )}
-            </Stack>
-
+                    {view === 'mensual' && (
+                        <MonthlyCalendar
+                            year={monthYear}
+                            month={monthIdx}
+                            events={allEvents}
+                            onEventClick={setSelectedEvent}
+                        />
+                    )}
+                </Stack>
+            </Container>
             <CreateSlotDialog
                 open={createOpen}
                 onClose={() => setCreateOpen(false)}
