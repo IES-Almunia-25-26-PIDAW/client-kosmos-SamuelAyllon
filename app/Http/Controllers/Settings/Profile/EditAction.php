@@ -29,6 +29,7 @@ class EditAction extends Controller
             'mustVerifyEmail' => $user instanceof MustVerifyEmail,
             'status' => $request->session()->get('status'),
             'consentForms' => $consentForms,
+            'user' => $user,
         ]);
     }
 }

@@ -11,12 +11,14 @@ use App\Http\Controllers\Settings\Profile\DestroyAction as ProfileDestroyAction;
 use App\Http\Controllers\Settings\Profile\EditAction as ProfileEditAction;
 use App\Http\Controllers\Settings\Profile\UpdateAction as ProfileUpdateAction;
 use App\Http\Controllers\Settings\TwoFactorAuthentication\ShowAction as TwoFactorShowAction;
+use App\Http\Controllers\Settings\UpdateAction as SettingsUpdateAction;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::middleware(['auth'])->group(function () {
     Route::get('settings/profile', ProfileEditAction::class)->name('profile.edit');
     Route::patch('settings/profile', ProfileUpdateAction::class)->name('profile.update');
+    Route::put('settings/profile', SettingsUpdateAction::class)->name('profile.settings-update');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {

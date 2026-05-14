@@ -1,7 +1,6 @@
 import { Badge, Box, Card, Container, Flex, Heading, HStack, Icon, IconButton, SegmentGroup, Separator, Stack, Text, VStack, chakra } from '@chakra-ui/react';
 import { Head, router, useForm } from '@inertiajs/react';
 import { CalendarDays, ChevronLeft, ChevronRight, Clock, MapPin, Plus, Trash2, Video } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import type { ReactNode } from 'react';
 import { useState } from 'react';
 import DestroyAction from '@/actions/App/Http/Controllers/Appointment/DestroyAction';
@@ -10,6 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import AppLayout from '@/layouts/app-layout';
 import schedule from '@/routes/professional/schedule';
 import availability from '@/routes/professional/schedule/availability';

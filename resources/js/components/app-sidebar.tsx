@@ -8,8 +8,6 @@ import {
     Handshake,
     Home,
     MessageSquare,
-    Receipt,
-    Settings,
     Sparkles,
     Users,
 } from 'lucide-react';
@@ -31,7 +29,7 @@ import { index as portalConsentFormsIndex } from '@/routes/patient/consent-forms
 import { index as portalInvoicesIndex } from '@/routes/patient/invoices';
 import { index as portalMessagesIndex } from '@/routes/patient/messages';
 import { index as portalProfessionalsIndex } from '@/routes/patient/professionals';
-import { dashboard, kosmo, settings } from '@/routes/professional';
+import { dashboard, kosmo } from '@/routes/professional';
 import { index as invoicesIndex } from '@/routes/professional/invoices';
 import { index as messagesIndex } from '@/routes/professional/messages';
 import { index as services } from '@/routes/professional/offered-consultations';
@@ -41,13 +39,7 @@ import { index as teamIndex } from '@/routes/professional/workspace/team';
 import type { Auth, NavItem } from '@/types';
 import AppLogo from './app-logo';
 
-const footerNavItems: NavItem[] = [
-    {
-        title: 'Ajustes',
-        href: settings.url(),
-        icon: Settings,
-    },
-];
+const footerNavItems: NavItem[] = [];
 
 const professionalNavItems: NavItem[] = [
     {

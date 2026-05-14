@@ -114,8 +114,6 @@ use App\Http\Controllers\Schedule\Availability\IndexAction as AvailabilityIndexA
 use App\Http\Controllers\Schedule\Availability\StoreAction as AvailabilityStoreAction;
 use App\Http\Controllers\Schedule\Availability\UpdateAction as AvailabilityUpdateAction;
 use App\Http\Controllers\Schedule\IndexAction as ScheduleIndexAction;
-use App\Http\Controllers\Settings\IndexAction as SettingsIndexAction;
-use App\Http\Controllers\Settings\UpdateAction as SettingsUpdateAction;
 use App\Http\Controllers\Webhook\StripeWebhookAction;
 use App\Http\Controllers\Workspace\Analytics\IndexAction as WorkspaceAnalyticsIndexAction;
 use App\Http\Controllers\Workspace\Patient\ShareAction as WorkspacePatientShareAction;
@@ -271,9 +269,6 @@ Route::middleware(['auth', 'verified', 'professional'])
         Route::get('/kosmo', KosmoIndexAction::class)->name('kosmo');
         Route::post('/kosmo/chat', KosmoChatAction::class)->name('kosmo.chat');
         Route::post('/kosmo/briefings/{briefing}/read', KosmoMarkReadAction::class)->name('kosmo.briefings.read');
-
-        Route::get('/settings', SettingsIndexAction::class)->name('settings');
-        Route::put('/settings', SettingsUpdateAction::class);
 
         // Referrals
         Route::get('/referrals', ReferralIndexAction::class)->name('referrals.index');
