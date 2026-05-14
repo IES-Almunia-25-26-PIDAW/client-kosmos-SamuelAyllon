@@ -22,6 +22,8 @@ class IndexAction extends Controller
         $appointments = Appointment::where('professional_id', $user->id)
             ->with(['patient', 'service'])
             ->whereBetween('starts_at', [$from, $to])
+            ->whereNotIn('status', ['completed', 'cancelled', 'no_show'])
+            ->where('ends_at', '>=', now())
             ->orderBy('starts_at')
             ->get()
             ->map(fn (Appointment $a) => [

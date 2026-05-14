@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Appointment;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\ExpireAppointmentJob;
 use App\Models\Appointment;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -13,13 +14,19 @@ class UpdateAction extends Controller
     {
         $validated = $request->validate([
             'service_id' => ['nullable', 'exists:offered_consultations,id'],
-            'starts_at'  => ['required', 'date'],
-            'ends_at'    => ['required', 'date', 'after:starts_at'],
-            'modality'   => ['required', 'in:in_person,video_call'],
-            'notes'      => ['nullable', 'string'],
+            'starts_at' => ['required', 'date'],
+            'ends_at' => ['required', 'date', 'after:starts_at'],
+            'modality' => ['required', 'in:in_person,video_call'],
+            'notes' => ['nullable', 'string'],
         ]);
 
+        $previousEndsAt = $appointment->ends_at;
+
         $appointment->update($validated);
+
+        if (! $appointment->ends_at->equalTo($previousEndsAt)) {
+            ExpireAppointmentJob::dispatch($appointment->id)->delay($appointment->ends_at);
+        }
 
         return back()->with('success', 'Cita actualizada.');
     }
