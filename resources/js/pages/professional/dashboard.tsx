@@ -4,6 +4,7 @@ import { ArrowRight, CalendarDays, Receipt } from 'lucide-react';
 import type { ReactNode } from 'react';
 import professionalAppointmentsIndex from '@/actions/App/Http/Controllers/Appointment/IndexAction';
 import AppointmentShowAction from '@/actions/App/Http/Controllers/Appointment/ShowAction';
+import InvoiceIndexAction from '@/actions/App/Http/Controllers/Invoice/IndexAction';
 import PatientShowAction from '@/actions/App/Http/Controllers/Patient/ShowAction';
 import { EmptyState } from '@/components/empty-state';
 import { KosmoBriefing as KosmoBriefingComponent } from '@/components/kosmo/kosmo-briefing';
@@ -93,16 +94,14 @@ const formatTime = (dt: string): { time: string; period: string } => {
 
 const getModalityLabel = (modality: string): string => {
     const map: Record<string, string> = {
-        presencial: 'Presencial',
-        online: 'Online',
-        videollamada: 'Videollamada',
-        telefono: 'Teléfono',
+        in_person: 'Presencial',
+        video_call: 'Videollamada',
     };
     return map[modality?.toLowerCase()] ?? modality ?? 'Presencial';
 };
 
 const isOnlineModality = (modality: string): boolean =>
-    ['online', 'videollamada', 'telefono'].includes(modality?.toLowerCase());
+    modality?.toLowerCase() === 'video_call';
 
 const getPaymentLabel = (payment: PendingPayment): string => {
     if (payment.status === 'overdue') {
@@ -343,7 +342,7 @@ export default function ProfessionalDashboard({
                                 ))}
                                 <Box px="4" py="2.5" borderTopWidth="1px" borderColor="border">
                                     <ChakraLink
-                                        href="/invoices"
+                                        href={InvoiceIndexAction().url}
                                         fontSize="xs"
                                         fontWeight="medium"
                                         color="brand.solid"

@@ -12,7 +12,11 @@ export function SidebarGroup({ ...props }: HTMLChakraProps<'div'>) {
             w="full"
             minW="0"
             flexDirection="column"
-            p="2"
+            px="2"
+            css={{
+                transition: 'padding 200ms linear',
+                '[data-collapsible=icon] &': { paddingInline: '0' },
+            }}
             {...props}
         />
     );
@@ -29,15 +33,17 @@ export function SidebarGroupLabel({
             data-slot="sidebar-group-label"
             data-sidebar="group-label"
             display="flex"
-            h="8"
+            h="6"
             flexShrink={0}
             alignItems="center"
             borderRadius="md"
             px="2"
             fontSize="xs"
-            fontWeight="medium"
+            fontWeight="semibold"
+            letterSpacing="wider"
+            textTransform="uppercase"
             outline="none"
-            opacity={0.7}
+            opacity={0.5}
             color="sidebar.fg"
             css={{
                 transition: 'margin opacity 200ms linear',

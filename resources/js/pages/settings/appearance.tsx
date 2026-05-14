@@ -6,8 +6,8 @@ import AppearanceTabs from '@/components/appearance-tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
-import { edit as editAppearance } from '@/routes/appearance';
 import type { BreadcrumbItem } from '@/types';
+import { edit as editAppearance } from '@/routes/appearance';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Ajustes de apariencia', href: editAppearance().url },

@@ -228,7 +228,7 @@ export function SidebarInset({ ...props }: HTMLChakraProps<'main'>) {
             bg="bg.DEFAULT"
             position="relative"
             display="flex"
-            maxW="full"
+            maxW="auto"
             minH="100svh"
             flex="1"
             flexDirection="column"
@@ -252,7 +252,7 @@ export function SidebarInput({ ...props }: React.ComponentProps<typeof Input>) {
             data-sidebar="input"
             bg="bg.DEFAULT"
             h="8"
-            w="full"
+            w="auto"
             boxShadow="none"
             {...props}
         />
@@ -269,7 +269,7 @@ export function SidebarHeader({ ...props }: React.ComponentProps<'div'>) {
             gap="1"
             px="2"
             py="1.5"
-            w="full"
+            w="auto"
             minW="0"
             overflow="hidden"
             {...props}
@@ -287,7 +287,7 @@ export function SidebarFooter({ ...props }: React.ComponentProps<'div'>) {
             gap="1"
             px="2"
             py="1.5"
-            w="full"
+            w="auto"
             minW="0"
             overflow="hidden"
             {...props}

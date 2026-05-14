@@ -11,8 +11,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useTwoFactorAuth } from '@/hooks/use-two-factor-auth';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
-import { disable, enable, show } from '@/routes/two-factor';
 import type { BreadcrumbItem } from '@/types';
+import { disable, enable, show } from '@/routes/two-factor';
 
 type Props = {
     requiresConfirmation?: boolean;

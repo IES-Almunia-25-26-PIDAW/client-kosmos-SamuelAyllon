@@ -23,7 +23,11 @@ import {
     SidebarHeader,
     SidebarMenu,
     SidebarMenuItem,
+    SidebarSeparator,
 } from '@/components/ui/sidebar';
+import type { Auth, NavItem } from '@/types';
+import AppLogo from './app-logo';
+import AdminUsersIndex from '@/actions/App/Http/Controllers/Admin/Users/IndexAction';
 import { dashboard as portalDashboard } from '@/routes/patient';
 import { index as portalAppointmentsIndex } from '@/routes/patient/appointments';
 import { index as portalConsentFormsIndex } from '@/routes/patient/consent-forms';
@@ -37,8 +41,6 @@ import { index as services } from '@/routes/professional/offered-consultations';
 import { index as patientsIndex } from '@/routes/professional/patients';
 import { index as scheduleIndex } from '@/routes/professional/schedule';
 import { index as teamIndex } from '@/routes/professional/workspace/team';
-import type { Auth, NavItem } from '@/types';
-import AppLogo from './app-logo';
 
 const footerNavItems: NavItem[] = [];
 
@@ -77,6 +79,7 @@ const professionalNavItems: NavItem[] = [
         title: 'Kosmo',
         href: kosmo.url(),
         icon: Sparkles,
+        highlight: true,
     },
     {
         title: 'Equipo',
@@ -121,7 +124,7 @@ const patientNavItems: NavItem[] = [
 const adminNavItems: NavItem[] = [
     {
         title: 'Usuarios',
-        href: '/admin/users',
+        href: AdminUsersIndex.url(),
         icon: Users,
     },
 ];
@@ -137,7 +140,7 @@ export function AppSidebar({ onMouseEnter, onMouseLeave }: AppSidebarProps = {})
     const isAdmin = role === 'admin';
     const isPatient = role === 'patient';
 
-    const homeHref = isAdmin ? '/admin/users' : isPatient ? portalDashboard.url() : dashboard.url();
+    const homeHref = isAdmin ? AdminUsersIndex.url() : isPatient ? portalDashboard.url() : dashboard.url();
 
     return (
         <Sidebar collapsible="icon" variant="inset" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
@@ -152,6 +155,8 @@ export function AppSidebar({ onMouseEnter, onMouseLeave }: AppSidebarProps = {})
                     </SidebarMenuItem>
                 </SidebarMenu>
             </SidebarHeader>
+
+            <SidebarSeparator />
 
             <SidebarContent>
                 {isAdmin && <NavMain items={adminNavItems} label="Administración" />}

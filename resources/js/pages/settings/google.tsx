@@ -7,8 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
-import { edit as editGoogle } from '@/routes/settings/google';
 import type { BreadcrumbItem } from '@/types';
+import { edit as editGoogle } from '@/routes/settings/google';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Conexión con Google', href: editGoogle().url },

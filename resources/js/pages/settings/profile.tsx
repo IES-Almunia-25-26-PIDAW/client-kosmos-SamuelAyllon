@@ -1,21 +1,20 @@
-import { Box, Flex, Grid, Heading, Stack, Text, Textarea as ChakraTextarea, chakra } from '@chakra-ui/react';
+import { Box, Field, Fieldset, Flex, Grid, Heading, Separator, Spinner, Stack, Text, chakra } from '@chakra-ui/react';
 import { Form, Head, Link, usePage, useForm } from '@inertiajs/react';
-import { CheckCircle2, Mail, User } from 'lucide-react';
+import { Building2, CheckCircle2, Mail, Receipt, Settings2, Shield, User } from 'lucide-react';
 import type { ReactNode } from 'react';
 import ProfileActions from '@/actions/App/Http/Controllers/Settings/Profile';
 import SettingsUpdateAction from '@/actions/App/Http/Controllers/Settings/UpdateAction';
 import { ActiveConsentsList, type ConsentFormSummary } from '@/components/active-consents-list';
 import DeleteUser from '@/components/delete-user';
-import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
+import type { Auth, BreadcrumbItem, User as UserType } from '@/types';
 import { edit } from '@/routes/profile';
 import { send } from '@/routes/verification';
-import type { Auth, BreadcrumbItem, User as UserType } from '@/types';
 
 const ChakraLink = chakra(Link);
 
@@ -62,6 +61,7 @@ export default function Profile({
             <Heading as="h1" srOnly>Ajustes de Perfil</Heading>
 
             <SettingsLayout>
+                {/* Información del perfil */}
                 <Card>
                     <CardHeader>
                         <Flex alignItems="center" gap="2">
@@ -79,37 +79,34 @@ export default function Profile({
                             action={ProfileActions.UpdateAction.url()}
                             method="patch"
                             options={{ preserveScroll: true }}
-                            style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}
                         >
                             {({ processing, recentlySuccessful, errors }) => (
-                                <>
-                                    <Stack gap="2">
-                                        <Label htmlFor="name">
-                                            <Flex alignItems="center" gap="2" fontSize="sm" fontWeight="medium">
-                                                <Box as={User} h="4" w="4" color="fg.muted" />
+                                <Stack gap="6">
+                                    <Field.Root invalid={!!errors.name}>
+                                        <Field.Label>
+                                            <Flex alignItems="center" gap="1.5">
+                                                <Box as={User} h="3.5" w="3.5" color="fg.muted" />
                                                 Nombre
                                             </Flex>
-                                        </Label>
+                                        </Field.Label>
                                         <Input
-                                            id="name"
                                             defaultValue={auth.user.name}
                                             name="name"
                                             required
                                             autoComplete="name"
                                             placeholder="Tu nombre completo"
                                         />
-                                        <InputError message={errors.name} />
-                                    </Stack>
+                                        {errors.name && <Field.ErrorText>{errors.name}</Field.ErrorText>}
+                                    </Field.Root>
 
-                                    <Stack gap="2">
-                                        <Label htmlFor="email">
-                                            <Flex alignItems="center" gap="2" fontSize="sm" fontWeight="medium">
-                                                <Box as={Mail} h="4" w="4" color="fg.muted" />
+                                    <Field.Root invalid={!!errors.email}>
+                                        <Field.Label>
+                                            <Flex alignItems="center" gap="1.5">
+                                                <Box as={Mail} h="3.5" w="3.5" color="fg.muted" />
                                                 Correo electrónico
                                             </Flex>
-                                        </Label>
+                                        </Field.Label>
                                         <Input
-                                            id="email"
                                             type="email"
                                             defaultValue={auth.user.email}
                                             name="email"
@@ -117,8 +114,8 @@ export default function Profile({
                                             autoComplete="username"
                                             placeholder="tu@email.com"
                                         />
-                                        <InputError message={errors.email} />
-                                    </Stack>
+                                        {errors.email && <Field.ErrorText>{errors.email}</Field.ErrorText>}
+                                    </Field.Root>
 
                                     {mustVerifyEmail && auth.user.email_verified_at === null && (
                                         <Box
@@ -160,7 +157,7 @@ export default function Profile({
                                         >
                                             {processing ? (
                                                 <Flex alignItems="center" gap="2">
-                                                    <Box h="4" w="4" borderRadius="full" borderWidth="2px" borderColor="currentColor" borderTopColor="transparent" css={{ animation: 'spin 1s linear infinite' }} />
+                                                    <Spinner size="xs" />
                                                     Guardando...
                                                 </Flex>
                                             ) : (
@@ -183,16 +180,17 @@ export default function Profile({
                                             Guardado
                                         </Flex>
                                     </Flex>
-                                </>
+                                </Stack>
                             )}
                         </Form>
                     </CardContent>
                 </Card>
 
+                {/* Configuración de consulta */}
                 <Card>
                     <CardHeader>
                         <Flex alignItems="center" gap="2">
-                            <Box as={User} h="5" w="5" color="brand.solid" />
+                            <Box as={Settings2} h="5" w="5" color="brand.solid" />
                             <CardTitle>
                                 <Text as="span" fontSize="md" fontWeight="semibold">Configuración de consulta</Text>
                             </CardTitle>
@@ -202,140 +200,215 @@ export default function Profile({
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <form onSubmit={submitSettings} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                            <Stack gap="5" borderRadius="lg" borderWidth="1px" borderColor="border" bg="bg.surface" p="6" boxShadow="sm">
-                                <Heading as="h3" fontSize="sm" fontWeight="semibold" color="fg">
-                                    Datos de la consulta
-                                </Heading>
+                        <chakra.form onSubmit={submitSettings} display="flex" flexDirection="column" gap="6">
+                            {/* Sección: Datos de la consulta */}
+                            <Fieldset.Root
+                                borderRadius="lg"
+                                borderWidth="1px"
+                                borderColor="border"
+                                bg="bg.surface"
+                                p="6"
+                                boxShadow="sm"
+                                gap="4"
+                            >
+                                <Fieldset.Legend>
+                                    <Flex alignItems="center" gap="2">
+                                        <Box as={Building2} h="4" w="4" color="brand.solid" />
+                                        <Text fontSize="sm" fontWeight="semibold" color="fg">Datos de la consulta</Text>
+                                    </Flex>
+                                </Fieldset.Legend>
 
-                                <Stack gap="1.5">
-                                    <Label htmlFor="practice_name">
-                                        <Text as="span" fontSize="sm" fontWeight="medium" color="fg">Nombre de la consulta</Text>
-                                    </Label>
-                                    <Input id="practice_name" value={data.practice_name} onChange={(e) => setData('practice_name', e.target.value)} />
-                                    {settingsErrors.practice_name && <Text fontSize="xs" color="danger.fg">{settingsErrors.practice_name}</Text>}
-                                </Stack>
+                                <Fieldset.Content gap="4">
+                                    <Field.Root invalid={!!settingsErrors.practice_name}>
+                                        <Field.Label>Nombre de la consulta</Field.Label>
+                                        <Input
+                                            id="practice_name"
+                                            value={data.practice_name}
+                                            onChange={(e) => setData('practice_name', e.target.value)}
+                                        />
+                                        {settingsErrors.practice_name && (
+                                            <Field.ErrorText>{settingsErrors.practice_name}</Field.ErrorText>
+                                        )}
+                                    </Field.Root>
 
-                                <Grid templateColumns={{ base: '1fr', sm: 'repeat(2, 1fr)' }} gap="4">
-                                    <Stack gap="1.5">
-                                        <Label htmlFor="specialty">
-                                            <Text as="span" fontSize="sm" fontWeight="medium" color="fg">Especialidad</Text>
-                                        </Label>
-                                        <Input id="specialty" value={data.specialty} onChange={(e) => setData('specialty', e.target.value)} placeholder="Ej: Psicología clínica" />
-                                    </Stack>
-                                    <Stack gap="1.5">
-                                        <Label htmlFor="city">
-                                            <Text as="span" fontSize="sm" fontWeight="medium" color="fg">Ciudad</Text>
-                                        </Label>
-                                        <Input id="city" value={data.city} onChange={(e) => setData('city', e.target.value)} />
-                                    </Stack>
-                                </Grid>
+                                    <Grid templateColumns={{ base: '1fr', sm: 'repeat(2, 1fr)' }} gap="4">
+                                        <Field.Root>
+                                            <Field.Label>Especialidad</Field.Label>
+                                            <Input
+                                                id="specialty"
+                                                value={data.specialty}
+                                                onChange={(e) => setData('specialty', e.target.value)}
+                                                placeholder="Ej: Psicología clínica"
+                                            />
+                                        </Field.Root>
+                                        <Field.Root>
+                                            <Field.Label>Ciudad</Field.Label>
+                                            <Input
+                                                id="city"
+                                                value={data.city}
+                                                onChange={(e) => setData('city', e.target.value)}
+                                            />
+                                        </Field.Root>
+                                    </Grid>
 
-                                <Grid templateColumns={{ base: '1fr', sm: 'repeat(2, 1fr)' }} gap="4">
-                                    <Stack gap="1.5">
-                                        <Label htmlFor="default_rate">
-                                            <Text as="span" fontSize="sm" fontWeight="medium" color="fg">Tarifa por sesión (€)</Text>
-                                        </Label>
-                                        <Input id="default_rate" type="number" min="0" step="0.01" value={data.default_rate} onChange={(e) => setData('default_rate', e.target.value)} placeholder="60.00" />
-                                    </Stack>
-                                    <Stack gap="1.5">
-                                        <Label htmlFor="default_session_duration">
-                                            <Text as="span" fontSize="sm" fontWeight="medium" color="fg">Duración por defecto (min)</Text>
-                                        </Label>
-                                        <Input id="default_session_duration" type="number" min="1" value={data.default_session_duration} onChange={(e) => setData('default_session_duration', e.target.value)} />
-                                    </Stack>
-                                </Grid>
-                            </Stack>
+                                    <Grid templateColumns={{ base: '1fr', sm: 'repeat(2, 1fr)' }} gap="4">
+                                        <Field.Root>
+                                            <Field.Label>Tarifa por sesión (€)</Field.Label>
+                                            <Input
+                                                id="default_rate"
+                                                type="number"
+                                                min="0"
+                                                step="0.01"
+                                                value={data.default_rate}
+                                                onChange={(e) => setData('default_rate', e.target.value)}
+                                                placeholder="60.00"
+                                            />
+                                        </Field.Root>
+                                        <Field.Root>
+                                            <Field.Label>Duración por defecto (min)</Field.Label>
+                                            <Input
+                                                id="default_session_duration"
+                                                type="number"
+                                                min="1"
+                                                value={data.default_session_duration}
+                                                onChange={(e) => setData('default_session_duration', e.target.value)}
+                                            />
+                                        </Field.Root>
+                                    </Grid>
+                                </Fieldset.Content>
+                            </Fieldset.Root>
 
-                            <Stack gap="5" borderRadius="lg" borderWidth="1px" borderColor="border" bg="bg.surface" p="6" boxShadow="sm">
-                                <Heading as="h3" fontSize="sm" fontWeight="semibold" color="fg">
-                                    Facturación
-                                </Heading>
+                            <Separator borderColor="border.subtle" />
 
-                                <Grid templateColumns={{ base: '1fr', sm: 'repeat(2, 1fr)' }} gap="4">
-                                    <Stack gap="1.5">
-                                        <Label htmlFor="nif">
-                                            <Text as="span" fontSize="sm" fontWeight="medium" color="fg">NIF/NIE</Text>
-                                        </Label>
-                                        <Input id="nif" value={data.nif} onChange={(e) => setData('nif', e.target.value)} />
-                                    </Stack>
-                                    <Stack gap="1.5">
-                                        <Label htmlFor="invoice_prefix">
-                                            <Text as="span" fontSize="sm" fontWeight="medium" color="fg">Prefijo de factura</Text>
-                                        </Label>
-                                        <Input id="invoice_prefix" value={data.invoice_prefix} onChange={(e) => setData('invoice_prefix', e.target.value)} placeholder="FAC" />
-                                    </Stack>
-                                </Grid>
+                            {/* Sección: Facturación */}
+                            <Fieldset.Root
+                                borderRadius="lg"
+                                borderWidth="1px"
+                                borderColor="border"
+                                bg="bg.surface"
+                                p="6"
+                                boxShadow="sm"
+                                gap="4"
+                            >
+                                <Fieldset.Legend>
+                                    <Flex alignItems="center" gap="2">
+                                        <Box as={Receipt} h="4" w="4" color="brand.solid" />
+                                        <Text fontSize="sm" fontWeight="semibold" color="fg">Facturación</Text>
+                                    </Flex>
+                                </Fieldset.Legend>
 
-                                <Stack gap="1.5">
-                                    <Label htmlFor="fiscal_address">
-                                        <Text as="span" fontSize="sm" fontWeight="medium" color="fg">Dirección fiscal</Text>
-                                    </Label>
-                                    <ChakraTextarea
-                                        id="fiscal_address"
-                                        value={data.fiscal_address}
-                                        onChange={(e) => setData('fiscal_address', e.target.value)}
-                                        minH="64px"
-                                        resize="vertical"
-                                    />
-                                </Stack>
+                                <Fieldset.Content gap="4">
+                                    <Grid templateColumns={{ base: '1fr', sm: 'repeat(2, 1fr)' }} gap="4">
+                                        <Field.Root>
+                                            <Field.Label>NIF/NIE</Field.Label>
+                                            <Input
+                                                id="nif"
+                                                value={data.nif}
+                                                onChange={(e) => setData('nif', e.target.value)}
+                                            />
+                                            <Field.HelperText>Aparecerá en tus facturas emitidas</Field.HelperText>
+                                        </Field.Root>
+                                        <Field.Root>
+                                            <Field.Label>Prefijo de factura</Field.Label>
+                                            <Input
+                                                id="invoice_prefix"
+                                                value={data.invoice_prefix}
+                                                onChange={(e) => setData('invoice_prefix', e.target.value)}
+                                                placeholder="FAC"
+                                            />
+                                            <Field.HelperText>Ej: FAC → FAC-2025-001</Field.HelperText>
+                                        </Field.Root>
+                                    </Grid>
 
-                                <Stack gap="1.5">
-                                    <Label htmlFor="invoice_footer_text">
-                                        <Text as="span" fontSize="sm" fontWeight="medium" color="fg">Pie de factura</Text>
-                                    </Label>
-                                    <ChakraTextarea
-                                        id="invoice_footer_text"
-                                        value={data.invoice_footer_text}
-                                        onChange={(e) => setData('invoice_footer_text', e.target.value)}
-                                        minH="64px"
-                                        resize="vertical"
-                                        placeholder="Texto que aparecerá al pie de todas las facturas"
-                                    />
-                                </Stack>
-                            </Stack>
+                                    <Field.Root>
+                                        <Field.Label>Dirección fiscal</Field.Label>
+                                        <Textarea
+                                            id="fiscal_address"
+                                            value={data.fiscal_address}
+                                            onChange={(e) => setData('fiscal_address', e.target.value)}
+                                            minH="64px"
+                                            resize="vertical"
+                                        />
+                                    </Field.Root>
 
-                            <Stack gap="5" borderRadius="lg" borderWidth="1px" borderColor="border" bg="bg.surface" p="6" boxShadow="sm">
-                                <Heading as="h3" fontSize="sm" fontWeight="semibold" color="fg">
-                                    Protección de datos (RGPD)
-                                </Heading>
+                                    <Field.Root>
+                                        <Field.Label>Pie de factura</Field.Label>
+                                        <Textarea
+                                            id="invoice_footer_text"
+                                            value={data.invoice_footer_text}
+                                            onChange={(e) => setData('invoice_footer_text', e.target.value)}
+                                            minH="64px"
+                                            resize="vertical"
+                                            placeholder="Texto que aparecerá al pie de todas las facturas"
+                                        />
+                                    </Field.Root>
+                                </Fieldset.Content>
+                            </Fieldset.Root>
 
-                                <Grid templateColumns={{ base: '1fr', sm: 'repeat(2, 1fr)' }} gap="4">
-                                    <Stack gap="1.5">
-                                        <Label htmlFor="data_retention_months">
-                                            <Text as="span" fontSize="sm" fontWeight="medium" color="fg">Retención de datos (meses)</Text>
-                                        </Label>
-                                        <Input id="data_retention_months" type="number" min="1" value={data.data_retention_months} onChange={(e) => setData('data_retention_months', e.target.value)} />
-                                    </Stack>
-                                    <Stack gap="1.5">
-                                        <Label htmlFor="privacy_policy_url">
-                                            <Text as="span" fontSize="sm" fontWeight="medium" color="fg">URL Política de privacidad</Text>
-                                        </Label>
-                                        <Input id="privacy_policy_url" type="url" value={data.privacy_policy_url} onChange={(e) => setData('privacy_policy_url', e.target.value)} placeholder="https://…" />
-                                    </Stack>
-                                </Grid>
+                            <Separator borderColor="border.subtle" />
 
-                                <Stack gap="1.5">
-                                    <Label htmlFor="rgpd_template">
-                                        <Text as="span" fontSize="sm" fontWeight="medium" color="fg">Plantilla de consentimiento RGPD</Text>
-                                    </Label>
-                                    <ChakraTextarea
-                                        id="rgpd_template"
-                                        value={data.rgpd_template}
-                                        onChange={(e) => setData('rgpd_template', e.target.value)}
-                                        minH="120px"
-                                        resize="vertical"
-                                        fontSize="sm"
-                                        placeholder="Texto del consentimiento informado que se mostrará a los pacientes para que firmen"
-                                    />
-                                </Stack>
-                            </Stack>
+                            {/* Sección: RGPD */}
+                            <Fieldset.Root
+                                borderRadius="lg"
+                                borderWidth="1px"
+                                borderColor="border"
+                                bg="bg.surface"
+                                p="6"
+                                boxShadow="sm"
+                                gap="4"
+                            >
+                                <Fieldset.Legend>
+                                    <Flex alignItems="center" gap="2">
+                                        <Box as={Shield} h="4" w="4" color="brand.solid" />
+                                        <Text fontSize="sm" fontWeight="semibold" color="fg">Protección de datos (RGPD)</Text>
+                                    </Flex>
+                                </Fieldset.Legend>
+
+                                <Fieldset.Content gap="4">
+                                    <Grid templateColumns={{ base: '1fr', sm: 'repeat(2, 1fr)' }} gap="4">
+                                        <Field.Root>
+                                            <Field.Label>Retención de datos (meses)</Field.Label>
+                                            <Input
+                                                id="data_retention_months"
+                                                type="number"
+                                                min="1"
+                                                value={data.data_retention_months}
+                                                onChange={(e) => setData('data_retention_months', e.target.value)}
+                                            />
+                                            <Field.HelperText>Mínimo legal recomendado: 60 meses</Field.HelperText>
+                                        </Field.Root>
+                                        <Field.Root>
+                                            <Field.Label>URL Política de privacidad</Field.Label>
+                                            <Input
+                                                id="privacy_policy_url"
+                                                type="url"
+                                                value={data.privacy_policy_url}
+                                                onChange={(e) => setData('privacy_policy_url', e.target.value)}
+                                                placeholder="https://…"
+                                            />
+                                        </Field.Root>
+                                    </Grid>
+
+                                    <Field.Root>
+                                        <Field.Label>Plantilla de consentimiento RGPD</Field.Label>
+                                        <Textarea
+                                            id="rgpd_template"
+                                            value={data.rgpd_template}
+                                            onChange={(e) => setData('rgpd_template', e.target.value)}
+                                            minH="120px"
+                                            resize="vertical"
+                                            fontSize="sm"
+                                            placeholder="Texto del consentimiento informado que se mostrará a los pacientes para que firmen"
+                                        />
+                                    </Field.Root>
+                                </Fieldset.Content>
+                            </Fieldset.Root>
 
                             <Flex alignItems="center" gap="4" borderTopWidth="1px" borderColor="border" pt="6">
                                 <Button type="submit" disabled={settingsProcessing}>
                                     {settingsProcessing ? (
                                         <Flex alignItems="center" gap="2">
-                                            <Box h="4" w="4" borderRadius="full" borderWidth="2px" borderColor="currentColor" borderTopColor="transparent" css={{ animation: 'spin 1s linear infinite' }} />
+                                            <Spinner size="xs" />
                                             Guardando...
                                         </Flex>
                                     ) : (
@@ -358,7 +431,7 @@ export default function Profile({
                                     Guardado
                                 </Flex>
                             </Flex>
-                        </form>
+                        </chakra.form>
                     </CardContent>
                 </Card>
 
