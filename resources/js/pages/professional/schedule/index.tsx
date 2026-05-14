@@ -261,58 +261,103 @@ function CreateSlotDialog({
 
     return (
         <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-            <DialogContent maxWidth={{ base: 'calc(100% - 2rem)', sm: 'md' }}>
-                <DialogHeader>
-                    <DialogTitle>Nuevo hueco de disponibilidad</DialogTitle>
+            <DialogContent maxWidth={{ base: 'calc(100% - 2rem)', sm: 'md' }} overflow="hidden">
+                <DialogHeader pr="8">
+                    <HStack gap="2.5" alignItems="center" minW="0">
+                        <Flex
+                            flexShrink="0"
+                            alignItems="center"
+                            justifyContent="center"
+                            boxSize="8"
+                            borderRadius="full"
+                            bg="brand.solid"
+                        >
+                            <Icon as={CalendarDays} boxSize="4" color="white" />
+                        </Flex>
+                        <Box minW="0" flex="1">
+                            <DialogTitle truncate>Nuevo hueco de disponibilidad</DialogTitle>
+                            <Text fontSize="xs" color="fg.muted" mt="0.5" truncate>
+                                Define una franja en la que aceptas citas
+                            </Text>
+                        </Box>
+                    </HStack>
                 </DialogHeader>
-                <chakra.form onSubmit={handleSubmit} display="flex" flexDirection="column" gap="4" pt="2">
-                    <Stack gap="1.5">
-                        <Label htmlFor="slot-date">Fecha</Label>
-                        <Input
-                            id="slot-date"
-                            type="date"
-                            value={data.date}
-                            onChange={(e) => setData('date', e.target.value)}
-                            required
-                        />
-                        {errors.date && <Text fontSize="xs" color="error">{errors.date}</Text>}
+                <chakra.form onSubmit={handleSubmit} display="flex" flexDirection="column" gap="4" pt="2" minW="0">
+                    <Stack
+                        gap="3.5"
+                        borderWidth="1px"
+                        borderColor="border"
+                        borderRadius="md"
+                        bg="bg.muted/40"
+                        p="3.5"
+                        minW="0"
+                    >
+                        <Stack gap="1.5" minW="0">
+                            <Label htmlFor="slot-date">Fecha</Label>
+                            <Input
+                                id="slot-date"
+                                type="date"
+                                value={data.date}
+                                onChange={(e) => setData('date', e.target.value)}
+                                required
+                                w="auto"
+                            />
+                            {errors.date && <Text fontSize="xs" color="error">{errors.date}</Text>}
+                        </Stack>
+
+                        <Box display="grid" gridTemplateColumns="repeat(2, minmax(0, 1fr))" gap="3">
+                            <Stack gap="1.5" minW="0">
+                                <Label htmlFor="slot-start">Hora de inicio</Label>
+                                <Input
+                                    id="slot-start"
+                                    type="time"
+                                    value={data.start_time}
+                                    onChange={(e) => setData('start_time', e.target.value)}
+                                    required
+                                    w="auto"
+                                />
+                                {errors.start_time && <Text fontSize="xs" color="error">{errors.start_time}</Text>}
+                            </Stack>
+                            <Stack gap="1.5" minW="0">
+                                <Label htmlFor="slot-end">Hora de fin</Label>
+                                <Input
+                                    id="slot-end"
+                                    type="time"
+                                    value={data.end_time}
+                                    onChange={(e) => setData('end_time', e.target.value)}
+                                    required
+                                    w="auto"
+                                />
+                                {errors.end_time && <Text fontSize="xs" color="error">{errors.end_time}</Text>}
+                            </Stack>
+                        </Box>
                     </Stack>
 
-                    <Box display="grid" gridTemplateColumns="repeat(2, 1fr)" gap="3">
-                        <Stack gap="1.5">
-                            <Label htmlFor="slot-start">Hora de inicio</Label>
-                            <Input
-                                id="slot-start"
-                                type="time"
-                                value={data.start_time}
-                                onChange={(e) => setData('start_time', e.target.value)}
-                                required
-                            />
-                            {errors.start_time && <Text fontSize="xs" color="error">{errors.start_time}</Text>}
-                        </Stack>
-                        <Stack gap="1.5">
-                            <Label htmlFor="slot-end">Hora de fin</Label>
-                            <Input
-                                id="slot-end"
-                                type="time"
-                                value={data.end_time}
-                                onChange={(e) => setData('end_time', e.target.value)}
-                                required
-                            />
-                            {errors.end_time && <Text fontSize="xs" color="error">{errors.end_time}</Text>}
-                        </Stack>
-                    </Box>
-
-                    <Flex alignItems="center" gap="2.5">
-                        <Checkbox
-                            id="slot-recurring"
-                            checked={data.is_recurring}
-                            onCheckedChange={(v) => setData('is_recurring', Boolean(v))}
-                        />
-                        <Label htmlFor="slot-recurring" cursor="pointer" fontWeight="normal">
-                            Se repite cada semana
-                        </Label>
-                    </Flex>
+                    <Checkbox
+                        id="slot-recurring"
+                        checked={data.is_recurring}
+                        onCheckedChange={(e) => setData('is_recurring', !!e.checked)}
+                        gap="3"
+                        alignItems="flex-start"
+                        cursor="pointer"
+                        borderWidth="1px"
+                        borderColor={data.is_recurring ? 'brand.solid' : 'border'}
+                        borderRadius="md"
+                        bg={data.is_recurring ? 'brand.subtle' : 'bg'}
+                        px="3.5"
+                        py="2.5"
+                        transition="all 0.15s"
+                        _hover={{ borderColor: 'brand.solid', bg: 'brand.subtle' }}
+                    >
+                        <Box minW="0" flex="1">
+                            <Text fontSize="sm" fontWeight="medium" color="fg">
+                                Se repite cada semana
+                            </Text>
+                            <Text fontSize="xs" color="fg.muted" fontWeight="normal">
+                                Aparecerá el mismo día y hora todas las semanas
+                            </Text>
+                        </Box>
+                    </Checkbox>
 
                     <Flex justifyContent="flex-end" gap="2" pt="1">
                         <Button type="button" variant="outline" onClick={onClose}>
@@ -445,16 +490,31 @@ function EditSlotForm({
                     {errors.end_time && <Text fontSize="xs" color="error">{errors.end_time}</Text>}
                 </Stack>
             </Box>
-            <Flex alignItems="center" gap="2.5">
-                <Checkbox
-                    id="edit-recurring"
-                    checked={data.is_recurring}
-                    onCheckedChange={(v) => setData('is_recurring', Boolean(v))}
-                />
-                <Label htmlFor="edit-recurring" cursor="pointer" fontWeight="normal">
-                    Se repite cada semana
-                </Label>
-            </Flex>
+            <Checkbox
+                id="edit-recurring"
+                checked={data.is_recurring}
+                onCheckedChange={(e) => setData('is_recurring', !!e.checked)}
+                gap="3"
+                alignItems="flex-start"
+                cursor="pointer"
+                borderWidth="1px"
+                borderColor={data.is_recurring ? 'brand.solid' : 'border'}
+                borderRadius="md"
+                bg={data.is_recurring ? 'brand.subtle' : 'bg'}
+                px="3.5"
+                py="2.5"
+                transition="all 0.15s"
+                _hover={{ borderColor: 'brand.solid', bg: 'brand.subtle' }}
+            >
+                <Box>
+                    <Text fontSize="sm" fontWeight="medium" color="fg">
+                        Se repite cada semana
+                    </Text>
+                    <Text fontSize="xs" color="fg.muted" fontWeight="normal">
+                        Aparecerá el mismo día y hora todas las semanas
+                    </Text>
+                </Box>
+            </Checkbox>
             <Flex justifyContent="flex-end" gap="2">
                 <Button type="button" variant="outline" onClick={onClose}>Cancelar</Button>
                 <Button type="submit" variant="default" disabled={processing}>Guardar cambios</Button>
@@ -912,11 +972,8 @@ export default function ScheduleIndex({ appointments, recurringSlots, specificSl
                 <Stack gap="4">
                     <Flex flexWrap="wrap" alignItems="center" justifyContent="space-between" gap="3">
                         <HStack gap="3" alignItems="center">
-                            <Flex alignItems="center" justifyContent="center" boxSize="10" borderRadius="lg" bg="brand.muted" color="brand.solid">
-                                <Icon as={CalendarDays} boxSize="5" />
-                            </Flex>
                             <Box>
-                                <Heading as="h1" fontSize="2xl" color="fg" lineHeight="tight">Calendario</Heading>
+                                <Heading as="h1" fontSize="3xl" color="fg" lineHeight="tight">Calendario</Heading>
                                 <Text fontSize="sm" color="fg.muted">Organiza tus horas de disponibilidad</Text>
                             </Box>
                         </HStack>

@@ -3,7 +3,7 @@ import * as React from 'react';
 
 type RootProps = React.ComponentProps<typeof ChakraCheckbox.Root>;
 
-function Checkbox(props: RootProps) {
+function Checkbox({ children, ...props }: RootProps) {
     return (
         <ChakraCheckbox.Root
             data-slot="checkbox"
@@ -14,10 +14,12 @@ function Checkbox(props: RootProps) {
             <ChakraCheckbox.HiddenInput />
             <ChakraCheckbox.Control
                 data-slot="checkbox-control"
-                borderColor="fg.muted"
+                borderColor="border.emphasized"
                 borderWidth="2px"
-                bg="bg.surface"
+                bg="bg"
                 rounded="sm"
+                transition="all 0.15s"
+                _hover={{ borderColor: 'brand.solid' }}
                 _checked={{
                     bg: 'brand.solid',
                     borderColor: 'brand.solid',
@@ -28,6 +30,11 @@ function Checkbox(props: RootProps) {
             >
                 <ChakraCheckbox.Indicator />
             </ChakraCheckbox.Control>
+            {children != null && (
+                <ChakraCheckbox.Label data-slot="checkbox-label">
+                    {children}
+                </ChakraCheckbox.Label>
+            )}
         </ChakraCheckbox.Root>
     );
 }
