@@ -53,6 +53,11 @@ WORKDIR /app
 
 COPY --from=deps /app/vendor vendor/
 
+# composer.json / composer.lock son obligatorios en runtime: Laravel los lee
+# para detectar paquetes y versión. Sin ellos, cualquier `artisan` revienta
+# con "file_get_contents(/app/composer.json): Failed to open stream".
+COPY composer.json composer.lock ./
+
 COPY package.json package-lock.json ./
 RUN npm ci
 
