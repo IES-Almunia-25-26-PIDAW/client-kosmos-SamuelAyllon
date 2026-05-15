@@ -3,6 +3,8 @@
          xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
          bootstrap="vendor/autoload.php"
          colors="true"
+         defaultTimeLimit="30"
+         enforceTimeLimit="true"
 >
     <testsuites>
         <testsuite name="Unit">
@@ -23,7 +25,7 @@
         <env name="ASSET_URL" value="http://localhost"/>
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
         <env name="BCRYPT_ROUNDS" value="4"/>
-        <env name="BROADCAST_CONNECTION" value="reverb"/>
+        <env name="BROADCAST_CONNECTION" value="null"/>
         <env name="REVERB_APP_ID" value="test-app"/>
         <env name="REVERB_APP_KEY" value="test-key"/>
         <env name="REVERB_APP_SECRET" value="test-secret"/>
