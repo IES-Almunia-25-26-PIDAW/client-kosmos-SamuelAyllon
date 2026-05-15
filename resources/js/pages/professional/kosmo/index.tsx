@@ -1,4 +1,17 @@
-import { Box, Flex, Heading, Icon, Stack, Text, chakra } from '@chakra-ui/react';
+import {
+    Box,
+    Card,
+    Container,
+    Flex,
+    Heading,
+    HStack,
+    Icon,
+    Input,
+    ScrollArea,
+    Separator,
+    Stack,
+    Text,
+} from '@chakra-ui/react';
 import { Head, router } from '@inertiajs/react';
 import { Sparkles, Send } from 'lucide-react';
 import type { ReactNode } from 'react';
@@ -76,131 +89,201 @@ export default function KosmoPage({ briefings }: Props) {
         <>
             <Head title="Kosmo — ClientKosmos" />
 
-            <Flex direction="column" h="full" p={{ base: '6', lg: '8' }} gap="6" maxW="4xl">
-                <Box>
-                    <Heading as="h1" fontSize="3xl" color="fg" display="flex" alignItems="center" gap="3">
-                        <Icon as={Sparkles} boxSize="7" color="brand.solid" />
-                        Kosmo
-                    </Heading>
-                    <Text mt="1" fontSize="md" color="fg.muted">
-                        Tu asistente de psicología clínica. Pregúntame sobre tus pacientes, sesiones o mejores prácticas.
-                    </Text>
-                </Box>
+            <Container maxW="7xl" px={{ base: '4', md: '6', lg: '8' }} py={{ base: '6', lg: '8' }}>
+                <Stack gap="6">
+                    {/* Page header */}
+                    <Box>
+                        <HStack gap="3">
+                            <Flex
+                                h="10"
+                                w="10"
+                                borderRadius="xl"
+                                bg="kosmo.muted"
+                                alignItems="center"
+                                justifyContent="center"
+                                flexShrink={0}
+                            >
+                                <Icon as={Sparkles} boxSize="5" color="kosmo.solid" />
+                            </Flex>
+                            <Box>
+                                <Heading as="h1" fontSize="2xl" color="fg" fontWeight="semibold" lineHeight="1.2">
+                                    Kosmo
+                                </Heading>
+                                <Text fontSize="sm" color="fg.muted" mt="0.5">
+                                    Tu asistente de psicología clínica. Pregúntame sobre tus pacientes, sesiones o mejores prácticas.
+                                </Text>
+                            </Box>
+                        </HStack>
+                        <Separator mt="4" borderColor="border.subtle" />
+                    </Box>
 
-                <Box display="grid" gridTemplateColumns={{ base: '1fr', lg: 'repeat(3, 1fr)' }} gap="6" flex="1">
-                    <Flex direction="column" gap="4" gridColumn={{ lg: 'span 2' }}>
-                        <Flex
-                            direction="column"
-                            flex="1"
-                            borderRadius="lg"
-                            borderWidth="1px"
-                            borderColor="border"
-                            bg="bg.surface"
-                            boxShadow="sm"
+                    {/* Main grid */}
+                    <Box
+                        display="grid"
+                        gridTemplateColumns={{ base: '1fr', lg: 'repeat(3, 1fr)' }}
+                        gap="6"
+                        alignItems="start"
+                    >
+                        {/* Chat panel */}
+                        <Card.Root
+                            gridColumn={{ lg: 'span 2' }}
                             overflow="hidden"
-                            minH="400px"
+                            borderColor="border"
+                            boxShadow="sm"
                         >
-                            <Stack flex="1" overflowY="auto" p="4" gap="4">
-                                {messages.length === 0 && (
-                                    <Flex direction="column" alignItems="center" justifyContent="center" h="full" textAlign="center" py="12">
-                                        <Flex
-                                            h="16"
-                                            w="16"
-                                            borderRadius="2xl"
-                                            bg="brand.muted"
-                                            alignItems="center"
-                                            justifyContent="center"
-                                            mb="4"
-                                        >
-                                            <Icon as={Sparkles} boxSize="8" color="brand.solid" />
-                                        </Flex>
-                                        <Text fontSize="sm" fontWeight="medium" color="fg">Hola, soy Kosmo</Text>
-                                        <Text fontSize="xs" color="fg.muted" mt="1" maxW="xs">
-                                            ¿En qué te puedo ayudar hoy? Puedo resumir sesiones, sugerir intervenciones o recordarte el estado de tus pacientes.
-                                        </Text>
-                                    </Flex>
-                                )}
-                                {messages.map((msg, i) => {
-                                    const isKosmo = msg.role === 'kosmo';
-                                    return (
-                                        <Flex key={i} gap="3" flexDirection={isKosmo ? 'row' : 'row-reverse'}>
-                                            <Flex
-                                                h="8"
-                                                w="8"
-                                                borderRadius="full"
-                                                alignItems="center"
-                                                justifyContent="center"
-                                                flexShrink={0}
-                                                fontSize="xs"
-                                                fontWeight="semibold"
-                                                bg={isKosmo ? 'brand.muted' : 'brand.solid'}
-                                                color={isKosmo ? 'brand.solid' : 'brand.contrast'}
-                                            >
-                                                {isKosmo ? 'K' : 'Tú'}
-                                            </Flex>
-                                            <Box
-                                                maxW="80%"
-                                                borderRadius="lg"
-                                                px="4"
-                                                py="3"
-                                                fontSize="sm"
-                                                bg={isKosmo ? 'brand.muted' : 'brand.solid'}
-                                                color={isKosmo ? 'fg' : 'brand.contrast'}
-                                                borderWidth={isKosmo ? '1px' : '0'}
-                                                borderColor={isKosmo ? 'brand.muted' : undefined}
-                                            >
-                                                <Text whiteSpace="pre-wrap">{msg.content}</Text>
-                                                <Text
-                                                    fontSize="xs"
-                                                    mt="1"
-                                                    color={isKosmo ? 'fg.subtle' : 'whiteAlpha.700'}
+                            <Card.Body p="0" display="flex" flexDirection="column">
+                                <ScrollArea.Root height="480px" size="xs">
+                                    <ScrollArea.Viewport>
+                                        <ScrollArea.Content p="4">
+                                            {messages.length === 0 ? (
+                                                <Flex
+                                                    direction="column"
+                                                    alignItems="center"
+                                                    justifyContent="center"
+                                                    minH="380px"
+                                                    textAlign="center"
+                                                    gap="4"
                                                 >
-                                                    {formatTime(msg.timestamp)}
-                                                </Text>
-                                            </Box>
-                                        </Flex>
-                                    );
-                                })}
-                                {loading && (
-                                    <Flex gap="3">
-                                        <Flex h="8" w="8" borderRadius="full" bg="brand.muted" alignItems="center" justifyContent="center" flexShrink={0}>
-                                            <Icon as={Sparkles} boxSize="3.5" color="brand.solid" animation="pulse 1s infinite" />
-                                        </Flex>
-                                        <Box bg="brand.muted" borderWidth="1px" borderColor="brand.muted" borderRadius="lg" px="4" py="3">
-                                            <Flex gap="1">
-                                                <Box as="span" h="2" w="2" borderRadius="full" bg="brand.solid" animation="bounce 1s infinite" style={{ animationDelay: '0ms' }} />
-                                                <Box as="span" h="2" w="2" borderRadius="full" bg="brand.solid" animation="bounce 1s infinite" style={{ animationDelay: '150ms' }} />
-                                                <Box as="span" h="2" w="2" borderRadius="full" bg="brand.solid" animation="bounce 1s infinite" style={{ animationDelay: '300ms' }} />
-                                            </Flex>
-                                        </Box>
-                                    </Flex>
-                                )}
-                                <div ref={messagesEndRef} />
-                            </Stack>
+                                                    <Flex
+                                                        h="16"
+                                                        w="16"
+                                                        borderRadius="2xl"
+                                                        bg="kosmo.muted"
+                                                        alignItems="center"
+                                                        justifyContent="center"
+                                                    >
+                                                        <Icon as={Sparkles} boxSize="8" color="kosmo.solid" />
+                                                    </Flex>
+                                                    <Box>
+                                                        <Text fontSize="sm" fontWeight="semibold" color="fg">
+                                                            Hola, soy Kosmo
+                                                        </Text>
+                                                        <Text fontSize="xs" color="fg.muted" mt="1" maxW="xs">
+                                                            ¿En qué te puedo ayudar hoy? Puedo resumir sesiones, sugerir intervenciones o recordarte el estado de tus pacientes.
+                                                        </Text>
+                                                    </Box>
+                                                </Flex>
+                                            ) : (
+                                                <Stack gap="4">
+                                                    {messages.map((msg, i) => {
+                                                        const isKosmo = msg.role === 'kosmo';
+                                                        return (
+                                                            <Flex
+                                                                key={i}
+                                                                gap="2.5"
+                                                                flexDirection={isKosmo ? 'row' : 'row-reverse'}
+                                                            >
+                                                                {/* Avatar indicator */}
+                                                                <Flex
+                                                                    h="8"
+                                                                    w="8"
+                                                                    borderRadius="full"
+                                                                    alignItems="center"
+                                                                    justifyContent="center"
+                                                                    flexShrink={0}
+                                                                    fontSize="xs"
+                                                                    fontWeight="semibold"
+                                                                    bg={isKosmo ? 'kosmo.muted' : 'kosmo.solid'}
+                                                                    color={isKosmo ? 'kosmo.solid' : 'kosmo.contrast'}
+                                                                >
+                                                                    {isKosmo
+                                                                        ? <Icon as={Sparkles} boxSize="3.5" />
+                                                                        : 'Tú'
+                                                                    }
+                                                                </Flex>
 
-                            <Box p="3" borderTopWidth="1px" borderColor="border.subtle" bg="bg.muted">
-                                <Flex gap="2">
-                                    <chakra.input
+                                                                {/* Bubble */}
+                                                                <Box
+                                                                    maxW="78%"
+                                                                    borderRadius="xl"
+                                                                    px="3.5"
+                                                                    py="2.5"
+                                                                    fontSize="sm"
+                                                                    bg={isKosmo ? 'bg.surface' : 'kosmo.solid'}
+                                                                    color={isKosmo ? 'fg' : 'kosmo.contrast'}
+                                                                    borderWidth={isKosmo ? '1px' : '0'}
+                                                                    borderColor={isKosmo ? 'border' : undefined}
+                                                                    boxShadow="sm"
+                                                                >
+                                                                    <Text whiteSpace="pre-wrap" lineHeight="1.65">
+                                                                        {msg.content}
+                                                                    </Text>
+                                                                    <Text
+                                                                        fontSize="xs"
+                                                                        mt="1.5"
+                                                                        color={isKosmo ? 'fg.subtle' : 'whiteAlpha.700'}
+                                                                        textAlign={isKosmo ? 'start' : 'end'}
+                                                                    >
+                                                                        {formatTime(msg.timestamp)}
+                                                                    </Text>
+                                                                </Box>
+                                                            </Flex>
+                                                        );
+                                                    })}
+
+                                                    {/* Typing indicator */}
+                                                    {loading && (
+                                                        <Flex gap="2.5">
+                                                            <Flex
+                                                                h="8"
+                                                                w="8"
+                                                                borderRadius="full"
+                                                                bg="kosmo.muted"
+                                                                alignItems="center"
+                                                                justifyContent="center"
+                                                                flexShrink={0}
+                                                            >
+                                                                <Icon
+                                                                    as={Sparkles}
+                                                                    boxSize="3.5"
+                                                                    color="kosmo.solid"
+                                                                    animation="pulse 1.5s ease-in-out infinite"
+                                                                />
+                                                            </Flex>
+                                                            <Box
+                                                                bg="bg.surface"
+                                                                borderWidth="1px"
+                                                                borderColor="border"
+                                                                borderRadius="xl"
+                                                                px="3.5"
+                                                                py="3"
+                                                                boxShadow="sm"
+                                                            >
+                                                                <HStack gap="1">
+                                                                    <Box as="span" h="2" w="2" borderRadius="full" bg="kosmo.solid" animation="bounce 1s infinite" style={{ animationDelay: '0ms' }} />
+                                                                    <Box as="span" h="2" w="2" borderRadius="full" bg="kosmo.solid" animation="bounce 1s infinite" style={{ animationDelay: '150ms' }} />
+                                                                    <Box as="span" h="2" w="2" borderRadius="full" bg="kosmo.solid" animation="bounce 1s infinite" style={{ animationDelay: '300ms' }} />
+                                                                </HStack>
+                                                            </Box>
+                                                        </Flex>
+                                                    )}
+
+                                                    <div ref={messagesEndRef} />
+                                                </Stack>
+                                            )}
+                                        </ScrollArea.Content>
+                                    </ScrollArea.Viewport>
+                                    <ScrollArea.Scrollbar>
+                                        <ScrollArea.Thumb />
+                                    </ScrollArea.Scrollbar>
+                                </ScrollArea.Root>
+                            </Card.Body>
+
+                            <Card.Footer p="3" borderTopWidth="1px" borderColor="border.subtle" bg="bg.muted">
+                                <HStack gap="2" w="full">
+                                    <Input
                                         value={input}
                                         onChange={(e) => setInput(e.target.value)}
                                         onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
                                         placeholder="Pregúntale a Kosmo…"
-                                        flex="1"
-                                        h="10"
-                                        px="3"
+                                        size="md"
                                         bg="bg.surface"
-                                        borderWidth="1px"
                                         borderColor="border"
-                                        borderRadius="md"
-                                        color="fg"
-                                        fontSize="sm"
-                                        _placeholder={{ color: 'fg.subtle' }}
                                         _focusVisible={{
                                             outline: 'none',
-                                            borderColor: 'brand.solid',
-                                            boxShadow: '0 0 0 3px var(--ck-colors-brand-muted)',
+                                            borderColor: 'kosmo.solid',
+                                            boxShadow: '0 0 0 3px var(--ck-colors-kosmo-muted)',
                                         }}
-                                        transition="border-color, box-shadow"
                                     />
                                     <Button
                                         variant="primary"
@@ -209,41 +292,45 @@ export default function KosmoPage({ briefings }: Props) {
                                         h="10"
                                         w="10"
                                         p="0"
+                                        flexShrink={0}
                                     >
                                         <Send size={16} />
                                     </Button>
-                                </Flex>
-                            </Box>
-                        </Flex>
-                    </Flex>
+                                </HStack>
+                            </Card.Footer>
+                        </Card.Root>
 
-                    <Stack gap="4">
-                        <Heading as="h3" fontSize="xl" color="fg">Briefings pendientes</Heading>
-                        {briefings.length === 0 ? (
-                            <EmptyState
-                                icon={Sparkles}
-                                title="Todo al día"
-                                description="No hay briefings sin leer."
-                            />
-                        ) : (
-                            briefings.map((briefing) => (
-                                <KosmoBriefingComponent
-                                    key={briefing.id}
-                                    title={briefing.type === 'daily' ? 'Briefing diario' : 'Briefing de sesión'}
-                                    content={
-                                        <Text fontSize="sm" color="fg.muted">
-                                            {typeof briefing.content === 'object' && 'summary' in briefing.content
-                                                ? String(briefing.content.summary)
-                                                : 'Ver detalle'}
-                                        </Text>
-                                    }
-                                    onDismiss={() => router.post(MarkReadAction.url(briefing.id))}
+                        {/* Briefings panel */}
+                        <Stack gap="3">
+                            <Heading as="h3" fontSize="lg" color="fg" fontWeight="semibold">
+                                Briefings pendientes
+                            </Heading>
+                            {briefings.length === 0 ? (
+                                <EmptyState
+                                    icon={Sparkles}
+                                    title="Todo al día"
+                                    description="No hay briefings sin leer."
                                 />
-                            ))
-                        )}
-                    </Stack>
-                </Box>
-            </Flex>
+                            ) : (
+                                briefings.map((briefing) => (
+                                    <KosmoBriefingComponent
+                                        key={briefing.id}
+                                        title={briefing.type === 'daily' ? 'Briefing diario' : 'Briefing de sesión'}
+                                        content={
+                                            <Text fontSize="sm" color="fg.muted">
+                                                {typeof briefing.content === 'object' && 'summary' in briefing.content
+                                                    ? String(briefing.content.summary)
+                                                    : 'Ver detalle'}
+                                            </Text>
+                                        }
+                                        onDismiss={() => router.post(MarkReadAction.url(briefing.id))}
+                                    />
+                                ))
+                            )}
+                        </Stack>
+                    </Box>
+                </Stack>
+            </Container>
         </>
     );
 }

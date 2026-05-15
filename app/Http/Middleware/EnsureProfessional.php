@@ -13,7 +13,7 @@ class EnsureProfessional
         $user = $request->user();
 
         if ($user?->isAdmin()) {
-            return redirect()->route('admin.users.index');
+            return redirect()->route('admin.dashboard');
         }
 
         if ($user?->isProfessional() && ! $user->professionalProfile?->isVerified()) {

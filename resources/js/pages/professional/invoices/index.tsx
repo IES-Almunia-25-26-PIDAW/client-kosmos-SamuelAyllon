@@ -1,4 +1,4 @@
-import { Alert, Badge, Box, Flex, Heading, HStack, Stack, Table, Text, chakra } from '@chakra-ui/react';
+import { Alert, Container ,Badge, Box, Flex, Heading, HStack, Stack, Table, Text, chakra } from '@chakra-ui/react';
 import { Head, router } from '@inertiajs/react';
 import { Receipt } from 'lucide-react';
 import type { ReactNode } from 'react';
@@ -62,194 +62,196 @@ export default function BillingIndex({ payments, stats, filters, pendingBilling 
         <>
             <Head title="Cobros — ClientKosmos" />
 
-            <Stack gap="6" p={{ base: '6', lg: '8' }}>
-                <Box>
-                    <Heading as="h1" fontSize="3xl" color="fg">Cobros</Heading>
-                    <Text mt="1" fontSize="md" color="fg.muted">
-                        Control de pagos y estado de cobros de todos tus pacientes
-                    </Text>
-                </Box>
-
-                {pendingBilling.length > 0 && (
-                    <Alert.Root status="warning" variant="subtle" borderRadius="md">
-                        <Alert.Indicator />
-                        <Stack gap="3" flex="1">
-                            <Alert.Description fontSize="sm">
-                                <Text fontWeight="semibold">
-                                    {pendingBilling.length === 1
-                                        ? '1 sesión pendiente de facturar'
-                                        : `${pendingBilling.length} sesiones pendientes de facturar`}
-                                </Text>
-                                <Text color="fg.muted" fontSize="xs" mt="0.5">
-                                    Sesiones completadas sin factura asociada. Lo normal es que se generen automáticamente; si ves alguna aquí, puedes crearla manualmente.
-                                </Text>
-                            </Alert.Description>
-                            <Stack gap="2">
-                                {pendingBilling.map((appt) => (
-                                    <Flex
-                                        key={appt.id}
-                                        alignItems="center"
-                                        justifyContent="space-between"
-                                        gap="3"
-                                        p="2"
-                                        borderRadius="md"
-                                        bg="bg.surface"
-                                        flexWrap="wrap"
-                                    >
-                                        <Box>
-                                            <Text fontSize="sm" fontWeight="medium" color="fg">
-                                                {appt.patient_name ?? '—'}
-                                            </Text>
-                                            <Text fontSize="xs" color="fg.muted">
-                                                {appt.service_name ?? 'Sesión'}
-                                                {appt.ended_at && ` · ${formatDate(appt.ended_at)}`}
-                                                {appt.price !== null && ` · €${appt.price.toLocaleString('es-ES', { minimumFractionDigits: 2 })}`}
-                                            </Text>
-                                        </Box>
-                                        <Button size="sm" variant="primary" onClick={() => handleGenerate(appt.id)}>
-                                            Generar factura
-                                        </Button>
-                                    </Flex>
-                                ))}
-                            </Stack>
-                        </Stack>
-                    </Alert.Root>
-                )}
-
-                <Box display="grid" gridTemplateColumns={{ base: '1fr', sm: 'repeat(3, 1fr)' }} gap="4">
-                    <KPICard
-                        label="Cobrado este mes"
-                        value={`€${stats.total_paid.toLocaleString('es-ES', { minimumFractionDigits: 2 })}`}
-                    />
-                    <KPICard
-                        label="Pendiente de cobro"
-                        value={`€${stats.total_pending.toLocaleString('es-ES', { minimumFractionDigits: 2 })}`}
-                    />
-                    <KPICard
-                        label="Vencido sin cobrar"
-                        value={`€${stats.total_overdue.toLocaleString('es-ES', { minimumFractionDigits: 2 })}`}
-                    />
-                </Box>
-
-                <Flex gap="2" flexWrap="wrap">
-                    {FILTER_OPTIONS.map((s) => {
-                        const isActive = (filters.status ?? '') === s;
-                        return (
-                            <chakra.button
-                                key={s}
-                                onClick={() => router.get(invoicesIndex.url(), { status: s || undefined }, { preserveState: true })}
-                                px="3"
-                                py="1.5"
-                                borderRadius="full"
-                                fontSize="xs"
-                                fontWeight="medium"
-                                transition="colors"
-                                bg={isActive ? 'brand.solid' : 'bg.muted'}
-                                color={isActive ? 'brand.contrast' : 'fg.muted'}
-                                _hover={!isActive ? { bg: 'border' } : undefined}
-                            >
-                                {s === '' ? 'Todos' : statusLabels[s]}
-                            </chakra.button>
-                        );
-                    })}
-                </Flex>
-
-                {payments.data.length === 0 ? (
-                    <EmptyState
-                        icon={Receipt}
-                        title="Sin cobros"
-                        description="Cuando registres cobros desde las sesiones de tus pacientes, aparecerán aquí."
-                    />
-                ) : (
-                    <Box
-                        borderRadius="lg"
-                        borderWidth="1px"
-                        borderColor="border"
-                        bg="bg.surface"
-                        overflow="hidden"
-                        boxShadow="sm"
-                    >
-                        <Table.Root size="sm">
-                            <Table.Header bg="bg.muted">
-                                <Table.Row borderBottomWidth="1px" borderColor="border.subtle">
-                                    <Table.ColumnHeader fontSize="xs" fontWeight="medium" color="fg.muted" textTransform="uppercase" letterSpacing="wider">Paciente</Table.ColumnHeader>
-                                    <Table.ColumnHeader fontSize="xs" fontWeight="medium" color="fg.muted" textTransform="uppercase" letterSpacing="wider">Concepto</Table.ColumnHeader>
-                                    <Table.ColumnHeader fontSize="xs" fontWeight="medium" color="fg.muted" textTransform="uppercase" letterSpacing="wider">Vencimiento</Table.ColumnHeader>
-                                    <Table.ColumnHeader textAlign="right" fontSize="xs" fontWeight="medium" color="fg.muted" textTransform="uppercase" letterSpacing="wider">Importe</Table.ColumnHeader>
-                                    <Table.ColumnHeader fontSize="xs" fontWeight="medium" color="fg.muted" textTransform="uppercase" letterSpacing="wider">Estado</Table.ColumnHeader>
-                                </Table.Row>
-                            </Table.Header>
-                            <Table.Body>
-                                {payments.data.map((payment) => (
-                                    <Table.Row key={payment.id} _hover={{ bg: 'bg.muted' }} transition="colors">
-                                        <Table.Cell color="fg" fontWeight="medium">
-                                            {payment.patient?.name ?? '—'}
-                                        </Table.Cell>
-                                        <Table.Cell color="fg.muted">
-                                            {payment.concept ?? 'Sesión'}
-                                        </Table.Cell>
-                                        <Table.Cell color="fg.muted">
-                                            {formatDate(payment.due_date)}
-                                        </Table.Cell>
-                                        <Table.Cell textAlign="right" fontWeight="medium" color="fg" fontVariantNumeric="tabular-nums">
-                                            €{Number(payment.amount).toLocaleString('es-ES', { minimumFractionDigits: 2 })}
-                                        </Table.Cell>
-                                        <Table.Cell>
-                                            <HStack gap="1.5" flexWrap="wrap">
-                                                <StatusBadge
-                                                    status={payment.status as 'paid' | 'pending' | 'overdue'}
-                                                    variant="subtle"
-                                                />
-                                                {(payment as Payment & { stripe_checkout_pending?: boolean })
-                                                    .stripe_checkout_pending && (
-                                                    <Badge colorPalette="purple" variant="subtle" fontSize="2xs">
-                                                        Stripe pendiente
-                                                    </Badge>
-                                                )}
-                                            </HStack>
-                                        </Table.Cell>
-                                    </Table.Row>
-                                ))}
-                            </Table.Body>
-                        </Table.Root>
-
-                        {payments.last_page > 1 && (
-                            <Flex
-                                alignItems="center"
-                                justifyContent="space-between"
-                                px="4"
-                                py="3"
-                                borderTopWidth="1px"
-                                borderColor="border.subtle"
-                                bg="bg.muted"
-                            >
-                                <Text fontSize="xs" color="fg.muted">
-                                    {payments.total} cobros · Página {payments.current_page} de {payments.last_page}
-                                </Text>
-                                <Flex gap="1">
-                                    {payments.links.map((link, i) => (
-                                        <chakra.button
-                                            key={i}
-                                            disabled={!link.url}
-                                            onClick={() => link.url && router.get(link.url)}
-                                            px="3"
-                                            py="1"
-                                            fontSize="xs"
-                                            borderRadius="sm"
-                                            transition="colors"
-                                            bg={link.active ? 'brand.solid' : 'transparent'}
-                                            color={link.active ? 'brand.contrast' : link.url ? 'fg.muted' : 'fg.subtle'}
-                                            cursor={link.url ? 'pointer' : 'not-allowed'}
-                                            _hover={!link.active && link.url ? { bg: 'border' } : undefined}
-                                            dangerouslySetInnerHTML={{ __html: link.label }}
-                                        />
-                                    ))}
-                                </Flex>
-                            </Flex>
-                        )}
+            <Container maxW="7xl" px={{ base: '4', md: '6', lg: '8' }} py={{ base: '6', lg: '8' }}>
+                <Stack gap="6" >
+                    <Box>
+                        <Heading as="h1" fontSize="3xl" color="fg">Cobros</Heading>
+                        <Text mt="1" fontSize="md" color="fg.muted">
+                            Control de pagos y estado de cobros de todos tus pacientes
+                        </Text>
                     </Box>
-                )}
-            </Stack>
+
+                    {pendingBilling.length > 0 && (
+                        <Alert.Root status="warning" variant="subtle" borderRadius="md">
+                            <Alert.Indicator />
+                            <Stack gap="3" flex="1">
+                                <Alert.Description fontSize="sm">
+                                    <Text fontWeight="semibold">
+                                        {pendingBilling.length === 1
+                                            ? '1 sesión pendiente de facturar'
+                                            : `${pendingBilling.length} sesiones pendientes de facturar`}
+                                    </Text>
+                                    <Text color="fg.muted" fontSize="xs" mt="0.5">
+                                        Sesiones completadas sin factura asociada. Lo normal es que se generen automáticamente; si ves alguna aquí, puedes crearla manualmente.
+                                    </Text>
+                                </Alert.Description>
+                                <Stack gap="2">
+                                    {pendingBilling.map((appt) => (
+                                        <Flex
+                                            key={appt.id}
+                                            alignItems="center"
+                                            justifyContent="space-between"
+                                            gap="3"
+                                            p="2"
+                                            borderRadius="md"
+                                            bg="bg.surface"
+                                            flexWrap="wrap"
+                                        >
+                                            <Box>
+                                                <Text fontSize="sm" fontWeight="medium" color="fg">
+                                                    {appt.patient_name ?? '—'}
+                                                </Text>
+                                                <Text fontSize="xs" color="fg.muted">
+                                                    {appt.service_name ?? 'Sesión'}
+                                                    {appt.ended_at && ` · ${formatDate(appt.ended_at)}`}
+                                                    {appt.price !== null && ` · €${appt.price.toLocaleString('es-ES', { minimumFractionDigits: 2 })}`}
+                                                </Text>
+                                            </Box>
+                                            <Button size="sm" variant="primary" onClick={() => handleGenerate(appt.id)}>
+                                                Generar factura
+                                            </Button>
+                                        </Flex>
+                                    ))}
+                                </Stack>
+                            </Stack>
+                        </Alert.Root>
+                    )}
+
+                    <Box display="grid" gridTemplateColumns={{ base: '1fr', sm: 'repeat(3, 1fr)' }} gap="4">
+                        <KPICard
+                            label="Cobrado este mes"
+                            value={`€${stats.total_paid.toLocaleString('es-ES', { minimumFractionDigits: 2 })}`}
+                        />
+                        <KPICard
+                            label="Pendiente de cobro"
+                            value={`€${stats.total_pending.toLocaleString('es-ES', { minimumFractionDigits: 2 })}`}
+                        />
+                        <KPICard
+                            label="Vencido sin cobrar"
+                            value={`€${stats.total_overdue.toLocaleString('es-ES', { minimumFractionDigits: 2 })}`}
+                        />
+                    </Box>
+
+                    <Flex gap="2" flexWrap="wrap">
+                        {FILTER_OPTIONS.map((s) => {
+                            const isActive = (filters.status ?? '') === s;
+                            return (
+                                <chakra.button
+                                    key={s}
+                                    onClick={() => router.get(invoicesIndex.url(), { status: s || undefined }, { preserveState: true })}
+                                    px="3"
+                                    py="1.5"
+                                    borderRadius="full"
+                                    fontSize="xs"
+                                    fontWeight="medium"
+                                    transition="colors"
+                                    bg={isActive ? 'brand.solid' : 'bg.muted'}
+                                    color={isActive ? 'brand.contrast' : 'fg.muted'}
+                                    _hover={!isActive ? { bg: 'border' } : undefined}
+                                >
+                                    {s === '' ? 'Todos' : statusLabels[s]}
+                                </chakra.button>
+                            );
+                        })}
+                    </Flex>
+
+                    {payments.data.length === 0 ? (
+                        <EmptyState
+                            icon={Receipt}
+                            title="Sin cobros"
+                            description="Cuando registres cobros desde las sesiones de tus pacientes, aparecerán aquí."
+                        />
+                    ) : (
+                        <Box
+                            borderRadius="lg"
+                            borderWidth="1px"
+                            borderColor="border"
+                            bg="bg.surface"
+                            overflow="hidden"
+                            boxShadow="sm"
+                        >
+                            <Table.Root size="sm">
+                                <Table.Header bg="bg.muted">
+                                    <Table.Row borderBottomWidth="1px" borderColor="border.subtle">
+                                        <Table.ColumnHeader fontSize="xs" fontWeight="medium" color="fg.muted" textTransform="uppercase" letterSpacing="wider">Paciente</Table.ColumnHeader>
+                                        <Table.ColumnHeader fontSize="xs" fontWeight="medium" color="fg.muted" textTransform="uppercase" letterSpacing="wider">Concepto</Table.ColumnHeader>
+                                        <Table.ColumnHeader fontSize="xs" fontWeight="medium" color="fg.muted" textTransform="uppercase" letterSpacing="wider">Vencimiento</Table.ColumnHeader>
+                                        <Table.ColumnHeader textAlign="right" fontSize="xs" fontWeight="medium" color="fg.muted" textTransform="uppercase" letterSpacing="wider">Importe</Table.ColumnHeader>
+                                        <Table.ColumnHeader fontSize="xs" fontWeight="medium" color="fg.muted" textTransform="uppercase" letterSpacing="wider">Estado</Table.ColumnHeader>
+                                    </Table.Row>
+                                </Table.Header>
+                                <Table.Body>
+                                    {payments.data.map((payment) => (
+                                        <Table.Row key={payment.id} _hover={{ bg: 'bg.muted' }} transition="colors">
+                                            <Table.Cell color="fg" fontWeight="medium">
+                                                {payment.patient?.name ?? '—'}
+                                            </Table.Cell>
+                                            <Table.Cell color="fg.muted">
+                                                {payment.concept ?? 'Sesión'}
+                                            </Table.Cell>
+                                            <Table.Cell color="fg.muted">
+                                                {formatDate(payment.due_date)}
+                                            </Table.Cell>
+                                            <Table.Cell textAlign="right" fontWeight="medium" color="fg" fontVariantNumeric="tabular-nums">
+                                                €{Number(payment.amount).toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                                            </Table.Cell>
+                                            <Table.Cell>
+                                                <HStack gap="1.5" flexWrap="wrap">
+                                                    <StatusBadge
+                                                        status={payment.status as 'paid' | 'pending' | 'overdue'}
+                                                        variant="subtle"
+                                                    />
+                                                    {(payment as Payment & { stripe_checkout_pending?: boolean })
+                                                        .stripe_checkout_pending && (
+                                                        <Badge colorPalette="purple" variant="subtle" fontSize="2xs">
+                                                            Stripe pendiente
+                                                        </Badge>
+                                                    )}
+                                                </HStack>
+                                            </Table.Cell>
+                                        </Table.Row>
+                                    ))}
+                                </Table.Body>
+                            </Table.Root>
+
+                            {payments.last_page > 1 && (
+                                <Flex
+                                    alignItems="center"
+                                    justifyContent="space-between"
+                                    px="4"
+                                    py="3"
+                                    borderTopWidth="1px"
+                                    borderColor="border.subtle"
+                                    bg="bg.muted"
+                                >
+                                    <Text fontSize="xs" color="fg.muted">
+                                        {payments.total} cobros · Página {payments.current_page} de {payments.last_page}
+                                    </Text>
+                                    <Flex gap="1">
+                                        {payments.links.map((link, i) => (
+                                            <chakra.button
+                                                key={i}
+                                                disabled={!link.url}
+                                                onClick={() => link.url && router.get(link.url)}
+                                                px="3"
+                                                py="1"
+                                                fontSize="xs"
+                                                borderRadius="sm"
+                                                transition="colors"
+                                                bg={link.active ? 'brand.solid' : 'transparent'}
+                                                color={link.active ? 'brand.contrast' : link.url ? 'fg.muted' : 'fg.subtle'}
+                                                cursor={link.url ? 'pointer' : 'not-allowed'}
+                                                _hover={!link.active && link.url ? { bg: 'border' } : undefined}
+                                                dangerouslySetInnerHTML={{ __html: link.label }}
+                                            />
+                                        ))}
+                                    </Flex>
+                                </Flex>
+                            )}
+                        </Box>
+                    )}
+                </Stack>
+            </Container>
         </>
     );
 }

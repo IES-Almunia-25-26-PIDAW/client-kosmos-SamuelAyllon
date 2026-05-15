@@ -1,4 +1,4 @@
-import { Box, Flex, Grid, Heading, Stack } from '@chakra-ui/react';
+import { Box, Container ,Flex, Grid, Heading, Stack } from '@chakra-ui/react';
 import { Head, router } from '@inertiajs/react';
 import { UserPlus, Search } from 'lucide-react';
 import { useState } from 'react';
@@ -43,86 +43,90 @@ export default function PatientsIndex({ patients }: Props) {
         <>
             <Head title="Pacientes — ClientKosmos" />
 
-            <Stack gap="6" p={{ base: '6', lg: '8' }}>
+            <Container maxW="7xl" px={{ base: '4', md: '6', lg: '8' }} py={{ base: '6', lg: '8' }}>
+                <Stack gap="6" >
 
-                <Flex alignItems="center" justifyContent="space-between">
-                    <Heading as="h1" fontSize="3xl" fontWeight="bold" color="fg">
-                        Pacientes
-                    </Heading>
-                    <Button variant="primary" onClick={() => router.visit(CreateAction.url())}>
-                        <Box as={UserPlus} w="4" h="4" mr="2" />
-                        Añadir paciente
-                    </Button>
-                </Flex>
-
-                <Flex direction={{ base: 'column', sm: 'row' }} gap="3" alignItems={{ sm: 'center' }}>
-                    <Box position="relative" flex="1">
-                        <Box
-                            as={Search}
-                            w="4"
-                            h="4"
-                            position="absolute"
-                            left="3"
-                            top="50%"
-                            transform="translateY(-50%)"
-                            color="fg.muted"
-                            pointerEvents="none"
-                        />
-                        <Input
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            placeholder="Buscar paciente…"
-                            pl="9"
-                            h="10"
-                        />
-                    </Box>
-                    <Flex flexWrap="wrap" gap="2">
-                        {filterLabels.map((f) => {
-                            const isActive = activeFilter === f.key;
-                            return (
-                                <Box
-                                    as="button"
-                                    key={f.key}
-                                    onClick={() => setActiveFilter(f.key)}
-                                    px="3"
-                                    py="1.5"
-                                    borderRadius="full"
-                                    fontSize="xs"
-                                    fontWeight="medium"
-                                    transition="colors 0.2s"
-                                    bg={isActive ? 'brand.solid' : 'bg.subtle'}
-                                    color={isActive ? 'brand.contrast' : 'fg.muted'}
-                                    _hover={isActive ? undefined : { bg: 'border' }}
-                                >
-                                    {f.label}
-                                </Box>
-                            );
-                        })}
+                    <Flex alignItems="center" justifyContent="space-between">
+                        <Heading as="h1" fontSize="3xl" fontWeight="bold" color="fg">
+                            Pacientes
+                        </Heading>
+                        <Button variant="primary" onClick={() => router.visit(CreateAction.url())}>
+                            <Box as={UserPlus} w="4" h="4" mr="2" />
+                            Añadir paciente
+                        </Button>
                     </Flex>
-                </Flex>
 
-                {filtered.length === 0 ? (
-                    <EmptyState
-                        icon={UserPlus}
-                        title={patients.length === 0 ? 'Tu consulta empieza aquí' : 'Sin resultados'}
-                        description={
-                            patients.length === 0
-                                ? 'Añade tu primer paciente para comenzar a gestionar tus sesiones.'
-                                : 'Prueba con otro término de búsqueda o cambia el filtro activo.'
-                        }
-                        action={patients.length === 0 ? {
-                            label: 'Añadir paciente',
-                            onClick: () => router.visit(CreateAction.url()),
-                        } : undefined}
-                    />
-                ) : (
-                    <Grid templateColumns={{ base: '1fr', sm: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }} gap="4">
-                        {filtered.map((patient) => (
-                            <PatientCard key={patient.id} patient={patient} />
-                        ))}
-                    </Grid>
-                )}
-            </Stack>
+                    <Flex direction={{ base: 'column', sm: 'row' }} gap="3" alignItems={{ sm: 'center' }}>
+                        <Box position="relative" flex="1">
+                            <Box
+                                as={Search}
+                                w="4"
+                                h="4"
+                                position="absolute"
+                                left="3"
+                                top="50%"
+                                transform="translateY(-50%)"
+                                color="fg.muted"
+                                pointerEvents="none"
+                            />
+                            <Input
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                placeholder="Buscar paciente…"
+                                pl="9"
+                                h="10"
+                            />
+                        </Box>
+                    </Flex>
+                    <Flex direction={{ base: 'column', sm: 'row' }} gap="3" alignItems={{ sm: 'center' }}>
+                        <Flex flexWrap="wrap" gap="2">
+                            {filterLabels.map((f) => {
+                                const isActive = activeFilter === f.key;
+                                return (
+                                    <Box
+                                        as="button"
+                                        key={f.key}
+                                        onClick={() => setActiveFilter(f.key)}
+                                        px="3"
+                                        py="1.5"
+                                        borderRadius="full"
+                                        fontSize="xs"
+                                        fontWeight="medium"
+                                        transition="colors 0.2s"
+                                        bg={isActive ? 'brand.solid' : 'bg.subtle'}
+                                        color={isActive ? 'brand.contrast' : 'fg.muted'}
+                                        _hover={isActive ? undefined : { bg: 'border' }}
+                                    >
+                                        {f.label}
+                                    </Box>
+                                );
+                            })}
+                        </Flex>
+                    </Flex>
+
+                    {filtered.length === 0 ? (
+                        <EmptyState
+                            icon={UserPlus}
+                            title={patients.length === 0 ? 'Tu consulta empieza aquí' : 'Sin resultados'}
+                            description={
+                                patients.length === 0
+                                    ? 'Añade tu primer paciente para comenzar a gestionar tus sesiones.'
+                                    : 'Prueba con otro término de búsqueda o cambia el filtro activo.'
+                            }
+                            action={patients.length === 0 ? {
+                                label: 'Añadir paciente',
+                                onClick: () => router.visit(CreateAction.url()),
+                            } : undefined}
+                        />
+                    ) : (
+                        <Grid templateColumns={{ base: '1fr', sm: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }} gap="4">
+                            {filtered.map((patient) => (
+                                <PatientCard key={patient.id} patient={patient} />
+                            ))}
+                        </Grid>
+                    )}
+                </Stack>
+            </Container>
         </>
     );
 }

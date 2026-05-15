@@ -6,7 +6,7 @@
 
 - **Usuario:** Lead Architect / QA Manager del proyecto Kosmos.
 - **IA:** ejecutor técnico bajo supervisión (Human-in-the-Loop). No decide estrategia.
-- **Ante conflicto** entre una petición y estos estándares: **no saltarse la regla**. Proponer ADR en `docs/decision-log.md` y pedir confirmación.
+- **Ante conflicto** entre una petición y estos estándares: **no saltarse la regla**. Proponer ADR en `docs/adr/` y pedir confirmación.
 
 ### Orden de precedencia (mayor → menor)
 
@@ -27,7 +27,7 @@
 
 **Frontend**
 - React 19.2 · TypeScript 5.7 · Inertia React v2 · `@laravel/echo-react` (Reverb)
-- Chakra UI v3.34 — **único sistema visual** (Tailwind eliminado; Radix UI: restos pre-migración a reemplazar)
+- Chakra UI v3.34 — **único sistema visual** (Tailwind eliminado; Radix UI eliminado)
 - **Zod 4** (validación cliente) · **Vitest 2** + Testing Library (tests frontend)
 - Vite 7 · ESLint 9 · Prettier 3 · `babel-plugin-react-compiler`
 
@@ -73,7 +73,7 @@ Fuente de verdad de versiones: [package.json](package.json) y [composer.json](co
 - ❌ Clases Tailwind en cualquier componente, nuevo o existente — Chakra UI v3 es el único sistema visual permitido.
 - ❌ Crear componentes visuales sin consultar primero el MCP de Chakra (`mcp__chakra-ui__*`) y la skill `chakra-ui-v3`.
 - ❌ URLs hardcoded — usar Wayfinder.
-- ❌ Dependencias nuevas sin ADR aprobado en [docs/decision-log.md](docs/decision-log.md).
+- ❌ Dependencias nuevas sin ADR aprobado en [docs/adr/](docs/adr/).
 - ❌ Commits con `--no-verify`, `--no-gpg-sign` o similares.
 - ❌ Commitear `.env`, credenciales o secretos.
 - ❌ Desactivar, borrar o saltar tests sin aprobación explícita.
@@ -108,7 +108,7 @@ tests/
   Feature/ Unit/      # Pest 3
 .agents/skills/       # Skills Registry (carga bajo demanda)
 .claude/              # Config local Claude Code
-docs/                 # ADRs, decision-log, ai-usage-declaration
+docs/adr/             # ADRs individuales (NNNN-titulo.md) — fuente de verdad de decisiones
 bootstrap/app.php     # Middleware, exceptions, routing (Laravel 12)
 routes/               # web.php, auth.php, console.php, etc.
 ```
@@ -129,8 +129,9 @@ Validar intención antes de codificar. Para cambios no triviales → **Plan Mode
 3. **Activar la skill relevante** del registry (carga modular, no duplicar su contenido aquí):
    - Backend: `laravel-patterns`, `laravel-specialist`, `php-pro`.
    - Frontend: `frontend-design`, `vercel-react-best-practices`, `vercel-composition-patterns`, `typescript-advanced-types`.
-   - UI/Estilo: `chakra-ui-v3` (**obligatoria** en cualquier tarea visual).
+   - UI/Estilo: `chakra-ui-v3` (**obligatoria** en cualquier tarea visual), `chakra-ui-builder`, `chakra-ui-refactor`.
    - Calidad: `accessibility`, `seo`, `vite`.
+   - Deploy/infra: `use-railway`.
 4. Usar también las skills declaradas en el CLAUDE.md global (`developing-with-fortify`, `wayfinder-development`, `pest-testing`, `inertia-react-development`, `laravel-inertia-react`, `laravel-best-practices`).
 
 ### Herramientas preferidas
@@ -200,16 +201,17 @@ Descripción obligatoria con:
 
 **Modelo de producto y monetización**
 - ClientKosmos es una **aplicación web gratuita** para profesionales autónomos. **No** es SaaS, **no** es multitenant, **no** hay planes ni suscripciones ni licencias por usuario.
-- La app se financia con **publicidad integrada**; el usuario puede activar un **modo sin anuncios** mediante pago opcional (ver ADR-0026 en [docs/decision-log.md](docs/decision-log.md)).
+- La app se financia con **publicidad integrada**; el usuario puede activar un **modo sin anuncios** mediante pago opcional (ver [ADR-0028](docs/adr/0028-monetization-free-app-ads-premium-no-ads.md)).
 - La facturación Stripe + dompdf existente es **profesional → paciente** (dominio de negocio del usuario), no la monetización de la plataforma.
 
 **Dominios productivos**
-- Pacientes, citas y disponibilidad (`AvailabilityService`, `CreateAppointment`).
+- Pacientes, citas y disponibilidad (`AvailabilityService`, `CreateAppointment`); auto-expiración de citas pasadas con revocación de enlace Meet.
 - Videoconsulta vía Google Meet con `room_id` generado en backend, recordings y limpieza de evento al colgar; estado HTTP 410 para salas completadas.
 - Transcripción Whisper con filtrado de alucinaciones y VAD cliente.
 - Facturación: `BillingService` + `GenerateInvoiceForAppointment`, PDFs vía dompdf, **pago de paciente vía Stripe Checkout**, recordatorios (`PaymentReminderService`).
 - Notas, mensajería, notificaciones, acuerdos de colaboración, RGPD (`RgpdService`), asistente Kosmo (`KosmoService` + OpenAI).
-- Permisos vía Spatie, auditoría vía `laravel-activitylog`.
+- Permisos vía Spatie (`AppointmentPolicy` y resto), auditoría vía `laravel-activitylog`.
+- **Autenticación Google OAuth** para profesionales y pacientes (login + registro); Google Calendar vinculado al paciente en login Google.
 
 **Iniciativas finalizadas (orden cronológico de fases UI/calidad)**
 - **Fase 1:** migración inicial Tailwind → Chakra UI v3 (welcome.tsx).
@@ -217,17 +219,20 @@ Descripción obligatoria con:
 - **Fase 3:** validación cliente con Zod + endurecimiento de Form Requests (`28bb0d4`).
 - **Fase 4:** sustitución de tokens de paleta hardcoded por tokens semánticos de `chakra-system.ts` (`ce27702`).
 - **Patrón emergente:** `SectionPanel` para layouts de detalle (estrenado en patient show).
+- **Fase 5:** migración de páginas professional + componentes admin/call/settings/shell a Chakra UI v3 (`7b15b9a`, `d82b692`). Radix UI eliminado completamente.
+- **Calidad:** PHPStan elevado a nivel 7 con baseline vacía ([ADR-0031](docs/adr/0031-phpstan-level-7-baseline-drained.md), `6d884c7`).
+- **Auth:** Google OAuth para profesionales y pacientes; Google Calendar vinculado al paciente en login Google (`5ce7b1e`, `1ec4068`).
+- **Settings:** páginas de ajustes profesionales consolidadas en `/settings/profile` (`8cffe96`).
 
 **En curso / pendiente visible**
-- WIP local sobre `welcome.tsx`, `badge.tsx`, `app.css` y `docs/clientkosmos-design-system.md` (rediseño/limpieza del design system doc).
-- Restos de Radix UI (`@radix-ui/react-navigation-menu`, `react-select`, `react-slot`) por reemplazar por equivalentes Chakra v3.
-- Mantener PHPStan en 0 errores tras la limpieza de `3776fad` (eloquent generics + property docblocks).
+- `docs/clientkosmos-design-system.md` en rediseño/limpieza (design system doc vivo).
+- Revisar páginas restantes sin migrar a Chakra v3 (si las hay) — contrastar con ADRs de migración.
 
 ---
 
 ## Artefactos vivos (mantener al día)
 
-- [docs/decision-log.md](docs/decision-log.md) — ADRs y excepciones a los estándares.
+- [docs/adr/](docs/adr/) — ADRs individuales (fuente de verdad de decisiones y excepciones).
 - [docs/ai-usage-declaration.md](docs/ai-usage-declaration.md) — declaración por PR asistido por IA.
 - [docs/clientkosmos-design-system.md](docs/clientkosmos-design-system.md) — design system vivo (en rediseño).
 - [.claude/project-context/](.claude/project-context/) — tech-stack, ERD, schema (si existe).

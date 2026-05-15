@@ -456,11 +456,11 @@ docker compose up --build   # Primera vez (construye la imagen)
 docker compose up -d        # Arranque normal
 ```
 
-### Producción (sin código fuente)
+### Demo local (sin código fuente)
 
 ```bash
 cd deploy/
-docker compose up -d
+docker compose -f docker-compose.local.yml up -d
 ```
 
 | Servicio | URL |
@@ -468,32 +468,50 @@ docker compose up -d
 | Aplicación | http://localhost:8000 |
 | Mailpit (correo de prueba) | http://localhost:8025 |
 
+### Producción real (VPS + Traefik + HTTPS)
+
+URL pública: **https://clientkosmos.duckdns.org** (subdominio gratuito DuckDNS).
+
+```bash
+# En el VPS, tras provisioning:
+cd /opt/clientkosmos/deploy
+cp .env.prod.example .env.prod   # rellenar valores
+touch acme.json && chmod 600 acme.json
+docker compose -f docker-compose.prod.yml --env-file .env.prod up -d
+```
+
+Runbook completo (provisioning del VPS, DNS, certificado ACME,
+secrets de GitHub Actions, troubleshooting): [`deploy/PRODUCTION.md`](deploy/PRODUCTION.md).
+
 ### Contenedores
 
-| Contenedor | Imagen | Puerto(s) | Descripción |
-|------------|--------|-----------|-------------|
-| `clientkosmos_app` | Custom (Dockerfile) | `8000` | Aplicación Laravel |
-| `clientkosmos_db` | `mysql:8.0` | `3306` | Base de datos MySQL |
-| `clientkosmos_mailpit` | `axllent/mailpit` | `1025` (SMTP), `8025` (UI) | Servidor de correo |
+| Contenedor | Imagen | Rol |
+|------------|--------|-----|
+| `clientkosmos_traefik` | `traefik:v3.1` | Reverse proxy + TLS (Let's Encrypt) |
+| `clientkosmos_app` | `samue45/client-kosmos` (FrankenPHP) | Aplicación Laravel + Caddy embebido |
+| `clientkosmos_db` | `mysql:8.0` | Base de datos (red interna, sin puerto público) |
+| `clientkosmos_redis` | `redis:7-alpine` | Cache + sesiones + cola |
+| `clientkosmos_duckdns` | `linuxserver/duckdns` | Sync de DNS si la IP del VPS es dinámica |
 
 ### Build multi-stage
 
 | Stage | Base | Acción |
 |-------|------|--------|
-| `deps` | `php:8.4-cli-alpine` | Instala dependencias PHP (Composer) |
+| `deps` | `php:8.4-cli-alpine` | Instala dependencias PHP (Composer, sin dev) |
 | `frontend` | `node:20-alpine` | Compila assets con Vite (`npm run build`) |
-| `final` | `php:8.4-fpm-alpine` | Imagen mínima con `vendor/` + `public/build/` |
+| `final` | `dunglas/frankenphp:1-php8.4-alpine` | Imagen final con Caddy + PHP 8.4 (objetivo ≤ 200 MB) |
 
 ### Entrypoint automático
 
-Al arrancar el contenedor se ejecuta automáticamente:
-1. Copia `.env.example` → `.env` con las variables del compose
-2. Genera `APP_KEY` si está vacía
-3. Espera a que MySQL esté lista (`mysqladmin ping`)
-4. Ejecuta `migrate --force`
-5. Ejecuta `db:seed` solo si `users` está vacía
-6. Cachea configuración, rutas y vistas
-7. Arranca `php artisan serve --host=0.0.0.0 --port=8000`
+Al arrancar el contenedor:
+1. Copia `.env.example` → `.env` con las variables del compose.
+2. Genera `APP_KEY` si está vacía.
+3. Espera a que MySQL acepte conexiones (vía PHP/PDO).
+4. Ejecuta `migrate --force` y `storage:link`.
+5. `db:seed` **solo** si `APP_ENV != production` y la tabla `users` está vacía.
+6. En producción cachea config, rutas y vistas.
+7. Arranca `frankenphp run --config /etc/caddy/Caddyfile` (HTTP plano `:8000`,
+   TLS lo termina Traefik por delante).
 
 ---
 

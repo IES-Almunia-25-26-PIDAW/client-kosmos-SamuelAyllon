@@ -4,6 +4,7 @@ import { ArrowRight, CalendarDays, Receipt } from 'lucide-react';
 import type { ReactNode } from 'react';
 import professionalAppointmentsIndex from '@/actions/App/Http/Controllers/Appointment/IndexAction';
 import AppointmentShowAction from '@/actions/App/Http/Controllers/Appointment/ShowAction';
+import InvoiceIndexAction from '@/actions/App/Http/Controllers/Invoice/IndexAction';
 import PatientShowAction from '@/actions/App/Http/Controllers/Patient/ShowAction';
 import { EmptyState } from '@/components/empty-state';
 import { KosmoBriefing as KosmoBriefingComponent } from '@/components/kosmo/kosmo-briefing';
@@ -93,16 +94,14 @@ const formatTime = (dt: string): { time: string; period: string } => {
 
 const getModalityLabel = (modality: string): string => {
     const map: Record<string, string> = {
-        presencial: 'Presencial',
-        online: 'Online',
-        videollamada: 'Videollamada',
-        telefono: 'Teléfono',
+        in_person: 'Presencial',
+        video_call: 'Videollamada',
     };
     return map[modality?.toLowerCase()] ?? modality ?? 'Presencial';
 };
 
 const isOnlineModality = (modality: string): boolean =>
-    ['online', 'videollamada', 'telefono'].includes(modality?.toLowerCase());
+    modality?.toLowerCase() === 'video_call';
 
 const getPaymentLabel = (payment: PendingPayment): string => {
     if (payment.status === 'overdue') {
@@ -157,8 +156,8 @@ export default function ProfessionalDashboard({
                     <Heading as="h1" fontSize={{ base: '2xl', md: '3xl' }} fontWeight="bold" color="fg" lineHeight="shorter">
                         {greeting()}, {auth.user.name.split(' ')[0]}
                     </Heading>
-                    <Text mt="1" fontSize="sm" color="fg.muted" textTransform="capitalize">
-                        {formatDate()}
+                    <Text mt="1" fontSize="sm" color="fg.muted">
+                        {formatDate().charAt(0).toUpperCase() + formatDate().slice(1)}
                     </Text>
                 </Box>
 
@@ -178,12 +177,12 @@ export default function ProfessionalDashboard({
                 <Grid templateColumns={{ base: '1fr', lg: 'repeat(3, 1fr)' }} gap={{ base: '4', lg: '6' }}>
 
                     <Box gridColumn={{ lg: 'span 2' }} minW={0}>
-                        <Flex alignItems="center" justifyContent="space-between" mb="4" gap="3" flexWrap="wrap">
+                        <Flex alignItems="center" justifyContent="space-between" mb="5" gap="3" flexWrap="wrap">
                             <Heading as="h2" fontSize="lg" fontWeight="semibold" color="fg">
                                 Agenda del día
                             </Heading>
                             <Button asChild variant="link" size="sm">
-                                <ChakraLink href={professionalAppointmentsIndex.url()} display="inline-flex" alignItems="center" gap="1">
+                                <ChakraLink href={professionalAppointmentsIndex.url()} display="inline-flex" alignItems="center" gap="1" color="fg" _hover={{ color: 'fg.success' }}>
                                     Ver calendario completo <Box as={ArrowRight} w="3.5" h="3.5" />
                                 </ChakraLink>
                             </Button>
@@ -282,7 +281,7 @@ export default function ProfessionalDashboard({
                         )}
                     </Box>
 
-                    <Stack gap="4">
+                    <Stack gap="4" paddingTop="20" >
 
                         {allPendingAlerts.length > 0 && (
                             <Box
@@ -323,7 +322,7 @@ export default function ProfessionalDashboard({
                                         <Flex alignItems="flex-start" gap="2.5" minW={0}>
                                             <Box mt="1" w="2" h="2" borderRadius="full" flexShrink={0} bg="error.solid" />
                                             <Box minW={0}>
-                                                <Text fontSize="sm" fontWeight="medium" color="fg" truncate>
+                                                <Text fontSize="sm" fontWeight="medium" color="fg" truncate m="0">
                                                     {alert.name}
                                                 </Text>
                                                 <Text
@@ -343,7 +342,7 @@ export default function ProfessionalDashboard({
                                 ))}
                                 <Box px="4" py="2.5" borderTopWidth="1px" borderColor="border">
                                     <ChakraLink
-                                        href="/invoices"
+                                        href={InvoiceIndexAction().url}
                                         fontSize="xs"
                                         fontWeight="medium"
                                         color="brand.solid"
@@ -358,7 +357,9 @@ export default function ProfessionalDashboard({
                         <Flex
                             borderRadius="lg"
                             bg="brand.solid"
-                            p="5"
+                            p="4"
+                            pb="1"
+                            pt="1"
                             alignItems="center"
                             justifyContent="space-between"
                             boxShadow="sm"
@@ -381,7 +382,9 @@ export default function ProfessionalDashboard({
                             borderWidth="1px"
                             borderColor="border"
                             bg="bg.surface"
-                            p="5"
+                            p="4"
+                            pb="1"
+                            pt="1"
                             alignItems="center"
                             justifyContent="space-between"
                             boxShadow="sm"

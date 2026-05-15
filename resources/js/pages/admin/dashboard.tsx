@@ -1,12 +1,13 @@
-import { Box, Flex, Heading, Stack, Table, Text, chakra } from '@chakra-ui/react';
+import { Box, chakra, Flex, Heading, HStack, Icon, Stack, Table, Text } from '@chakra-ui/react';
 import { Head, router, usePage } from '@inertiajs/react';
-import { Plus, Search, Trash2, Users } from 'lucide-react';
+import { Plus, Search, Trash2, UserRound, Users, UsersRound } from 'lucide-react';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import DashboardIndexAction from '@/actions/App/Http/Controllers/Admin/DashboardIndexAction';
 import CreateAction from '@/actions/App/Http/Controllers/Admin/Users/CreateAction';
 import DestroyAction from '@/actions/App/Http/Controllers/Admin/Users/DestroyAction';
 import ShowAction from '@/actions/App/Http/Controllers/Admin/Users/ShowAction';
 import { Button } from '@/components/ui/button';
+import { IconInput } from '@/components/ui/icon-input';
 import AdminLayout from '@/layouts/admin-layout';
 import type { Auth } from '@/types';
 
@@ -35,24 +36,38 @@ interface Props {
 }
 
 const ROLE_FILTERS = [
-    { value: 'all', label: 'Todos' },
-    { value: 'professional', label: 'Profesional' },
-    { value: 'patient', label: 'Paciente' },
+    { value: 'all', label: 'Todos', icon: UsersRound },
+    { value: 'professional', label: 'Profesional', icon: UserRound },
+    { value: 'patient', label: 'Paciente', icon: UserRound },
 ] as const;
 
 const formatDate = (d: string) =>
     new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(d));
+
+const getInitials = (name: string) =>
+    name
+        .split(' ')
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((p) => p[0]?.toUpperCase())
+        .join('');
 
 export default function AdminDashboard({ users, filters }: Props) {
     const { auth } = usePage<{ auth: Auth }>().props;
     const [search, setSearch] = useState(filters.search ?? '');
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const roleRef = useRef(filters.role);
+    const isFirstRender = useRef(true);
+
     useEffect(() => {
         roleRef.current = filters.role;
     });
 
     useEffect(() => {
+        if (isFirstRender.current) {
+            isFirstRender.current = false;
+            return;
+        }
         if (debounceRef.current) {
             clearTimeout(debounceRef.current);
         }
@@ -92,79 +107,82 @@ export default function AdminDashboard({ users, filters }: Props) {
             <Head title="Usuarios — Admin — ClientKosmos" />
 
             <Stack gap="6" p={{ base: '6', lg: '8' }}>
-                <Flex alignItems="flex-start" justifyContent="space-between">
-                    <Box>
-                        <Heading as="h1" fontSize="3xl" color="fg" display="flex" alignItems="center" gap="3">
-                            <Users size={28} />
-                            Usuarios
-                        </Heading>
-                        <Text mt="1" fontSize="md" color="fg.muted">
-                            {users.total} usuarios registrados
-                        </Text>
-                    </Box>
+                <Flex alignItems="flex-start" justifyContent="space-between" flexWrap="wrap" gap="4">
+                    <Flex alignItems="center" gap="3">
+                        <Flex
+                            alignItems="center"
+                            justifyContent="center"
+                            w="11"
+                            h="11"
+                            borderRadius="lg"
+                            bg="brand.subtle"
+                            color="brand.solid"
+                            borderWidth="1px"
+                            borderColor="brand.emphasized"
+                        >
+                            <Icon as={Users} boxSize="5" />
+                        </Flex>
+                        <Box>
+                            <Heading as="h1" fontSize="2xl" color="fg" lineHeight="1.2">
+                                Usuarios
+                            </Heading>
+                            <Text mt="1" fontSize="sm" color="fg.muted">
+                                {users.total} {users.total === 1 ? 'usuario registrado' : 'usuarios registrados'}
+                            </Text>
+                        </Box>
+                    </Flex>
                     <Button variant="primary" onClick={() => router.visit(CreateAction.url())}>
                         <Plus size={16} />
                         Nuevo usuario
                     </Button>
                 </Flex>
 
-                <Stack alignItems="center" gap="3">
-                    <Box position="relative" w="full" maxW="xl">
-                        <Box
-                            position="absolute"
-                            left="3"
-                            top="50%"
-                            transform="translateY(-50%)"
-                            color="fg.muted"
-                            pointerEvents="none"
-                        >
-                            <Search size={16} />
-                        </Box>
-                        <chakra.input
-                            type="text"
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            placeholder="Buscar por nombre o correo…"
-                            w="full"
-                            h="10"
-                            pl="9"
-                            pr="3"
-                            bg="bg.surface"
-                            borderWidth="1px"
-                            borderColor="border"
-                            borderRadius="md"
-                            color="fg"
-                            fontSize="sm"
-                            _placeholder={{ color: 'fg.subtle' }}
-                            _focusVisible={{
-                                outline: 'none',
-                                borderColor: 'brand.solid',
-                                boxShadow: '0 0 0 3px var(--ck-colors-brand-muted)',
-                            }}
-                            transition="border-color, box-shadow"
-                        />
-                    </Box>
+                <Stack
+                    gap="3"
+                    borderWidth="1px"
+                    borderColor="border"
+                    borderRadius="md"
+                    p="3.5"
+                >
+                    <HStack gap="2" flexWrap="wrap" justifyContent="center">
+                        {ROLE_FILTERS.map((f) => {
+                            const isActive = activeRole === f.value;
+                            return (
+                                <chakra.button
+                                    key={f.value}
+                                    type="button"
+                                    onClick={() => applyRoleFilter(f.value)}
+                                    display="inline-flex"
+                                    alignItems="center"
+                                    gap="1.5"
+                                    px="3.5"
+                                    py="1.5"
+                                    fontSize="sm"
+                                    fontWeight="medium"
+                                    borderRadius="full"
+                                    borderWidth="1px"
+                                    transition="all 0.15s"
+                                    bg={isActive ? 'brand.solid' : 'bg.surface'}
+                                    color={isActive ? 'brand.contrast' : 'fg.muted'}
+                                    borderColor={isActive ? 'brand.solid' : 'border'}
+                                    _hover={!isActive ? { bg: 'bg.muted', color: 'fg' } : undefined}
+                                >
+                                    <Icon as={f.icon} boxSize="3.5" />
+                                    {f.label}
+                                </chakra.button>
+                            );
+                        })}
+                    </HStack>
 
-                    <Flex alignItems="center" gap="2">
-                        {ROLE_FILTERS.map((f) => (
-                            <chakra.button
-                                key={f.value}
-                                onClick={() => applyRoleFilter(f.value)}
-                                px="4"
-                                py="1.5"
-                                fontSize="sm"
-                                borderRadius="full"
-                                borderWidth="1px"
-                                transition="colors"
-                                bg={activeRole === f.value ? 'brand.solid' : 'bg.surface'}
-                                color={activeRole === f.value ? 'brand.contrast' : 'fg.muted'}
-                                borderColor={activeRole === f.value ? 'brand.solid' : 'border'}
-                                _hover={activeRole !== f.value ? { bg: 'bg.muted' } : undefined}
-                            >
-                                {f.label}
-                            </chakra.button>
-                        ))}
-                    </Flex>
+                    <IconInput
+                        icon={Search}
+                        type="text"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        placeholder="Buscar por nombre o correo…"
+                        h="10"
+                        w="full"
+                    />
                 </Stack>
 
                 <Box
@@ -189,8 +207,16 @@ export default function AdminDashboard({ users, filters }: Props) {
                         <Table.Body>
                             {users.data.length === 0 && (
                                 <Table.Row>
-                                    <Table.Cell colSpan={6} textAlign="center" py="8" color="fg.muted">
-                                        No se encontraron usuarios.
+                                    <Table.Cell colSpan={6} py="12">
+                                        <Stack alignItems="center" gap="2" color="fg.muted">
+                                            <Icon as={Search} boxSize="6" opacity={0.5} />
+                                            <Text fontSize="sm" fontWeight="medium" color="fg">
+                                                No se encontraron usuarios
+                                            </Text>
+                                            <Text fontSize="xs">
+                                                Prueba a ajustar los filtros o el término de búsqueda.
+                                            </Text>
+                                        </Stack>
                                     </Table.Cell>
                                 </Table.Row>
                             )}
@@ -200,21 +226,44 @@ export default function AdminDashboard({ users, filters }: Props) {
                                     onClick={() => router.visit(ShowAction.url({ user: user.id }))}
                                     _hover={{ bg: 'bg.muted' }}
                                     cursor="pointer"
-                                    transition="colors"
+                                    transition="background-color 0.15s"
                                 >
                                     <Table.Cell>
-                                        <Text fontWeight="medium" color="fg">{user.name}</Text>
-                                        <Text fontSize="xs" color="fg.muted">{user.email}</Text>
+                                        <Flex alignItems="center" gap="3">
+                                            <Flex
+                                                alignItems="center"
+                                                justifyContent="center"
+                                                w="9"
+                                                h="9"
+                                                borderRadius="full"
+                                                bg="brand.subtle"
+                                                color="brand.solid"
+                                                fontSize="xs"
+                                                fontWeight="semibold"
+                                                flexShrink={0}
+                                            >
+                                                {getInitials(user.name) || '?'}
+                                            </Flex>
+                                            <Box minW="0">
+                                                <Text fontWeight="medium" color="fg" truncate>{user.name}</Text>
+                                                <Text fontSize="xs" color="fg.muted" truncate>{user.email}</Text>
+                                            </Box>
+                                        </Flex>
                                     </Table.Cell>
-                                    <Table.Cell textAlign="center" color="fg">{user.patients_count}</Table.Cell>
-                                    <Table.Cell textAlign="center" color="fg">{user.professional_appointments_count}</Table.Cell>
-                                    <Table.Cell textAlign="right" color="fg" fontVariantNumeric="tabular-nums">
+                                    <Table.Cell textAlign="center" color="fg" fontVariantNumeric="tabular-nums">{user.patients_count}</Table.Cell>
+                                    <Table.Cell textAlign="center" color="fg" fontVariantNumeric="tabular-nums">{user.professional_appointments_count}</Table.Cell>
+                                    <Table.Cell textAlign="right" color="fg" fontVariantNumeric="tabular-nums" fontWeight="medium">
                                         €{Number(user.paid_amount ?? 0).toLocaleString('es-ES', { minimumFractionDigits: 2 })}
                                     </Table.Cell>
-                                    <Table.Cell color="fg.muted">{formatDate(user.created_at)}</Table.Cell>
+                                    <Table.Cell color="fg.muted" fontSize="sm">{formatDate(user.created_at)}</Table.Cell>
                                     <Table.Cell textAlign="right">
                                         {user.id !== auth.user.id && (
-                                            <Button variant="destructive" size="sm" onClick={(e) => deleteUser(e, user)}>
+                                            <Button
+                                                variant="destructive"
+                                                size="sm"
+                                                onClick={(e) => deleteUser(e, user)}
+                                                aria-label={`Eliminar a ${user.name}`}
+                                            >
                                                 <Trash2 size={13} />
                                             </Button>
                                         )}
@@ -247,7 +296,7 @@ export default function AdminDashboard({ users, filters }: Props) {
                                         py="1"
                                         fontSize="xs"
                                         borderRadius="sm"
-                                        transition="colors"
+                                        transition="background-color 0.15s"
                                         bg={link.active ? 'brand.solid' : 'transparent'}
                                         color={link.active ? 'brand.contrast' : link.url ? 'fg.muted' : 'fg.subtle'}
                                         cursor={link.url ? 'pointer' : 'not-allowed'}

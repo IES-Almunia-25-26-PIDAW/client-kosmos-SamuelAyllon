@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Http;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
-uses(TestCase::class, RefreshDatabase::class);
+uses(TestCase::class, RefreshDatabase::class)->group('external');
 
 beforeEach(function () {
     $this->withoutVite();

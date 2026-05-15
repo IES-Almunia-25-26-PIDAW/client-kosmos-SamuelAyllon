@@ -31,10 +31,9 @@ class CallbackAction extends Controller
 
         $intent = $sessionState['intent'] ?? 'login';
         $type = $sessionState['type'] ?? null;
-        $includeCalendar = $type === 'professional';
 
         try {
-            $profile = $google->handleCallback((string) $request->query('code'), $includeCalendar);
+            $profile = $google->handleCallback((string) $request->query('code'));
         } catch (Throwable $e) {
             Log::warning('Google OAuth callback failed', ['err' => $e->getMessage()]);
 
@@ -57,13 +56,13 @@ class CallbackAction extends Controller
                 if ($user->email_verified_at === null && $profile['email_verified']) {
                     $user->email_verified_at = now();
                 }
-                if ($includeCalendar && $profile['refresh_token'] !== null) {
+                if ($profile['refresh_token'] !== null) {
                     $user->google_refresh_token = $profile['refresh_token'];
                 }
                 $user->save();
             }
         } else {
-            if ($includeCalendar && $profile['refresh_token'] !== null) {
+            if ($profile['refresh_token'] !== null) {
                 $user->google_refresh_token = $profile['refresh_token'];
                 $user->save();
             }

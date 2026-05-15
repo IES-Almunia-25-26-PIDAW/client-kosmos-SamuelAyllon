@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 
+pest()->group('external');
+
 it('calls Groq Whisper and persists the transcription segment', function () {
     Storage::fake('local');
     Event::fake([TranscriptionSegmentCreated::class]);

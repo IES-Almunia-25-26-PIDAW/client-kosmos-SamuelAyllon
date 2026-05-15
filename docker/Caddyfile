@@ -1,0 +1,35 @@
+# ==============================================================================
+# Caddyfile — FrankenPHP (HTTP plano puerto 8000)
+# ==============================================================================
+# La terminación TLS la hace Traefik por delante. FrankenPHP escucha HTTP
+# plano en :8000 dentro de la red interna de Docker. NUNCA exponer este
+# puerto directamente a internet.
+# ==============================================================================
+
+{
+	# Workers + servidor embebido (Laravel Octane no se usa aquí: arrancamos
+	# en modo "clásico" para no obligar a octane:start. Se puede migrar a
+	# worker mode más adelante con: frankenphp { worker /app/public/index.php }
+	frankenphp
+	auto_https off
+	admin off
+	servers {
+		trusted_proxies static private_ranges
+	}
+}
+
+:8000 {
+	root * /app/public
+	encode zstd br gzip
+
+	# Cabeceras de seguridad: Traefik las puede añadir también, pero es
+	# defensa en profundidad por si la app se expusiera directamente.
+	header {
+		-Server
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+	}
+
+	# Sirve estáticos directamente; el resto va a PHP.
+	php_server
+}

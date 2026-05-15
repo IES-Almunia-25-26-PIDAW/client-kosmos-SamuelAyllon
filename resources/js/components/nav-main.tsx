@@ -1,3 +1,4 @@
+import { Box } from '@chakra-ui/react';
 import { Link } from '@inertiajs/react';
 import {
     SidebarGroup,
@@ -38,12 +39,29 @@ export function NavMain({ items = [], label = 'Menú' }: { items: NavItem[]; lab
                                 isActive={isCurrentUrl(item.href)}
                                 tooltip={{ children: item.title }}
                             >
-                                <Link 
-                                    href={item.href} 
+                                <Link
+                                    href={item.href}
                                     prefetch
                                     {...(tutorialId && { 'data-tutorial': tutorialId })}
                                 >
-                                    {item.icon && <item.icon />}
+                                    {item.icon && item.highlight ? (
+                                        <Box
+                                            display="flex"
+                                            alignItems="center"
+                                            justifyContent="center"
+                                            w="5"
+                                            h="5"
+                                            borderRadius="sm"
+                                            bg="kosmo.muted"
+                                            color="kosmo.fg"
+                                            flexShrink={0}
+                                            css={{ '[data-collapsible=icon] &': { width: '1.125rem', height: '1.125rem' } }}
+                                        >
+                                            <item.icon size={13} />
+                                        </Box>
+                                    ) : (
+                                        item.icon && <item.icon />
+                                    )}
                                     <span>{item.title}</span>
                                 </Link>
                             </SidebarMenuButton>

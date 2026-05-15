@@ -1,8 +1,8 @@
-import { Badge, Box, Flex, Heading, Stack, Text, chakra } from '@chakra-ui/react';
+import { Badge, Box, EmptyState, Flex, Heading, Stack, Tabs, Text, VStack, chakra } from '@chakra-ui/react';
 import { Head, router } from '@inertiajs/react';
 import { ArrowLeft, BadgeCheck, CalendarClock, ChevronLeft, ChevronRight, MessageSquare, Star } from 'lucide-react';
 import type { ReactNode } from 'react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import IndexAction from '@/actions/App/Http/Controllers/Portal/Professional/IndexAction';
 import { BookingDialog } from '@/components/patient/booking-dialog';
 import { Button } from '@/components/ui/button';
@@ -53,8 +53,6 @@ const getInitials = (name: string): string =>
         .join('')
         .toUpperCase();
 
-const TABS = ['Experiencia', 'Servicios y precios', 'Consultas', 'Aseguradoras', 'Opiniones'] as const;
-type Tab = (typeof TABS)[number];
 
 const DAY_NAMES = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
 
@@ -67,14 +65,24 @@ function formatDayColumn(isoDate: string): { dayName: string; dayNum: number } {
 const DAYS_PER_PAGE = 3;
 
 export default function ProfessionalShow({ professional, services }: Props) {
-    const [activeTab, setActiveTab] = useState<Tab>('Experiencia');
     const [slotPage, setSlotPage] = useState(0);
     const [bioExpanded, setBioExpanded] = useState(false);
     const [bookingOpen, setBookingOpen] = useState(false);
     const [preselectedServiceId, setPreselectedServiceId] = useState<number | null>(null);
+    const [preselectedSlot, setPreselectedSlot] = useState<{ date: string; time: string } | null>(null);
+    const [activeTab, setActiveTab] = useState('experiencia');
+    const tabScrollRef = useRef<HTMLDivElement>(null);
 
-    const openBooking = (serviceId: number | null = null) => {
+    useEffect(() => {
+        const container = tabScrollRef.current;
+        if (!container) return;
+        const active = container.querySelector<HTMLElement>('[data-selected]');
+        active?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }, [activeTab]);
+
+    const openBooking = (serviceId: number | null = null, slot: { date: string; time: string } | null = null) => {
         setPreselectedServiceId(serviceId);
+        setPreselectedSlot(slot);
         setBookingOpen(true);
     };
 
@@ -92,10 +100,6 @@ export default function ProfessionalShow({ professional, services }: Props) {
         return first === last ? fmt(first) : `${fmt(first)} – ${fmt(last)}`;
     })();
 
-    const selectSlot = () => {
-        const firstActive = services.find((s) => s.is_active);
-        openBooking(firstActive?.id ?? null);
-    };
     void router;
 
     const bioText = professional.bio ?? '';
@@ -142,12 +146,23 @@ export default function ProfessionalShow({ professional, services }: Props) {
                             borderWidth="1px"
                             borderColor="border"
                             bg="bg.surface"
-                            p="8"
+                            p={{ base: '4', sm: '6', md: '8' }}
                             boxShadow="sm"
                         >
-                            <Flex gap="8" align="start">
+                            <Flex
+                                gap={{ base: '4', md: '8' }}
+                                align={{ base: 'center', sm: 'start' }}
+                                flexDirection={{ base: 'column', sm: 'row' }}
+                            >
                                 {/* Avatar */}
-                                <Box w="32" h="32" borderRadius="full" overflow="hidden" flexShrink={0} bg="bg.subtle">
+                                <Box
+                                    w={{ base: '20', sm: '24', md: '32' }}
+                                    h={{ base: '20', sm: '24', md: '32' }}
+                                    borderRadius="full"
+                                    overflow="hidden"
+                                    flexShrink={0}
+                                    bg="bg.subtle"
+                                >
                                     {professional.avatar_path ? (
                                         <ChakraImg
                                             src={professional.avatar_path}
@@ -164,7 +179,7 @@ export default function ProfessionalShow({ professional, services }: Props) {
                                             color="brand.solid"
                                             alignItems="center"
                                             justifyContent="center"
-                                            fontSize="2xl"
+                                            fontSize={{ base: 'xl', md: '2xl' }}
                                             fontWeight="bold"
                                         >
                                             {getInitials(professional.name)}
@@ -173,9 +188,9 @@ export default function ProfessionalShow({ professional, services }: Props) {
                                 </Box>
 
                                 {/* Info */}
-                                <Stack gap="1" flex="1" minW={0}>
-                                    <Flex align="center" gap="2" flexWrap="wrap">
-                                        <Heading as="h1" fontSize="2xl" fontWeight="extrabold" color="fg" letterSpacing="-0.5px">
+                                <Stack gap="1" flex="1" minW={0} align={{ base: 'center', sm: 'start' }}>
+                                    <Flex align="center" gap="2" flexWrap="wrap" justify={{ base: 'center', sm: 'start' }}>
+                                        <Heading as="h1" fontSize={{ base: 'xl', md: '2xl' }} fontWeight="extrabold" color="fg" letterSpacing="-0.5px" m="0" textAlign={{ base: 'center', sm: 'start' }}>
                                             {professional.name}
                                         </Heading>
                                         {professional.is_verified && (
@@ -184,13 +199,13 @@ export default function ProfessionalShow({ professional, services }: Props) {
                                     </Flex>
 
                                     {professional.specialties.length > 0 && (
-                                        <Text fontSize="sm" color="fg.muted">
+                                        <Text fontSize="sm" color="fg.muted" m="0" textAlign={{ base: 'center', sm: 'start' }}>
                                             {professional.specialties.map(formatSpecialty).join(', ')}
                                         </Text>
                                     )}
 
                                     {/* Rating placeholder */}
-                                    <Flex align="center" gap="1.5" mt="1">
+                                    <Flex align="center" gap="1.5" mt="1" m="0">
                                         {[1, 2, 3, 4, 5].map((i) => (
                                             <Box
                                                 key={i}
@@ -202,27 +217,39 @@ export default function ProfessionalShow({ professional, services }: Props) {
                                                 aria-hidden
                                             />
                                         ))}
-                                        <Text fontSize="sm" fontWeight="bold" color="fg">4.9</Text>
-                                        <Text fontSize="sm" color="fg.subtle">(128 opiniones)</Text>
+                                        <Text fontSize="sm" fontWeight="bold" color="fg" m="0">4.9</Text>
+                                        <Text fontSize="sm" color="fg.subtle" m="0">(128 opiniones)</Text>
                                     </Flex>
 
                                     {professional.collegiate_number && (
-                                        <Text fontSize="xs" color="fg.subtle" mt="1">
+                                        <Text fontSize="xs" color="fg.subtle" mt="1" m="0">
                                             Nº colegiado: {professional.collegiate_number}
                                         </Text>
                                     )}
 
-                                    <Flex gap="3" mt="5" flexWrap="wrap">
+                                    <Flex
+                                        gap="3"
+                                        mt="4"
+                                        flexWrap="wrap"
+                                        flexDirection={{ base: 'column', sm: 'row' }}
+                                        w={{ base: 'full', sm: 'auto' }}
+                                    >
                                         <Button
                                             variant="primary"
                                             size="md"
                                             disabled={services.length === 0}
                                             onClick={() => openBooking(null)}
+                                            w={{ base: 'full', sm: 'auto' }}
                                         >
                                             <Box as={CalendarClock} w="4" h="4" aria-hidden />
                                             Reservar cita
                                         </Button>
-                                        <Button variant="secondary" size="md" disabled>
+                                        <Button
+                                            variant="secondary"
+                                            size="md"
+                                            disabled
+                                            w={{ base: 'full', sm: 'auto' }}
+                                        >
                                             <Box as={MessageSquare} w="4" h="4" aria-hidden />
                                             Enviar mensaje
                                         </Button>
@@ -231,116 +258,122 @@ export default function ProfessionalShow({ professional, services }: Props) {
                             </Flex>
                         </Box>
 
-                        {/* Navigation tabs */}
-                        <Flex
-                            borderBottomWidth="1px"
-                            borderColor="border"
-                            gap="0"
-                            overflowX="auto"
+                        {/* Navigation tabs + content */}
+                        <Tabs.Root
+                            value={activeTab}
+                            onValueChange={(e) => setActiveTab(e.value)}
+                            colorPalette="brand"
+                            variant="line"
+                            lazyMount
+                            unmountOnExit
                         >
-                            {TABS.map((tab) => {
-                                const isActive = tab === activeTab;
-                                return (
-                                    <Box
-                                        key={tab}
-                                        as="button"
-                                        onClick={() => setActiveTab(tab)}
-                                        px="4"
-                                        py="4"
-                                        fontSize="sm"
-                                        fontWeight={isActive ? 'bold' : 'medium'}
-                                        color={isActive ? 'brand.solid' : 'fg.muted'}
-                                        borderBottomWidth="2px"
-                                        borderColor={isActive ? 'brand.solid' : 'transparent'}
-                                        flexShrink={0}
-                                        _hover={{ color: 'fg' }}
-                                        transition="all 0.15s"
-                                        aria-selected={isActive}
-                                    >
-                                        {tab}
-                                    </Box>
-                                );
-                            })}
-                        </Flex>
-
-                        {/* Tab content */}
-                        {activeTab === 'Experiencia' && (
+                            {/* Tab nav — own card, scrollable on mobile */}
                             <Box
-                                borderRadius="2xl"
+                                ref={tabScrollRef}
+                                borderRadius="xl"
                                 borderWidth="1px"
                                 borderColor="border"
                                 bg="bg.surface"
-                                p="8"
+                                boxShadow="xs"
+                                overflowX="auto"
+                                css={{
+                                    '&::-webkit-scrollbar': { display: 'none' },
+                                    scrollbarWidth: 'none',
+                                    msOverflowStyle: 'none',
+                                }}
+                            >
+                                <Tabs.List gap="0" borderBottomWidth="0" minW="max-content">
+                                    <Tabs.Trigger value="experiencia" px={{ base: '3', md: '5' }} py="3.5" fontSize="sm" fontWeight="medium">Experiencia</Tabs.Trigger>
+                                    <Tabs.Trigger value="servicios" px={{ base: '3', md: '5' }} py="3.5" fontSize="sm" fontWeight="medium">Servicios y precios</Tabs.Trigger>
+                                    <Tabs.Trigger value="consultas" px={{ base: '3', md: '5' }} py="3.5" fontSize="sm" fontWeight="medium">Consultas</Tabs.Trigger>
+                                    <Tabs.Trigger value="aseguradoras" px={{ base: '3', md: '5' }} py="3.5" fontSize="sm" fontWeight="medium">Aseguradoras</Tabs.Trigger>
+                                    <Tabs.Trigger value="opiniones" px={{ base: '3', md: '5' }} py="3.5" fontSize="sm" fontWeight="medium">Opiniones</Tabs.Trigger>
+                                </Tabs.List>
+                            </Box>
+
+                            {/* Tab content — own card below */}
+                            <Box
+                                borderRadius="xl"
+                                borderWidth="1px"
+                                borderColor="border"
+                                bg="bg.surface"
                                 boxShadow="xs"
                             >
-                                <Stack gap="6">
-                                    <Heading as="h2" fontSize="xl" fontWeight="bold" color="fg">
-                                        Experiencia
-                                    </Heading>
+                                <Tabs.Content value="experiencia" p="0">
+                                    <Box p={{ base: '5', md: '8' }}>
+                                        <Stack gap="6">
+                                            <Heading as="h2" fontSize="xl" fontWeight="bold" color="fg">
+                                                Experiencia
+                                            </Heading>
 
-                                    {bioText ? (
-                                        <Text fontSize="md" color="fg" lineHeight="tall">
-                                            {bioDisplay}
-                                            {bioText.length > BIO_LIMIT && (
-                                                <Box
-                                                    as="button"
-                                                    ml="1"
-                                                    color="brand.solid"
-                                                    fontWeight="medium"
-                                                    fontSize="md"
-                                                    onClick={() => setBioExpanded(!bioExpanded)}
-                                                >
-                                                    {bioExpanded ? 'ver menos' : 'ver más'}
-                                                </Box>
+                                            {bioText ? (
+                                                <Text fontSize="md" color="fg" lineHeight="tall">
+                                                    {bioDisplay}
+                                                    {bioText.length > BIO_LIMIT && (
+                                                        <Box
+                                                            as="button"
+                                                            ml="1"
+                                                            color="brand.solid"
+                                                            fontWeight="medium"
+                                                            fontSize="md"
+                                                            _hover={{ textDecoration: 'underline' }}
+                                                            onClick={() => setBioExpanded(!bioExpanded)}
+                                                        >
+                                                            {bioExpanded ? 'ver menos' : 'ver más'}
+                                                        </Box>
+                                                    )}
+                                                </Text>
+                                            ) : (
+                                                <Text fontSize="sm" color="fg.muted" fontStyle="italic">
+                                                    Este profesional aún no ha completado su perfil.
+                                                </Text>
                                             )}
-                                        </Text>
-                                    ) : (
-                                        <Text fontSize="sm" color="fg.muted">
-                                            Este profesional aún no ha completado su perfil.
-                                        </Text>
-                                    )}
 
-                                    {professional.specialties.length > 0 && (
-                                        <Stack gap="3">
-                                            <Text fontSize="sm" fontWeight="bold" color="fg">
-                                                Especialista en:
-                                            </Text>
-                                            <Flex gap="2" flexWrap="wrap">
-                                                {professional.specialties.map((s) => (
-                                                    <Badge
-                                                        key={s}
-                                                        variant="outline"
-                                                        colorPalette="gray"
-                                                        borderRadius="full"
-                                                        px="4"
-                                                        py="1.5"
-                                                        fontSize="sm"
-                                                        fontWeight="medium"
-                                                    >
-                                                        {formatSpecialty(s)}
-                                                    </Badge>
-                                                ))}
-                                            </Flex>
+                                            {professional.specialties.length > 0 && (
+                                                <Stack gap="3">
+                                                    <Text fontSize="xs" fontWeight="semibold" color="fg.subtle" textTransform="uppercase" letterSpacing="wider">
+                                                        Especialista en
+                                                    </Text>
+                                                    <Flex gap="2" flexWrap="wrap">
+                                                        {professional.specialties.map((s) => (
+                                                            <Badge
+                                                                key={s}
+                                                                colorPalette="brand"
+                                                                variant="subtle"
+                                                                borderRadius="full"
+                                                                px="4"
+                                                                py="1.5"
+                                                                fontSize="sm"
+                                                                fontWeight="medium"
+                                                            >
+                                                                {formatSpecialty(s)}
+                                                            </Badge>
+                                                        ))}
+                                                    </Flex>
+                                                </Stack>
+                                            )}
                                         </Stack>
-                                    )}
-                                </Stack>
-                            </Box>
-                        )}
+                                    </Box>
+                                </Tabs.Content>
 
-                        {activeTab !== 'Experiencia' && (
-                            <Box
-                                borderRadius="2xl"
-                                borderWidth="1px"
-                                borderColor="border"
-                                bg="bg.surface"
-                                p="12"
-                                textAlign="center"
-                            >
-                                <Text fontSize="sm" color="fg.muted">
-                                    Esta sección estará disponible próximamente.
-                                </Text>
+                                {(['servicios', 'consultas', 'aseguradoras', 'opiniones'] as const).map((tab) => (
+                                    <Tabs.Content key={tab} value={tab} p="0">
+                                        <EmptyState.Root py="16">
+                                            <EmptyState.Content>
+                                                <VStack textAlign="center" gap="1">
+                                                    <EmptyState.Title fontSize="sm" fontWeight="semibold" color="fg">
+                                                        Próximamente
+                                                    </EmptyState.Title>
+                                                    <EmptyState.Description fontSize="sm" color="fg.muted">
+                                                        Esta sección estará disponible en breve.
+                                                    </EmptyState.Description>
+                                                </VStack>
+                                            </EmptyState.Content>
+                                        </EmptyState.Root>
+                                    </Tabs.Content>
+                                ))}
                             </Box>
-                        )}
+                        </Tabs.Root>
                     </Stack>
 
                     {/* Right column — booking widget */}
@@ -349,10 +382,13 @@ export default function ProfessionalShow({ professional, services }: Props) {
                         borderWidth="1px"
                         borderColor="border"
                         bg="bg.surface"
-                        p="8"
+                        p={{ base: '5', md: '8' }}
                         boxShadow="md"
                         w={{ base: 'full', lg: '96' }}
                         flexShrink={0}
+                        position={{ lg: 'sticky' }}
+                        top={{ lg: '24' }}
+                        alignSelf={{ lg: 'flex-start' }}
                     >
                         <Stack gap="4">
                             <Heading as="h2" fontSize="xl" fontWeight="bold" color="fg">
@@ -412,7 +448,10 @@ export default function ProfessionalShow({ professional, services }: Props) {
                                                             variant="secondary"
                                                             size="sm"
                                                             w="full"
-                                                            onClick={selectSlot}
+                                                            onClick={() => {
+                                                                const firstActive = services.find((s) => s.is_active);
+                                                                openBooking(firstActive?.id ?? null, { date: day.date, time });
+                                                            }}
                                                         >
                                                             {time}
                                                         </Button>
@@ -454,6 +493,7 @@ export default function ProfessionalShow({ professional, services }: Props) {
                 services={services}
                 slots={professional.slots}
                 preselectedServiceId={preselectedServiceId}
+                preselectedSlot={preselectedSlot}
             />
         </>
     );

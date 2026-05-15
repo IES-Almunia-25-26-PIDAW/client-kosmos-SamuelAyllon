@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Appointment;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\ExpireAppointmentJob;
 use App\Models\Appointment;
 use App\Services\GoogleCalendarService;
 use Illuminate\Http\RedirectResponse;
@@ -45,6 +46,8 @@ class StoreAction extends Controller
                 // Non-fatal: appointment is created, Meet link can be added manually
             }
         }
+
+        ExpireAppointmentJob::dispatch($appointment->id)->delay($appointment->ends_at);
 
         return redirect()->route('professional.appointments.show', $appointment)
             ->with('success', 'Cita creada.');

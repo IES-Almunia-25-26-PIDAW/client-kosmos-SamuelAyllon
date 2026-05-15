@@ -27,14 +27,12 @@ it('schedule page returns appointments in the date range', function () {
     $professional = createProfessional();
     $patient = createPatient();
 
-    $now = now();
-
     Appointment::factory()->create([
         'professional_id' => $professional->id,
         'patient_id' => $patient->id,
         'workspace_id' => null,
-        'starts_at' => $now->copy()->startOfWeek()->addHours(9),
-        'ends_at' => $now->copy()->startOfWeek()->addHours(10),
+        'starts_at' => now()->addHour(),
+        'ends_at' => now()->addHours(2),
         'status' => 'pending',
     ]);
 
@@ -103,8 +101,8 @@ it('does not return appointments belonging to other professionals', function () 
         'professional_id' => $other->id,
         'patient_id' => $patient->id,
         'workspace_id' => null,
-        'starts_at' => now()->startOfWeek()->addHours(9),
-        'ends_at' => now()->startOfWeek()->addHours(10),
+        'starts_at' => now()->addHour(),
+        'ends_at' => now()->addHours(2),
     ]);
 
     $this->actingAs($professional)

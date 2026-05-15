@@ -38,7 +38,7 @@ export default function GoogleSettings({ connected }: { connected: boolean }) {
                             </CardTitle>
                         </Flex>
                         <CardDescription>
-                            Conecta tu cuenta Google para sincronizar las citas y, en el caso de los profesionales, generar enlaces de Google Meet automáticamente.
+                            Conecta tu cuenta Google para sincronizar las citas en tu calendario. Los profesionales podrán además generar enlaces de Google Meet automáticamente.
                         </CardDescription>
                     </CardHeader>
                     <CardContent>

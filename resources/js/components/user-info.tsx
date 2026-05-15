@@ -1,6 +1,4 @@
-import { Box, Text } from '@chakra-ui/react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useInitials } from '@/hooks/use-initials';
+import { Avatar, Box, Text } from '@chakra-ui/react';
 import type { User } from '@/types';
 
 export function UserInfo({
@@ -10,14 +8,12 @@ export function UserInfo({
     user: User;
     showEmail?: boolean;
 }) {
-    const getInitials = useInitials();
-
     return (
         <>
-            <Avatar flexShrink={0}>
-                <AvatarImage src={user.avatar_path ?? undefined} alt={user.name} />
-                <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
-            </Avatar>
+            <Avatar.Root size="sm" flexShrink={0} colorPalette="brand" variant="solid">
+                <Avatar.Image src={user.avatar_path ?? undefined} alt={user.name} />
+                <Avatar.Fallback name={user.name} />
+            </Avatar.Root>
             <Box
                 display="flex"
                 flexDirection="column"
@@ -28,11 +24,11 @@ export function UserInfo({
                 lineHeight="tight"
                 css={{ '[data-collapsible=icon] &': { display: 'none' } }}
             >
-                <Text truncate fontWeight="medium" maxW="full">
+                <Text truncate fontWeight="medium" maxW="full" m="0">
                     {user.name}
                 </Text>
                 {showEmail && (
-                    <Text truncate fontSize="xs" color="fg.muted" maxW="full">
+                    <Text truncate fontSize="xs" color="fg.muted" maxW="full" m="0">
                         {user.email}
                     </Text>
                 )}

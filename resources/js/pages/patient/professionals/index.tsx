@@ -533,7 +533,7 @@ export default function PortalProfessionalsIndex({ professionals, cities }: Prop
                                         {/* Info */}
                                         <Box flex="1" minW={0}>
                                             <Flex align="center" gap="2" mb="0.5" flexWrap="wrap">
-                                                <Heading as="h2" fontSize="lg" fontWeight="bold" color="fg">
+                                                <Heading as="h2" fontSize="lg" fontWeight="bold" color="fg" m="0">
                                                     {professional.name}
                                                 </Heading>
                                                 {professional.is_verified && (
@@ -547,13 +547,13 @@ export default function PortalProfessionalsIndex({ professionals, cities }: Prop
                                             </Flex>
 
                                             {professional.bio && (
-                                                <Text fontSize="sm" color="brand.solid" mb="2" fontWeight="medium">
+                                                <Text fontSize="sm" color="brand.solid" fontWeight="medium" m="0" mb="6"  >
                                                     {professional.bio}
                                                 </Text>
                                             )}
 
                                             {professional.specialties.length > 0 && (
-                                                <Flex flexWrap="wrap" gap="1.5" mb="2">
+                                                <Flex flexWrap="wrap" gap="1.5" mb="2" mt="2">
                                                     {professional.specialties.map((specialty) => (
                                                         <Badge
                                                             key={specialty}
@@ -577,11 +577,13 @@ export default function PortalProfessionalsIndex({ professionals, cities }: Prop
                                                 {professional.city && (
                                                     <Flex align="center" gap="1">
                                                         <Box as={MapPin} w="3" h="3" color="fg.subtle" aria-hidden />
-                                                        <Text fontSize="xs" color="fg.subtle">{professional.city}</Text>
+                                                        <Text fontSize="xs" color="fg.subtle" m="0">
+                                                            {professional.city}
+                                                        </Text>
                                                     </Flex>
                                                 )}
                                                 {professional.collegiate_number && (
-                                                    <Text fontSize="xs" color="fg.subtle">
+                                                    <Text fontSize="xs" color="fg.subtle" m="0">
                                                         Nº colegiado: {professional.collegiate_number}
                                                     </Text>
                                                 )}

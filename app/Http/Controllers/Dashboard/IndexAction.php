@@ -52,6 +52,7 @@ class IndexAction extends Controller
             ->with(['patient:id,name,avatar_path', 'service:id,name'])
             ->whereDate('starts_at', today())
             ->whereNotIn('status', ['cancelled', 'completed'])
+            ->where('ends_at', '>', now())
             ->orderBy('starts_at')
             ->select('appointments.*')
             ->selectSub($completedBeforeSub, 'completed_before_count')
@@ -82,13 +83,14 @@ class IndexAction extends Controller
 
         $pendingPayments = Invoice::where('professional_id', $user->id)
             ->whereIn('status', ['sent', 'overdue'])
+            ->whereIn('patient_id', $patientProfileMap->keys())
             ->with('patient:id,name')
             ->orderBy('due_at')
             ->take(5)
             ->get()
             ->map(fn (Invoice $invoice) => [
                 'id' => $invoice->id,
-                'patient_id' => $invoice->patient_id,
+                'patient_id' => $patientProfileMap->get($invoice->patient_id)->id ?? $invoice->patient_id,
                 'patient_name' => $invoice->patient->name ?? 'Paciente',
                 'amount' => (float) $invoice->total,
                 'status' => $invoice->status,
@@ -171,6 +173,7 @@ class IndexAction extends Controller
             ->with(['professional:id,name,avatar_path,specialty', 'service:id,name'])
             ->whereDate('starts_at', today())
             ->whereNotIn('status', ['cancelled', 'completed'])
+            ->where('ends_at', '>', now())
             ->orderBy('starts_at')
             ->get()
             ->map($mapAppointment);
@@ -200,6 +203,7 @@ class IndexAction extends Controller
             'upcoming_appointments' => $user->appointments()
                 ->whereDate('starts_at', today())
                 ->whereNotIn('status', ['cancelled', 'completed'])
+                ->where('ends_at', '>', now())
                 ->count(),
             'completed_sessions' => $user->appointments()
                 ->where('status', 'completed')

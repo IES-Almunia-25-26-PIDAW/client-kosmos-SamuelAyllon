@@ -121,7 +121,7 @@ export default function PatientInvoicesIndex({ invoices }: Props) {
                                 >
                                     <Stack gap="2" flex="1" minW={0}>
                                         <Flex alignItems="center" gap="2" flexWrap="wrap">
-                                            <Heading as="h2" fontSize="md" fontWeight="semibold" color="fg">
+                                            <Heading as="h2" fontSize="md" fontWeight="semibold" color="fg" m="0">
                                                 {invoice.invoice_number}
                                             </Heading>
                                             <Badge
@@ -140,16 +140,16 @@ export default function PatientInvoicesIndex({ invoices }: Props) {
                                         </Flex>
 
                                         <Flex gap="4" flexWrap="wrap" color="fg.muted" fontSize="sm">
-                                            <Text>Emitida el {formatDate(invoice.issued_at)}</Text>
+                                            <Text m="0">Emitida el {formatDate(invoice.issued_at)}</Text>
                                             {invoice.due_at && (
-                                                <Text>Vence el {formatDate(invoice.due_at)}</Text>
+                                                <Text m="0">Vence el {formatDate(invoice.due_at)}</Text>
                                             )}
                                             {invoice.paid_at && (
                                                 <Text>Pagada el {formatDate(invoice.paid_at)}</Text>
                                             )}
                                         </Flex>
 
-                                        <Text fontSize="lg" fontWeight="bold" color="fg">
+                                        <Text fontSize="lg" fontWeight="bold" color="fg" m="0" mt="2">
                                             {formatAmount(invoice.total)}
                                         </Text>
                                     </Stack>
@@ -158,14 +158,12 @@ export default function PatientInvoicesIndex({ invoices }: Props) {
                                         <Button asChild variant="secondary" size="sm">
                                             <ChakraLink href={ShowAction.url(invoice.id)}>Ver detalle</ChakraLink>
                                         </Button>
-                                        {invoice.pdf_path && (
-                                            <Button asChild variant="ghost" size="sm" aria-label="Descargar PDF">
-                                                <ChakraLink href={DownloadPdfAction.url(invoice.id)}>
-                                                    <Box as={Download} w="4" h="4" aria-hidden />
-                                                    PDF
-                                                </ChakraLink>
-                                            </Button>
-                                        )}
+                                        <Button asChild variant="ghost" size="sm" aria-label="Descargar PDF">
+                                            <a href={DownloadPdfAction.url(invoice.id)} download>
+                                                <Box as={Download} w="4" h="4" aria-hidden />
+                                                PDF
+                                            </a>
+                                        </Button>
                                     </Flex>
                                 </Flex>
                             );

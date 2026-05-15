@@ -95,6 +95,7 @@ function DialogContent({
                             right="4"
                             borderRadius="sm"
                             opacity={0.7}
+                            pt="1"
                             transition="opacity"
                             _hover={{ opacity: 1 }}
                             _focus={{
@@ -149,6 +150,8 @@ function DialogTitle(
             fontWeight="semibold"
             lineHeight="none"
             color="fg"
+            m="0"
+            pt="3"
             {...props}
         />
     );

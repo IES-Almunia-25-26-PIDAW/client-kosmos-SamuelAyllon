@@ -50,7 +50,14 @@ class IndexAction extends Controller
             ->whereIn('status', ['sent', 'overdue'])
             ->orderBy('due_at')
             ->limit(5)
-            ->get();
+            ->get()
+            ->map(fn ($invoice) => [
+                'id' => $invoice->id,
+                'amount' => (float) $invoice->total,
+                'status' => $invoice->status,
+                'due_at' => $invoice->due_at,
+                'created_at' => $invoice->created_at,
+            ]);
 
         $unreadMessages = Message::where('receiver_id', $user->id)
             ->whereNull('read_at')
@@ -61,6 +68,7 @@ class IndexAction extends Controller
             'upcomingAppointments' => $upcomingAppointments,
             'recentInvoices' => $recentInvoices,
             'unreadMessages' => $unreadMessages,
+            'googleCalendarConnected' => $user->google_refresh_token !== null,
         ]);
     }
 }

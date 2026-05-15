@@ -9,11 +9,11 @@ import {
     Home,
     MessageSquare,
     Receipt,
-    Settings,
     Sparkles,
     Users,
 } from 'lucide-react';
 import type { MouseEventHandler } from 'react';
+import AdminDashboardIndex from '@/actions/App/Http/Controllers/Admin/DashboardIndexAction';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -24,6 +24,7 @@ import {
     SidebarHeader,
     SidebarMenu,
     SidebarMenuItem,
+    SidebarSeparator,
 } from '@/components/ui/sidebar';
 import { dashboard as portalDashboard } from '@/routes/patient';
 import { index as portalAppointmentsIndex } from '@/routes/patient/appointments';
@@ -31,7 +32,7 @@ import { index as portalConsentFormsIndex } from '@/routes/patient/consent-forms
 import { index as portalInvoicesIndex } from '@/routes/patient/invoices';
 import { index as portalMessagesIndex } from '@/routes/patient/messages';
 import { index as portalProfessionalsIndex } from '@/routes/patient/professionals';
-import { dashboard, kosmo, settings } from '@/routes/professional';
+import { dashboard, kosmo } from '@/routes/professional';
 import { index as invoicesIndex } from '@/routes/professional/invoices';
 import { index as messagesIndex } from '@/routes/professional/messages';
 import { index as services } from '@/routes/professional/offered-consultations';
@@ -41,13 +42,7 @@ import { index as teamIndex } from '@/routes/professional/workspace/team';
 import type { Auth, NavItem } from '@/types';
 import AppLogo from './app-logo';
 
-const footerNavItems: NavItem[] = [
-    {
-        title: 'Ajustes',
-        href: settings.url(),
-        icon: Settings,
-    },
-];
+const footerNavItems: NavItem[] = [];
 
 const professionalNavItems: NavItem[] = [
     {
@@ -84,6 +79,7 @@ const professionalNavItems: NavItem[] = [
         title: 'Kosmo',
         href: kosmo.url(),
         icon: Sparkles,
+        highlight: true,
     },
     {
         title: 'Equipo',
@@ -128,7 +124,7 @@ const patientNavItems: NavItem[] = [
 const adminNavItems: NavItem[] = [
     {
         title: 'Usuarios',
-        href: '/admin/users',
+        href: AdminDashboardIndex.url(),
         icon: Users,
     },
 ];
@@ -144,7 +140,7 @@ export function AppSidebar({ onMouseEnter, onMouseLeave }: AppSidebarProps = {})
     const isAdmin = role === 'admin';
     const isPatient = role === 'patient';
 
-    const homeHref = isAdmin ? '/admin/users' : isPatient ? portalDashboard.url() : dashboard.url();
+    const homeHref = isAdmin ? AdminDashboardIndex.url() : isPatient ? portalDashboard.url() : dashboard.url();
 
     return (
         <Sidebar collapsible="icon" variant="inset" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
@@ -159,6 +155,8 @@ export function AppSidebar({ onMouseEnter, onMouseLeave }: AppSidebarProps = {})
                     </SidebarMenuItem>
                 </SidebarMenu>
             </SidebarHeader>
+
+            <SidebarSeparator />
 
             <SidebarContent>
                 {isAdmin && <NavMain items={adminNavItems} label="Administración" />}

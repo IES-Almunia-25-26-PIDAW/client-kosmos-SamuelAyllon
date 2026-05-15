@@ -55,6 +55,7 @@ class PatientConsentsAction extends Controller
             'google_id' => $pending['google_id'],
             'password' => null,
             'email_verified_at' => $pending['email_verified'] ? now() : null,
+            'google_refresh_token' => $pending['refresh_token'] ?? null,
         ]);
 
         $user->assignRole('patient');

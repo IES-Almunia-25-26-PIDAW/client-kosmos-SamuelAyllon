@@ -79,7 +79,7 @@ it('redirects professional without google_refresh_token to calendar connect afte
     $user = createProfessional();
     $user->forceFill(['google_id' => '1234567890', 'google_refresh_token' => null])->save();
 
-    mockGoogleService(googleProfile());
+    mockGoogleService(googleProfile(['refresh_token' => null]));
 
     $this->withSession(['google_oauth' => ['state' => 's', 'intent' => 'login', 'type' => null]]);
 
@@ -89,7 +89,7 @@ it('redirects professional without google_refresh_token to calendar connect afte
     $this->assertAuthenticatedAs($user->fresh());
 });
 
-it('links Google to an existing local account by email', function () {
+it('links Google to an existing local account by email and stores the refresh token', function () {
     $user = createProfessional();
     $user->forceFill(['email' => 'jane@example.com', 'google_id' => null])->save();
 
@@ -97,13 +97,13 @@ it('links Google to an existing local account by email', function () {
 
     $this->withSession(['google_oauth' => ['state' => 's', 'intent' => 'login', 'type' => null]]);
 
-    // El login intent no pide scope de Calendar → no llega refresh_token → tras vincular
-    // se redirige al flujo de conexión de Calendar (solución de auto-connect).
     $this->get('/auth/google/callback?state=s&code=abc')
-        ->assertRedirect(route('settings.google.redirect'));
+        ->assertRedirect(route('dashboard'));
 
-    expect($user->fresh()->google_id)->toBe('1234567890');
-    $this->assertAuthenticatedAs($user->fresh());
+    $fresh = $user->fresh();
+    expect($fresh->google_id)->toBe('1234567890')
+        ->and($fresh->google_refresh_token)->toBe('rt-abc');
+    $this->assertAuthenticatedAs($fresh);
 });
 
 it('blocks role mismatch when registering with an email that belongs to another role', function () {
@@ -192,6 +192,7 @@ it('finalises patient account only after submitting all consents', function () {
 
     expect($user->hasRole('patient'))->toBeTrue()
         ->and($user->google_id)->toBe('1234567890')
+        ->and($user->google_refresh_token)->toBe('rt-abc')
         ->and($user->patientProfile)->not->toBeNull()
         ->and($user->patientProfile->consentForms()->count())->toBe(4);
     $this->assertAuthenticatedAs($user);

@@ -34,11 +34,11 @@ const KPICard = React.forwardRef<HTMLDivElement, KPICardProps>(
                 >
                     {label}
                 </Text>
-                {Icon && <Icon size={16} color="var(--ck-colors-fg-subtle)" />}
+                {Icon && <Icon size={16} color="var(--ck-colors-fg-subtle)"  />}
             </Flex>
 
             <Box mb="2">
-                <Text fontSize="2xl" fontWeight="bold" color="fg">
+                <Text fontSize="2xl" fontWeight="bold" color="fg" marginTop="1" marginBottom="1">
                     {value}
                 </Text>
                 {trend && (

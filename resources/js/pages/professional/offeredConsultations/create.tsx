@@ -1,5 +1,6 @@
-import { Heading, Stack, Text } from '@chakra-ui/react';
+import { Box, Container, Flex, Heading, Icon, Separator, Stack, Text } from '@chakra-ui/react';
 import { Head } from '@inertiajs/react';
+import { Briefcase } from 'lucide-react';
 import type { ReactNode } from 'react';
 import OfferedConsultationsIndexAction from '@/actions/App/Http/Controllers/OfferedConsultations/IndexAction';
 import OfferedConsultationsStoreAction from '@/actions/App/Http/Controllers/OfferedConsultations/StoreAction';
@@ -10,23 +11,41 @@ export default function OfferedConsultationsCreate() {
     return (
         <>
             <Head title="Nuevo servicio — ClientKosmos" />
-            <Stack id="main-content" tabIndex={-1} gap="6" px={{ base: '6', lg: '8' }} pt={{ base: '8', lg: '10' }} pb="10" maxW="4xl" mx="auto" w="full">
-                <Stack gap="1">
-                    <Heading as="h1" fontSize="3xl" fontWeight="bold" color="fg">
-                        Nuevo servicio
-                    </Heading>
-                    <Text fontSize="sm" color="fg.muted">
-                        Define las características del servicio que ofreces.
-                    </Text>
-                </Stack>
 
-                <FormOfferedConsultations
-                    submitUrl={OfferedConsultationsStoreAction.url()}
-                    method="post"
-                    submitLabel="Crear servicio"
-                    onCancelHref={OfferedConsultationsIndexAction.url()}
-                />
-            </Stack>
+            <Container maxW="2xl" px={{ base: '4', md: '6', lg: '8' }} py={{ base: '6', lg: '8' }}>
+                <Stack gap="5">
+                    <Box>
+                        <Stack gap="3" direction="row" alignItems="center">
+                            <Flex
+                                flexShrink="0"
+                                alignItems="center"
+                                justifyContent="center"
+                                boxSize="10"
+                                borderRadius="full"
+                                bg="brand.solid"
+                            >
+                                <Icon as={Briefcase} boxSize="5" color="white" />
+                            </Flex>
+                            <Box minW="0" flex="1">
+                                <Heading as="h1" fontSize="xl" fontWeight="semibold" color="fg" lineHeight="1.2">
+                                    Nuevo servicio
+                                </Heading>
+                                <Text fontSize="xs" color="fg.muted" mt="0.5">
+                                    Define las características del servicio que ofreces
+                                </Text>
+                            </Box>
+                        </Stack>
+                        <Separator mt="4" borderColor="border.subtle" />
+                    </Box>
+
+                    <FormOfferedConsultations
+                        submitUrl={OfferedConsultationsStoreAction.url()}
+                        method="post"
+                        submitLabel="Crear servicio"
+                        onCancelHref={OfferedConsultationsIndexAction.url()}
+                    />
+                </Stack>
+            </Container>
         </>
     );
 }

@@ -70,6 +70,7 @@ export function SidebarMenuButton({
             overflow="hidden"
             borderRadius="md"
             p="2"
+            borderColor="transparent"
             textAlign="left"
             fontSize={size === 'sm' ? 'xs' : 'sm'}
             outline="none"

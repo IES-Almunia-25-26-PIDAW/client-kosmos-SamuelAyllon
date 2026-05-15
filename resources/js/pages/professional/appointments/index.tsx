@@ -5,7 +5,6 @@ import { CalendarDays, Clock } from 'lucide-react';
 import type { ReactNode } from 'react';
 import IndexAction from '@/actions/App/Http/Controllers/Appointment/IndexAction';
 import ShowAction from '@/actions/App/Http/Controllers/Appointment/ShowAction';
-import PatientShowAction from '@/actions/App/Http/Controllers/Patient/ShowAction';
 import { EmptyState } from '@/components/empty-state';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
@@ -44,14 +43,13 @@ const statusConfig: Record<string, { label: string; palette: string }> = {
 };
 
 const modalityLabel: Record<string, string> = {
-    presencial:   'Presencial',
-    online:       'Online',
-    videollamada: 'Videollamada',
-    telefono:     'Teléfono',
+    in_person:  'Presencial',
+    video_call: 'Videollamada',
+    telefono:   'Teléfono',
 };
 
 const isOnline = (modality: string) =>
-    ['online', 'videollamada', 'telefono'].includes(modality?.toLowerCase());
+    ['video_call', 'telefono'].includes(modality?.toLowerCase());
 
 const formatDateTime = (dt: string) => {
     const date = new Date(dt);
@@ -101,7 +99,6 @@ export default function AppointmentsIndex({ appointments, filters }: Props) {
                     role="tablist"
                     aria-label="Filtrar por estado"
                     p="1"
-                    bg="bg.subtle"
                     borderRadius="full"
                     w="fit-content"
                     maxW="full"
@@ -174,12 +171,12 @@ export default function AppointmentsIndex({ appointments, filters }: Props) {
                                     />
 
                                     <Box w={{ base: 'auto', md: '28' }} flexShrink={0}>
-                                        <Text fontSize="xs" fontWeight="medium" color="fg.muted" textTransform="capitalize">
+                                        <Text fontSize="xs" fontWeight="medium" color="fg.muted" textTransform="capitalize" margin="0">
                                             {date}
                                         </Text>
                                         <Flex alignItems="center" gap="1" mt="0.5">
                                             <Box as={Clock} w="3" h="3" color="fg.subtle" />
-                                            <Text fontSize="sm" fontWeight="semibold" color="fg" fontVariantNumeric="tabular-nums">
+                                            <Text fontSize="sm" fontWeight="semibold" color="fg" fontVariantNumeric="tabular-nums" margin="var(--space-1)">
                                                 {time}
                                             </Text>
                                         </Flex>
@@ -196,53 +193,56 @@ export default function AppointmentsIndex({ appointments, filters }: Props) {
                                         )}
                                     </Box>
 
-                                    <Flex gap="1.5" flexShrink={0} flexWrap="wrap">
-                                        <Badge
-                                            variant="subtle"
-                                            colorPalette={online ? 'gray' : 'green'}
-                                            borderRadius="full"
-                                            px="2"
-                                            py="0.5"
-                                            fontSize="2xs"
-                                            fontWeight="semibold"
-                                            textTransform="uppercase"
-                                            letterSpacing="wider"
-                                        >
-                                            {modalityLabel[appt.modality?.toLowerCase()] ?? appt.modality ?? 'Presencial'}
-                                        </Badge>
-
-                                        <Badge
-                                            variant="subtle"
-                                            colorPalette={cfg.palette}
-                                            borderRadius="full"
-                                            px="2"
-                                            py="0.5"
-                                            fontSize="2xs"
-                                            fontWeight="semibold"
-                                            textTransform="uppercase"
-                                            letterSpacing="wider"
-                                        >
-                                            {cfg.label}
-                                        </Badge>
-                                    </Flex>
-
                                     <Flex
-                                        alignItems="center"
-                                        gap="2"
-                                        flexShrink={0}
+                                        gap={{ base: '2', md: '4' }}
+                                        alignItems={{ base: 'flex-start', md: 'center' }}
+                                        flexDirection={{ base: 'column', md: 'row' }}
                                         w={{ base: 'full', md: 'auto' }}
-                                        justifyContent={{ base: 'flex-end', md: 'flex-start' }}
+                                        flexShrink={0}
                                     >
-                                        {appt.status !== 'completed' && appt.status !== 'cancelled' && (
-                                            <Button asChild variant="primary" size="sm">
-                                                <ChakraLink href={ShowAction.url(appt.id)}>Ver sesión</ChakraLink>
-                                            </Button>
-                                        )}
-                                        {appt.patient && (
-                                            <Button asChild variant="outline" size="sm">
-                                                <ChakraLink href={PatientShowAction.url(appt.patient.id)}>Ver ficha</ChakraLink>
-                                            </Button>
-                                        )}
+                                        <Flex gap="1.5" flexShrink={0} flexWrap="wrap">
+                                            <Badge
+                                                variant="subtle"
+                                                colorPalette={online ? 'gray' : 'green'}
+                                                borderRadius="full"
+                                                px="2"
+                                                py="0.5"
+                                                fontSize="2xs"
+                                                fontWeight="semibold"
+                                                textTransform="uppercase"
+                                                letterSpacing="wider"
+                                            >
+                                                {modalityLabel[appt.modality?.toLowerCase()] ?? appt.modality ?? 'Presencial'}
+                                            </Badge>
+
+                                            <Badge
+                                                variant="subtle"
+                                                colorPalette={cfg.palette}
+                                                borderRadius="full"
+                                                px="2"
+                                                py="0.5"
+                                                fontSize="2xs"
+                                                fontWeight="semibold"
+                                                textTransform="uppercase"
+                                                letterSpacing="wider"
+                                            >
+                                                {cfg.label}
+                                            </Badge>
+                                        </Flex>
+                                    </Flex>
+                                    <Flex
+                                            alignItems="center"
+                                            gap="1"
+                                            flexShrink={0}
+                                            w={{ base: 'full', md: 'auto' }}
+                                            justifyContent={{ base: 'flex-start', md: 'flex-start' }}
+                                            flexWrap="wrap"
+                                        >
+                                            {appt.status !== 'completed' && appt.status !== 'cancelled' && (
+                                                <Button asChild variant="primary" size="sm">
+                                                    <ChakraLink href={ShowAction.url(appt.id)}>Inicar sesión</ChakraLink>
+                                                </Button>
+                                            )}
                                     </Flex>
                                 </Flex>
                             );

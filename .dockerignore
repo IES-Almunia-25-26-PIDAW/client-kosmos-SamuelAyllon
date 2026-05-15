@@ -1,14 +1,28 @@
-# Dependencias (se instalan durante el build)
+# ==============================================================================
+# .dockerignore — ClientKosmos
+# ==============================================================================
+# Cada MB excluido reduce el tamaño de la imagen final.
+# Objetivo: imagen ≤ 200 MB.
+# ==============================================================================
+
+# Dependencias (se instalan durante el build en cada etapa)
 node_modules/
 vendor/
 
-# Entorno local (nunca incluir secretos en la imagen)
+# Entorno local — NUNCA incluir secretos en la imagen
 .env
+.env.*
+!.env.example
 
 # Git y herramientas de desarrollo
 .git/
+.gitignore
+.gitattributes
 .github/
 .claude/
+.agents/
+.vscode/
+.editorconfig
 
 # Storage generado en runtime (se monta como volumen)
 storage/logs/
@@ -17,7 +31,7 @@ storage/framework/sessions/
 storage/framework/views/
 bootstrap/cache/
 
-# Build del frontend (se regenera en el stage 1)
+# Build del frontend (se regenera en el stage 2)
 public/build/
 public/hot
 
@@ -28,16 +42,38 @@ database/database.sqlite
 # Tests (no necesarios en producción)
 tests/
 
-# Documentación y configuración de IDE
+# Documentación y configuración de IDE/linters
 docs/
 README.md
-.editorconfig
+CLAUDE.md
+*.md
+!.env.example
 .prettierrc
 .prettierignore
 eslint.config.js
 pint.json
+phpstan.neon
+phpstan-baseline.neon
 phpunit.xml
+vitest.config.ts
+tsconfig.test.json
+skills-lock.json
+boost.json
+.mcp.json
+.mailmap
+.npmrc
 
 # Docker (evitar recursión innecesaria)
 docker-compose.yml
+docker-compose.*.yml
+deploy/
 .dockerignore
+
+# Archivos temporales sueltos en raíz
+C:UsersxamueAppData*
+check_sessions.php
+
+# Logs y artefactos
+*.log
+coverage*
+junit.xml

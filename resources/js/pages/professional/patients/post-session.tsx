@@ -1,18 +1,31 @@
-import { Badge, Box, Flex, Grid, Heading, Skeleton, SkeletonText, Stack, Text, chakra } from '@chakra-ui/react';
+import {
+    Badge,
+    Box,
+    Button,
+    Card,
+    Field,
+    Flex,
+    Grid,
+    Heading,
+    Input,
+    NativeSelect,
+    Skeleton,
+    Stack,
+    Text,
+    Textarea,
+    chakra,
+} from '@chakra-ui/react';
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import { useEcho } from '@laravel/echo-react';
-import { ArrowLeft, Check, FileText, Sparkles } from 'lucide-react';
+import { ArrowLeft, Check, ExternalLink, FileText, PencilLine, Sparkles } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
 import AgreementStoreAction from '@/actions/App/Http/Controllers/Agreement/StoreAction';
 import FinalizeAndNotifyAction from '@/actions/App/Http/Controllers/Appointment/FinalizeAndNotifyAction';
+import InvoiceEditAction from '@/actions/App/Http/Controllers/Invoice/EditAction';
 import InvoiceReviewAction from '@/actions/App/Http/Controllers/Invoice/ReviewAction';
 import InvoiceStoreAction from '@/actions/App/Http/Controllers/Invoice/StoreAction';
 import NoteStoreAction from '@/actions/App/Http/Controllers/Note/StoreAction';
 import PatientShowAction from '@/actions/App/Http/Controllers/Patient/ShowAction';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/app-layout';
 import type { Patient } from '@/types';
 
@@ -61,9 +74,10 @@ interface AgreementForm {
 
 interface PaymentForm {
     amount: string;
-    due_date: string;
-    concept: string;
+    due_at: string;
+    notes: string;
     payment_method: string;
+    appointment_id: string;
     [key: string]: string;
 }
 
@@ -73,6 +87,22 @@ const STEPS: Array<{ id: StepId; title: string; description: string }> = [
     { id: 1, title: 'Notas y resumen IA', description: 'Revisa el resumen generado y añade notas o acuerdos.' },
     { id: 2, title: 'Factura', description: 'Revisa la factura y registra el cobro si aplica.' },
 ];
+
+const INVOICE_PALETTE: Record<string, string> = {
+    draft: 'yellow',
+    sent: 'blue',
+    paid: 'green',
+    overdue: 'red',
+    cancelled: 'gray',
+};
+
+const INVOICE_LABEL: Record<string, string> = {
+    draft: 'Borrador',
+    sent: 'Enviada',
+    paid: 'Pagada',
+    overdue: 'Vencida',
+    cancelled: 'Cancelada',
+};
 
 function Stepper({ current }: { current: StepId }) {
     return (
@@ -105,7 +135,7 @@ function Stepper({ current }: { current: StepId }) {
                             fontWeight="semibold"
                             fontSize="sm"
                         >
-                            {isDone ? <Box as={Check} w="4" h="4" /> : step.id}
+                            {isDone ? <Check size={16} /> : step.id}
                         </Flex>
                         <Box>
                             <Text fontSize="sm" fontWeight="semibold" color="fg">
@@ -122,30 +152,10 @@ function Stepper({ current }: { current: StepId }) {
     );
 }
 
-function Card({ children, ...rest }: { children: ReactNode; [key: string]: unknown }) {
-    return (
-        <Box
-            borderRadius="lg"
-            borderWidth="1px"
-            borderColor="border"
-            bg="bg.surface"
-            p="5"
-            boxShadow="sm"
-            {...rest}
-        >
-            {children}
-        </Box>
-    );
-}
-
 function formatCurrency(value: number | string | null | undefined): string {
-    if (value === null || value === undefined) {
-        return '—';
-    }
+    if (value === null || value === undefined) return '—';
     const n = typeof value === 'string' ? Number.parseFloat(value) : value;
-    if (Number.isNaN(n)) {
-        return '—';
-    }
+    if (Number.isNaN(n)) return '—';
     return n.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' });
 }
 
@@ -153,46 +163,37 @@ export default function PostSession({ patient, lastAppointment, lastInvoice }: P
     const [currentStep, setCurrentStep] = useState<StepId>(1);
     const [noteSaved, setNoteSaved] = useState(false);
     const [agreementSaved, setAgreementSaved] = useState(false);
-    const [paymentSaved, setPaymentSaved] = useState(false);
     const [finishing, setFinishing] = useState(false);
+
+    const patientLabel = patient.name ?? patient.project_name ?? 'Paciente';
 
     const noteForm = useForm<NoteForm>({ content: '', type: 'session_note' });
     const agreementForm = useForm<AgreementForm>({ content: '' });
     const paymentForm = useForm<PaymentForm>({
         amount: '',
-        due_date: new Date().toISOString().split('T')[0],
-        concept: 'Sesión de psicología',
+        due_at: new Date().toISOString().split('T')[0],
+        notes: 'Sesión de psicología',
         payment_method: '',
+        appointment_id: lastAppointment ? String(lastAppointment.id) : '',
     });
 
     const submitNote = (e: React.FormEvent) => {
         e.preventDefault();
         noteForm.post(NoteStoreAction.url(patient.id), {
-            onSuccess: () => {
-                noteForm.reset();
-                setNoteSaved(true);
-            },
+            onSuccess: () => { noteForm.reset(); setNoteSaved(true); },
         });
     };
 
     const submitAgreement = (e: React.FormEvent) => {
         e.preventDefault();
         agreementForm.post(AgreementStoreAction.url(patient.id), {
-            onSuccess: () => {
-                agreementForm.reset();
-                setAgreementSaved(true);
-            },
+            onSuccess: () => { agreementForm.reset(); setAgreementSaved(true); },
         });
     };
 
     const submitPayment = (e: React.FormEvent) => {
         e.preventDefault();
-        paymentForm.post(InvoiceStoreAction.url(patient.id), {
-            onSuccess: () => {
-                paymentForm.reset();
-                setPaymentSaved(true);
-            },
-        });
+        paymentForm.post(InvoiceStoreAction.url(patient.id));
     };
 
     const goNext = () => setCurrentStep((s) => (s < 2 ? ((s + 1) as StepId) : s));
@@ -221,11 +222,7 @@ export default function PostSession({ patient, lastAppointment, lastInvoice }: P
     useEcho(
         lastAppointment ? `appointment.${lastAppointment.id}` : 'appointment.none',
         '.session.summarized',
-        () => {
-            if (lastAppointment) {
-                router.reload({ only: ['lastAppointment'] });
-            }
-        },
+        () => { if (lastAppointment) router.reload({ only: ['lastAppointment'] }); },
     );
 
     const summaryStatus: 'ready' | 'pending' | 'failed' = aiSummary
@@ -236,9 +233,10 @@ export default function PostSession({ patient, lastAppointment, lastInvoice }: P
 
     return (
         <>
-            <Head title={`Post-sesión: ${(patient.name ?? patient.project_name ?? 'Paciente')} — ClientKosmos`} />
+            <Head title={`Post-sesión: ${patientLabel} — ClientKosmos`} />
 
             <Stack gap="6" p={{ base: '6', lg: '8' }} maxW="5xl" mx="auto" w="full">
+                {/* Header */}
                 <Box>
                     <ChakraLink
                         href={PatientShowAction.url(patient.id)}
@@ -250,270 +248,319 @@ export default function PostSession({ patient, lastAppointment, lastInvoice }: P
                         mb="4"
                         _hover={{ color: 'fg' }}
                     >
-                        <Box as={ArrowLeft} w="4" h="4" />
-                        Volver a {(patient.name ?? patient.project_name ?? 'Paciente')}
+                        <ArrowLeft size={16} />
+                        Volver a {patientLabel}
                     </ChakraLink>
                     <Heading as="h1" fontSize="3xl" fontWeight="bold" color="fg">
                         Cerrar sesión
                     </Heading>
                     <Text fontSize="md" color="fg.muted" mt="1">
-                        {(patient.name ?? patient.project_name ?? 'Paciente')}
+                        {patientLabel}
                     </Text>
                 </Box>
 
                 <Stepper current={currentStep} />
 
+                {/* Step 1 — Notas y resumen */}
                 {currentStep === 1 && (
                     <Stack gap="6">
-                        <Card>
-                            <Flex gap="3" align="center" mb="3">
-                                <Box as={Sparkles} w="5" h="5" color="brand.solid" />
-                                <Heading as="h3" fontSize="lg" fontWeight="semibold" color="fg">
-                                    Resumen IA de la sesión
-                                </Heading>
-                                {aiSummary && (
-                                    <Badge colorPalette="brand" variant="subtle" ml="auto">
-                                        Generado
-                                    </Badge>
-                                )}
-                            </Flex>
-                            {summaryStatus === 'ready' && (
-                                <Text fontSize="sm" color="fg" whiteSpace="pre-wrap" lineHeight="1.7">
-                                    {aiSummary}
-                                </Text>
-                            )}
-                            {summaryStatus === 'pending' && (
-                                <Stack gap="3">
-                                    <Text fontSize="sm" color="fg.muted">
-                                        {lastAppointment?.session_recording
-                                            ? 'Generando resumen automático… Esta operación puede tardar hasta 30 segundos.'
-                                            : 'No hay transcripción disponible para esta sesión.'}
-                                    </Text>
-                                    {lastAppointment?.session_recording && (
-                                        <Skeleton height="6" loading>
-                                            <SkeletonText noOfLines={4} gap="2" />
-                                        </Skeleton>
+                        <Card.Root>
+                            <Card.Body p="5">
+                                <Flex gap="3" align="center" mb="4">
+                                    <Box as={Sparkles} w="5" h="5" color="brand.solid" />
+                                    <Heading as="h3" fontSize="lg" fontWeight="semibold" color="fg">
+                                        Resumen IA de la sesión
+                                    </Heading>
+                                    {aiSummary && (
+                                        <Badge colorPalette="brand" variant="subtle" ml="auto">
+                                            Generado
+                                        </Badge>
                                     )}
-                                </Stack>
-                            )}
-                            {summaryStatus === 'failed' && (
-                                <Text fontSize="sm" color="fg.muted">
-                                    No se generó resumen: el paciente no otorgó consentimiento de grabación.
-                                </Text>
-                            )}
-                        </Card>
+                                </Flex>
+
+                                {summaryStatus === 'ready' && (
+                                    <Text fontSize="sm" color="fg" whiteSpace="pre-wrap" lineHeight="1.7">
+                                        {aiSummary}
+                                    </Text>
+                                )}
+                                {summaryStatus === 'pending' && (
+                                    <Stack gap="3">
+                                        <Text fontSize="sm" color="fg.muted">
+                                            {lastAppointment?.session_recording
+                                                ? 'Generando resumen automático… Puede tardar hasta 30 segundos.'
+                                                : 'No hay transcripción disponible para esta sesión.'}
+                                        </Text>
+                                        {lastAppointment?.session_recording && (
+                                            <Stack gap="2">
+                                                <Skeleton height="4" />
+                                                <Skeleton height="4" width="85%" />
+                                                <Skeleton height="4" />
+                                                <Skeleton height="4" width="70%" />
+                                            </Stack>
+                                        )}
+                                    </Stack>
+                                )}
+                                {summaryStatus === 'failed' && (
+                                    <Text fontSize="sm" color="fg.muted">
+                                        No se generó resumen: el paciente no otorgó consentimiento de grabación.
+                                    </Text>
+                                )}
+                            </Card.Body>
+                        </Card.Root>
 
                         <Grid templateColumns={{ base: '1fr', lg: 'repeat(2, 1fr)' }} gap="6">
-                            <Card>
-                                <Heading as="h3" fontSize="lg" fontWeight="semibold" color="fg" mb="4">
-                                    Nota de sesión
-                                </Heading>
-                                <Box as="form" onSubmit={submitNote}>
-                                    <Stack gap="3">
-                                        <Textarea
-                                            value={noteForm.data.content}
-                                            onChange={(e) => noteForm.setData('content', e.target.value)}
-                                            placeholder="¿Qué has trabajado en esta sesión? Observaciones clave, avances, puntos a seguir…"
-                                            minH="120px"
-                                            resize="vertical"
-                                        />
-                                        <Flex justify="space-between" align="center">
-                                            {noteSaved && (
-                                                <Text fontSize="xs" color="success.fg">
-                                                    Nota guardada.
-                                                </Text>
-                                            )}
-                                            <Button
-                                                type="submit"
-                                                variant="primary"
-                                                size="sm"
-                                                ml="auto"
-                                                loading={noteForm.processing}
-                                                disabled={!noteForm.data.content}
-                                            >
-                                                Guardar nota
-                                            </Button>
-                                        </Flex>
-                                    </Stack>
-                                </Box>
-                            </Card>
+                            <Card.Root>
+                                <Card.Body p="5">
+                                    <Heading as="h3" fontSize="lg" fontWeight="semibold" color="fg" mb="4">
+                                        Nota de sesión
+                                    </Heading>
+                                    <Box as="form" onSubmit={submitNote}>
+                                        <Stack gap="3">
+                                            <Textarea
+                                                value={noteForm.data.content}
+                                                onChange={(e) => noteForm.setData('content', e.target.value)}
+                                                placeholder="¿Qué has trabajado en esta sesión? Observaciones clave, avances, puntos a seguir…"
+                                                minH="120px"
+                                                resize="vertical"
+                                            />
+                                            <Flex justify="space-between" align="center">
+                                                {noteSaved && (
+                                                    <Text fontSize="xs" color="success.fg">
+                                                        Nota guardada.
+                                                    </Text>
+                                                )}
+                                                <Button
+                                                    type="submit"
+                                                    colorPalette="brand"
+                                                    variant="solid"
+                                                    size="sm"
+                                                    ml="auto"
+                                                    loading={noteForm.processing}
+                                                    disabled={!noteForm.data.content}
+                                                >
+                                                    Guardar nota
+                                                </Button>
+                                            </Flex>
+                                        </Stack>
+                                    </Box>
+                                </Card.Body>
+                            </Card.Root>
 
-                            <Card>
-                                <Heading as="h3" fontSize="lg" fontWeight="semibold" color="fg" mb="4">
-                                    Acuerdo de la sesión
-                                </Heading>
-                                <Box as="form" onSubmit={submitAgreement}>
-                                    <Stack gap="3">
-                                        <Textarea
-                                            value={agreementForm.data.content}
-                                            onChange={(e) => agreementForm.setData('content', e.target.value)}
-                                            placeholder="¿Qué se acordó hacer antes de la próxima sesión? Tarea, compromiso, reflexión…"
-                                            minH="120px"
-                                            resize="vertical"
-                                        />
-                                        <Flex justify="space-between" align="center">
-                                            {agreementSaved && (
-                                                <Text fontSize="xs" color="success.fg">
-                                                    Acuerdo guardado.
-                                                </Text>
-                                            )}
-                                            <Button
-                                                type="submit"
-                                                variant="secondary"
-                                                size="sm"
-                                                ml="auto"
-                                                loading={agreementForm.processing}
-                                                disabled={!agreementForm.data.content}
-                                            >
-                                                Registrar acuerdo
-                                            </Button>
-                                        </Flex>
-                                    </Stack>
-                                </Box>
-                            </Card>
+                            <Card.Root>
+                                <Card.Body p="5">
+                                    <Heading as="h3" fontSize="lg" fontWeight="semibold" color="fg" mb="4">
+                                        Acuerdo de la sesión
+                                    </Heading>
+                                    <Box as="form" onSubmit={submitAgreement}>
+                                        <Stack gap="3">
+                                            <Textarea
+                                                value={agreementForm.data.content}
+                                                onChange={(e) => agreementForm.setData('content', e.target.value)}
+                                                placeholder="¿Qué se acordó hacer antes de la próxima sesión? Tarea, compromiso, reflexión…"
+                                                minH="120px"
+                                                resize="vertical"
+                                            />
+                                            <Flex justify="space-between" align="center">
+                                                {agreementSaved && (
+                                                    <Text fontSize="xs" color="success.fg">
+                                                        Acuerdo guardado.
+                                                    </Text>
+                                                )}
+                                                <Button
+                                                    type="submit"
+                                                    variant="outline"
+                                                    size="sm"
+                                                    ml="auto"
+                                                    loading={agreementForm.processing}
+                                                    disabled={!agreementForm.data.content}
+                                                >
+                                                    Registrar acuerdo
+                                                </Button>
+                                            </Flex>
+                                        </Stack>
+                                    </Box>
+                                </Card.Body>
+                            </Card.Root>
                         </Grid>
                     </Stack>
                 )}
 
+                {/* Step 2 — Factura */}
                 {currentStep === 2 && (
                     <Stack gap="6">
-                        <Card>
-                            <Flex gap="3" align="center" mb="4">
-                                <Box as={FileText} w="5" h="5" color="brand.solid" />
-                                <Heading as="h3" fontSize="lg" fontWeight="semibold" color="fg">
-                                    Factura de la sesión
-                                </Heading>
-                                {lastInvoice && (
-                                    <Badge
-                                        ml="auto"
-                                        colorPalette={lastInvoice.status === 'draft' ? 'yellow' : 'green'}
-                                        variant="subtle"
-                                    >
-                                        {lastInvoice.status}
-                                    </Badge>
-                                )}
-                            </Flex>
-                            {lastInvoice ? (
-                                <Stack gap="3">
-                                    <Grid templateColumns={{ base: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }} gap="4">
-                                        <Box>
-                                            <Text fontSize="xs" color="fg.muted">Número</Text>
-                                            <Text fontSize="sm" fontWeight="semibold" color="fg">{lastInvoice.invoice_number}</Text>
-                                        </Box>
-                                        <Box>
-                                            <Text fontSize="xs" color="fg.muted">Subtotal</Text>
-                                            <Text fontSize="sm" fontWeight="semibold" color="fg">{formatCurrency(lastInvoice.subtotal)}</Text>
-                                        </Box>
-                                        <Box>
-                                            <Text fontSize="xs" color="fg.muted">IVA ({lastInvoice.tax_rate}%)</Text>
-                                            <Text fontSize="sm" fontWeight="semibold" color="fg">{formatCurrency(lastInvoice.tax_amount)}</Text>
-                                        </Box>
-                                        <Box>
-                                            <Text fontSize="xs" color="fg.muted">Total</Text>
-                                            <Text fontSize="sm" fontWeight="semibold" color="fg">{formatCurrency(lastInvoice.total)}</Text>
-                                        </Box>
-                                    </Grid>
-                                    <Box
-                                        p="3"
-                                        borderRadius="md"
-                                        bg="bg.muted"
-                                        borderLeftWidth="3px"
-                                        borderLeftColor="brand.solid"
-                                    >
-                                        <Text fontSize="xs" color="fg.muted">
-                                            Operación exenta de IVA conforme al art. 20.1.3º de la Ley 37/1992 del IVA
-                                            (servicios de asistencia sanitaria prestados por profesionales psicólogos).
-                                        </Text>
-                                    </Box>
-                                    <ChakraLink href={InvoiceReviewAction.url(lastInvoice.id)} alignSelf="flex-start">
-                                        <Button variant="secondary" size="sm">Revisar factura completa</Button>
-                                    </ChakraLink>
-                                </Stack>
-                            ) : (
-                                <Text fontSize="sm" color="fg.muted">
-                                    Aún no se ha generado factura para esta sesión. Puedes registrar el cobro abajo
-                                    y generar la factura desde la ficha del paciente.
-                                </Text>
-                            )}
-                        </Card>
+                        {/* Invoice display */}
+                        <Card.Root>
+                            <Card.Body p="5">
+                                <Flex gap="3" align="center" mb="4">
+                                    <Box as={FileText} w="5" h="5" color="brand.solid" />
+                                    <Heading as="h3" fontSize="lg" fontWeight="semibold" color="fg">
+                                        Factura de la sesión
+                                    </Heading>
+                                    {lastInvoice && (
+                                        <Badge
+                                            ml="auto"
+                                            colorPalette={INVOICE_PALETTE[lastInvoice.status] ?? 'gray'}
+                                            variant="subtle"
+                                        >
+                                            {INVOICE_LABEL[lastInvoice.status] ?? lastInvoice.status}
+                                        </Badge>
+                                    )}
+                                </Flex>
 
-                        <Card>
-                            <Heading as="h3" fontSize="lg" fontWeight="semibold" color="fg" mb="4">
-                                Registrar cobro
-                            </Heading>
-                            <Box as="form" onSubmit={submitPayment}>
-                                <Grid templateColumns={{ base: '1fr', sm: 'repeat(2, 1fr)', lg: 'repeat(4, 1fr)' }} gap="4">
-                                    <Stack gap="1.5">
-                                        <Label>Importe (€)</Label>
-                                        <Input
-                                            type="number"
-                                            min="0"
-                                            step="0.01"
-                                            value={paymentForm.data.amount}
-                                            onChange={(e) => paymentForm.setData('amount', e.target.value)}
-                                            placeholder="60.00"
-                                            h="10"
-                                        />
-                                    </Stack>
-                                    <Stack gap="1.5">
-                                        <Label>Fecha vencimiento</Label>
-                                        <Input
-                                            type="date"
-                                            value={paymentForm.data.due_date}
-                                            onChange={(e) => paymentForm.setData('due_date', e.target.value)}
-                                            h="10"
-                                        />
-                                    </Stack>
-                                    <Stack gap="1.5">
-                                        <Label>Método de pago</Label>
-                                        <chakra.select
-                                            value={paymentForm.data.payment_method}
-                                            onChange={(e) => paymentForm.setData('payment_method', e.target.value)}
-                                            w="full"
-                                            h="10"
-                                            px="3"
-                                            bg="bg.surface"
-                                            borderWidth="1px"
-                                            borderColor="border"
+                                {lastInvoice ? (
+                                    <Stack gap="4">
+                                        <Grid
+                                            templateColumns={{ base: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }}
+                                            gap="4"
+                                        >
+                                            <Box>
+                                                <Text fontSize="xs" color="fg.muted">Número</Text>
+                                                <Text fontSize="sm" fontWeight="semibold" color="fg">
+                                                    {lastInvoice.invoice_number}
+                                                </Text>
+                                            </Box>
+                                            <Box>
+                                                <Text fontSize="xs" color="fg.muted">Subtotal</Text>
+                                                <Text fontSize="sm" fontWeight="semibold" color="fg">
+                                                    {formatCurrency(lastInvoice.subtotal)}
+                                                </Text>
+                                            </Box>
+                                            <Box>
+                                                <Text fontSize="xs" color="fg.muted">
+                                                    IVA ({lastInvoice.tax_rate}%)
+                                                </Text>
+                                                <Text fontSize="sm" fontWeight="semibold" color="fg">
+                                                    {formatCurrency(lastInvoice.tax_amount)}
+                                                </Text>
+                                            </Box>
+                                            <Box>
+                                                <Text fontSize="xs" color="fg.muted">Total</Text>
+                                                <Text fontSize="sm" fontWeight="semibold" color="fg">
+                                                    {formatCurrency(lastInvoice.total)}
+                                                </Text>
+                                            </Box>
+                                        </Grid>
+
+                                        <Box
+                                            p="3"
                                             borderRadius="md"
-                                            color="fg"
-                                            fontSize="md"
-                                            _focusVisible={{
-                                                outline: 'none',
-                                                borderColor: 'brand.solid',
-                                                boxShadow: '0 0 0 3px var(--ck-colors-brand-muted)',
-                                            }}
+                                            bg="bg.muted"
+                                            borderLeftWidth="3px"
+                                            borderLeftColor="brand.solid"
                                         >
-                                            <option value="">Sin especificar</option>
-                                            <option value="cash">Efectivo</option>
-                                            <option value="bizum">Bizum</option>
-                                            <option value="transfer">Transferencia</option>
-                                            <option value="card">Tarjeta</option>
-                                        </chakra.select>
+                                            <Text fontSize="xs" color="fg.muted">
+                                                Operación exenta de IVA conforme al art. 20.1.3º de la Ley 37/1992 del IVA
+                                                (servicios de asistencia sanitaria prestados por profesionales psicólogos).
+                                            </Text>
+                                        </Box>
+
+                                        <Flex gap="3" flexWrap="wrap">
+                                            {lastInvoice.status === 'draft' && (
+                                                <ChakraLink href={InvoiceEditAction.url(lastInvoice.id)}>
+                                                    <Button colorPalette="brand" variant="solid" size="sm">
+                                                        <PencilLine />
+                                                        Editar factura
+                                                    </Button>
+                                                </ChakraLink>
+                                            )}
+                                            <ChakraLink href={InvoiceReviewAction.url(lastInvoice.id)}>
+                                                <Button variant="outline" size="sm">
+                                                    <ExternalLink />
+                                                    Ver factura completa
+                                                </Button>
+                                            </ChakraLink>
+                                        </Flex>
                                     </Stack>
-                                    <Flex alignItems="flex-end">
-                                        <Button
-                                            type="submit"
-                                            variant="primary"
-                                            w="full"
-                                            h="10"
-                                            loading={paymentForm.processing}
-                                            disabled={!paymentForm.data.amount || !paymentForm.data.due_date}
-                                        >
-                                            Registrar cobro
-                                        </Button>
-                                    </Flex>
-                                </Grid>
-                                {paymentSaved && (
-                                    <Text fontSize="xs" color="success.fg" mt="3">
-                                        Cobro registrado.
+                                ) : (
+                                    <Text fontSize="sm" color="fg.muted">
+                                        Aún no hay factura para esta sesión. Usa el formulario de abajo para registrar el cobro y generarla.
                                     </Text>
                                 )}
-                            </Box>
-                        </Card>
+                            </Card.Body>
+                        </Card.Root>
+
+                        {/* Payment form — only shown when no invoice exists */}
+                        {!lastInvoice && (
+                            <Card.Root>
+                                <Card.Body p="5">
+                                    <Heading as="h3" fontSize="lg" fontWeight="semibold" color="fg" mb="4">
+                                        Registrar cobro
+                                    </Heading>
+                                    <Box as="form" onSubmit={submitPayment}>
+                                        <Grid
+                                            templateColumns={{ base: '1fr', sm: 'repeat(2, 1fr)', lg: 'repeat(4, 1fr)' }}
+                                            gap="4"
+                                        >
+                                            <Field.Root invalid={!!paymentForm.errors.amount}>
+                                                <Field.Label fontSize="sm">Importe (€)</Field.Label>
+                                                <Input
+                                                    type="number"
+                                                    min="0"
+                                                    step="0.01"
+                                                    value={paymentForm.data.amount}
+                                                    onChange={(e) => paymentForm.setData('amount', e.target.value)}
+                                                    placeholder="60.00"
+                                                />
+                                                {paymentForm.errors.amount && (
+                                                    <Field.ErrorText>{paymentForm.errors.amount}</Field.ErrorText>
+                                                )}
+                                            </Field.Root>
+
+                                            <Field.Root invalid={!!paymentForm.errors.due_at}>
+                                                <Field.Label fontSize="sm">Fecha vencimiento</Field.Label>
+                                                <Input
+                                                    type="date"
+                                                    value={paymentForm.data.due_at}
+                                                    onChange={(e) => paymentForm.setData('due_at', e.target.value)}
+                                                />
+                                                {paymentForm.errors.due_at && (
+                                                    <Field.ErrorText>{paymentForm.errors.due_at}</Field.ErrorText>
+                                                )}
+                                            </Field.Root>
+
+                                            <Field.Root invalid={!!paymentForm.errors.payment_method}>
+                                                <Field.Label fontSize="sm">Método de pago</Field.Label>
+                                                <NativeSelect.Root>
+                                                    <NativeSelect.Field
+                                                        value={paymentForm.data.payment_method}
+                                                        onChange={(e) =>
+                                                            paymentForm.setData('payment_method', e.target.value)
+                                                        }
+                                                    >
+                                                        <option value="">Sin especificar</option>
+                                                        <option value="cash">Efectivo</option>
+                                                        <option value="bizum">Bizum</option>
+                                                        <option value="transfer">Transferencia</option>
+                                                        <option value="card">Tarjeta</option>
+                                                    </NativeSelect.Field>
+                                                    <NativeSelect.Indicator />
+                                                </NativeSelect.Root>
+                                                {paymentForm.errors.payment_method && (
+                                                    <Field.ErrorText>{paymentForm.errors.payment_method}</Field.ErrorText>
+                                                )}
+                                            </Field.Root>
+
+                                            <Flex alignItems="flex-end">
+                                                <Button
+                                                    type="submit"
+                                                    colorPalette="brand"
+                                                    variant="solid"
+                                                    w="full"
+                                                    loading={paymentForm.processing}
+                                                    disabled={!paymentForm.data.amount || !paymentForm.data.due_at}
+                                                >
+                                                    Registrar cobro
+                                                </Button>
+                                            </Flex>
+                                        </Grid>
+                                    </Box>
+                                </Card.Body>
+                            </Card.Root>
+                        )}
                     </Stack>
                 )}
 
+                {/* Navigation */}
                 <Flex
                     justify="space-between"
                     align="center"
@@ -523,16 +570,16 @@ export default function PostSession({ patient, lastAppointment, lastInvoice }: P
                     gap="3"
                     flexWrap="wrap"
                 >
-                    <Button variant="secondary" onClick={goBack} disabled={currentStep === 1}>
+                    <Button variant="outline" onClick={goBack} disabled={currentStep === 1}>
                         Atrás
                     </Button>
                     <Flex gap="3" ml="auto">
                         {currentStep < 2 ? (
-                            <Button variant="primary" onClick={goNext}>
+                            <Button colorPalette="brand" variant="solid" onClick={goNext}>
                                 Siguiente
                             </Button>
                         ) : (
-                            <Button variant="primary" onClick={finishAndExit} loading={finishing}>
+                            <Button colorPalette="brand" variant="solid" onClick={finishAndExit} loading={finishing}>
                                 Finalizar
                             </Button>
                         )}

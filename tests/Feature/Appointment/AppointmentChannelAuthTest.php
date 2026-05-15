@@ -1,6 +1,21 @@
 <?php
 
 use App\Models\Appointment;
+use Illuminate\Broadcasting\Broadcasters\Broadcaster;
+use Illuminate\Support\Facades\Broadcast;
+
+function appointmentChannelCallback(): Closure
+{
+    $broadcaster = Broadcast::driver();
+    $channels = (function () {
+        /** @var Broadcaster $this */
+        return $this->channels;
+    })->call($broadcaster);
+
+    expect($channels)->toHaveKey('appointment.{appointmentId}');
+
+    return $channels['appointment.{appointmentId}'];
+}
 
 it('patient is authorized on the appointment channel', function () {
     $professional = createProfessional();
@@ -12,12 +27,9 @@ it('patient is authorized on the appointment channel', function () {
         'workspace_id'    => null,
     ]);
 
-    $this->actingAs($patient)
-        ->postJson('/broadcasting/auth', [
-            'channel_name' => "private-appointment.{$appointment->id}",
-            'socket_id'    => '1234.5678',
-        ])
-        ->assertOk();
+    $callback = appointmentChannelCallback();
+
+    expect($callback($patient, $appointment->id))->toBeTrue();
 });
 
 it('professional is authorized on the appointment channel', function () {
@@ -30,12 +42,9 @@ it('professional is authorized on the appointment channel', function () {
         'workspace_id'    => null,
     ]);
 
-    $this->actingAs($professional)
-        ->postJson('/broadcasting/auth', [
-            'channel_name' => "private-appointment.{$appointment->id}",
-            'socket_id'    => '1234.5678',
-        ])
-        ->assertOk();
+    $callback = appointmentChannelCallback();
+
+    expect($callback($professional, $appointment->id))->toBeTrue();
 });
 
 it('a third-party user is denied on the appointment channel', function () {
@@ -49,10 +58,15 @@ it('a third-party user is denied on the appointment channel', function () {
         'workspace_id'    => null,
     ]);
 
-    $this->actingAs($stranger)
-        ->postJson('/broadcasting/auth', [
-            'channel_name' => "private-appointment.{$appointment->id}",
-            'socket_id'    => '1234.5678',
-        ])
-        ->assertForbidden();
+    $callback = appointmentChannelCallback();
+
+    expect($callback($stranger, $appointment->id))->toBeFalse();
+});
+
+it('returns false when the appointment does not exist', function () {
+    $user = createPatient();
+
+    $callback = appointmentChannelCallback();
+
+    expect($callback($user, PHP_INT_MAX))->toBeFalse();
 });

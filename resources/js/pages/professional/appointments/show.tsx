@@ -176,23 +176,23 @@ export default function AppointmentShow({ appointment, documents, lastClinicalNo
                             justifyContent="space-between"
                             px="5"
                             py="3"
-                            bg="bg.subtle"
+                            bg="var(--primary)"
                             borderBottomWidth="1px"
                             borderColor="border.subtle"
                             gap="3"
                         >
-                            <Flex alignItems="center" gap="2" minW={0}>
-                                <Box as={MessageSquare} w="4" h="4" color="brand.solid" flexShrink={0} />
+                            <Flex alignItems="center" gap="2" minW={0} >
+                                <Box as={MessageSquare} w="4" h="4" color="var(--primary-foreground)" flexShrink={0}   />
                                 <Text
                                     fontSize="sm"
                                     fontWeight="semibold"
-                                    color="fg"
+                                    color="var(--primary-foreground)"
                                     truncate
                                 >
                                     Resumen clínico automático
                                 </Text>
                             </Flex>
-                            <Text fontSize="2xs" color="fg.subtle" flexShrink={0}>
+                            <Text fontSize="2xs" color="var(--primary-subtle)" flexShrink={0}>
                                 {formatSyncedAt()}
                             </Text>
                         </Flex>
@@ -315,16 +315,15 @@ export default function AppointmentShow({ appointment, documents, lastClinicalNo
                                 as="header"
                                 px="4"
                                 py="3"
-                                bg="bg.subtle"
+                                bg="var(--primary)"
                                 borderBottomWidth="1px"
                                 borderColor="border.subtle"
                             >
                                 <Text
-                                    fontSize="xs"
+                                    fontSize="sm"
                                     fontWeight="semibold"
-                                    textTransform="uppercase"
                                     letterSpacing="wider"
-                                    color="fg.subtle"
+                                    color="var(--primary-foreground)"
                                 >
                                     Recursos del cliente
                                 </Text>

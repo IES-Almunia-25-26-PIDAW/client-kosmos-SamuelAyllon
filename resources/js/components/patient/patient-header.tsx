@@ -22,6 +22,7 @@ const PatientHeader: React.FC<PatientHeaderProps> = ({ patient }) => {
             borderColor="border.subtle"
             bg="bg.surface"
             shadow="sm"
+            borderRadius="0"
         >
             <Flex
                 h="73px"

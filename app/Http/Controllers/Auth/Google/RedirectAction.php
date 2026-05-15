@@ -35,8 +35,6 @@ class RedirectAction extends Controller
             ],
         ]);
 
-        $includeCalendar = $type === 'professional';
-
-        return redirect()->away($google->createAuthUrl($state, $includeCalendar));
+        return redirect()->away($google->createAuthUrl($state));
     }
 }

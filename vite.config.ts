@@ -22,4 +22,16 @@ export default defineConfig({
     esbuild: {
         jsx: 'automatic',
     },
+    build: {
+        rollupOptions: {
+            output: {
+                manualChunks: {
+                    react: ['react', 'react-dom'],
+                    inertia: ['@inertiajs/react'],
+                    chakra: ['@chakra-ui/react', '@emotion/react'],
+                    echo: ['@laravel/echo-react', 'laravel-echo', 'pusher-js'],
+                },
+            },
+        },
+    },
 });

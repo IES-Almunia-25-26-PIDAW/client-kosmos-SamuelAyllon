@@ -74,6 +74,7 @@ export default function Password() {
                                             type="password"
                                             autoComplete="current-password"
                                             placeholder="Tu contraseña actual"
+                                            pr="0"
                                         />
                                         <InputError message={errors.current_password} />
                                     </Stack>
@@ -92,6 +93,7 @@ export default function Password() {
                                             type="password"
                                             autoComplete="new-password"
                                             placeholder="Tu nueva contraseña"
+                                            pr="0"   
                                         />
                                         <InputError message={errors.password} />
                                     </Stack>
@@ -109,6 +111,7 @@ export default function Password() {
                                             type="password"
                                             autoComplete="new-password"
                                             placeholder="Confirma tu nueva contraseña"
+                                            pr="0"
                                         />
                                         <InputError message={errors.password_confirmation} />
                                     </Stack>

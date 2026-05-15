@@ -28,6 +28,10 @@ const STATUS_CONFIG: Record<string, { label: string; palette: string; icon: type
 };
 
 const CONSENT_TYPE_LABELS: Record<string, string> = {
+    privacy_policy: 'Protección de datos (RGPD)',
+    health_data: 'Tratamiento de datos de salud',
+    terms_of_service: 'Condiciones del servicio',
+    recording_global: 'Consentimiento de grabación',
     gdpr: 'Protección de datos (RGPD)',
     treatment: 'Consentimiento de tratamiento',
     recording: 'Consentimiento de grabación',
@@ -118,6 +122,7 @@ export default function PatientConsentFormsIndex({ consentForms }: Props) {
                                             alignItems="center"
                                             justifyContent="center"
                                             flexShrink={0}
+                                            mt="2"
                                         >
                                             <Box
                                                 as={cfg.icon}
@@ -130,7 +135,7 @@ export default function PatientConsentFormsIndex({ consentForms }: Props) {
 
                                         <Stack gap="1" minW={0}>
                                             <Flex alignItems="center" gap="2" flexWrap="wrap">
-                                                <Heading as="h2" fontSize="md" fontWeight="semibold" color="fg">
+                                                <Heading as="h2" fontSize="md" fontWeight="semibold" color="fg" m="0">
                                                     {typeLabel}
                                                 </Heading>
                                                 <Badge
@@ -149,12 +154,12 @@ export default function PatientConsentFormsIndex({ consentForms }: Props) {
                                             </Flex>
 
                                             <Flex gap="4" flexWrap="wrap" color="fg.muted" fontSize="xs">
-                                                <Text>Enviado el {formatDate(form.created_at)}</Text>
+                                                <Text m="0">Enviado el {formatDate(form.created_at)}</Text>
                                                 {form.signed_at && (
-                                                    <Text>Firmado el {formatDate(form.signed_at)}</Text>
+                                                    <Text m="0">Firmado el {formatDate(form.signed_at)}</Text>
                                                 )}
                                                 {form.expires_at && (
-                                                    <Text>Expira el {formatDate(form.expires_at)}</Text>
+                                                    <Text m="0">Expira el {formatDate(form.expires_at)}</Text>
                                                 )}
                                             </Flex>
                                         </Stack>

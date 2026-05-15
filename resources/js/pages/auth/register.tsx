@@ -5,23 +5,20 @@ import {
     Flex,
     Grid,
     Heading,
-    HStack,
-    Separator,
     SimpleGrid,
     Stack,
+    Steps,
     Text,
 } from '@chakra-ui/react';
 import { Head, useForm } from '@inertiajs/react';
 import {
+    ArrowLeft,
     Award,
     BookOpen,
     Briefcase,
-    Check,
     ChevronLeft,
     ChevronRight,
     Heart,
-    KeyRound,
-    Lock,
     Mail,
     User,
     UserPlus,
@@ -34,6 +31,7 @@ import TextLink from '@/components/text-link';
 import { Checkbox } from '@/components/ui/checkbox';
 import { FieldLabel } from '@/components/ui/field-label';
 import { IconInput } from '@/components/ui/icon-input';
+import { PasswordInput } from '@/components/ui/password-input';
 import { Spinner } from '@/components/ui/spinner';
 import AuthSplitLayout from '@/layouts/auth/auth-split-layout';
 import { registerSchema } from '@/lib/schemas/register.schema';
@@ -110,68 +108,11 @@ function TypeButton({ active, onClick, icon: Icon, label }: TypeButtonProps) {
     );
 }
 
-function StepIndicator({ step, userType }: { step: 1 | 2; userType: UserType }) {
-    const labels =
-        userType === 'professional'
-            ? ['Datos básicos', 'Perfil profesional']
-            : ['Datos básicos', 'Consentimientos'];
-
-    return (
-        <Flex alignItems="center" gap="0">
-            {labels.map((label, i) => {
-                const num = i + 1;
-                const isCompleted = step > num;
-                const isActive = step === num;
-                return (
-                    <Flex key={num} alignItems="center" flex={i < labels.length - 1 ? '1' : undefined}>
-                        <Flex direction="column" alignItems="center" gap="1.5" minW="0">
-                            <Flex
-                                w="8"
-                                h="8"
-                                borderRadius="full"
-                                alignItems="center"
-                                justifyContent="center"
-                                fontSize="xs"
-                                fontWeight="bold"
-                                transition="all 0.2s"
-                                bg={isCompleted || isActive ? 'brand.solid' : 'bg.subtle'}
-                                color={isCompleted || isActive ? 'white' : 'fg.muted'}
-                                borderWidth="2px"
-                                borderColor={isCompleted || isActive ? 'brand.solid' : 'border'}
-                                flexShrink={0}
-                            >
-                                {isCompleted ? <Box as={Check} h="3.5" w="3.5" /> : num}
-                            </Flex>
-                            <Text
-                                fontSize="2xs"
-                                fontWeight={isActive ? 'semibold' : 'normal'}
-                                color={isActive ? 'brand.solid' : 'fg.muted'}
-                                whiteSpace="nowrap"
-                            >
-                                {label}
-                            </Text>
-                        </Flex>
-                        {i < labels.length - 1 && (
-                            <Box
-                                flex={1}
-                                h="2px"
-                                mx="2"
-                                mb="5"
-                                bg={step > num ? 'brand.solid' : 'border'}
-                                transition="background 0.3s"
-                                borderRadius="full"
-                            />
-                        )}
-                    </Flex>
-                );
-            })}
-        </Flex>
-    );
-}
 
 export default function Register() {
     const [userType, setUserType] = useState<UserType>('professional');
     const [step, setStep] = useState<1 | 2>(1);
+    const [useEmail, setUseEmail] = useState(false);
 
     const { data, setData, post, processing, errors, setError, clearErrors } = useForm({
         type: 'professional' as UserType,
@@ -283,6 +224,7 @@ export default function Register() {
                         fontSize={{ base: '2xl', md: '3xl' }}
                         letterSpacing="-0.025em"
                         color="fg"
+                        m="0"
                     >
                         Crear una cuenta
                     </Heading>
@@ -292,7 +234,21 @@ export default function Register() {
                 </Stack>
 
                 {/* Step indicator */}
-                <StepIndicator step={step} userType={userType} />
+                <Steps.Root step={step - 1} count={2} size="sm" colorPalette="brand">
+                    <Steps.List>
+                        <Steps.Item index={0}>
+                            <Steps.Indicator />
+                            <Steps.Title>Datos básicos</Steps.Title>
+                            <Steps.Separator />
+                        </Steps.Item>
+                        <Steps.Item index={1}>
+                            <Steps.Indicator />
+                            <Steps.Title>
+                                {userType === 'professional' ? 'Perfil profesional' : 'Consentimientos'}
+                            </Steps.Title>
+                        </Steps.Item>
+                    </Steps.List>
+                </Steps.Root>
 
                 {/* Form */}
                 <chakra.form onSubmit={submit} display="flex" flexDirection="column" gap="5">
@@ -300,38 +256,76 @@ export default function Register() {
                     {/* ── STEP 1 ── */}
                     {step === 1 && (
                         <Stack gap="4">
-                            {/* User type selector */}
-                            <SimpleGrid columns={2} gap="3">
-                                <TypeButton
-                                    active={userType === 'professional'}
-                                    onClick={() => selectType('professional')}
-                                    icon={Briefcase}
-                                    label="Profesional"
-                                />
-                                <TypeButton
-                                    active={userType === 'patient'}
-                                    onClick={() => selectType('patient')}
-                                    icon={Heart}
-                                    label="Paciente"
-                                />
-                            </SimpleGrid>
+                            {!useEmail && (
+                                <Stack gap="4">
+                                    {/* User type selector */}
+                                    <SimpleGrid columns={2} gap="3">
+                                        <TypeButton
+                                            active={userType === 'professional'}
+                                            onClick={() => selectType('professional')}
+                                            icon={Briefcase}
+                                            label="Profesional"
+                                        />
+                                        <TypeButton
+                                            active={userType === 'patient'}
+                                            onClick={() => selectType('patient')}
+                                            icon={Heart}
+                                            label="Paciente"
+                                        />
+                                    </SimpleGrid>
 
-                            <GoogleSignInButton
-                                intent="register"
-                                role={userType}
-                                label={
-                                    userType === 'professional'
-                                        ? 'Registrarme como profesional con Google'
-                                        : 'Registrarme como paciente con Google'
-                                }
-                            />
-                            <HStack>
-                                <Separator flex="1" />
-                                <Text fontSize="xs" color="fg.muted" px="2">
-                                    o con email y contraseña
-                                </Text>
-                                <Separator flex="1" />
-                            </HStack>
+                                    <GoogleSignInButton
+                                        intent="register"
+                                        role={userType}
+                                        label={
+                                            userType === 'professional'
+                                                ? 'Registrarme como profesional con Google'
+                                                : 'Registrarme como paciente con Google'
+                                        }
+                                    />
+
+                                    <ChakraButton
+                                        type="button"
+                                        onClick={() => setUseEmail(true)}
+                                        w="full"
+                                        h="14"
+                                        borderRadius="full"
+                                        fontSize="sm"
+                                        fontWeight="semibold"
+                                        variant="outline"
+                                        borderWidth="2px"
+                                        borderColor="border"
+                                        color="fg"
+                                        bg="transparent"
+                                        _hover={{ bg: 'bg.subtle', borderColor: 'brand.solid' }}
+                                    >
+                                        <Flex alignItems="center" gap="2">
+                                            <Box as={Mail} h="5" w="5" />
+                                            Registrarme con email
+                                        </Flex>
+                                    </ChakraButton>
+                                </Stack>
+                            )}
+
+                            {useEmail && (
+                                <>
+                                    <ChakraButton
+                                        type="button"
+                                        onClick={() => setUseEmail(false)}
+                                        variant="plain"
+                                        size="sm"
+                                        alignSelf="flex-start"
+                                        color="fg.muted"
+                                        fontWeight="medium"
+                                        px="0"
+                                        h="auto"
+                                        _hover={{ color: 'brand.solid', bg: 'transparent' }}
+                                    >
+                                        <Flex alignItems="center" gap="1.5">
+                                            <Box as={ArrowLeft} h="3.5" w="3.5" />
+                                            Otras opciones
+                                        </Flex>
+                                    </ChakraButton>
 
                             <FormField
                                 label={<FieldLabel>Nombre completo</FieldLabel>}
@@ -384,10 +378,7 @@ export default function Register() {
                                 required
                             >
                                 <PasswordStrengthPopover password={data.password}>
-                                    <IconInput
-                                        icon={Lock}
-                                        iconLeft="4"
-                                        type="password"
+                                    <PasswordInput
                                         name="password"
                                         required
                                         autoComplete="new-password"
@@ -407,10 +398,7 @@ export default function Register() {
                                 error={errors.password_confirmation}
                                 required
                             >
-                                <IconInput
-                                    icon={KeyRound}
-                                    iconLeft="4"
-                                    type="password"
+                                <PasswordInput
                                     name="password_confirmation"
                                     required
                                     autoComplete="new-password"
@@ -446,6 +434,8 @@ export default function Register() {
                                     <Box as={ChevronRight} h="5" w="5" />
                                 </Flex>
                             </ChakraButton>
+                                </>
+                            )}
                         </Stack>
                     )}
 
@@ -465,7 +455,7 @@ export default function Register() {
                                         Información profesional
                                     </Text>
 
-                                    <SimpleGrid columns={{ base: 1, sm: 2 }} gap="24" maxW="320px">
+                                    <SimpleGrid columns={{ base: 1, sm: 2 }} gap="4">
                                         <FormField
                                             label={<FieldLabel>Nº colegiado</FieldLabel>}
                                             error={errors.collegiate_number}
@@ -699,7 +689,7 @@ export default function Register() {
                 </chakra.form>
 
                 {/* Login link */}
-                <Text textAlign="center" fontSize="sm" color="fg.muted" pt="2" pb="12">
+                <Text textAlign="center" fontSize="sm" color="fg.muted" pt="2">
                     ¿Ya tienes una cuenta?{' '}
                     <TextLink href={login()}>
                         <Text as="span" color="brand.solid" fontWeight="semibold">
