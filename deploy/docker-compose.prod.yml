@@ -1,0 +1,190 @@
+# ==============================================================================
+# docker-compose.prod.yml — ClientKosmos en producción (VPS + Traefik + FrankenPHP)
+# ==============================================================================
+# Arquitectura:
+#   Internet → Traefik (443 TLS, ACME Let's Encrypt) → app (FrankenPHP :8000)
+#                                                        ↓
+#                                                       db (MySQL) + redis
+#
+# Antes de levantar este compose:
+#   1. Copia .env.prod.example a .env.prod y rellena los valores.
+#   2. touch acme.json && chmod 600 acme.json
+#   3. Asegúrate de que el DNS de $DOMAIN apunta a la IP pública del VPS.
+#   4. ufw allow 80,443,22 (los demás puertos NO se exponen).
+#
+# Comandos básicos:
+#   docker compose -f docker-compose.prod.yml --env-file .env.prod up -d
+#   docker compose -f docker-compose.prod.yml logs -f traefik
+#   docker compose -f docker-compose.prod.yml pull && \
+#     docker compose -f docker-compose.prod.yml up -d   # actualizar imagen
+# ==============================================================================
+
+services:
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # SERVICIO: traefik — Reverse proxy + terminación TLS (ACME)
+  # ──────────────────────────────────────────────────────────────────────────
+  traefik:
+    image: traefik:v3.1
+    container_name: clientkosmos_traefik
+    restart: unless-stopped
+    command:
+      # Entrypoints
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      # Redirect HTTP → HTTPS
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+      - "--entrypoints.web.http.redirections.entrypoint.permanent=true"
+      # Provider Docker (descubrimiento por labels)
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.network=clientkosmos_edge"
+      # ACME Let's Encrypt (HTTP-01 challenge)
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL}"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+      # Logs y dashboard solo en local (apagado por defecto)
+      - "--api.dashboard=false"
+      - "--log.level=INFO"
+      - "--accesslog=false"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./acme.json:/letsencrypt/acme.json
+    networks:
+      - edge
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:80/ping"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # SERVICIO: app — ClientKosmos (FrankenPHP)
+  # ──────────────────────────────────────────────────────────────────────────
+  app:
+    image: samue45/client-kosmos:${APP_TAG:-latest}
+    container_name: clientkosmos_app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    env_file:
+      - .env.prod
+    environment:
+      # Valores fijos derivados del compose (no se duplican en .env.prod)
+      APP_ENV: production
+      APP_DEBUG: "false"
+      APP_URL: "https://${DOMAIN}"
+      DB_CONNECTION: mysql
+      DB_HOST: db
+      DB_PORT: "3306"
+      DB_DATABASE: clientkosmos
+      DB_USERNAME: clientkosmos
+      SESSION_DRIVER: redis
+      CACHE_STORE: redis
+      QUEUE_CONNECTION: redis
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      LOG_CHANNEL: stderr
+    volumes:
+      - app_storage:/app/storage/app/public
+    networks:
+      - edge
+      - internal
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=clientkosmos_edge"
+      - "traefik.http.routers.app.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.app.entrypoints=websecure"
+      - "traefik.http.routers.app.tls=true"
+      - "traefik.http.routers.app.tls.certresolver=letsencrypt"
+      - "traefik.http.services.app.loadbalancer.server.port=8000"
+      # Cabeceras de seguridad básicas
+      - "traefik.http.middlewares.app-sec.headers.stsSeconds=31536000"
+      - "traefik.http.middlewares.app-sec.headers.stsIncludeSubdomains=true"
+      - "traefik.http.middlewares.app-sec.headers.contentTypeNosniff=true"
+      - "traefik.http.middlewares.app-sec.headers.referrerPolicy=strict-origin-when-cross-origin"
+      - "traefik.http.routers.app.middlewares=app-sec"
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # SERVICIO: db — MySQL 8.0 (solo red interna, sin puertos expuestos)
+  # ──────────────────────────────────────────────────────────────────────────
+  db:
+    image: mysql:8.0
+    container_name: clientkosmos_db
+    restart: unless-stopped
+    # NO `ports:` — sólo accesible desde la red interna de Docker.
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: clientkosmos
+      MYSQL_USER: clientkosmos
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "--silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # SERVICIO: redis — Cache + sesiones + cola
+  # ──────────────────────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: clientkosmos_redis
+    restart: unless-stopped
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # SERVICIO: duckdns — Mantiene el subdominio apuntando a la IP del VPS
+  # ──────────────────────────────────────────────────────────────────────────
+  # Solo necesario si la IP del VPS es dinámica. Con IP fija puedes comentar
+  # este servicio y registrar la IP manualmente una vez en duckdns.org.
+  duckdns:
+    image: linuxserver/duckdns:latest
+    container_name: clientkosmos_duckdns
+    restart: unless-stopped
+    environment:
+      SUBDOMAINS: ${DUCKDNS_SUBDOMAIN}
+      TOKEN: ${DUCKDNS_TOKEN}
+      LOG_FILE: "false"
+    networks:
+      - edge
+
+# ──────────────────────────────────────────────────────────────────────────────
+# REDES
+# ──────────────────────────────────────────────────────────────────────────────
+# edge:     Traefik ↔ servicios expuestos a internet (app, duckdns).
+# internal: app ↔ db/redis. Sin acceso externo, ni siquiera a través de Traefik.
+networks:
+  edge:
+    name: clientkosmos_edge
+  internal:
+    name: clientkosmos_internal
+    internal: true
+
+# ──────────────────────────────────────────────────────────────────────────────
+# VOLÚMENES
+# ──────────────────────────────────────────────────────────────────────────────
+volumes:
+  db_data:
+    name: clientkosmos_db_data
+  app_storage:
+    name: clientkosmos_app_storage
