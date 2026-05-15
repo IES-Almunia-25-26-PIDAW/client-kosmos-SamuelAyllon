@@ -18,6 +18,8 @@
 .env.backup
 .env.production
 .env.prod
+/deploy/.env.prod
+/deploy/acme.json
 .phpactor.json
 .phpunit.result.cache
 Homestead.json
