@@ -37,10 +37,16 @@ RUN composer install \
 # ==============================================================================
 FROM node:20-alpine AS frontend
 
-# PHP necesario porque Vite invoca artisan durante el build (Wayfinder)
+# PHP necesario porque Vite invoca artisan durante el build (Wayfinder).
+# Incluimos todas las extensiones que los ServiceProviders cargan al
+# arrancar Laravel: curl/iconv/intl/bcmath/gd/zip/simplexml son requeridas
+# por Stripe, OpenAI, Google API, Carbon, etc. Sin ellas artisan falla con
+# "extension X not found" antes de poder enumerar rutas para Wayfinder.
 RUN apk add --no-cache php84 php84-tokenizer php84-mbstring php84-xml \
     php84-phar php84-openssl php84-dom php84-xmlwriter php84-ctype \
     php84-pdo php84-pdo_sqlite php84-fileinfo php84-session \
+    php84-curl php84-iconv php84-intl php84-bcmath php84-gd \
+    php84-zip php84-simplexml php84-sodium php84-opcache \
     && ln -sf /usr/bin/php84 /usr/bin/php
 
 WORKDIR /app
@@ -65,6 +71,16 @@ RUN mkdir -p bootstrap/cache storage/framework/sessions storage/framework/views 
     && chmod -R 775 bootstrap/cache storage
 
 COPY .env.example .env
+
+# Generamos APP_KEY de build (no se usa en runtime — Railway/compose inyecta
+# la real) para que artisan pueda bootear sin warnings de cifrado.
+RUN php artisan key:generate --force --no-interaction
+
+# Pre-generamos los tipos de Wayfinder con verbosidad. Si el plugin de Vite
+# llama después al mismo comando y todo está bien, simplemente regenera. Si
+# algo falla, el error real (stack trace de Laravel) aparece aquí en lugar
+# de quedarse oculto detrás del "Command failed" de Rollup.
+RUN php artisan wayfinder:generate --with-form -v
 
 RUN npm run build
 
