@@ -16,7 +16,15 @@ class IndexAction extends Controller
 
         $consentForms = $profile->consentForms()
             ->orderByDesc('created_at')
-            ->get();
+            ->get()
+            ->map(fn ($form) => [
+                'id' => $form->id,
+                'consent_type' => $form->consent_type,
+                'status' => $form->status,
+                'signed_at' => $form->signed_at?->toIso8601String(),
+                'expires_at' => $form->expires_at?->toDateString(),
+                'created_at' => $form->created_at->toIso8601String(),
+            ]);
 
         return Inertia::render('patient/consent-forms/index', [
             'consentForms' => $consentForms,

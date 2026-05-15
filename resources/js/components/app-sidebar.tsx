@@ -13,6 +13,7 @@ import {
     Users,
 } from 'lucide-react';
 import type { MouseEventHandler } from 'react';
+import AdminUsersIndex from '@/actions/App/Http/Controllers/Admin/Users/IndexAction';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -25,9 +26,6 @@ import {
     SidebarMenuItem,
     SidebarSeparator,
 } from '@/components/ui/sidebar';
-import type { Auth, NavItem } from '@/types';
-import AppLogo from './app-logo';
-import AdminUsersIndex from '@/actions/App/Http/Controllers/Admin/Users/IndexAction';
 import { dashboard as portalDashboard } from '@/routes/patient';
 import { index as portalAppointmentsIndex } from '@/routes/patient/appointments';
 import { index as portalConsentFormsIndex } from '@/routes/patient/consent-forms';
@@ -41,6 +39,8 @@ import { index as services } from '@/routes/professional/offered-consultations';
 import { index as patientsIndex } from '@/routes/professional/patients';
 import { index as scheduleIndex } from '@/routes/professional/schedule';
 import { index as teamIndex } from '@/routes/professional/workspace/team';
+import type { Auth, NavItem } from '@/types';
+import AppLogo from './app-logo';
 
 const footerNavItems: NavItem[] = [];
 

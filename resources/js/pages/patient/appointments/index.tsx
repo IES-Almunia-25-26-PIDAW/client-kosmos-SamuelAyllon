@@ -121,9 +121,9 @@ export default function PatientAppointmentsIndex({ appointments }: Props) {
                                     flexDirection={{ base: 'column', md: 'row' }}
                                     justifyContent="space-between"
                                 >
-                                    <Stack gap="2" flex="1" minW={0}>
+                                    <Stack gap="1" flex="1" minW={0}>
                                         <Flex alignItems="center" gap="2">
-                                            <Heading as="h2" fontSize="lg" fontWeight="semibold" color="fg" truncate>
+                                            <Heading as="h2" fontSize="lg" fontWeight="semibold" color="fg" m="0" truncate>
                                                 {appt.professional?.name ?? 'Profesional'}
                                             </Heading>
                                             <Badge
@@ -136,6 +136,7 @@ export default function PatientAppointmentsIndex({ appointments }: Props) {
                                                 fontWeight="semibold"
                                                 textTransform="uppercase"
                                                 letterSpacing="wider"
+                                                m="0"
                                             >
                                                 {statusCfg.label}
                                             </Badge>
@@ -144,24 +145,24 @@ export default function PatientAppointmentsIndex({ appointments }: Props) {
                                         <Flex alignItems="center" gap="4" flexWrap="wrap" color="fg.muted" fontSize="sm">
                                             <Flex alignItems="center" gap="1.5">
                                                 <Box as={CalendarDays} w="3.5" h="3.5" aria-hidden={true} />
-                                                <Text>{formatDate(appt.starts_at)}</Text>
+                                                <Text m="0">{formatDate(appt.starts_at)}</Text>
                                             </Flex>
                                             <Flex alignItems="center" gap="1.5">
                                                 <Box as={Clock} w="3.5" h="3.5" aria-hidden={true} />
-                                                <Text>
+                                                <Text m="0">
                                                     {formatTime(appt.starts_at)} – {formatTime(appt.ends_at)}
                                                 </Text>
                                             </Flex>
                                             {isOnline && (
                                                 <Flex alignItems="center" gap="1.5">
                                                     <Box as={Video} w="3.5" h="3.5" aria-hidden={true} />
-                                                    <Text>Videollamada</Text>
+                                                    <Text m="0">Videollamada</Text>
                                                 </Flex>
                                             )}
                                         </Flex>
 
                                         {appt.service && (
-                                            <Text fontSize="sm" color="fg.subtle">
+                                            <Text fontSize="sm" color="fg.subtle" m="0" mt="2">
                                                 {appt.service.name}
                                             </Text>
                                         )}

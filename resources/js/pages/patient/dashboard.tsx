@@ -155,10 +155,12 @@ export default function PatientDashboard({
                         p="5"
                     >
                         <Flex gap="3" alignItems="flex-start">
-                            <Box as={CalendarDays} w="5" h="5" color="brand.solid" mt="0.5" aria-hidden={true} />
+                            <Box as={CalendarDays} w="10" h="10" color="brand.solid" mt="3" aria-hidden={true} />
                             <Stack gap="1">
-                                <Text fontWeight="semibold" color="fg">Conecta tu Google Calendar</Text>
-                                <Text fontSize="sm" color="fg.muted">
+                                <Text fontWeight="semibold" color="fg" m="0" mt="2">
+                                    Conecta tu Google Calendar
+                                </Text>
+                                <Text fontSize="sm" color="fg.muted" m="0" mb="2">
                                     Vincula tu cuenta para sincronizar tus citas con tu calendario personal.
                                 </Text>
                             </Stack>
@@ -275,7 +277,6 @@ export default function PatientDashboard({
                         display="flex"
                         alignItems="center"
                         justifyContent="flex-end"
-                        p="8"
                     >
                         {/* Doctor photo — left half */}
                         <Box
@@ -283,7 +284,7 @@ export default function PatientDashboard({
                             left={0}
                             top={0}
                             bottom={0}
-                            w="55%"
+                            w="50%"
                             overflow="hidden"
                             aria-hidden={true}
                         >
@@ -332,6 +333,7 @@ export default function PatientDashboard({
                             zIndex={1}
                             w={{ base: 'full', md: '45%' }}
                             alignItems="flex-start"
+                            paddingRight="10"
                         >
                             <Badge
                                 bg="#93f0e0"
@@ -407,7 +409,7 @@ export default function PatientDashboard({
 
                 {/* ── Bottom grid ── */}
                 <Grid
-                    templateColumns={{ base: '1fr', lg: '5fr 7fr' }}
+                    templateColumns={{ base: '1fr', lg: '7fr 7fr' }}
                     gap={{ base: '8', lg: '12' }}
                     alignItems="start"
                 >
@@ -615,10 +617,11 @@ export default function PatientDashboard({
                                                         color="fg.subtle"
                                                         textTransform="uppercase"
                                                         letterSpacing="wider"
+                                                        m="0" mt="2"
                                                     >
                                                         {formatInvoiceNumber(invoice.id)}
                                                     </Text>
-                                                    <Text fontSize="sm" color="fg.muted">
+                                                    <Text fontSize="sm" color="fg.muted" m="0" mb="2">
                                                         {invoice.created_at
                                                             ? new Intl.DateTimeFormat('es-ES', {
                                                                   day: 'numeric',
@@ -638,6 +641,7 @@ export default function PatientDashboard({
                                                         fontWeight="bold"
                                                         color="fg"
                                                         lineHeight="none"
+                                                        m="0" 
                                                     >
                                                         {Number(invoice.amount).toLocaleString(
                                                             'es-ES',
@@ -654,6 +658,7 @@ export default function PatientDashboard({
                                                             fontWeight="bold"
                                                             textTransform="uppercase"
                                                             letterSpacing="wider"
+                                                            m="0" 
                                                             color={
                                                                 isOverdue
                                                                     ? 'danger.solid'

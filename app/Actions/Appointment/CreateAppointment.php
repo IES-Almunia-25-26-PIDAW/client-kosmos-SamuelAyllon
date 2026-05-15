@@ -2,6 +2,7 @@
 
 namespace App\Actions\Appointment;
 
+use App\Jobs\ExpireAppointmentJob;
 use App\Models\Appointment;
 use App\Models\OfferedConsultation;
 use App\Models\ProfessionalProfile;
@@ -90,7 +91,7 @@ class CreateAppointment
             $this->assertNoProfessionalConflict($professional->id, $startsAt, $endsAt);
             $this->assertNoPatientConflict($patient->id, $startsAt, $endsAt);
 
-            return Appointment::create([
+            $appointment = Appointment::create([
                 'workspace_id' => $workspace->id,
                 'patient_id' => $patient->id,
                 'professional_id' => $professional->id,
@@ -101,6 +102,10 @@ class CreateAppointment
                 'status' => 'pending',
                 'notes' => $data['notes'] ?? null,
             ]);
+
+            ExpireAppointmentJob::dispatch($appointment->id)->delay($endsAt);
+
+            return $appointment;
         });
     }
 }

@@ -12,9 +12,9 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
-import type { Auth, BreadcrumbItem, User as UserType } from '@/types';
 import { edit } from '@/routes/profile';
 import { send } from '@/routes/verification';
+import type { Auth, BreadcrumbItem, User as UserType } from '@/types';
 
 const ChakraLink = chakra(Link);
 

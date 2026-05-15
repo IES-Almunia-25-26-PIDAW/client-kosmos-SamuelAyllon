@@ -40,6 +40,8 @@ interface BookingDialogProps {
     slots: BookingDialogSlot[];
     /** When set, dialog opens directly on the day-time step. */
     preselectedServiceId?: number | null;
+    /** When set alongside preselectedServiceId, dialog opens directly on the note step. */
+    preselectedSlot?: { date: string; time: string } | null;
 }
 
 type Step = 'service' | 'datetime' | 'note' | 'confirm' | 'success';
@@ -60,7 +62,7 @@ type Action =
     | { type: 'SET_NOTE'; value: string }
     | { type: 'GOTO'; step: Step }
     | { type: 'BACK' }
-    | { type: 'RESET'; preselected: OfferedConsultation | null };
+    | { type: 'RESET'; preselected: OfferedConsultation | null; slot: { date: string; time: string } | null };
 
 const STEP_ORDER: Step[] = ['service', 'datetime', 'note', 'confirm', 'success'];
 
@@ -85,11 +87,11 @@ function reducer(state: State, action: Action): State {
         }
         case 'RESET':
             return {
-                step: action.preselected ? 'datetime' : 'service',
+                step: action.preselected && action.slot ? 'note' : action.preselected ? 'datetime' : 'service',
                 modalityFilter: 'all',
                 selectedService: action.preselected,
-                selectedDate: null,
-                selectedTime: null,
+                selectedDate: action.slot?.date ?? null,
+                selectedTime: action.slot?.time ?? null,
                 note: '',
             };
     }
@@ -117,6 +119,7 @@ export function BookingDialog({
     services,
     slots,
     preselectedServiceId = null,
+    preselectedSlot = null,
 }: BookingDialogProps) {
     const preselected = useMemo(
         () => services.find((s) => s.id === preselectedServiceId) ?? null,
@@ -124,19 +127,19 @@ export function BookingDialog({
     );
 
     const [state, dispatch] = useReducer(reducer, {
-        step: preselected ? 'datetime' : 'service',
+        step: preselected && preselectedSlot ? 'note' : preselected ? 'datetime' : 'service',
         modalityFilter: 'all',
         selectedService: preselected,
-        selectedDate: null,
-        selectedTime: null,
+        selectedDate: preselectedSlot?.date ?? null,
+        selectedTime: preselectedSlot?.time ?? null,
         note: '',
     });
 
     useEffect(() => {
         if (open) {
-            dispatch({ type: 'RESET', preselected });
+            dispatch({ type: 'RESET', preselected, slot: preselectedSlot });
         }
-    }, [open, preselected]);
+    }, [open, preselected, preselectedSlot]);
 
     const form = useForm<{
         professional_id: number;
