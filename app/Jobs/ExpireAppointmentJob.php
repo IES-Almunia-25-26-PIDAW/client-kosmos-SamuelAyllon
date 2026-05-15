@@ -6,6 +6,8 @@ use App\Models\Appointment;
 use App\Services\GoogleCalendarService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Queue\SyncQueue;
+use Illuminate\Support\Facades\Queue;
 
 class ExpireAppointmentJob implements ShouldQueue
 {
@@ -27,7 +29,10 @@ class ExpireAppointmentJob implements ShouldQueue
 
         // ends_at moved into the future (cita reprogramada): reagendar el job al nuevo fin.
         if ($appointment->ends_at->isFuture()) {
-            self::dispatch($appointment->id)->delay($appointment->ends_at);
+            // Sync queue ignora delays; re-despachar recursaría hasta agotar la pila.
+            if (! Queue::connection() instanceof SyncQueue) {
+                self::dispatch($appointment->id)->delay($appointment->ends_at);
+            }
 
             return;
         }
