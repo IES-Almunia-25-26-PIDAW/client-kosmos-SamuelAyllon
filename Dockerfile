@@ -1,53 +1,43 @@
 # ==============================================================================
-# Dockerfile de ClientKosmos (Laravel + React)
+# Dockerfile de ClientKosmos (Laravel + React) — FrankenPHP
 # ==============================================================================
-# Un Dockerfile "multi-stage" divide la construcción en varias etapas.
-# Cada etapa hace una cosa, y la imagen final solo coge lo que necesita.
-# Resultado: imagen más pequeña y limpia.
+# Multi-stage:
+#   1. deps     → librerías PHP (Composer)
+#   2. frontend → React/TS compilado (Node + Vite)
+#   3. final    → imagen ejecutable basada en FrankenPHP (Caddy + PHP 8.4)
 #
-# Etapas:
-#   1. deps     → descarga las librerías PHP (Composer)
-#   2. frontend → compila el código React/TypeScript (Node + Vite)
-#   3. final    → imagen que se ejecuta en producción
+# El servidor de aplicación es FrankenPHP. Traefik se encarga de TLS por
+# delante; FrankenPHP escucha HTTP plano en :8000 (ver docker/Caddyfile).
 #
-# Para arrancar el proyecto: docker compose up --build
+# Para arrancar el proyecto (desarrollo): docker compose up --build
 # ==============================================================================
 
 
 # ==============================================================================
-# ETAPA 1: Descargar librerías PHP con Composer
+# ETAPA 1: Composer
 # ==============================================================================
-# Usamos PHP 8.4 en Alpine (Alpine = versión de Linux muy ligera)
 FROM php:8.4-cli-alpine AS deps
 
-# unzip lo necesita Composer para descomprimir los paquetes
 RUN apk add --no-cache unzip
-
-# Copiamos el ejecutable de Composer desde su imagen oficial
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Directorio de trabajo dentro del contenedor (como hacer cd /app)
 WORKDIR /app
 
-# Copiamos solo los archivos de dependencias primero.
-# Así Docker usa la caché y no re-descarga todo si el código no cambia.
 COPY composer.json composer.lock ./
 
-# Instalamos las dependencias PHP sin las de desarrollo
 RUN composer install \
     --no-scripts \
+    --no-dev \
     --no-interaction \
     --optimize-autoloader
 
 
 # ==============================================================================
-# ETAPA 2: Compilar el frontend (React + Vite)
+# ETAPA 2: Frontend (Vite + React)
 # ==============================================================================
-# Node 20 en Alpine para ejecutar Vite.
-# También necesitamos PHP porque Vite llama a "php artisan" durante el build.
 FROM node:20-alpine AS frontend
 
-# Instalamos PHP y algunos módulos que necesita artisan
+# PHP necesario porque Vite invoca artisan durante el build (Wayfinder)
 RUN apk add --no-cache php84 php84-tokenizer php84-mbstring php84-xml \
     php84-phar php84-openssl php84-dom php84-xmlwriter php84-ctype \
     php84-pdo php84-pdo_sqlite php84-fileinfo php84-session \
@@ -55,17 +45,12 @@ RUN apk add --no-cache php84 php84-tokenizer php84-mbstring php84-xml \
 
 WORKDIR /app
 
-# Traemos las librerías PHP de la etapa anterior
 COPY --from=deps /app/vendor vendor/
 
-# Copiamos los archivos de dependencias Node y las instalamos
 COPY package.json package-lock.json ./
 RUN npm ci
 
-# Copiamos la configuración de Vite y TypeScript
 COPY vite.config.ts tsconfig.json components.json ./
-
-# Copiamos el código fuente del frontend y otros archivos que necesita artisan
 COPY resources/ resources/
 COPY public/ public/
 COPY artisan ./
@@ -75,85 +60,69 @@ COPY routes/ routes/
 COPY app/ app/
 COPY database/ database/
 
-# Creamos carpetas que Laravel necesita para no dar error al arrancar
 RUN mkdir -p bootstrap/cache storage/framework/sessions storage/framework/views \
     storage/framework/cache/data storage/logs \
     && chmod -R 775 bootstrap/cache storage
 
-# Vite necesita el .env para leer algunas variables durante el build
 COPY .env.example .env
 
-# Compilamos el frontend: convierte React/TypeScript → JavaScript optimizado
-# El resultado queda en public/build/
 RUN npm run build
 
 
 # ==============================================================================
-# ETAPA 3: Imagen final (la que se ejecuta)
+# ETAPA 3: Imagen final — FrankenPHP
 # ==============================================================================
-FROM php:8.4-cli-alpine
+# dunglas/frankenphp ya trae Caddy embebido + PHP 8.4 + install-php-extensions.
+# La imagen base alpine pesa ~70 MB; con extensiones + app debería quedar < 200 MB.
+FROM dunglas/frankenphp:1-php8.4-alpine
 
-# Instalamos las herramientas del sistema que PHP y Laravel necesitan
-RUN apk add --no-cache \
-    bash \
-    curl \
-    unzip \
-    libpng-dev \
-    oniguruma-dev \
-    libxml2-dev \
-    libzip-dev \
-    icu-dev \
-    openssl-dev \
-    mysql-client
+# Instalamos extensiones PHP de runtime usando install-php-extensions (helper
+# que ya viene en la imagen FrankenPHP). Usa apk virtual deps internamente y
+# las purga al terminar — no quedan headers *-dev en la capa final.
+RUN install-php-extensions \
+        pdo_mysql \
+        intl \
+        zip \
+        bcmath \
+        opcache \
+        pcntl
 
-# Instalamos las extensiones PHP que usa Laravel
-RUN docker-php-ext-install \
-    pdo \
-    pdo_mysql \
-    mbstring \
-    xml \
-    bcmath \
-    zip \
-    intl \
-    opcache
-
-# Copiamos Composer por si necesitamos ejecutar comandos en el contenedor
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+# curl es necesario para el HEALTHCHECK. bash facilita el entrypoint.
+RUN apk add --no-cache bash curl
 
 WORKDIR /app
 
-# Copiamos las librerías PHP de la etapa 1
+# vendor (PHP sin dev) desde etapa 1
 COPY --from=deps /app/vendor vendor/
 
-# Copiamos todo el código fuente de la aplicación
+# Código de la aplicación. .dockerignore filtra lo que no debe entrar.
 COPY . .
 
-# Copiamos el frontend ya compilado de la etapa 2
+# Frontend compilado desde etapa 2
 COPY --from=frontend /app/public/build public/build/
 
-# Creamos las carpetas de almacenamiento que Laravel necesita al arrancar
+# Configuración de Caddy/FrankenPHP
+COPY docker/Caddyfile /etc/caddy/Caddyfile
+
+# Permisos para storage y bootstrap/cache
 RUN mkdir -p \
         storage/framework/sessions \
         storage/framework/views \
         storage/framework/cache/data \
         storage/logs \
         bootstrap/cache \
-    && chmod -R 775 storage bootstrap/cache
+    && chmod -R 775 storage bootstrap/cache \
+    && chown -R www-data:www-data storage bootstrap/cache
 
-# Copiamos el script de arranque y le damos permisos de ejecución
+# Entrypoint (migraciones, caches, etc.)
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
-# Docker verifica periódicamente que la app responde.
-# /up es la ruta de health check integrada en Laravel 11+.
-# --start-period da 60 s de margen para que el entrypoint termine las migraciones.
+# /up es el healthcheck integrado en Laravel 11+.
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD curl -f http://localhost:8000/up || exit 1
 
-# Indicamos que la app escucha en el puerto 8000
 EXPOSE 8000
 
-# El entrypoint prepara el entorno (migraciones, caches, etc.) y luego
-# ejecuta el CMD que se le pase. Por defecto: php artisan serve.
 ENTRYPOINT ["docker-entrypoint.sh"]
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
+CMD ["frankenphp", "run", "--config", "/etc/caddy/Caddyfile"]
