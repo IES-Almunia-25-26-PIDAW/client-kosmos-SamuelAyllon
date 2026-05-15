@@ -131,15 +131,21 @@ export default function AuthSplitLayout({ children }: AuthLayoutProps) {
 
             {/* Form panel */}
             <Flex
-                alignItems="center"
-                justifyContent="center"
+                direction="column"
                 bg="bg"
                 h="100dvh"
                 overflowY="auto"
-                py={{ base: '10', lg: '12' }}
-                px={{ base: '6', md: '10', lg: '16' }}
+                py={{ base: '8', md: '10', lg: '12' }}
+                px={{ base: '5', sm: '8', md: '10', lg: '16' }}
             >
-                <Flex direction="column" w="full" maxW="520px" gap="6">
+                <Flex
+                    direction="column"
+                    w="full"
+                    maxW="520px"
+                    mx="auto"
+                    my="auto"
+                    gap="6"
+                >
                     {children}
                 </Flex>
             </Flex>

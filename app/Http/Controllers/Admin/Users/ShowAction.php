@@ -11,7 +11,10 @@ class ShowAction extends Controller
 {
     public function __invoke(User $user): Response
     {
-        $user->loadCount(['patientProfiles', 'professionalAppointments'])
+        $user->loadCount([
+            'patientProfiles as patients_count',
+            'professionalAppointments as sessions_count',
+        ])
             ->loadSum(['professionalInvoices as paid_amount' => fn ($q) => $q->where('status', 'paid')], 'total')
             ->load('professionalProfile');
 

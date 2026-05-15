@@ -3,7 +3,6 @@
 use App\Http\Controllers\Admin\DashboardIndexAction as AdminDashboardIndexAction;
 use App\Http\Controllers\Admin\Users\CreateAction as AdminUserCreateAction;
 use App\Http\Controllers\Admin\Users\DestroyAction as AdminUserDestroyAction;
-use App\Http\Controllers\Admin\Users\IndexAction as AdminUserIndexAction;
 use App\Http\Controllers\Admin\Users\ShowAction as AdminUserShowAction;
 use App\Http\Controllers\Admin\Users\StoreAction as AdminUserStoreAction;
 use App\Http\Controllers\Admin\Users\VerifyProfessionalAction as AdminVerifyProfessionalAction;
@@ -283,7 +282,6 @@ Route::middleware(['auth', 'verified', 'admin'])
     ->name('admin.')
     ->group(function () {
         Route::get('/', AdminDashboardIndexAction::class)->name('dashboard');
-        Route::get('/users', AdminUserIndexAction::class)->name('users.index');
         Route::get('/users/create', AdminUserCreateAction::class)->name('users.create');
         Route::post('/users', AdminUserStoreAction::class)->name('users.store');
         Route::get('/users/{user}', AdminUserShowAction::class)->name('users.show');

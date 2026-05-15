@@ -142,7 +142,6 @@ export default function AdminDashboard({ users, filters }: Props) {
                     borderWidth="1px"
                     borderColor="border"
                     borderRadius="md"
-                    bg="bg.muted/40"
                     p="3.5"
                 >
                     <HStack gap="2" flexWrap="wrap" justifyContent="center">

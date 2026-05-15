@@ -1,4 +1,4 @@
-import { Badge, Box, Card, Container, Flex, Heading, HStack, Icon, IconButton, SegmentGroup, Separator, Stack, Text, VStack, chakra } from '@chakra-ui/react';
+import { Badge, Box, Card, Container, Flex, Heading, HStack, Icon, IconButton, SegmentGroup, Stack, Text, VStack, chakra } from '@chakra-ui/react';
 import { Head, router, useForm } from '@inertiajs/react';
 import { CalendarDays, ChevronLeft, ChevronRight, Clock, MapPin, Plus, Trash2, Video } from 'lucide-react';
 import type { ReactNode } from 'react';

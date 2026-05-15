@@ -5,7 +5,6 @@ import { CalendarDays, Clock } from 'lucide-react';
 import type { ReactNode } from 'react';
 import IndexAction from '@/actions/App/Http/Controllers/Appointment/IndexAction';
 import ShowAction from '@/actions/App/Http/Controllers/Appointment/ShowAction';
-import PatientShowAction from '@/actions/App/Http/Controllers/Patient/ShowAction';
 import { EmptyState } from '@/components/empty-state';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';

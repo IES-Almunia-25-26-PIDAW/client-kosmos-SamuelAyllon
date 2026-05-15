@@ -29,7 +29,7 @@ class ImpersonationController extends Controller
 
         auth()->login(User::findOrFail((int) $adminId));
 
-        return redirect()->route('admin.users.index')
+        return redirect()->route('admin.dashboard')
             ->with('success', 'Impersonación finalizada.');
     }
 }

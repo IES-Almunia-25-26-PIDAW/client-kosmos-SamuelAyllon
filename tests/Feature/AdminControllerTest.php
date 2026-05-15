@@ -4,32 +4,32 @@ use App\Models\User;
 
 // ── Acceso por rol ────────────────────────────────────────────────────────────
 
-it('redirects guests from admin users index to login', function () {
-    $this->get(route('admin.users.index'))->assertRedirect(route('login'));
+it('redirects guests from admin dashboard to login', function () {
+    $this->get(route('admin.dashboard'))->assertRedirect(route('login'));
 });
 
-it('professional cannot access admin users index', function () {
+it('professional cannot access admin dashboard', function () {
     $this->actingAs(createProfessional())
-        ->get(route('admin.users.index'))
+        ->get(route('admin.dashboard'))
         ->assertForbidden();
 });
 
-it('admin can access admin users index', function () {
+it('admin can access admin dashboard', function () {
     $this->actingAs(createAdmin())
-        ->get(route('admin.users.index'))
+        ->get(route('admin.dashboard'))
         ->assertOk()
-        ->assertInertia(fn ($page) => $page->component('admin/users/index'));
+        ->assertInertia(fn ($page) => $page->component('admin/dashboard'));
 });
 
 // ── Listado de usuarios ───────────────────────────────────────────────────────
 
-it('admin users index contains paginated users', function () {
+it('admin dashboard contains paginated users', function () {
     $admin = createAdmin();
 
     $this->actingAs($admin)
-        ->get(route('admin.users.index'))
+        ->get(route('admin.dashboard'))
         ->assertInertia(fn ($page) => $page
-            ->component('admin/users/index')
+            ->component('admin/dashboard')
             ->has('users')
         );
 });

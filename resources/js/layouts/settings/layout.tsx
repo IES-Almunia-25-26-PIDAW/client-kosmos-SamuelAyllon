@@ -1,5 +1,5 @@
 import { Box, Flex, Heading, Stack, Text, chakra } from '@chakra-ui/react';
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { Calendar, Lock, Palette, Settings, Shield, User } from 'lucide-react';
 import type { PropsWithChildren } from 'react';
 import { Button } from '@/components/ui/button';
@@ -11,20 +11,23 @@ import { edit } from '@/routes/profile';
 import { edit as editGoogle } from '@/routes/settings/google';
 import { show } from '@/routes/two-factor';
 import { edit as editPassword } from '@/routes/user-password';
-import type { NavItem } from '@/types';
+import type { Auth, NavItem } from '@/types';
 
 const ChakraLink = chakra(Link);
 
-const sidebarNavItems: NavItem[] = [
-    { title: 'Perfil', href: edit(), icon: User },
-    { title: 'Contraseña', href: editPassword(), icon: Lock },
-    { title: 'Autenticación 2FA', href: show(), icon: Shield },
-    { title: 'Apariencia', href: editAppearance(), icon: Palette },
-    { title: 'Google Calendar', href: editGoogle(), icon: Calendar },
-];
-
 export default function SettingsLayout({ children }: PropsWithChildren) {
     const { isCurrentUrl } = useCurrentUrl();
+    const { auth } = usePage<{ auth: Auth }>().props;
+
+    const sidebarNavItems: NavItem[] = [
+        { title: 'Perfil', href: edit(), icon: User },
+        { title: 'Contraseña', href: editPassword(), icon: Lock },
+        { title: 'Autenticación 2FA', href: show(), icon: Shield },
+        { title: 'Apariencia', href: editAppearance(), icon: Palette },
+        ...(auth.user.role === 'admin'
+            ? []
+            : [{ title: 'Google Calendar', href: editGoogle(), icon: Calendar }]),
+    ];
 
     if (typeof window === 'undefined') {
         return null;

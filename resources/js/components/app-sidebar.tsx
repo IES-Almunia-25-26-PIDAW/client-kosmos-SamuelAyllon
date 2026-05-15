@@ -13,7 +13,7 @@ import {
     Users,
 } from 'lucide-react';
 import type { MouseEventHandler } from 'react';
-import AdminUsersIndex from '@/actions/App/Http/Controllers/Admin/Users/IndexAction';
+import AdminDashboardIndex from '@/actions/App/Http/Controllers/Admin/DashboardIndexAction';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -124,7 +124,7 @@ const patientNavItems: NavItem[] = [
 const adminNavItems: NavItem[] = [
     {
         title: 'Usuarios',
-        href: AdminUsersIndex.url(),
+        href: AdminDashboardIndex.url(),
         icon: Users,
     },
 ];
@@ -140,7 +140,7 @@ export function AppSidebar({ onMouseEnter, onMouseLeave }: AppSidebarProps = {})
     const isAdmin = role === 'admin';
     const isPatient = role === 'patient';
 
-    const homeHref = isAdmin ? AdminUsersIndex.url() : isPatient ? portalDashboard.url() : dashboard.url();
+    const homeHref = isAdmin ? AdminDashboardIndex.url() : isPatient ? portalDashboard.url() : dashboard.url();
 
     return (
         <Sidebar collapsible="icon" variant="inset" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>

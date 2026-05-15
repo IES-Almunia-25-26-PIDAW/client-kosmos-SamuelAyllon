@@ -20,9 +20,19 @@ import {
     X,
 } from 'lucide-react';
 import type { ReactNode } from 'react';
+import { useState } from 'react';
 import DashboardIndexAction from '@/actions/App/Http/Controllers/Admin/DashboardIndexAction';
 import { KPICard } from '@/components/patient/kpi-card';
 import { Button } from '@/components/ui/button';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog';
 import AdminLayout from '@/layouts/admin-layout';
 import type { Auth } from '@/types';
 
@@ -67,12 +77,13 @@ const getInitials = (name: string) =>
 
 export default function AdminUserShow({ user }: Props) {
     const { auth } = usePage<{ auth: Auth }>().props;
+    const [deleteOpen, setDeleteOpen] = useState(false);
 
     const isSelf = user.id === auth.user.id;
 
     const handleDelete = () => {
-        if (!confirm(`¿Eliminar a ${user.name}? Esta acción no se puede deshacer.`)) return;
         router.delete(`/admin/users/${user.id}`);
+        setDeleteOpen(false);
     };
 
     const handleVerify = (status: 'verified' | 'rejected') => {
@@ -99,7 +110,7 @@ export default function AdminUserShow({ user }: Props) {
         <>
             <Head title={`${user.name} — Admin — ClientKosmos`} />
 
-            <Stack gap="6" p={{ base: '6', lg: '8' }} maxW="4xl">
+            <Stack gap="6" p={{ base: '6', lg: '8' }} maxW="4xl" mx="auto" w="full">
                 <Box>
                     <ChakraLink
                         href={DashboardIndexAction.url()}
@@ -164,10 +175,31 @@ export default function AdminUserShow({ user }: Props) {
                         </Flex>
 
                         {!isSelf && (
-                            <Button variant="destructive" size="sm" onClick={handleDelete}>
-                                <Trash2 size={14} />
-                                Eliminar usuario
-                            </Button>
+                            <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+                                <DialogTrigger asChild>
+                                    <Button variant="destructive" size="sm">
+                                        <Trash2 size={14} />
+                                        Eliminar usuario
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                    <DialogHeader>
+                                        <DialogTitle>¿Eliminar a {user.name}?</DialogTitle>
+                                        <DialogDescription>
+                                            Esta acción no se puede deshacer. Se eliminarán permanentemente su cuenta y todos sus datos asociados.
+                                        </DialogDescription>
+                                    </DialogHeader>
+                                    <DialogFooter>
+                                        <Button variant="outline" onClick={() => setDeleteOpen(false)}>
+                                            Cancelar
+                                        </Button>
+                                        <Button variant="destructive" onClick={handleDelete}>
+                                            <Trash2 size={14} />
+                                            Eliminar usuario
+                                        </Button>
+                                    </DialogFooter>
+                                </DialogContent>
+                            </Dialog>
                         )}
                     </Flex>
                 </Box>

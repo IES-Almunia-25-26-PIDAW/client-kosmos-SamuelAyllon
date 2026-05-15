@@ -1,6 +1,6 @@
 import { Alert, Button as ChakraButton, Flex, HStack, Heading, Separator, Stack, Text } from '@chakra-ui/react';
 import { Form, Head, usePage } from '@inertiajs/react';
-import { AtSign, Lock } from 'lucide-react';
+import { AtSign } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { FormField } from '@/components/form-field';
 import { GoogleSignInButton } from '@/components/google-sign-in-button';
@@ -9,6 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { FieldLabel } from '@/components/ui/field-label';
 import { IconInput } from '@/components/ui/icon-input';
 import { Label } from '@/components/ui/label';
+import { PasswordInput } from '@/components/ui/password-input';
 import { Spinner } from '@/components/ui/spinner';
 import AuthSplitLayout from '@/layouts/auth/auth-split-layout';
 import { register } from '@/routes';
@@ -29,7 +30,7 @@ export default function Login({ status, canResetPassword, canRegister }: Props) 
         <>
             <Head title="Iniciar sesión" />
 
-            <Stack gap="1">
+            <Stack gap="0.5">
                 <Heading
                     as="h1"
                     fontFamily="heading"
@@ -37,6 +38,7 @@ export default function Login({ status, canResetPassword, canRegister }: Props) 
                     fontSize={{ base: '2xl', md: '3xl' }}
                     letterSpacing="-0.025em"
                     color="fg"
+                    m="0"
                 >
                     Bienvenido de vuelta
                 </Heading>
@@ -63,7 +65,7 @@ export default function Login({ status, canResetPassword, canRegister }: Props) 
                 </Alert.Root>
             )}
 
-            <Stack gap="4">
+            <Stack gap="1">
                 <GoogleSignInButton intent="login" />
                 <HStack>
                     <Separator flex="1" />
@@ -119,10 +121,7 @@ export default function Login({ status, canResetPassword, canRegister }: Props) 
                                 error={errors.password}
                                 required
                             >
-                                <IconInput
-                                    icon={Lock}
-                                    iconLeft="4"
-                                    type="password"
+                                <PasswordInput
                                     name="password"
                                     required
                                     tabIndex={2}
@@ -136,7 +135,7 @@ export default function Login({ status, canResetPassword, canRegister }: Props) 
                             </FormField>
 
                             <Flex alignItems="center" gap="3" px="1" py="2">
-                                <Checkbox id="remember" name="remember" tabIndex={3} />
+                                <Checkbox id="remember" name="remember" tabIndex={3} color="brand.solid"/>
                                 <Label htmlFor="remember">
                                     <Text as="span" cursor="pointer" fontSize="sm" color="fg.muted">
                                         Mantener sesión activa

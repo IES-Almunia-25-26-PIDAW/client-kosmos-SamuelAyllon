@@ -1,12 +1,11 @@
-import { Box, chakra, Flex, Heading, Icon, Stack, Text } from '@chakra-ui/react';
+import { Box, chakra, Field, Flex, Heading, Icon, Stack, Text } from '@chakra-ui/react';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { ArrowLeft, AtSign, KeyRound, User as UserIcon, UserPlus } from 'lucide-react';
 import type { FormEvent, ReactNode } from 'react';
-import IndexAction from '@/actions/App/Http/Controllers/Admin/Users/IndexAction';
+import DashboardIndexAction from '@/actions/App/Http/Controllers/Admin/DashboardIndexAction';
 import StoreAction from '@/actions/App/Http/Controllers/Admin/Users/StoreAction';
 import { Button } from '@/components/ui/button';
 import { IconInput } from '@/components/ui/icon-input';
-import { Label } from '@/components/ui/label';
 import AdminLayout from '@/layouts/admin-layout';
 
 const ChakraLink = chakra(Link);
@@ -27,10 +26,10 @@ export default function AdminUserCreate() {
         <>
             <Head title="Nuevo profesional — Admin — ClientKosmos" />
 
-            <Stack gap="6" p={{ base: '6', lg: '8' }} maxW="2xl">
+            <Stack gap="6" p={{ base: '6', lg: '8' }} maxW="2xl" mx="auto" w="full">
                 <Box>
                     <ChakraLink
-                        href={IndexAction.url()}
+                        href={DashboardIndexAction.url()}
                         display="inline-flex"
                         alignItems="center"
                         gap="2"
@@ -84,10 +83,10 @@ export default function AdminUserCreate() {
                         p="4"
                         minW="0"
                     >
-                        <Stack gap="1.5" minW="0">
-                            <Label htmlFor="name">
-                                Nombre completo <Box as="span" color="danger.solid">*</Box>
-                            </Label>
+                        <Field.Root invalid={!!errors.name} required minW="0">
+                            <Field.Label>
+                                Nombre completo <Field.RequiredIndicator />
+                            </Field.Label>
                             <IconInput
                                 id="name"
                                 icon={UserIcon}
@@ -98,15 +97,13 @@ export default function AdminUserCreate() {
                                 h="10"
                                 autoFocus
                             />
-                            {errors.name && (
-                                <Text fontSize="xs" color="danger.solid">{errors.name}</Text>
-                            )}
-                        </Stack>
+                            <Field.ErrorText>{errors.name}</Field.ErrorText>
+                        </Field.Root>
 
-                        <Stack gap="1.5" minW="0">
-                            <Label htmlFor="email">
-                                Correo electrónico <Box as="span" color="danger.solid">*</Box>
-                            </Label>
+                        <Field.Root invalid={!!errors.email} required minW="0">
+                            <Field.Label>
+                                Correo electrónico <Field.RequiredIndicator />
+                            </Field.Label>
                             <IconInput
                                 id="email"
                                 icon={AtSign}
@@ -117,15 +114,13 @@ export default function AdminUserCreate() {
                                 h="10"
                                 autoComplete="email"
                             />
-                            {errors.email && (
-                                <Text fontSize="xs" color="danger.solid">{errors.email}</Text>
-                            )}
-                        </Stack>
+                            <Field.ErrorText>{errors.email}</Field.ErrorText>
+                        </Field.Root>
 
-                        <Stack gap="1.5" minW="0">
-                            <Label htmlFor="password">
-                                Contraseña inicial <Box as="span" color="danger.solid">*</Box>
-                            </Label>
+                        <Field.Root invalid={!!errors.password} required minW="0">
+                            <Field.Label>
+                                Contraseña inicial <Field.RequiredIndicator />
+                            </Field.Label>
                             <IconInput
                                 id="password"
                                 icon={KeyRound}
@@ -137,13 +132,13 @@ export default function AdminUserCreate() {
                                 autoComplete="new-password"
                             />
                             {errors.password ? (
-                                <Text fontSize="xs" color="danger.solid">{errors.password}</Text>
+                                <Field.ErrorText>{errors.password}</Field.ErrorText>
                             ) : (
-                                <Text fontSize="xs" color="fg.muted">
+                                <Field.HelperText>
                                     El profesional podrá cambiarla después desde sus ajustes.
-                                </Text>
+                                </Field.HelperText>
                             )}
-                        </Stack>
+                        </Field.Root>
                     </Stack>
 
                     <Flex
@@ -151,7 +146,7 @@ export default function AdminUserCreate() {
                         gap="2"
                         pt="1"
                     >
-                        <ChakraLink href={IndexAction.url()}>
+                        <ChakraLink href={DashboardIndexAction.url()}>
                             <Button type="button" variant="outline" disabled={processing}>
                                 Cancelar
                             </Button>

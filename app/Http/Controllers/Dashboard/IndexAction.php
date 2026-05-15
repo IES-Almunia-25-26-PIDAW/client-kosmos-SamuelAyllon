@@ -90,7 +90,7 @@ class IndexAction extends Controller
             ->get()
             ->map(fn (Invoice $invoice) => [
                 'id' => $invoice->id,
-                'patient_id' => $patientProfileMap->get($invoice->patient_id)?->id ?? $invoice->patient_id,
+                'patient_id' => $patientProfileMap->get($invoice->patient_id)->id ?? $invoice->patient_id,
                 'patient_name' => $invoice->patient->name ?? 'Paciente',
                 'amount' => (float) $invoice->total,
                 'status' => $invoice->status,
