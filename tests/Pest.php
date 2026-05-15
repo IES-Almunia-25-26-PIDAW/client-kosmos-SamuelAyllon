@@ -9,6 +9,10 @@ use App\Services\RgpdService;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Queue;
 use PHPUnit\Framework\Assert;
 use Spatie\Activitylog\Models\Activity;
 use Spatie\Permission\Models\Role;
@@ -32,6 +36,17 @@ beforeEach(function () {
     app()[PermissionRegistrar::class]->forgetCachedPermissions();
     $this->seed(RoleSeeder::class);
     app()[PermissionRegistrar::class]->forgetCachedPermissions();
+
+    // Cazador de cuelgues: ninguna llamada HTTP real debe escapar de los tests.
+    // Los tests que necesiten HTTP deben hacer Http::fake([...]) explícito.
+    Http::preventStrayRequests();
+    Http::fake();
+
+    // Fakes globales de IO diferido. Event::fake() NO se aplica aquí porque
+    // muchos tests verifican activity_log vía observers de Eloquent.
+    Queue::fake();
+    Bus::fake();
+    Mail::fake();
 })->in('Feature');
 
 /*

@@ -9,6 +9,8 @@ use Illuminate\Contracts\Queue\Job;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Http;
 
+pest()->group('external');
+
 it('summarizes when transcription is ready and marks status completed', function () {
     Event::fake([SessionSummarized::class]);
 

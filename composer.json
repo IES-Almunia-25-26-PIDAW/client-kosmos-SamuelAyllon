@@ -81,6 +81,22 @@
             "@test:lint",
             "@php artisan test"
         ],
+        "test:fast": [
+            "@php artisan config:clear --ansi",
+            "@php artisan test --parallel --exclude-group=slow,external --compact"
+        ],
+        "test:slow": [
+            "@php artisan config:clear --ansi",
+            "@php artisan test --group=slow,external --compact"
+        ],
+        "test:all": [
+            "@php artisan config:clear --ansi",
+            "@php artisan test --parallel --compact"
+        ],
+        "test:profile": [
+            "@php artisan config:clear --ansi",
+            "vendor/bin/pest --profile"
+        ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi"
