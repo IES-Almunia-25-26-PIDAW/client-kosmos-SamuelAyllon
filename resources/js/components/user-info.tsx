@@ -10,7 +10,7 @@ export function UserInfo({
 }) {
     return (
         <>
-            <Avatar.Root size="sm" flexShrink={0} colorPalette="brand">
+            <Avatar.Root size="sm" flexShrink={0} colorPalette="brand" variant="solid">
                 <Avatar.Image src={user.avatar_path ?? undefined} alt={user.name} />
                 <Avatar.Fallback name={user.name} />
             </Avatar.Root>

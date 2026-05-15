@@ -87,7 +87,7 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
                 </Box>
 
                 <Box flex="1" minW={0}>
-                    <Stack as="section" maxW="2xl" gap="8">
+                    <Stack as="section" gap="8">
                         {children}
                     </Stack>
                 </Box>

@@ -5,7 +5,6 @@ import {
     DropdownMenuGroup,
     DropdownMenuItem,
     DropdownMenuLabel,
-    DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { useMobileNavigation } from '@/hooks/use-mobile-navigation';
 import { logout } from '@/routes';
@@ -29,6 +28,7 @@ const MenuButton = chakra('button', {
         cursor: 'pointer',
         textAlign: 'left',
         bg: 'transparent',
+        border: 'none',
     },
 });
 
@@ -68,12 +68,11 @@ export function UserMenuContent({ user }: Props) {
                     gap="3"
                     px="3"
                     py="3"
-                    bg="bg.subtle"
                     borderRadius="sm"
                     mx="1"
                     mt="1"
                 >
-                    <Avatar.Root size="md" flexShrink={0} colorPalette="brand">
+                    <Avatar.Root size="md" flexShrink={0} colorPalette="brand" variant="solid">
                         <Avatar.Image src={user.avatar_path ?? undefined} alt={user.name} />
                         <Avatar.Fallback name={user.name} />
                     </Avatar.Root>
@@ -87,7 +86,7 @@ export function UserMenuContent({ user }: Props) {
                         <Badge
                             size="xs"
                             colorPalette={ROLE_PALETTE[user.role] ?? ROLE_PALETTE_FALLBACK}
-                            variant="subtle"
+                            variant="solid"
                             mt="1.5"
                         >
                             {ROLE_LABEL[user.role] ?? ROLE_LABEL_FALLBACK}
@@ -95,7 +94,6 @@ export function UserMenuContent({ user }: Props) {
                     </Box>
                 </Flex>
             </DropdownMenuLabel>
-            <DropdownMenuSeparator />
             <DropdownMenuGroup>
                 <DropdownMenuItem asChild>
                     <MenuLink href={edit()} prefetch onClick={cleanup}>
@@ -104,7 +102,6 @@ export function UserMenuContent({ user }: Props) {
                     </MenuLink>
                 </DropdownMenuItem>
             </DropdownMenuGroup>
-            <DropdownMenuSeparator />
             <DropdownMenuItem variant="destructive" asChild>
                 <MenuButton
                     type="button"
