@@ -112,19 +112,24 @@ if [ -z "${DB_HOST:-}" ] || [ -z "${DB_PORT:-}" ] || [ -z "${DB_USERNAME:-}" ] |
 fi
 
 echo "==> Esperando a que la base de datos esté disponible..."
-max_retries=30
-retry=0
-until mysqladmin ping -h"$DB_HOST" -P"$DB_PORT" -u"$DB_USERNAME" -p"$DB_PASSWORD" --ssl=0 --silent 2>/dev/null || [ $retry -ge $max_retries ]; do
-    retry=$((retry + 1))
-    echo "    Intento $retry/$max_retries — esperando..."
-    sleep 2
-done
-
-if [ $retry -ge $max_retries ]; then
-    echo "==> ERROR: La base de datos no respondio tras $max_retries intentos."
-    echo "    Comprueba que el servicio 'db' esté activo y que DB_HOST/DB_PORT son correctos."
-    echo "    Intentando continuar de todos modos (puede fallar en migraciones)..."
-fi
+# Usamos PHP directamente porque la imagen final no incluye mysql-client.
+# Intenta abrir una conexión PDO hasta 30 veces (60 s total).
+# shellcheck disable=SC2016
+php -r '
+    $host = $argv[1]; $port = $argv[2]; $user = $argv[3]; $pass = $argv[4];
+    for ($i = 1; $i <= 30; $i++) {
+        try {
+            new PDO("mysql:host=$host;port=$port", $user, $pass, [PDO::ATTR_TIMEOUT => 2]);
+            fwrite(STDOUT, "==> Base de datos disponible (intento $i)\n");
+            exit(0);
+        } catch (Throwable $e) {
+            fwrite(STDOUT, "    Intento $i/30 — esperando...\n");
+            sleep(2);
+        }
+    }
+    fwrite(STDERR, "==> ERROR: la base de datos no respondió tras 30 intentos.\n");
+    exit(1);
+' "$DB_HOST" "$DB_PORT" "$DB_USERNAME" "$DB_PASSWORD"
 
 # ──────────────────────────────────────────────────────────────────────────────
 # PASO 6: Migraciones y seeders
@@ -145,15 +150,24 @@ php /app/artisan storage:link --force 2>/dev/null || true
 echo "==> Ejecutando migraciones..."
 php /app/artisan migrate --force
 
-# Ejecutamos los seeders (datos de prueba) solo si la base de datos está vacía.
-# Usamos el cliente mysql directamente para evitar que tinker falle en producción.
-USER_COUNT=$(mysql -h"$DB_HOST" -P"$DB_PORT" -u"$DB_USERNAME" -p"$DB_PASSWORD" --ssl=0 -sN -e "SELECT COUNT(*) FROM users;" "$DB_DATABASE" 2>/dev/null || echo "0")
-USER_COUNT="${USER_COUNT:-0}"
-if [ "${USER_COUNT}" = "0" ]; then
-    echo "==> Primera instalación. Ejecutando seeders..."
-    php /app/artisan db:seed --force
+# Seeders: solo en entornos NO productivos.
+# En producción los datos de prueba son ruido (y peor: dejan usuarios con
+# contraseña "password" accesibles públicamente). Para sembrar producción
+# por una vez, hazlo manualmente: docker compose exec app php artisan db:seed.
+if [ "${APP_ENV:-production}" = "production" ]; then
+    echo "==> APP_ENV=production: saltando seeders por seguridad."
 else
-    echo "==> Ya hay datos (${USER_COUNT} usuarios). Saltando seeders."
+    # En local/staging sembramos solo si la base está vacía. Usamos PHP en
+    # lugar del cliente mysql (no está en la imagen FrankenPHP).
+    USER_COUNT=$(php /app/artisan tinker --execute='echo \App\Models\User::count();' 2>/dev/null | tail -n1 || echo "0")
+    USER_COUNT="${USER_COUNT//[^0-9]/}"
+    USER_COUNT="${USER_COUNT:-0}"
+    if [ "${USER_COUNT}" = "0" ]; then
+        echo "==> Primera instalación (${APP_ENV}). Ejecutando seeders..."
+        php /app/artisan db:seed --force
+    else
+        echo "==> Ya hay datos (${USER_COUNT} usuarios). Saltando seeders."
+    fi
 fi
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -171,12 +185,16 @@ fi
 # ──────────────────────────────────────────────────────────────────────────────
 # Todo listo
 # ──────────────────────────────────────────────────────────────────────────────
-echo "==> ClientKosmos listo en http://localhost:8000"
-echo ""
-echo "    Usuarios de prueba:"
-echo "    admin@clientkosmos.test    / password  (admin)"
-echo "    natalia@clientkosmos.test  / password  (professional)"
-echo ""
+if [ "${APP_ENV:-production}" = "production" ]; then
+    echo "==> ClientKosmos listo (entorno: production)"
+else
+    echo "==> ClientKosmos listo en http://localhost:8000"
+    echo ""
+    echo "    Usuarios de prueba:"
+    echo "    admin@clientkosmos.test    / password  (admin)"
+    echo "    natalia@clientkosmos.test  / password  (professional)"
+    echo ""
+fi
 
 # ──────────────────────────────────────────────────────────────────────────────
 # PASO 8: Arrancar el servidor (CMD del Dockerfile)
