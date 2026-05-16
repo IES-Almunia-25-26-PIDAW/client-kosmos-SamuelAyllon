@@ -74,9 +74,17 @@ class PatientConsentsAction extends Controller
                 'email' => $pending['email'],
                 'google_id' => $pending['google_id'],
                 'password' => null,
-                'email_verified_at' => $pending['email_verified'] ? now() : null,
                 'google_refresh_token' => $pending['refresh_token'] ?? null,
             ]);
+
+            // email_verified_at NO está en $fillable del modelo User
+            // (decisión de seguridad: evitar que input del usuario bypasee
+            // la verificación). Para Google OAuth ya hubo verificación real,
+            // así que lo aplicamos explícitamente tras el create.
+            if ($pending['email_verified']) {
+                $user->email_verified_at = now();
+                $user->save();
+            }
 
             $user->assignRole('patient');
             $user->patientProfile()->create([]);

@@ -135,9 +135,15 @@ class CallbackAction extends Controller
                 'email' => $profile['email'],
                 'google_id' => $profile['google_id'],
                 'password' => null,
-                'email_verified_at' => $profile['email_verified'] ? now() : null,
                 'google_refresh_token' => $profile['refresh_token'],
             ]);
+
+            // email_verified_at no está en $fillable; aplicar explícitamente
+            // tras el create cuando Google ya verificó la dirección.
+            if ($profile['email_verified']) {
+                $user->email_verified_at = now();
+                $user->save();
+            }
 
             $user->assignRole('professional');
             $user->professionalProfile()->create([
