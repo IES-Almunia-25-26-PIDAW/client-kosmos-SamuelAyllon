@@ -22,7 +22,17 @@
 # -o pipefail → un fallo en cualquier parte de un pipe se propaga como error
 set -euo pipefail
 
-echo "==> Iniciando ClientKosmos..."
+# Rol del contenedor — permite reutilizar la misma imagen para varios servicios
+# en Railway sin duplicar el Dockerfile. Valores soportados:
+#   web        → migraciones + caches + FrankenPHP (default)
+#   queue      → php artisan queue:work
+#   scheduler  → php artisan schedule:work
+#   reverb     → php artisan reverb:start
+# Solo el rol `web` toca la base de datos y regenera caches; el resto se limita
+# a arrancar su proceso para evitar races en deploy multi-servicio.
+CONTAINER_ROLE="${CONTAINER_ROLE:-web}"
+
+echo "==> Iniciando ClientKosmos (role=${CONTAINER_ROLE})..."
 
 # ──────────────────────────────────────────────────────────────────────────────
 # PASO 1: Crear el .env
@@ -40,11 +50,18 @@ fi
 # Las variables que pusiste en docker-compose.yml llegan aquí como variables
 # del sistema. Las escribimos en el .env para que Laravel las lea.
 env_vars=(
-    APP_NAME APP_ENV APP_DEBUG APP_KEY APP_URL
-    DB_CONNECTION DB_HOST DB_PORT DB_DATABASE DB_USERNAME DB_PASSWORD DB_SSL_CA
-    SESSION_DRIVER CACHE_STORE QUEUE_CONNECTION LOG_CHANNEL
-    MAIL_MAILER MAIL_HOST MAIL_PORT MAIL_USERNAME MAIL_PASSWORD MAIL_FROM_ADDRESS MAIL_FROM_NAME
+    APP_NAME APP_ENV APP_DEBUG APP_KEY APP_URL ASSET_URL APP_LOCALE APP_FALLBACK_LOCALE
+    TRUSTED_PROXIES
+    DB_CONNECTION DB_HOST DB_PORT DB_DATABASE DB_USERNAME DB_PASSWORD DB_SSL_CA DB_DISABLE_FK_CHECKS
+    SESSION_DRIVER CACHE_STORE QUEUE_CONNECTION LOG_CHANNEL FILESYSTEM_DISK BCRYPT_ROUNDS
+    BROADCAST_CONNECTION
+    REVERB_APP_ID REVERB_APP_KEY REVERB_APP_SECRET REVERB_HOST REVERB_PORT REVERB_SCHEME
+    MAIL_MAILER MAIL_HOST MAIL_PORT MAIL_USERNAME MAIL_PASSWORD MAIL_ENCRYPTION MAIL_FROM_ADDRESS MAIL_FROM_NAME
     GROQ_API_KEY GROQ_BASE_URL GROQ_MODEL
+    OPENAI_API_KEY OPENAI_ORGANIZATION
+    STRIPE_KEY STRIPE_SECRET STRIPE_WEBHOOK_SECRET
+    GOOGLE_CLIENT_ID GOOGLE_CLIENT_SECRET GOOGLE_REDIRECT_URI
+    AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_DEFAULT_REGION AWS_BUCKET AWS_USE_PATH_STYLE_ENDPOINT
 )
 for var in "${env_vars[@]}"; do
     if [ -n "${!var+set}" ]; then
@@ -147,8 +164,15 @@ php -r '
 ' "$DB_HOST" "$DB_PORT" "$DB_USERNAME" "$DB_PASSWORD"
 
 # ──────────────────────────────────────────────────────────────────────────────
-# PASO 6: Migraciones y seeders
+# PASO 6: Migraciones y seeders (SOLO rol web)
 # ──────────────────────────────────────────────────────────────────────────────
+# Sólo el contenedor web aplica migraciones y caches; queue/scheduler/reverb
+# arrancan sobre el esquema que el web ya dejó listo. Esto evita carreras
+# donde varios servicios intentan migrar a la vez en cada deploy.
+if [ "${CONTAINER_ROLE}" != "web" ]; then
+    echo "==> role=${CONTAINER_ROLE}: saltando migraciones/seeders/caches."
+else
+
 # Limpiamos cachés viejas para evitar problemas con la nueva configuración.
 # cache:clear puede fallar si la tabla 'cache' aún no existe (primer arranque),
 # por eso usamos || true para ignorar ese error.
@@ -197,6 +221,8 @@ if [ "$APP_ENV" = "production" ]; then
     php /app/artisan view:cache
 fi
 
+fi  # cierre del bloque "solo rol web"
+
 # ──────────────────────────────────────────────────────────────────────────────
 # Todo listo
 # ──────────────────────────────────────────────────────────────────────────────
@@ -212,8 +238,44 @@ else
 fi
 
 # ──────────────────────────────────────────────────────────────────────────────
-# PASO 8: Arrancar el servidor (CMD del Dockerfile)
+# PASO 8: Arrancar el proceso según el rol
 # ──────────────────────────────────────────────────────────────────────────────
-# "exec" reemplaza este script por el proceso PHP.
-# Así PHP recibe las señales de Docker (por ejemplo, para parar limpiamente).
-exec "$@"
+# "exec" reemplaza este script por el proceso final para que reciba las
+# señales de Docker/Railway (SIGTERM en deploy → shutdown limpio).
+#
+# - web        → respeta el CMD del Dockerfile (FrankenPHP)
+# - queue      → procesa la cola de jobs (Whisper, recordatorios, emails…)
+# - scheduler  → ejecuta el scheduler de Laravel (routes/console.php)
+# - reverb     → arranca el servidor WebSocket de Reverb
+#
+# Railway puede sobreescribir CMD vía "Custom Start Command" por servicio, pero
+# usar CONTAINER_ROLE mantiene la configuración declarativa: una sola variable.
+case "${CONTAINER_ROLE}" in
+    web)
+        exec "$@"
+        ;;
+    queue)
+        echo "==> Arrancando queue worker..."
+        exec php /app/artisan queue:work \
+            --tries=3 \
+            --backoff=10 \
+            --max-time=3600 \
+            --max-jobs=1000 \
+            --sleep=3
+        ;;
+    scheduler)
+        echo "==> Arrancando scheduler..."
+        exec php /app/artisan schedule:work
+        ;;
+    reverb)
+        echo "==> Arrancando Reverb en :${PORT:-8080}..."
+        exec php /app/artisan reverb:start \
+            --host=0.0.0.0 \
+            --port="${PORT:-8080}"
+        ;;
+    *)
+        echo "==> ERROR: CONTAINER_ROLE='${CONTAINER_ROLE}' no reconocido." >&2
+        echo "    Valores soportados: web | queue | scheduler | reverb" >&2
+        exit 1
+        ;;
+esac
