@@ -1,180 +1,209 @@
 # Bootstrap del despliegue en Railway
 
-Paso a paso del despliegue de ClientKosmos en Railway desde un proyecto vacío,
-ejecutado el **2026-05-16** usando la skill [`use-railway`](../../.agents/skills/use-railway/SKILL.md)
-y el MCP de Railway.
+Procedimiento real, con todas las trampas encontradas, para llevar
+ClientKosmos a Railway desde un proyecto vacío. Sustituye al runbook
+operativo [deploy/RAILWAY.md](../../deploy/RAILWAY.md), que describe la
+operativa diaria.
 
-> Runbook operativo (logs, redeploys, troubleshooting, dominio propio): [deploy/RAILWAY.md](../../deploy/RAILWAY.md).
-> Este documento describe el **bootstrap inicial**; aquel describe la **operativa diaria**.
+**Ejecutado:** 2026-05-16 con la skill [`use-railway`](../../.agents/skills/use-railway/SKILL.md) (MCP + CLI).
 
 ---
 
-## 0. Estado de partida
+## 0. Estado de partida y resultado
 
-- Proyecto Railway `clientkosmos` (id `4495a3db-46a7-4ff4-83d3-08867f1abc18`,
-  workspace *Samu's Projects*, entorno `production` id `c0103637-3b92-4c5c-bad2-0746c477bcb5`)
-  **existía pero sin servicios** — `environment_status` devolvía *"No services in this environment"*.
-- Repo GitHub: `Samu-Mind/client-kosmos-SamuelAyllon`, rama `main`.
-- Imagen ya preparada en repo: [Dockerfile](../../Dockerfile) multi-stage
-  (Composer → Vite/Wayfinder → FrankenPHP) con `EXPOSE 8000` y healthcheck a `/up`.
-- Entrypoint [docker-entrypoint.sh](../../docker-entrypoint.sh) ya vuelca env del
-  contenedor a `.env`, espera MySQL, migra y cachea config.
+| Recurso | ID / Detalle |
+|---|---|
+| Proyecto Railway `clientkosmos` | `4495a3db-46a7-4ff4-83d3-08867f1abc18` |
+| Entorno `production` | `c0103637-3b92-4c5c-bad2-0746c477bcb5` |
+| Servicio `MySQL` | template oficial `mysql` (mysql:9.4) |
+| Servicio `app` | servicio "empty" + `railway up` (tarball local) — `155ef390-79db-4486-9c5b-23055b3bb8c7` |
+| Volumen `app-volume-ZS4g` | `bfdb64ff-9956-42c8-968c-2e542b376c5e` · montado en `/app/storage/app` |
+| Dominio público | <https://clientkosmos.up.railway.app> (puerto 8000) |
+| Repo GitHub | `Samu-Mind/client-kosmos-SamuelAyllon`, rama `main` |
 
-## 1. Resultado
+---
 
-| Recurso | Tipo | ID / Detalle |
+## 1. Fixes en el código aplicados durante el bootstrap
+
+Estos commits **deben estar en `main` antes de desplegar** una BD fresca:
+
+| Commit | Fix | Por qué |
 |---|---|---|
-| Proyecto | — | `4495a3db-46a7-4ff4-83d3-08867f1abc18` |
-| Entorno | `production` | `c0103637-3b92-4c5c-bad2-0746c477bcb5` |
-| Servicio `MySQL` | Template oficial `mysql` | provisionado en 2026-05-16 07:01 UTC |
-| Servicio `app` | Docker (repo GitHub) | `39a367cf-ea39-412a-b8f7-9f8f0d5e7288` · puerto 8000 |
-| Volumen `app-volume-ZS4g` | Persistente | `bfdb64ff-9956-42c8-968c-2e542b376c5e` · montado en `/app/storage/app` |
-| Dominio público | Railway-generated | <https://app-production-3078.up.railway.app> |
+| `363d7a0` | Renombrar `2026_05_05_000001_create_workspaces_table.php` → `2026_04_01_…` (idem para `workspace_members`) | Varias migraciones de abril (`patient_profiles`, `documents`, `patient_delegations`) hacen FK a `workspaces`. Con BD vacía explotaban con `1824 Failed to open the referenced table 'workspaces'` |
+| `2a41a30` | Escape hatch `DB_DISABLE_FK_CHECKS=1` en [config/database.php](../../config/database.php): añade `PDO::MYSQL_ATTR_INIT_COMMAND = 'SET FOREIGN_KEY_CHECKS=0'` a la conexión MySQL cuando la env var está presente | Hay más ciclos de FK out-of-order entre abril y mayo (`notes`→`appointments`, etc.). Con FK checks deshabilitados durante el bootstrap, MySQL crea las constraints sin validar la tabla referenciada — pasan en cualquier orden y siguen siendo válidas en runtime |
+| `76a7cb7` | Acortar nombres de índices en `transcription_segments` | El nombre autogenerado `transcription_segments_session_recording_id_speaker_user_id_position_unique` excede el límite de **64 caracteres** de MySQL. Hay que pasar nombres explícitos a `$table->unique(…, 'short_name')` |
 
 ---
 
-## 2. Paso a paso (llamadas MCP usadas)
+## 2. Configuración Railway descubierta
 
-Todas las mutaciones se hicieron vía el MCP de Railway (`mcp__railway__*`); el CLI
-no era estrictamente necesario, pero la skill `use-railway` recomienda preflight
-con `railway whoami --json` (ver §2 de [SKILL.md](../../.agents/skills/use-railway/SKILL.md)).
+Tres trampas no documentadas en `deploy/RAILWAY.md` original:
 
-### 2.1. Preflight
+1. **`PORT` debe ser una env var.** Railway hace healthcheck contra el valor de
+   `$PORT` (no contra el `target port` del dominio). Si la app escucha en 8000
+   y `PORT` no está definida, el healthcheck va al puerto equivocado, nunca
+   recibe 200 y la deploy se marca `FAILED` tras el timeout. **Fijar
+   `PORT=8000`** como variable normal. Ver
+   <https://docs.railway.com/deployments/healthchecks#configure-the-healthcheck-port>.
 
-```text
-mcp__railway__whoami
-→ Logged in as Samu (samuelayllonsevilla1@gmail.com)
+2. **`prohibitDestructiveCommands` bloquea `migrate:fresh` aunque pases `--force`.**
+   En [app/Providers/AppServiceProvider.php:109](../../app/Providers/AppServiceProvider.php#L109) la app activa el guard cuando `app()->isProduction()`. Por eso **no uses `pre_deploy_command='php artisan migrate:fresh …'`** en producción. Solución: dejar que el entrypoint corra `php artisan migrate --force` sobre BD vacía (ese SÍ funciona) y usar `DB_DISABLE_FK_CHECKS=1` para sobrevivir al orden de FKs.
 
-mcp__railway__list_projects
-→ clientkosmos (id: 4495a3db-46a7-4ff4-83d3-08867f1abc18)
+3. **El CLI `railway add -r REPO` puede dar `Unauthorized`** si la app GitHub de Railway no tiene permiso vigente sobre el repo. Workaround comprobado: crear el servicio **vacío** (`railway add -s app`) y desplegar con `railway up` desde el directorio local. Railway construye con Railpack que detecta el `Dockerfile` en la raíz automáticamente; las variables y volúmenes ya configurados antes de `up` se aplican al primer deploy.
 
-mcp__railway__environment_status(project_id=…, environment_id=…)
-→ No services in this environment.
-```
+---
 
-### 2.2. Generar APP_KEY local
+## 3. Procedimiento paso a paso
 
-Crítico: si no la fijamos antes del primer deploy, [docker-entrypoint.sh](../../docker-entrypoint.sh)
-genera una nueva en cada arranque e invalida sesiones.
+> Asume CLI `railway` instalado y `railway whoami` OK. Si MCP funciona, las
+> mutaciones equivalentes están en `mcp__railway__*`. La skill
+> [`use-railway`](../../.agents/skills/use-railway/SKILL.md) recomienda
+> prefijar las llamadas CLI con `RAILWAY_CALLER=skill:use-railway@1.2.0`.
+
+### 3.1. Generar `APP_KEY` local
+
+Crítico: si no la fijas como variable antes del primer deploy, el
+[entrypoint](../../docker-entrypoint.sh) la regenera en cada arranque e
+invalida sesiones.
 
 ```bash
 php artisan key:generate --show
 # → base64:ozJOfHUKhsRV1qRQoSCLXG7ASS9YVLk0QPzzi+OyIas=
 ```
 
-### 2.3. Provisionar MySQL
-
-```text
-mcp__railway__search_templates(query="mysql")
-→ MySQL (code: mysql) - Deploy a MySQL database service
-
-mcp__railway__deploy_template(template_code="mysql", project_id=…, environment_id=…)
-→ Template 'MySQL' deployed.
-```
-
-Tras unos segundos, `environment_status` reporta `MySQL | SUCCESS`.
-
-### 2.4. Crear servicio `app` desde GitHub
-
-```text
-mcp__railway__create_service(
-    name="app",
-    source_repo="Samu-Mind/client-kosmos-SamuelAyllon",
-    project_id=…, environment_id=…
-)
-→ Service created: app (id: 39a367cf-ea39-412a-b8f7-9f8f0d5e7288)
-```
-
-### 2.5. Configurar build, healthcheck y restart policy
-
-```text
-mcp__railway__update_service(
-    service_id="39a367cf-…",
-    dockerfile_path="Dockerfile",
-    health_check_path="/up",
-    healthcheck_timeout=300,        # segundos (no ms)
-    restart_policy_type="ON_FAILURE",
-    restart_policy_max_retries=3
-)
-→ Service updated successfully.
-```
-
-> ⚠ El parámetro `healthcheck_timeout` se expresa **en segundos**. Pasarlo en
-> milisegundos devuelve `Error in healthcheckTimeout - Invalid input`.
-
-### 2.6. Crear volumen persistente
-
-```text
-mcp__railway__create_volume(
-    service_id="39a367cf-…",
-    mount_path="/app/storage/app"
-)
-→ Volume created: app-volume-ZS4g (id: bfdb64ff-9956-42c8-968c-2e542b376c5e)
-```
-
-Solo `/app/storage/app` (uploads). Montar `/app/storage` completo persiste
-caches viejos entre redeploys y los rompe.
-
-### 2.7. Generar dominio público
-
-```text
-mcp__railway__generate_domain(service_id="39a367cf-…", port=8000)
-→ https://app-production-3078.up.railway.app
-```
-
-### 2.8. Fijar variables core
-
-```text
-mcp__railway__set_variables(service_id="39a367cf-…", skip_deploys=true, variables={
-    APP_NAME, APP_ENV, APP_DEBUG, APP_KEY, APP_URL, ASSET_URL,
-    TRUSTED_PROXIES, DB_CONNECTION, SESSION_DRIVER, CACHE_STORE,
-    QUEUE_CONNECTION, BROADCAST_CONNECTION, LOG_CHANNEL, MAIL_MAILER,
-    APP_LOCALE, APP_FALLBACK_LOCALE, FILESYSTEM_DISK, BCRYPT_ROUNDS
-})
-→ Successfully set 18 variable(s)
-```
-
-### 2.9. Fijar referencias a MySQL
-
-```text
-mcp__railway__add_reference_variable(service_id="39a367cf-…", variables=[
-    DB_HOST     = ${{MySQL.MYSQLHOST}},
-    DB_PORT     = ${{MySQL.MYSQLPORT}},
-    DB_DATABASE = ${{MySQL.MYSQLDATABASE}},
-    DB_USERNAME = ${{MySQL.MYSQLUSER}},
-    DB_PASSWORD = ${{MySQL.MYSQLPASSWORD}}
-])
-→ Reference variable(s) set: DB_HOST, DB_PORT, DB_DATABASE, DB_USERNAME, DB_PASSWORD
-```
-
-La set anterior usó `skip_deploys=true`; esta segunda llamada disparó el primer build.
-
-### 2.10. Esperar build y verificar
+### 3.2. Linkar el proyecto
 
 ```bash
-# Polling hasta que /up devuelva 200
-until curl -fsS https://app-production-3078.up.railway.app/up >/dev/null; do sleep 15; done
+railway link --project 4495a3db-46a7-4ff4-83d3-08867f1abc18 --environment production
 ```
 
-```text
-mcp__railway__environment_status
-→ MySQL | SUCCESS | 1
-→ app   | SUCCESS | 1
+### 3.3. Provisionar MySQL
+
+```bash
+railway add -d mysql
+```
+
+Espera a que `railway service list` muestre `MySQL ● Online`.
+
+### 3.4. Crear servicio `app` (vacío) + volumen + dominio
+
+```bash
+railway add -s app                                # servicio vacío
+railway service link app
+railway volume add -m /app/storage/app            # ⚠ no usar mount path completo /app/storage
+railway domain -p 8000                            # genera FQDN público
+```
+
+Apuntar el nombre del dominio devuelto (`app-production-XXXX.up.railway.app`).
+
+> 💡 En git-bash en Windows, MSYS convierte rutas que empiezan por `/` al
+> path absoluto local. Si el volumen acaba con `mount path: //app/storage/app`,
+> prefija el comando con `MSYS_NO_PATHCONV=1` o usa PowerShell.
+
+### 3.5. Fijar variables (núcleo + refs MySQL + bootstrap flags)
+
+Sustituye `<DOMINIO>` por el FQDN del paso 3.4. **Una sola llamada** para
+batch-set; las refs `${{MySQL.*}}` se resuelven automáticamente.
+
+```bash
+railway variable set --service app \
+  APP_NAME=ClientKosmos \
+  APP_ENV=production \
+  APP_DEBUG=false \
+  APP_KEY="base64:…" \
+  APP_URL=https://<DOMINIO> \
+  ASSET_URL=https://<DOMINIO> \
+  APP_LOCALE=es \
+  APP_FALLBACK_LOCALE=en \
+  TRUSTED_PROXIES='*' \
+  DB_CONNECTION=mysql \
+  'DB_HOST=${{MySQL.MYSQLHOST}}' \
+  'DB_PORT=${{MySQL.MYSQLPORT}}' \
+  'DB_DATABASE=${{MySQL.MYSQLDATABASE}}' \
+  'DB_USERNAME=${{MySQL.MYSQLUSER}}' \
+  'DB_PASSWORD=${{MySQL.MYSQLPASSWORD}}' \
+  DB_DISABLE_FK_CHECKS=1 \
+  SESSION_DRIVER=database \
+  CACHE_STORE=database \
+  QUEUE_CONNECTION=database \
+  BROADCAST_CONNECTION=log \
+  LOG_CHANNEL=stderr \
+  MAIL_MAILER=log \
+  FILESYSTEM_DISK=local \
+  BCRYPT_ROUNDS=12 \
+  PORT=8000 \
+  --skip-deploys
+```
+
+### 3.6. Primer deploy desde el directorio local
+
+```bash
+railway up --service app --detach -m "bootstrap deploy"
+```
+
+Railway:
+1. Sube tarball respetando `.dockerignore`/`.gitignore`.
+2. Railpack detecta el `Dockerfile` y construye (Composer → Vite/Wayfinder → FrankenPHP).
+3. Arranca el contenedor; el [entrypoint](../../docker-entrypoint.sh) ejecuta `php artisan migrate --force` sobre BD vacía — con `DB_DISABLE_FK_CHECKS=1` pasa de extremo a extremo.
+4. Si user count == 0, el entrypoint corre seeders (admin + profesionales + pacientes demo).
+5. FrankenPHP arranca en `:8000`, el healthcheck de Railway le pega a `/up` por el `$PORT` y obtiene 200.
+
+Espera:
+
+```bash
+until curl -fsS https://<DOMINIO>/up >/dev/null; do sleep 20; done && echo UP
+```
+
+### 3.7. Configurar healthcheck + restart policy
+
+(Sólo posible después de que exista la primera deploy.)
+
+```bash
+railway environment edit \
+  --service-config app deploy.healthcheckPath /up \
+  --service-config app deploy.healthcheckTimeout 300 \
+  --service-config app deploy.restartPolicyType ON_FAILURE \
+  --service-config app deploy.restartPolicyMaxRetries 3 \
+  -m "set healthcheck and restart policy"
+```
+
+> ⚠ `healthcheckTimeout` se expresa en **segundos**, no milisegundos.
+
+### 3.8. Limpieza post-bootstrap
+
+Una vez `/up` devuelve 200 y la app responde, retira el flag de bootstrap:
+
+```bash
+railway variable delete DB_DISABLE_FK_CHECKS --service app
+```
+
+La columna de FKs ya están todas creadas con sus referencias correctas; al
+no haber más `migrate` con tablas faltantes, el guard de MySQL puede volver
+a estar activo. El código del escape hatch (en
+[config/database.php](../../config/database.php)) permanece **inerte** sin
+la env var.
+
+Para el push-to-deploy continuo:
+
+```bash
+# Conectar el repo GitHub para auto-deploy en cada push a main
+# Hacerlo en el dashboard: Project → app → Settings → Source → Connect Repo
+# (la CLI da Unauthorized si la GitHub App de Railway no está al día)
 ```
 
 ---
 
-## 3. Variables fijadas (resumen)
+## 4. Variables fijadas (resumen final)
 
-### Núcleo (valor literal)
+### Núcleo (literal)
 
 | Clave | Valor |
 |---|---|
 | `APP_NAME` | `ClientKosmos` |
 | `APP_ENV` | `production` |
 | `APP_DEBUG` | `false` |
-| `APP_KEY` | `base64:…` (generada local — **no rotar**, invalida sesiones) |
-| `APP_URL` / `ASSET_URL` | `https://app-production-3078.up.railway.app` |
+| `APP_KEY` | `base64:…` (no rotar) |
+| `APP_URL` / `ASSET_URL` | `https://clientkosmos.up.railway.app` |
 | `APP_LOCALE` / `APP_FALLBACK_LOCALE` | `es` / `en` |
 | `TRUSTED_PROXIES` | `*` |
 | `DB_CONNECTION` | `mysql` |
@@ -184,8 +213,9 @@ mcp__railway__environment_status
 | `LOG_CHANNEL` | `stderr` |
 | `FILESYSTEM_DISK` | `local` |
 | `BCRYPT_ROUNDS` | `12` |
+| **`PORT`** | **`8000`** (clave para el healthcheck — ver §2.1) |
 
-### Referencias a MySQL
+### Refs a MySQL
 
 | Clave | Referencia |
 |---|---|
@@ -195,41 +225,42 @@ mcp__railway__environment_status
 | `DB_USERNAME` | `${{MySQL.MYSQLUSER}}` |
 | `DB_PASSWORD` | `${{MySQL.MYSQLPASSWORD}}` |
 
-### Pendiente (sólo añadir cuando se active la feature)
+### Bootstrap-only (retirar tras §3.8)
 
-Ver tabla **Opcionales** en [deploy/RAILWAY.md §3](../../deploy/RAILWAY.md):
-Stripe, Groq/Whisper, Google OAuth+Calendar, Reverb, MAIL_* real.
+- `DB_DISABLE_FK_CHECKS=1`
 
----
+### Pendiente (añadir cuando se active cada feature)
 
-## 4. Cómo reproducir desde cero
-
-Si vuelves a empezar con el proyecto vacío:
-
-1. `php artisan key:generate --show` → guarda el valor.
-2. `mcp__railway__deploy_template` con `template_code=mysql`.
-3. `mcp__railway__create_service` con `name=app`, `source_repo=Samu-Mind/client-kosmos-SamuelAyllon`.
-4. `mcp__railway__update_service` con `dockerfile_path=Dockerfile`, `health_check_path=/up`, `healthcheck_timeout=300` (segundos).
-5. `mcp__railway__create_volume` con `mount_path=/app/storage/app`.
-6. `mcp__railway__generate_domain` con `port=8000`.
-7. `mcp__railway__set_variables` con el núcleo (incluyendo `APP_URL` apuntando al dominio generado).
-8. `mcp__railway__add_reference_variable` con las 5 refs `${{MySQL.*}}`.
-9. Esperar a `environment_status` → `SUCCESS`. Comprobar `curl https://<dominio>/up`.
-
-A partir de aquí, los push a `main` despliegan automáticamente vía la integración GitHub.
+Stripe, Groq/Whisper, Google OAuth+Calendar, Reverb, `MAIL_*` real — ver
+tabla *Opcionales* en [deploy/RAILWAY.md §3](../../deploy/RAILWAY.md).
 
 ---
 
 ## 5. Verificación end-to-end
 
-- ✅ `mcp__railway__environment_status` → `app` y `MySQL` en `SUCCESS`.
-- ✅ `curl -fsS https://app-production-3078.up.railway.app/up` → HTTP 200.
-- ⏭ Smoke manual de login/registro pendiente al primer uso real.
+- `railway service list` → `app ● Online` y `MySQL ● Online`.
+- `curl -fsS https://<DOMINIO>/up` → HTTP 200.
+- Logs runtime: `railway logs --service app` debe mostrar `INFO Nothing to migrate.` y FrankenPHP arrancando en `:8000`.
+- Login con `admin@clientkosmos.test / password` desde el navegador.
 
 ---
 
-## 6. Referencias
+## 6. Errores típicos durante el bootstrap (referencia)
+
+| Síntoma en logs | Causa | Fix |
+|---|---|---|
+| `1050 Table 'patient_profiles' already exists` | Deploy anterior creó las tablas; el nuevo intenta otra vez | DB tiene residuos: hacer migrate desde BD limpia o resetear MySQL |
+| `1824 Failed to open the referenced table 'workspaces'` (o `appointments`, etc.) | FK out-of-order en migraciones | Fix `2a41a30`: `DB_DISABLE_FK_CHECKS=1` |
+| `1059 Identifier name '…' is too long` | Índice/unique con nombre auto > 64 chars | Pasar nombre explícito al método `unique()` / `index()` |
+| `WARN This command is prohibited from running in this environment.` | Usaste `migrate:fresh` con `APP_ENV=production` y el guard `prohibitDestructiveCommands` está activo | No usar `migrate:fresh` en prod; basta `migrate --force` sobre BD vacía |
+| `X-Railway-Fallback: true` + 404 desde `railway-edge` | No hay deploy activo, healthcheck nunca pasó | Falta `PORT=8000` o el healthcheck timeout demasiado bajo |
+| `SQLSTATE[HY000] [2002]` al primer deploy | MySQL aún no listo | Esperar; el entrypoint reintenta |
+
+---
+
+## 7. Referencias
 
 - Skill: [.agents/skills/use-railway/SKILL.md](../../.agents/skills/use-railway/SKILL.md)
 - Runbook operativo: [deploy/RAILWAY.md](../../deploy/RAILWAY.md)
+- Railway healthchecks: <https://docs.railway.com/deployments/healthchecks>
 - Dashboard del proyecto: <https://railway.com/project/4495a3db-46a7-4ff4-83d3-08867f1abc18>
