@@ -103,6 +103,15 @@ RUN mkdir -p bootstrap/cache storage/framework/sessions storage/framework/views 
 
 COPY .env.example .env
 
+# Sobreescribir los VITE_REVERB_* en .env con los valores de los ARGs. Vite
+# lee de .env durante `vite build`, y aunque process.env tendría precedencia,
+# escribirlo al fichero garantiza que (a) cualquier mecanismo de lectura
+# alternativo lo vea y (b) la capa rompe cache si los ARGs cambian, forzando
+# rebuild cuando Railway actualiza las VITE_REVERB_* del servicio. Sin esto
+# el bundle se quedaba con wsHost=localhost/key="" del .env.example.
+RUN printf '\nVITE_REVERB_APP_KEY=%s\nVITE_REVERB_HOST=%s\nVITE_REVERB_PORT=%s\nVITE_REVERB_SCHEME=%s\n' \
+    "$VITE_REVERB_APP_KEY" "$VITE_REVERB_HOST" "$VITE_REVERB_PORT" "$VITE_REVERB_SCHEME" >> .env
+
 # Generamos APP_KEY de build (no se usa en runtime — Railway/compose inyecta
 # la real) para que artisan pueda bootear sin warnings de cifrado.
 RUN php artisan key:generate --force --no-interaction
