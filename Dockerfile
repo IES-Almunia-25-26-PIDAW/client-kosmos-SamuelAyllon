@@ -47,6 +47,22 @@ RUN cd vendor/google/apiclient-services/src && \
 # ==============================================================================
 FROM node:20-alpine AS frontend
 
+# Variables VITE_* que Vite hornea en el bundle JS en tiempo de build. Si no
+# se pasan vía --build-arg (o via Railway que las inyecta automáticamente
+# desde las env vars del servicio), Vite cae al valor por defecto del
+# .env.example y el cliente quedará apuntando a localhost.
+ARG VITE_APP_NAME=ClientKosmos
+ARG VITE_REVERB_APP_KEY
+ARG VITE_REVERB_HOST
+ARG VITE_REVERB_PORT
+ARG VITE_REVERB_SCHEME
+# Promocionar a ENV para que `npm run build` (Vite) las vea como process.env.*
+ENV VITE_APP_NAME=$VITE_APP_NAME \
+    VITE_REVERB_APP_KEY=$VITE_REVERB_APP_KEY \
+    VITE_REVERB_HOST=$VITE_REVERB_HOST \
+    VITE_REVERB_PORT=$VITE_REVERB_PORT \
+    VITE_REVERB_SCHEME=$VITE_REVERB_SCHEME
+
 # PHP necesario porque Vite invoca artisan durante el build (Wayfinder).
 # Incluimos todas las extensiones que los ServiceProviders cargan al
 # arrancar Laravel: curl/iconv/intl/bcmath/gd/zip/simplexml son requeridas
