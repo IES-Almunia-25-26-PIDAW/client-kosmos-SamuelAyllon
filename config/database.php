@@ -60,6 +60,10 @@ return [
             'engine' => null,
             'options' => extension_loaded('pdo_mysql') ? array_filter([
                 PDO::MYSQL_ATTR_SSL_CA => env('DB_SSL_CA'),
+                // Escape hatch: cuando la BD se bootstrapea desde cero, las migraciones
+                // pueden hacer FK a tablas que se crean en migraciones posteriores.
+                // Activar DB_DISABLE_FK_CHECKS=1 sólo durante el primer migrate:fresh.
+                PDO::MYSQL_ATTR_INIT_COMMAND => env('DB_DISABLE_FK_CHECKS') ? 'SET FOREIGN_KEY_CHECKS=0' : null,
             ]) : [],
         ],
 
