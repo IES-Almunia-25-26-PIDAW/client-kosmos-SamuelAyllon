@@ -119,7 +119,11 @@
     "extra": {
         "laravel": {
             "dont-discover": []
-        }
+        },
+        "google/apiclient-services": [
+            "Calendar",
+            "Oauth2"
+        ]
     },
     "config": {
         "optimize-autoloader": true,
