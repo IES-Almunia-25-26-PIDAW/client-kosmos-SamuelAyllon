@@ -76,6 +76,21 @@ class CallbackAction extends Controller
             }
 
             if ($type === 'professional') {
+                // Bloqueo soft-deleted: el unique index a nivel BD daría 500
+                // si una cuenta previa con el mismo email/google_id está en
+                // la papelera. Mensaje claro en su lugar.
+                $trashed = User::onlyTrashed()
+                    ->where(fn ($q) => $q
+                        ->where('email', $profile['email'])
+                        ->orWhere('google_id', $profile['google_id'])
+                    )
+                    ->exists();
+
+                if ($trashed) {
+                    return redirect()->route('register')
+                        ->withErrors(['google' => 'Esta cuenta de Google ya estuvo registrada anteriormente. Contacta con soporte para reactivarla.']);
+                }
+
                 $user = $this->createProfessional($profile);
             } else {
                 session([

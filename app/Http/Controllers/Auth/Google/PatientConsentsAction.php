@@ -9,6 +9,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -49,19 +50,40 @@ class PatientConsentsAction extends Controller
             'consent_recording_global' => ['required', 'accepted'],
         ]);
 
-        $user = User::create([
-            'name' => $pending['name'],
-            'email' => $pending['email'],
-            'google_id' => $pending['google_id'],
-            'password' => null,
-            'email_verified_at' => $pending['email_verified'] ? now() : null,
-            'google_refresh_token' => $pending['refresh_token'] ?? null,
-        ]);
+        // Si existe un usuario soft-deleted con este email o google_id, el
+        // unique index a nivel BD bloquearía el insert con un 500 opaco.
+        // Devolvemos error claro en su lugar: el usuario ya tuvo cuenta,
+        // que contacte para reactivarla o usar otra dirección/cuenta Google.
+        $existingTrashed = User::onlyTrashed()
+            ->where(fn ($q) => $q
+                ->where('email', $pending['email'])
+                ->orWhere('google_id', $pending['google_id'])
+            )
+            ->first();
 
-        $user->assignRole('patient');
-        $user->patientProfile()->create([]);
+        if ($existingTrashed !== null) {
+            session()->forget('pending_google_patient');
 
-        $rgpd->storeRegistrationConsents($user, $request);
+            return redirect()->route('register')
+                ->withErrors(['google' => 'Esta cuenta de Google ya estuvo registrada anteriormente. Contacta con soporte para reactivarla.']);
+        }
+
+        $user = DB::transaction(function () use ($pending, $rgpd, $request) {
+            $user = User::create([
+                'name' => $pending['name'],
+                'email' => $pending['email'],
+                'google_id' => $pending['google_id'],
+                'password' => null,
+                'email_verified_at' => $pending['email_verified'] ? now() : null,
+                'google_refresh_token' => $pending['refresh_token'] ?? null,
+            ]);
+
+            $user->assignRole('patient');
+            $user->patientProfile()->create([]);
+            $rgpd->storeRegistrationConsents($user, $request);
+
+            return $user;
+        });
 
         session()->forget('pending_google_patient');
 
