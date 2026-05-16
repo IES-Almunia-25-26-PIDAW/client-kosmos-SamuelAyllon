@@ -31,6 +31,16 @@ RUN composer install \
     --no-interaction \
     --optimize-autoloader
 
+# Trim google/apiclient-services: el paquete trae cientos de servicios Google
+# (~190 MB) y solo usamos Calendar + Oauth2. El script oficial de Google
+# (Google\Task\Composer::cleanup) no corre con --no-scripts, así que limpiamos
+# a mano. Mantenemos el subdir y el .php top-level de cada servicio en uso.
+RUN cd vendor/google/apiclient-services/src && \
+    find . -mindepth 1 -maxdepth 1 -type d \
+        ! -name Calendar ! -name Oauth2 -exec rm -rf {} + && \
+    find . -mindepth 1 -maxdepth 1 -type f -name '*.php' \
+        ! -name Calendar.php ! -name Oauth2.php -delete
+
 
 # ==============================================================================
 # ETAPA 2: Frontend (Vite + React)
