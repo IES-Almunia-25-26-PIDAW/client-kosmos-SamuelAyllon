@@ -189,7 +189,16 @@ php /app/artisan storage:link --force 2>/dev/null || true
 echo "==> Ejecutando migraciones..."
 php /app/artisan migrate --force
 
-# Seeders: solo en entornos NO productivos.
+# Seeders OBLIGATORIOS en cualquier entorno (idempotentes): roles y permisos
+# de Spatie. Sin la tabla `roles` poblada, todo `assignRole()` falla silenciosa
+# y los registros quedan huérfanos (usuarios sin rol, no pueden hacer login).
+# Ambos seeders usan firstOrCreate/syncPermissions, así que correrlos en cada
+# deploy no duplica datos pero garantiza que llegan nuevos permisos al añadirlos.
+echo "==> Seeding roles y permisos (idempotente)..."
+php /app/artisan db:seed --class=RoleSeeder --force
+php /app/artisan db:seed --class=PermissionSeeder --force
+
+# Seeders de datos demo: solo en entornos NO productivos.
 # En producción los datos de prueba son ruido (y peor: dejan usuarios con
 # contraseña "password" accesibles públicamente). Para sembrar producción
 # por una vez, hazlo manualmente: docker compose exec app php artisan db:seed.
