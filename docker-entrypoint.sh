@@ -53,12 +53,27 @@ for var in "${env_vars[@]}"; do
         if [ "$var" = "APP_KEY" ] && [ -z "$val" ]; then
             continue
         fi
+        # Si el valor contiene espacio, #, comilla o $, hay que entrecomillarlo
+        # para que dotenv lo parsee bien. Caso real: Gmail App Passwords vienen
+        # en formato "xxxx xxxx xxxx xxxx" y rompen el parser sin comillas.
+        case "$val" in
+            *[[:space:]\#\"\']*|*\$*)
+                # Escapamos comillas dobles y $ dentro del valor
+                escaped="${val//\\/\\\\}"
+                escaped="${escaped//\"/\\\"}"
+                escaped="${escaped//\$/\\\$}"
+                line="${var}=\"${escaped}\""
+                ;;
+            *)
+                line="${var}=${val}"
+                ;;
+        esac
         if grep -q "^${var}=" /app/.env; then
             # La variable ya existe en el .env → la sobreescribimos
-            sed -i "s|^${var}=.*|${var}=${val}|" /app/.env
+            sed -i "s|^${var}=.*|${line}|" /app/.env
         else
             # No existe → la añadimos al final
-            echo "${var}=${val}" >> /app/.env
+            echo "${line}" >> /app/.env
         fi
     fi
 done
