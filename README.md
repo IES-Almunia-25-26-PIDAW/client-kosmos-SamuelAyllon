@@ -9,7 +9,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![PHP](https://img.shields.io/badge/PHP-8.4+-777BB4?style=flat-square&logo=php&logoColor=white)](https://www.php.net)
 [![Chakra UI](https://img.shields.io/badge/Chakra_UI-v3-319795?style=flat-square&logo=chakraui&logoColor=white)](https://chakra-ui.com)
-[![Tests](https://img.shields.io/badge/Tests-389_casos-brightgreen?style=flat-square&logo=checkmarx&logoColor=white)]()
+[![Tests](https://img.shields.io/badge/Tests-509_casos-brightgreen?style=flat-square&logo=checkmarx&logoColor=white)]()
 [![Docker](https://img.shields.io/badge/Docker-samue45%2Fclient--kosmos-2496ED?style=flat-square&logo=docker&logoColor=white)](https://hub.docker.com/r/samue45/client-kosmos)
 [![License](https://img.shields.io/badge/License-MIT-green.svg?style=flat-square)](LICENSE)
 
@@ -70,14 +70,21 @@ Muchos profesionales mezclan cuadernos, hojas de cálculo, carpetas de correo y 
 |--------|-------------|
 | **Dashboard** | Panel de control diario con métricas, alertas y briefing de Kosmo |
 | **Pacientes** | CRUD completo con ficha detallada, pre/post sesión |
+| **Citas y Agenda** | Reserva online, disponibilidad por workspace, recordatorios, auto-expiración con revocación de enlace Meet |
+| **Videoconsulta** | Sala Google Meet generada en backend, recordings, transcripción Whisper con VAD y filtrado de alucinaciones |
+| **Workspaces** | Personal y colaborativo: invitaciones, acuerdos de colaboración, derivaciones (referrals) |
+| **Mensajería** | Chat profesional ↔ paciente vía Reverb (websockets) |
 | **Notas** | Registro de sesiones anidado por paciente |
 | **Acuerdos** | Condiciones del servicio por paciente |
 | **Pagos** | Control de cobros (pendiente / pagado / vencido) |
 | **Documentos** | Archivos adjuntos por paciente |
 | **Consentimientos** | Formularios RGPD y consentimiento informado |
-| **Facturación** | Vista consolidada de ingresos con filtros |
+| **Facturación** | Vista consolidada de ingresos, factura PDF (dompdf) y cobro paciente vía Stripe Checkout |
+| **Notificaciones** | Centro de notificaciones en tiempo real (Reverb) |
+| **Portal Paciente** | Acceso del paciente a su consulta: citas, facturas, mensajes, documentos |
+| **Consultas ofertadas** | Catálogo de servicios del profesional con duración y precio |
 | **Kosmo IA** | Briefings diarios + chat contextual con Llama 3.3 70B |
-| **Ajustes** | Datos de consulta, fiscales y RGPD |
+| **Ajustes** | Perfil, password, 2FA, Google OAuth, datos de consulta, fiscales y RGPD |
 | **Admin** | Gestión de usuarios del sistema (solo admins) |
 
 ### Autenticación y seguridad
@@ -185,7 +192,7 @@ Tras ejecutar `php artisan migrate:fresh --seed`:
 | Google API Client | 2.19+ | Integración con Google Calendar / Meet para videoconsulta |
 | openai-php/client | 0.19 | SDK Kosmo (chat) y Whisper (transcripción), compatible con Groq |
 | barryvdh/laravel-dompdf | 3.x | Generación de facturas PDF |
-| Pest | 3.x | Framework de testing (389 tests, 1.535 aserciones) |
+| Pest | 3.x | Framework de testing (509 tests, 1.887 aserciones) |
 | Larastan / PHPStan | 3.x | Análisis estático nivel 7, 0 errores |
 
 ### Frontend
@@ -271,15 +278,26 @@ client-kosmos-SamuelAyllon/
 │   │   ├── Controllers/          ← Patrón Single-Action (__invoke)
 │   │   │   ├── Dashboard/
 │   │   │   ├── Patient/
+│   │   │   ├── Appointment/
+│   │   │   ├── Schedule/
+│   │   │   ├── Call/             ← Videoconsulta Google Meet
 │   │   │   ├── Note/
 │   │   │   ├── Agreement/
-│   │   │   ├── Payment/
+│   │   │   ├── CollaborationAgreement/
+│   │   │   ├── Workspace/
+│   │   │   ├── Referral/
+│   │   │   ├── OfferedConsultations/
+│   │   │   ├── Message/
+│   │   │   ├── Notification/
 │   │   │   ├── Document/
 │   │   │   ├── ConsentForm/
-│   │   │   ├── Billing/
+│   │   │   ├── Invoice/          ← Facturación + Stripe Checkout
+│   │   │   ├── Webhook/          ← Stripe webhook
+│   │   │   ├── Portal/           ← Vistas del paciente
+│   │   │   ├── Professional/
 │   │   │   ├── Kosmo/
 │   │   │   ├── Onboarding/
-│   │   │   ├── Settings/         ← Consulta + Profile + Password + 2FA
+│   │   │   ├── Settings/         ← Consulta + Profile + Password + 2FA + Google
 │   │   │   ├── Admin/Users/
 │   │   │   └── Auth/
 │   │   └── Middleware/
@@ -297,9 +315,9 @@ client-kosmos-SamuelAyllon/
 ├── routes/
 │   ├── web.php                   ← Todas las rutas
 │   └── settings.php              ← Rutas de configuración de cuenta
-├── tests/Feature/                ← 97 tests (Pest)
+├── tests/Feature/                ← 35 archivos / 509 test cases (Pest)
 ├── docs/                         ← Documentación técnica y de usuario
-├── deploy/                       ← Docker Compose para producción
+├── deploy/                       ← Runbook Railway + docker-compose.local.yml
 ├── Dockerfile
 └── docker-compose.yml
 ```
@@ -395,14 +413,41 @@ GET                  /patients/{patient}/pre-session
 GET                  /patients/{patient}/post-session
 POST, PUT, DEL       /patients/{patient}/notes/...
 POST, PUT, DEL       /patients/{patient}/agreements/...
-POST, PUT, DEL       /patients/{patient}/payments/...
 POST, DEL            /patients/{patient}/documents/...
 POST, PUT            /patients/{patient}/consent-forms/...
-GET                  /billing
+GET, POST, PUT, DEL  /appointments
+GET, PUT             /schedule                        ← Disponibilidad del profesional
+GET                  /calls/{room}                    ← Sala Google Meet
+GET, POST, PUT, DEL  /workspaces
+POST, PUT, DEL       /workspaces/{ws}/collaboration-agreements
+POST, PUT, DEL       /workspaces/{ws}/referrals
+GET, POST, PUT, DEL  /offered-consultations
+GET, POST            /messages
+GET                  /notifications
+GET, POST            /invoices
+GET                  /invoices/{invoice}/pdf
+POST                 /invoices/{invoice}/checkout     ← Stripe Checkout
 GET, POST            /kosmo
 POST                 /kosmo/chat
 POST                 /kosmo/briefings/{briefing}/read
-GET, PUT             /settings
+GET, PUT             /settings                        ← Perfil, password, 2FA, Google, consulta
+```
+
+### Paciente (portal) — `['auth', 'verified']`
+
+```
+GET                  /portal
+GET                  /portal/appointments
+GET                  /portal/invoices
+GET                  /portal/messages
+```
+
+### Endpoints REST reales (no-Inertia)
+
+```
+POST                 /webhooks/stripe                 ← Firma Stripe (sin CSRF)
+POST                 /broadcasting/auth               ← Handshake Reverb
+GET, POST            /auth/google/callback            ← OAuth Google
 ```
 
 ### Admin — `['auth', 'verified', 'admin']`
@@ -424,7 +469,7 @@ DELETE      /admin/users/{user}
 php artisan test --testsuite=Feature   # Ejecutar todos los Feature tests
 ```
 
-**389 test cases** — **1.535 aserciones** — todas en verde ✅
+**509 test cases** — **1.887 aserciones** — todas en verde ✅
 
 Áreas cubiertas por la suite Feature:
 
@@ -468,50 +513,52 @@ docker compose -f docker-compose.local.yml up -d
 | Aplicación | http://localhost:8000 |
 | Mailpit (correo de prueba) | http://localhost:8025 |
 
-### Producción real (VPS + Traefik + HTTPS)
+### Producción real (Railway)
 
-URL pública: **https://clientkosmos.duckdns.org** (subdominio gratuito DuckDNS).
+ClientKosmos está desplegado en [Railway](https://railway.com) con auto-deploy
+desde `main`. Stack: servicio `app` (Docker build desde el `Dockerfile` del repo)
++ servicio `MySQL` (template oficial) + volumen montado en `/app/storage/app`.
+
+URL pública actual: **https://app-production-a329.up.railway.app**
 
 ```bash
-# En el VPS, tras provisioning:
-cd /opt/clientkosmos/deploy
-cp .env.prod.example .env.prod   # rellenar valores
-touch acme.json && chmod 600 acme.json
-docker compose -f docker-compose.prod.yml --env-file .env.prod up -d
+# Operaciones desde local (vía Railway CLI / MCP)
+railway logs --service app --environment production
+railway variables --service app --environment production --json
+railway up --service app                    # Deploy manual (normalmente auto)
 ```
 
-Runbook completo (provisioning del VPS, DNS, certificado ACME,
-secrets de GitHub Actions, troubleshooting): [`deploy/PRODUCTION.md`](deploy/PRODUCTION.md).
+Runbook completo (topología, variables, troubleshooting, MCP de Railway):
+[`deploy/RAILWAY.md`](deploy/RAILWAY.md). La pila legacy VPS + Traefik + DuckDNS
+queda archivada en [`deploy/legacy/`](deploy/legacy/).
 
-### Contenedores
+### Servicios Railway
 
-| Contenedor | Imagen | Rol |
-|------------|--------|-----|
-| `clientkosmos_traefik` | `traefik:v3.1` | Reverse proxy + TLS (Let's Encrypt) |
-| `clientkosmos_app` | `samue45/client-kosmos` (FrankenPHP) | Aplicación Laravel + Caddy embebido |
-| `clientkosmos_db` | `mysql:8.0` | Base de datos (red interna, sin puerto público) |
-| `clientkosmos_redis` | `redis:7-alpine` | Cache + sesiones + cola |
-| `clientkosmos_duckdns` | `linuxserver/duckdns` | Sync de DNS si la IP del VPS es dinámica |
+| Servicio | Tipo | Rol |
+|----------|------|-----|
+| `app` | Docker (repo) | Aplicación Laravel + FrankenPHP, expuesta en `:8000` |
+| `MySQL` | Template oficial Railway | Base de datos, conectada por refs `${{MySQL.MYSQLHOST}}`, etc. |
+| `app-volume` | Volume | Persistencia de `/app/storage/app` (uploads, PDFs) |
 
-### Build multi-stage
+### Build multi-stage (Dockerfile)
 
 | Stage | Base | Acción |
 |-------|------|--------|
 | `deps` | `php:8.4-cli-alpine` | Instala dependencias PHP (Composer, sin dev) |
 | `frontend` | `node:20-alpine` | Compila assets con Vite (`npm run build`) |
-| `final` | `dunglas/frankenphp:1-php8.4-alpine` | Imagen final con Caddy + PHP 8.4 (objetivo ≤ 200 MB) |
+| `final` | `dunglas/frankenphp:1-php8.4-alpine` | Imagen final con Caddy + PHP 8.4 |
 
 ### Entrypoint automático
 
 Al arrancar el contenedor:
-1. Copia `.env.example` → `.env` con las variables del compose.
+1. Copia `.env.example` → `.env` con las variables del entorno (Railway / compose).
 2. Genera `APP_KEY` si está vacía.
 3. Espera a que MySQL acepte conexiones (vía PHP/PDO).
 4. Ejecuta `migrate --force` y `storage:link`.
 5. `db:seed` **solo** si `APP_ENV != production` y la tabla `users` está vacía.
 6. En producción cachea config, rutas y vistas.
-7. Arranca `frankenphp run --config /etc/caddy/Caddyfile` (HTTP plano `:8000`,
-   TLS lo termina Traefik por delante).
+7. Arranca `frankenphp run --config /etc/caddy/Caddyfile` en `:8000`
+   (Railway termina TLS por delante).
 
 ---
 

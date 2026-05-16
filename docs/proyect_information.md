@@ -75,8 +75,8 @@ Profesionales autónomos o en pequeñas consultas que necesitan:
 | Autenticación 2FA | ✅ | TOTP con códigos de recuperación |
 | Modo oscuro / claro | ✅ | Con persistencia en cookie |
 | Docker (desarrollo) | ✅ | Compose con MySQL + Mailpit |
-| Docker (producción) | ✅ | Imagen publicada en Docker Hub |
-| Tests automatizados | ✅ | 97 tests, 487 aserciones |
+| Despliegue producción | ✅ | Railway (auto-deploy desde `main`) — ver [deploy/RAILWAY.md](../deploy/RAILWAY.md) |
+| Tests automatizados | ✅ | 509 tests, 1.887 aserciones |
 
 ### Funcionalidades pendientes / roadmap 🔮
 
@@ -435,8 +435,13 @@ El proyecto se desarrolló de forma iterativa en varias fases:
 | **Fase 3** | Pagos, documentos y formularios de consentimiento; módulo de facturación | ✅ |
 | **Fase 4** | Integración Kosmo IA: briefings diarios + chat contextual con Groq/Llama | ✅ |
 | **Fase 5** | Panel de administración; onboarding; ajustes de consulta | ✅ |
-| **Fase 6** | Refactor Single-Action Controllers; tests completos (97); documentación | ✅ |
-| **Fase 7** | Dockerización: multi-stage build + Docker Hub + deploy README | ✅ |
+| **Fase 6** | Refactor Single-Action Controllers; tests completos; documentación | ✅ |
+| **Fase 7** | Dockerización: multi-stage build con FrankenPHP | ✅ |
+| **Fase 8** | Citas, agenda, videoconsulta Google Meet, transcripción Whisper, mensajería Reverb, portal del paciente | ✅ |
+| **Fase 9** | Migración UI Tailwind → Chakra UI v3 (fases 1–5), eliminación de Radix UI | ✅ |
+| **Fase 10** | Google OAuth (profesional + paciente), Calendar vinculado en login Google | ✅ |
+| **Fase 11** | PHPStan nivel 7 con baseline vacía (ADR-0031) | ✅ |
+| **Fase 12** | Migración de despliegue VPS → Railway (auto-deploy, MySQL gestionado, volumen) | ✅ |
 
 ---
 
