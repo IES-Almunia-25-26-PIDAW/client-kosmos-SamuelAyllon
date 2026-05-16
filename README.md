@@ -145,8 +145,6 @@ Edita `.env` con tu API key de Groq (opcional):
 GROQ_API_KEY=gsk_tu_clave_aqui
 ```
 
-> En Windows, si usas TiDB Cloud como base de datos, descarga también el certificado SSL (ver sección [Variables de Entorno](#variables-de-entorno)).
-
 #### 3. Migrar base de datos con datos de prueba
 
 ```bash
@@ -214,7 +212,7 @@ Tras ejecutar `php artisan migrate:fresh --seed`:
 | Entorno | Motor | Conexión |
 |---------|-------|----------|
 | Desarrollo local | SQLite | Sin configuración — `DB_CONNECTION=sqlite` |
-| Producción / Docker | MySQL 8 / TiDB Cloud | Puerto 4000, SSL obligatorio |
+| Producción / Docker | MySQL 8 (Railway) | Servicio gestionado, variables inyectadas vía referencia |
 | Tests | SQLite in-memory | Rápido y aislado |
 
 ### IA (Kosmo)
@@ -234,7 +232,7 @@ ClientKosmos usa **SPA monolítica con Inertia.js**: el backend Laravel sirve di
 ```
 ┌─────────────┐    Inertia.js    ┌──────────────────────┐   Eloquent   ┌──────────────────┐
 │   Browser   │ ◄──────────────► │  Laravel Controllers  │ ◄──────────► │  SQLite / MySQL  │
-│  React SPA  │                  │  (Single-Action)      │              │  (TiDB Cloud)    │
+│  React SPA  │                  │  (Single-Action)      │              │   (Railway)      │
 └─────────────┘                  └──────────┬───────────┘              └──────────────────┘
                                              │
                           ┌──────────────────┼──────────────────┐
@@ -582,7 +580,7 @@ GROQ_MODEL=llama-3.3-70b-versatile
 GROQ_CA_BUNDLE=C:/certs/cacert.pem   # Solo Windows
 ```
 
-### Producción (MySQL / TiDB Cloud)
+### Producción (MySQL gestionado en Railway)
 
 ```env
 APP_NAME=ClientKosmos
@@ -590,14 +588,13 @@ APP_ENV=production
 APP_DEBUG=false
 APP_URL=https://tu-dominio.com
 
-# Base de datos (TiDB Cloud Serverless — MySQL compatible)
+# Base de datos — referencias al servicio MySQL del propio proyecto Railway
 DB_CONNECTION=mysql
-DB_HOST=gateway01.eu-central-1.prod.aws.tidbcloud.com
-DB_PORT=4000
-DB_DATABASE=test
-DB_USERNAME=tu_usuario
-DB_PASSWORD=tu_password
-DB_SSL_CA=/ruta/isrgrootx1.pem   # Certificado ISRG Root X1
+DB_HOST=${{ MySQL.MYSQLHOST }}
+DB_PORT=${{ MySQL.MYSQLPORT }}
+DB_DATABASE=${{ MySQL.MYSQLDATABASE }}
+DB_USERNAME=${{ MySQL.MYSQLUSER }}
+DB_PASSWORD=${{ MySQL.MYSQLPASSWORD }}
 
 # IA contextual
 GROQ_API_KEY=gsk_xxxxxxxxxxxxxxxx
@@ -605,19 +602,18 @@ GROQ_BASE_URL=https://api.groq.com/openai/v1
 GROQ_MODEL=llama-3.3-70b-versatile
 ```
 
-### Certificados SSL (solo necesarios en producción con TiDB Cloud)
+### Certificados SSL (Groq en Windows)
 
-> En desarrollo con SQLite **no se necesitan certificados**. En Docker, MySQL corre localmente.
+> En desarrollo con SQLite **no se necesitan certificados**. La BD de producción se accede dentro de la red privada de Railway sin certificado adicional.
 
 | Sistema | Acción |
 |---------|--------|
-| **Windows** | Descargar `isrgrootx1.pem` (TiDB) y `cacert.pem` (Groq) con PowerShell |
+| **Windows** | Descargar `cacert.pem` (Groq) con PowerShell |
 | **Linux / macOS** | Sin acción — certificados del sistema disponibles automáticamente |
 
 ```powershell
 # PowerShell (Windows) — como administrador
 mkdir C:\certs
-Invoke-WebRequest -Uri "https://letsencrypt.org/certs/isrgrootx1.pem" -OutFile "C:\certs\isrgrootx1.pem"
 Invoke-WebRequest -Uri "https://curl.se/ca/cacert.pem" -OutFile "C:\certs\cacert.pem"
 ```
 
@@ -628,7 +624,6 @@ Invoke-WebRequest -Uri "https://curl.se/ca/cacert.pem" -OutFile "C:\certs\cacert
 | Síntoma | Causa probable | Solución |
 |---------|----------------|----------|
 | `cURL error 60` con la IA | PHP/cURL sin certificados CA (Windows) | Descargar `cacert.pem` y configurar `GROQ_CA_BUNDLE` |
-| `cURL error 60` con BD | Falta certificado ISRG Root X1 (TiDB) | Descargar `isrgrootx1.pem` y configurar `DB_SSL_CA` |
 | Error 419 en formularios | Token CSRF expirado | `php artisan config:clear` + borrar cookies |
 | `RoleDoesNotExist` | Seeders no ejecutados | `php artisan migrate:fresh --seed` |
 | Tests fallan con Vite | Manifest de Vite no encontrado | `php artisan view:clear` y volver a ejecutar |

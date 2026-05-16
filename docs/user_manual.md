@@ -446,7 +446,7 @@ Accede desde `/admin/users`:
 Sí. Cada usuario tiene sus propios pacientes, notas y configuraciones. Los datos de un profesional son completamente privados y no son accesibles por otros usuarios.
 
 **¿Los datos de mis pacientes están seguros?**
-Los datos se almacenan de forma cifrada en la base de datos. En producción se usa TiDB Cloud con conexión SSL. Las contraseñas nunca se guardan en texto plano (bcrypt).
+Los datos se almacenan de forma cifrada en la base de datos. En producción se usa MySQL gestionado en Railway. Las contraseñas nunca se guardan en texto plano (bcrypt).
 
 **¿Puedo usar ClientKosmos sin conexión a internet?**
 No. ClientKosmos es una aplicación web que requiere conexión. La IA (Kosmo) también requiere conexión a la API de Groq.

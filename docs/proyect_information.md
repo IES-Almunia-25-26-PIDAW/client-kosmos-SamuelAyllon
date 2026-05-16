@@ -124,7 +124,7 @@ Profesionales autónomos o en pequeñas consultas que necesitan:
 |---------|---------------|-------------|
 | Desarrollo local | SQLite (archivo) | Cero configuración |
 | Tests | SQLite in-memory | Rápido y aislado |
-| Docker / producción | MySQL 8 (TiDB Cloud) | Alta disponibilidad, serverless |
+| Docker / producción | MySQL 8 (Railway) | Servicio gestionado en Railway |
 
 ### IA
 
@@ -394,14 +394,13 @@ APP_URL=http://localhost:8000
 # Desarrollo (SQLite — sin configuración adicional)
 DB_CONNECTION=sqlite
 
-# Producción (MySQL / TiDB Cloud)
+# Producción (MySQL gestionado en Railway)
 DB_CONNECTION=mysql
-DB_HOST=gateway01.eu-central-1.prod.aws.tidbcloud.com
-DB_PORT=4000
-DB_DATABASE=test
-DB_USERNAME=tu_usuario
-DB_PASSWORD=tu_contraseña
-DB_SSL_CA=/ruta/isrgrootx1.pem   # Solo Windows con TiDB
+DB_HOST=${{ MySQL.MYSQLHOST }}
+DB_PORT=${{ MySQL.MYSQLPORT }}
+DB_DATABASE=${{ MySQL.MYSQLDATABASE }}
+DB_USERNAME=${{ MySQL.MYSQLUSER }}
+DB_PASSWORD=${{ MySQL.MYSQLPASSWORD }}
 ```
 
 ### IA (Kosmo)
