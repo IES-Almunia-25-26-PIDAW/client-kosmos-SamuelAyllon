@@ -23,6 +23,13 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // En Railway terminamos TLS en el edge: FrankenPHP recibe la request
+        // por HTTP plano con X-Forwarded-Proto: https. Sin trustProxies, el
+        // URL builder de Laravel emite redirects a http:// (ej. login → 302
+        // location: http://.../dashboard) y la cookie samesite=lax se pierde
+        // en el bounce a https, dejando al usuario fuera de sesión.
+        $middleware->trustProxies(at: '*');
+
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
 
         $middleware->validateCsrfTokens(except: ['webhooks/stripe']);
