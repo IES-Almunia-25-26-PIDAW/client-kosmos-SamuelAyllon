@@ -3,8 +3,11 @@
 use App\Http\Controllers\Admin\DashboardIndexAction as AdminDashboardIndexAction;
 use App\Http\Controllers\Admin\Users\CreateAction as AdminUserCreateAction;
 use App\Http\Controllers\Admin\Users\DestroyAction as AdminUserDestroyAction;
+use App\Http\Controllers\Admin\Users\ForceDeleteAction as AdminUserForceDeleteAction;
+use App\Http\Controllers\Admin\Users\RestoreAction as AdminUserRestoreAction;
 use App\Http\Controllers\Admin\Users\ShowAction as AdminUserShowAction;
 use App\Http\Controllers\Admin\Users\StoreAction as AdminUserStoreAction;
+use App\Http\Controllers\Admin\Users\TrashedIndexAction as AdminUserTrashedIndexAction;
 use App\Http\Controllers\Admin\Users\VerifyProfessionalAction as AdminVerifyProfessionalAction;
 use App\Http\Controllers\Admin\Workspaces\IndexAction as AdminWorkspaceIndexAction;
 use App\Http\Controllers\Admin\Workspaces\ShowAction as AdminWorkspaceShowAction;
@@ -283,6 +286,17 @@ Route::middleware(['auth', 'verified', 'admin'])
     ->group(function () {
         Route::get('/', AdminDashboardIndexAction::class)->name('dashboard');
         Route::get('/users/create', AdminUserCreateAction::class)->name('users.create');
+        // Rutas estáticas /users/trash y operaciones sobre la papelera. Deben
+        // declararse antes de /users/{user} para que 'trash' no se interprete
+        // como un id. Las acciones sobre usuarios borrados usan withTrashed()
+        // en el route model binding para resolver registros con deleted_at.
+        Route::get('/users/trash', AdminUserTrashedIndexAction::class)->name('users.trash');
+        Route::post('/users/{user}/restore', AdminUserRestoreAction::class)
+            ->withTrashed()
+            ->name('users.restore');
+        Route::delete('/users/{user}/force', AdminUserForceDeleteAction::class)
+            ->withTrashed()
+            ->name('users.force-delete');
         Route::post('/users', AdminUserStoreAction::class)->name('users.store');
         Route::get('/users/{user}', AdminUserShowAction::class)->name('users.show');
         Route::delete('/users/{user}', AdminUserDestroyAction::class)->name('users.destroy');
