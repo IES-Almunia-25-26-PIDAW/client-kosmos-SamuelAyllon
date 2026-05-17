@@ -46,6 +46,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { dashboard } from '@/routes';
 import { login, register } from '@/routes';
+import legal from '@/routes/legal';
 import type { Auth } from '@/types';
 
 const NAV_ITEMS = [
@@ -935,7 +936,7 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
                 {/* Footer */}
                 <chakra.footer borderTopWidth="1px">
                     <PageCtn py="16">
-                        <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} gap="10" mb="12">
+                        <SimpleGrid columns={{ base: 1, md: 2, lg: 5 }} gap="10" mb="12">
                             <Box gridColumn={{ lg: 'span 2' }}>
                                 <HStack gap="3" mb="4">
                                     <chakra.img src={logo} alt="ClientKosmos" h="10" w="auto" objectFit="contain" />
@@ -987,6 +988,37 @@ export default function Welcome({ canRegister = true }: { canRegister?: boolean 
                                     {[
                                         { href: register(), label: 'Crear cuenta' },
                                         { href: login(), label: 'Iniciar sesión' },
+                                    ].map((item) => (
+                                        <Box as="li" key={item.label}>
+                                            <chakra.a
+                                                display="inline-flex"
+                                                alignItems="center"
+                                                gap="1.5"
+                                                fontSize="sm"
+                                                color="fg.muted"
+                                                fontWeight="medium"
+                                                transition="color 0.2s ease, transform 0.2s ease"
+                                                _hover={{ color: 'brand.solid', transform: 'translateX(4px)' }}
+                                                asChild
+                                            >
+                                                <Link href={item.href}>
+                                                    <Icon as={ArrowRight} boxSize="3" flexShrink={0} />
+                                                    {item.label}
+                                                </Link>
+                                            </chakra.a>
+                                        </Box>
+                                    ))}
+                                </Stack>
+                            </Box>
+
+                            <Box>
+                                <Heading as="h4" fontSize="sm" fontWeight="semibold" letterSpacing="wider" textTransform="uppercase" color="fg.subtle" mb="5">
+                                    Legal
+                                </Heading>
+                                <Stack as="ul" listStyleType="none" gap="3">
+                                    {[
+                                        { href: legal.privacy(), label: 'Política de privacidad' },
+                                        { href: legal.terms(), label: 'Términos y condiciones' },
                                     ].map((item) => (
                                         <Box as="li" key={item.label}>
                                             <chakra.a
