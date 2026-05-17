@@ -44,6 +44,23 @@ it('sends an email via Brevo HTTP API with correct payload and headers', functio
     });
 });
 
+it('throws a descriptive error when the API key is empty', function () {
+    Mail::forgetMailers();
+    Config::set('mail.mailers.brevo.key', '');
+    Config::set('services.brevo.key', '');
+
+    Http::preventStrayRequests();
+    Http::fake();
+
+    expect(fn () => Mail::raw('x', fn ($m) => $m->to('a@b.com')->subject('s')))
+        ->toThrow(
+            TransportException::class,
+            'BREVO_API_KEY is empty',
+        );
+
+    Http::assertNothingSent();
+});
+
 it('throws when Brevo API responds with an error', function () {
     Mail::forgetMailers();
 

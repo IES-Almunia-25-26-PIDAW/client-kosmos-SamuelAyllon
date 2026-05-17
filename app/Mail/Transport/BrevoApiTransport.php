@@ -33,6 +33,13 @@ class BrevoApiTransport extends AbstractTransport
 
     protected function doSend(SentMessage $message): void
     {
+        if ($this->apiKey === '') {
+            throw new TransportException(
+                'Brevo API transport: BREVO_API_KEY is empty. Set it in your environment '.
+                'and make sure the queue/worker container also receives the variable.'
+            );
+        }
+
         $original = $message->getOriginalMessage();
 
         if (! $original instanceof Message) {
