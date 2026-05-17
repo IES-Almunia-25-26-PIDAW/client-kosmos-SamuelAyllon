@@ -271,9 +271,14 @@ case "${CONTAINER_ROLE}" in
         # la cola se muere. Sin esos flags el worker solo sale por crash,
         # que ON_FAILURE sí reinicia. Trade-off: el proceso podría acumular
         # memoria a largo plazo; aceptable para los volúmenes actuales.
+        #
+        # --timeout=30 mata cualquier job que tarde >30s. Esencial cuando el
+        # SMTP cuelga: en vez de quedar RUNNING para siempre, el job va a
+        # failed_jobs con su stacktrace y podemos diagnosticar.
         exec php /app/artisan queue:work \
             --tries=3 \
             --backoff=10 \
+            --timeout=30 \
             --sleep=3
         ;;
     scheduler)
