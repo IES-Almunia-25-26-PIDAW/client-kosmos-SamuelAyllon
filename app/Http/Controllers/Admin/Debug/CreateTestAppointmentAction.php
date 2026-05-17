@@ -60,6 +60,9 @@ class CreateTestAppointmentAction extends Controller
             ], 422);
         }
 
+        $cleanup = $request->boolean('cleanup');
+        $deletedZombieIds = [];
+
         $appointment = DB::transaction(function () use ($professional, $patient): Appointment {
             // Workspace: usamos el primero del profesional, o creamos uno mínimo.
             $workspace = $professional->workspaces()->first()
@@ -152,6 +155,25 @@ class CreateTestAppointmentAction extends Controller
             ]);
         });
 
+        // Cleanup opcional: borrar (forceDelete, no soft-delete) las citas test
+        // previas entre este par de users excepto la que acabamos de reutilizar.
+        // Útil para limpiar zombis acumulados en pruebas anteriores.
+        if ($cleanup) {
+            $deletedZombieIds = Appointment::withTrashed()
+                ->where('professional_id', $professional->id)
+                ->where('patient_id', $patient->id)
+                ->where('notes', 'like', '%create-test-appointment%')
+                ->where('id', '!=', $appointment->id)
+                ->pluck('id')
+                ->all();
+
+            if ($deletedZombieIds !== []) {
+                Appointment::withTrashed()
+                    ->whereIn('id', $deletedZombieIds)
+                    ->forceDelete();
+            }
+        }
+
         // Crear evento Google Meet si el profesional tiene Calendar vinculado.
         // Si la cita reutilizada ya tenía meeting_url, no creamos otro evento
         // (evita duplicar entradas en Google Calendar al llamar al endpoint
@@ -191,6 +213,7 @@ class CreateTestAppointmentAction extends Controller
             'meeting_room_id' => $appointment->meeting_room_id,
             'meeting_url' => $appointment->fresh()->meeting_url,
             'meet_warning' => $meetWarning,
+            'cleaned_up_zombie_ids' => $cleanup ? $deletedZombieIds : null,
         ]));
     }
 }
