@@ -108,7 +108,35 @@ class CreateTestAppointmentAction extends Controller
                 ],
             );
 
-            // Cita ahora mismo, confirmada, 60 min.
+            // Reutilizar una cita de prueba existente entre estos dos users
+            // si la hay (evita acumular zombis al llamar al endpoint varias veces).
+            // La marcamos siempre con la nota distintiva para identificarla.
+            $existing = Appointment::query()
+                ->where('professional_id', $professional->id)
+                ->where('patient_id', $patient->id)
+                ->where('notes', 'like', '%create-test-appointment%')
+                ->orderByDesc('id')
+                ->first();
+
+            if ($existing !== null) {
+                // Refrescar ventana, estado y room_id si faltase. Mantiene el
+                // meeting_url existente si ya estaba creado en Google Calendar.
+                $existing->update([
+                    'workspace_id' => $workspace->id,
+                    'service_id' => $service->id,
+                    'starts_at' => now()->subMinute(),
+                    'ends_at' => now()->addHour(),
+                    'modality' => 'video_call',
+                    'status' => 'confirmed',
+                    'confirmed_at' => now(),
+                    'meeting_room_id' => $existing->meeting_room_id ?? (string) Str::uuid(),
+                    'professional_joined_at' => null,
+                    'patient_joined_at' => null,
+                ]);
+
+                return $existing->fresh();
+            }
+
             return Appointment::create([
                 'workspace_id' => $workspace->id,
                 'patient_id' => $patient->id,
@@ -125,10 +153,13 @@ class CreateTestAppointmentAction extends Controller
         });
 
         // Crear evento Google Meet si el profesional tiene Calendar vinculado.
-        // Sin esto, el meeting_url queda en null y al pulsar "Iniciar llamada"
-        // no se abre Google Meet.
+        // Si la cita reutilizada ya tenía meeting_url, no creamos otro evento
+        // (evita duplicar entradas en Google Calendar al llamar al endpoint
+        // muchas veces). Sin Calendar vinculado, meeting_url queda en null.
         $meetWarning = null;
-        if ($professional->google_refresh_token === null) {
+        if ($appointment->meeting_url !== null) {
+            $meetWarning = 'Reutilizando meeting_url existente — no se ha creado un nuevo evento en Google Calendar.';
+        } elseif ($professional->google_refresh_token === null) {
             $meetWarning = 'El profesional NO tiene Google Calendar vinculado: el meeting_url queda vacío. Loguéate como él y conecta Google Calendar en Settings antes de probar la videollamada.';
         } else {
             try {
