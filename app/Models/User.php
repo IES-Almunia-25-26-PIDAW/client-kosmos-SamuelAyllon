@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Notifications\QueuedResetPassword;
+use App\Notifications\QueuedVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Builder;
@@ -198,6 +200,26 @@ class User extends Authenticatable implements MustVerifyEmail
     public function completeTutorial(): void
     {
         $this->update(['tutorial_completed_at' => now()]);
+    }
+
+    /**
+     * Empujar el correo de verificación a la cola en lugar de enviarlo síncrono
+     * dentro de la request de registro. Evita que un SMTP lento/caído cuelgue
+     * el registro y termine en fatal por max_execution_time.
+     */
+    public function sendEmailVerificationNotification(): void
+    {
+        $this->notify(new QueuedVerifyEmail);
+    }
+
+    /**
+     * Empujar el correo de reset de contraseña a la cola. Mismo motivo que
+     * el override de verificación: evita que un SMTP lento cuelgue la request
+     * de /forgot-password hasta el timeout de PHP.
+     */
+    public function sendPasswordResetNotification($token): void
+    {
+        $this->notify(new QueuedResetPassword($token));
     }
 
     public function currentWorkspaceId(): ?int
