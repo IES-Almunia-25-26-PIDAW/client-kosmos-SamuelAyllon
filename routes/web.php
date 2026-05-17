@@ -133,6 +133,10 @@ use Inertia\Inertia;
 
 Route::get('/', fn () => Inertia::render('welcome'))->name('home');
 
+// ─── Legal (públicas, requeridas para verificación OAuth de Google) ─────────────
+Route::get('/privacy', fn () => Inertia::render('legal/privacy'))->name('legal.privacy');
+Route::get('/terms', fn () => Inertia::render('legal/terms'))->name('legal.terms');
+
 // ─── Dashboard catch-all (Fortify home, email verification redirect) ──────────
 Route::middleware(['auth', 'verified'])
     ->get('/dashboard', function () {
