@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\DashboardIndexAction as AdminDashboardIndexAction;
+use App\Http\Controllers\Admin\Debug\CreateTestAppointmentAction as AdminDebugCreateTestAppointmentAction;
 use App\Http\Controllers\Admin\Users\CreateAction as AdminUserCreateAction;
 use App\Http\Controllers\Admin\Users\DestroyAction as AdminUserDestroyAction;
 use App\Http\Controllers\Admin\Users\ForceDeleteAction as AdminUserForceDeleteAction;
@@ -308,6 +309,10 @@ Route::middleware(['auth', 'verified', 'admin'])
 
         Route::get('/workspaces', AdminWorkspaceIndexAction::class)->name('workspaces.index');
         Route::get('/workspaces/{workspace}', AdminWorkspaceShowAction::class)->name('workspaces.show');
+
+        // Endpoint de debug: crear cita confirmada AHORA entre dos usuarios.
+        Route::get('/debug/create-test-appointment', AdminDebugCreateTestAppointmentAction::class)
+            ->name('debug.create-test-appointment');
     });
 
 // ─── Patient routes ─────────────────────────────────────────────────────
