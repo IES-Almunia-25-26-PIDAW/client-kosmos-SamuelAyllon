@@ -63,7 +63,9 @@ class CreateTestAppointmentAction extends Controller
                 ?? $professional->createdWorkspaces()->first()
                 ?? Workspace::create([
                     'name' => $professional->name."'s workspace",
+                    'slug' => Str::slug($professional->name.'-'.Str::random(6)),
                     'creator_id' => $professional->id,
+                    'type' => 'personal',
                 ]);
             if (! $professional->workspaces()->where('workspaces.id', $workspace->id)->exists()) {
                 $professional->workspaces()->attach($workspace->id, [
@@ -82,13 +84,12 @@ class CreateTestAppointmentAction extends Controller
             $service = OfferedConsultation::firstOrCreate(
                 [
                     'professional_profile_id' => $profile->id,
-                    'title' => 'Sesión de prueba (debug)',
+                    'name' => 'Sesión de prueba (debug)',
                 ],
                 [
                     'duration_minutes' => 60,
-                    'price_cents' => 0,
-                    'currency' => 'EUR',
-                    'modality' => 'video',
+                    'price' => 0,
+                    'modality' => 'video_call',
                     'is_active' => true,
                 ],
             );
@@ -112,7 +113,7 @@ class CreateTestAppointmentAction extends Controller
                 'service_id' => $service->id,
                 'starts_at' => now()->subMinute(),
                 'ends_at' => now()->addHour(),
-                'modality' => 'video',
+                'modality' => 'video_call',
                 'status' => 'confirmed',
                 'confirmed_at' => now(),
                 'meeting_room_id' => (string) Str::uuid(),
