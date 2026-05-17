@@ -265,11 +265,15 @@ case "${CONTAINER_ROLE}" in
         ;;
     queue)
         echo "==> Arrancando queue worker..."
+        # NOTA: NO usamos --max-time ni --max-jobs aquí. Railway tiene la
+        # política de reinicio en ON_FAILURE, así que un exit 0 limpio (que
+        # es lo que provocan esos flags) deja el servicio en "Completed" y
+        # la cola se muere. Sin esos flags el worker solo sale por crash,
+        # que ON_FAILURE sí reinicia. Trade-off: el proceso podría acumular
+        # memoria a largo plazo; aceptable para los volúmenes actuales.
         exec php /app/artisan queue:work \
             --tries=3 \
             --backoff=10 \
-            --max-time=3600 \
-            --max-jobs=1000 \
             --sleep=3
         ;;
     scheduler)
