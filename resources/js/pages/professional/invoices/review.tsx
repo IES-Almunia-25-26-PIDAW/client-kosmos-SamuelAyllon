@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 import CreateCheckoutAction from '@/actions/App/Http/Controllers/Invoice/CreateCheckoutAction';
 import EditAction from '@/actions/App/Http/Controllers/Invoice/EditAction';
 import SendAction from '@/actions/App/Http/Controllers/Invoice/SendAction';
-import ShowAction from '@/actions/App/Http/Controllers/Invoice/ShowAction';
+import IndexAction from '@/actions/App/Http/Controllers/Invoice/IndexAction';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 
@@ -188,7 +188,7 @@ export default function InvoiceReview({ invoice }: Props) {
                 </Card.Root>
 
                 <HStack justifyContent="flex-end" gap="3" flexWrap="wrap">
-                    <Button variant="outline" onClick={() => router.visit(ShowAction.url(invoice.id))}>
+                    <Button variant="outline" onClick={() => router.visit(IndexAction.url())}>
                         Volver
                     </Button>
                     {invoice.status === 'draft' && (
