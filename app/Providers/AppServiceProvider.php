@@ -8,6 +8,7 @@ use App\Events\TranscriptionSegmentCreated;
 use App\Http\Responses\LoginResponse;
 use App\Listeners\AggregateTranscription;
 use App\Listeners\GeneratePostSessionBriefingOnSummarized;
+use App\Mail\Transport\BrevoApiTransport;
 use App\Models\Appointment;
 use App\Models\Document;
 use App\Models\Invoice;
@@ -29,10 +30,12 @@ use App\Services\Payments\StripeGateway;
 use Carbon\CarbonImmutable;
 use GuzzleHttp\Client as GuzzleClient;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Client\Factory;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 use Laravel\Fortify\Contracts\LoginResponse as LoginResponseContract;
@@ -95,6 +98,18 @@ class AppServiceProvider extends ServiceProvider
 
         Event::listen(TranscriptionSegmentCreated::class, AggregateTranscription::class);
         Event::listen(SessionSummarized::class, GeneratePostSessionBriefingOnSummarized::class);
+
+        // Mailer 'brevo' usa la API HTTP de Brevo (HTTPS, puerto 443). Necesario
+        // porque Railway bloquea SMTP saliente. Se activa con MAIL_MAILER=brevo
+        // + BREVO_API_KEY=xkeysib-... en las env vars.
+        Mail::extend('brevo', function (array $config = []) {
+            $apiKey = (string) ($config['key'] ?? config('services.brevo.key') ?? '');
+
+            return new BrevoApiTransport(
+                http: app(Factory::class),
+                apiKey: $apiKey,
+            );
+        });
     }
 
     /**

@@ -65,6 +65,14 @@ return [
             'transport' => 'resend',
         ],
 
+        // Brevo HTTP API — necesario en Railway porque bloquean SMTP saliente.
+        // Implementado en App\Mail\Transport\BrevoApiTransport y registrado
+        // como driver 'brevo' en AppServiceProvider::boot().
+        'brevo' => [
+            'transport' => 'brevo',
+            'key' => env('BREVO_API_KEY'),
+        ],
+
         'sendmail' => [
             'transport' => 'sendmail',
             'path' => env('MAIL_SENDMAIL_PATH', '/usr/sbin/sendmail -bs -i'),
