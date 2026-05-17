@@ -1,3 +1,13 @@
+# syntax=docker/dockerfile:1
+# check=skip=SecretsUsedInArgOrEnv
+# ──────────────────────────────────────────────────────────────────────────────
+# Nota sobre `check=skip=SecretsUsedInArgOrEnv`:
+# El linter detecta "KEY" en `VITE_REVERB_APP_KEY` y lo marca como secreto.
+# Es un falso positivo: ese valor es el identificador *público* de la app
+# Reverb que se hornea en el bundle de cliente para que el navegador pueda
+# suscribirse a canales WebSocket. El secreto real es `REVERB_APP_SECRET`,
+# que se queda en el servidor y NO aparece en este Dockerfile.
+# ──────────────────────────────────────────────────────────────────────────────
 # ==============================================================================
 # Dockerfile de ClientKosmos (Laravel + React) — FrankenPHP
 # ==============================================================================
