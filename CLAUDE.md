@@ -223,10 +223,17 @@ Descripción obligatoria con:
 - **Calidad:** PHPStan elevado a nivel 7 con baseline vacía ([ADR-0031](docs/adr/0031-phpstan-level-7-baseline-drained.md), `6d884c7`).
 - **Auth:** Google OAuth para profesionales y pacientes; Google Calendar vinculado al paciente en login Google (`5ce7b1e`, `1ec4068`).
 - **Settings:** páginas de ajustes profesionales consolidadas en `/settings/profile` (`8cffe96`).
+- **Deploy:** migración VPS+Traefik → **Railway** con Docker multi-stage + FrankenPHP (`d5bdff8`, `ba13466`); split `app` / `worker` vía `CONTAINER_ROLE` (`191c43c`).
+- **Storage:** disco de Laravel migrado a **Cloudflare R2** para compartir uploads/PDFs entre servicios ([ADR-0032](docs/adr/0032-object-storage-cloudflare-r2.md), `41ef5f8`).
+- **Mail:** transport **Brevo HTTP API** para bypassear el bloqueo de egreso SMTP de Railway (`676471d`); notificaciones de verificación y reset encoladas (`6306cef`).
+- **Legal/OAuth:** rutas públicas `/privacy` y `/terms` (`d9f289c`), enlaces en footer y documento [docs/google-oauth-test-users-justification.md](docs/google-oauth-test-users-justification.md) (`b49b382`). Cliente OAuth en modo Testing por imposibilidad de verificar el subdominio `*.up.railway.app`.
+- **Admin:** papelera de usuarios soft-deleted con restauración y borrado físico (`8c68960`); liberación de `email`/`google_id` al hacer soft-delete (`db01bf4`).
+- **Debug:** endpoint `/admin/debug/create-test-appointment` para seedear citas joinables al instante (`6c4feb1`, `5a465e0`).
 
 **En curso / pendiente visible**
 - `docs/clientkosmos-design-system.md` en rediseño/limpieza (design system doc vivo).
 - Revisar páginas restantes sin migrar a Chakra v3 (si las hay) — contrastar con ADRs de migración.
+- Adquisición de dominio propio para sacar el cliente OAuth de modo Testing (ver plan de salida en `google-oauth-test-users-justification.md`).
 
 ---
 

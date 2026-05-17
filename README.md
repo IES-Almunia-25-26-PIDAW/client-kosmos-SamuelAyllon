@@ -85,7 +85,8 @@ Muchos profesionales mezclan cuadernos, hojas de cálculo, carpetas de correo y 
 | **Consultas ofertadas** | Catálogo de servicios del profesional con duración y precio |
 | **Kosmo IA** | Briefings diarios + chat contextual con Llama 3.3 70B |
 | **Ajustes** | Perfil, password, 2FA, Google OAuth, datos de consulta, fiscales y RGPD |
-| **Admin** | Gestión de usuarios del sistema (solo admins) |
+| **Admin** | Gestión de usuarios del sistema + **papelera de soft-deleted** con restauración y borrado físico (solo admins) |
+| **Páginas legales** | Rutas públicas `/privacy` y `/terms` (requeridas por la verificación OAuth de Google) |
 
 ### Autenticación y seguridad
 
@@ -165,12 +166,22 @@ npm run dev        # Frontend con hot reload
 
 ## Credenciales de Prueba
 
-Tras ejecutar `php artisan migrate:fresh --seed`:
+### Local (tras `php artisan migrate:fresh --seed`)
 
 | Rol | Email | Contraseña | Datos demo |
 |-----|-------|:----------:|------------|
 | **Admin** | admin@clientkosmos.test | `password` | Panel de administración |
 | **Profesional** | natalia@clientkosmos.test | `password` | Consulta con pacientes demo |
+
+### Producción (Railway — entorno de evaluación)
+
+| Rol | Email | Contraseña |
+|-----|-------|------------|
+| **Admin** | admin@clientkosmos.com | `AdminKosmos2026!` |
+| **Profesional** | ayllonsevillasamuel62@gmail.com | `aYJS9mKdQhVbpNW=` |
+| **Paciente** | samuelayllonsevilla86@gmail.com | `QV2zPPb2N4Unm2K=` |
+
+> Las cuentas Profesional y Paciente coinciden con _test users_ del cliente OAuth de Google → también permiten "Continuar con Google". El cliente OAuth está en **modo Testing** por la imposibilidad de verificar el subdominio `*.up.railway.app` en Search Console: ver [docs/google-oauth-test-users-justification.md](docs/google-oauth-test-users-justification.md).
 
 ---
 
@@ -517,7 +528,7 @@ ClientKosmos está desplegado en [Railway](https://railway.com) con auto-deploy
 desde `main`. Stack: servicio `app` (Docker build desde el `Dockerfile` del repo)
 + servicio `MySQL` (template oficial) + volumen montado en `/app/storage/app`.
 
-URL pública actual: **https://app-production-a329.up.railway.app**
+URL pública actual: **https://clientkosmos.up.railway.app**
 
 ```bash
 # Operaciones desde local (vía Railway CLI / MCP)
@@ -535,8 +546,10 @@ queda archivada en [`deploy/legacy/`](deploy/legacy/).
 | Servicio | Tipo | Rol |
 |----------|------|-----|
 | `app` | Docker (repo) | Aplicación Laravel + FrankenPHP, expuesta en `:8000` |
+| `worker` | Docker (repo, mismo image) | Worker de cola (`CONTAINER_ROLE=worker`) — procesa transcripciones, emails, PDFs |
 | `MySQL` | Template oficial Railway | Base de datos, conectada por refs `${{MySQL.MYSQLHOST}}`, etc. |
-| `app-volume` | Volume | Persistencia de `/app/storage/app` (uploads, PDFs) |
+| `Cloudflare R2` | Bucket S3-compatible externo | Persistencia de uploads, PDFs y documentos compartida entre `app` y `worker` ([ADR-0032](docs/adr/0032-object-storage-cloudflare-r2.md)) |
+| `Brevo HTTP API` | Servicio externo | Transport de email transaccional (Railway bloquea SMTP saliente) |
 
 ### Build multi-stage (Dockerfile)
 
@@ -600,6 +613,22 @@ DB_PASSWORD=${{ MySQL.MYSQLPASSWORD }}
 GROQ_API_KEY=gsk_xxxxxxxxxxxxxxxx
 GROQ_BASE_URL=https://api.groq.com/openai/v1
 GROQ_MODEL=llama-3.3-70b-versatile
+
+# Email transaccional — Brevo HTTP API (Railway bloquea egreso SMTP)
+MAIL_MAILER=brevo
+BREVO_API_KEY=xkeysib-xxxxxxxxxxxxxxxx
+MAIL_FROM_ADDRESS=no-reply@clientkosmos.com
+MAIL_FROM_NAME=ClientKosmos
+
+# Almacenamiento de objetos — Cloudflare R2
+FILESYSTEM_DISK=r2
+R2_ACCESS_KEY_ID=xxxxxxxxxxxxxxxx
+R2_SECRET_ACCESS_KEY=xxxxxxxxxxxxxxxx
+R2_BUCKET=clientkosmos-prod
+R2_ENDPOINT=https://<account-id>.r2.cloudflarestorage.com
+
+# Rol del contenedor (app | worker) — gestiona el entrypoint
+CONTAINER_ROLE=app
 ```
 
 ### Certificados SSL (Groq en Windows)
@@ -630,6 +659,9 @@ Invoke-WebRequest -Uri "https://curl.se/ca/cacert.pem" -OutFile "C:\certs\cacert
 | Frontend no actualiza | Caché de Vite | Reiniciar `npm run dev` o Ctrl+Shift+R |
 | La app tarda en arrancar (Docker) | MySQL inicializando | Normal. Espera ~60 s y observa `docker compose logs -f app` |
 | Sesiones se invalidan (Docker) | `APP_KEY` cambia en cada contenedor | Fija la `APP_KEY` en el `docker-compose.yml` |
+| Emails de verificación no llegan en Railway | Railway bloquea egreso SMTP en plan Hobby | Usar `MAIL_MAILER=brevo` con `BREVO_API_KEY` (HTTP API, no SMTP) |
+| PDF generado por el worker no se ve en la app | Volumen local no compartido entre servicios Railway | `FILESYSTEM_DISK=r2` con credenciales de Cloudflare R2 |
+| "Acceso bloqueado: ClientKosmos no ha completado la verificación" al iniciar sesión con Google | Cliente OAuth en modo Testing (subdominio `*.up.railway.app` no verificable) | Pedir al admin que añada tu email como _test user_ en Google Cloud Console. Justificación: [docs/google-oauth-test-users-justification.md](docs/google-oauth-test-users-justification.md) |
 
 ---
 
@@ -667,11 +699,12 @@ Los únicos endpoints que **sí actúan como API HTTP pura** son integraciones d
 
 | Documento | Descripción |
 |-----------|-------------|
-| [docs/user_manual.md](docs/user_manual.md) | Manual de uso para el usuario final |
-| [docs/justificate_implementation.md](docs/justificate_implementation.md) | Justificación técnica de decisiones de diseño |
-| [docs/proyect_information.md](docs/proyect_information.md) | Contexto completo, estado actual y estructura |
+| [docs/memoria_tecnica.md](docs/memoria_tecnica.md) | Memoria técnica completa del Proyecto Intermodular DAM |
+| [docs/informe-transparencia-ia.md](docs/informe-transparencia-ia.md) | Declaración de uso de IA en el desarrollo |
+| [docs/google-oauth-test-users-justification.md](docs/google-oauth-test-users-justification.md) | Justificación del cliente OAuth en modo Testing |
+| [docs/adr/](docs/adr/) | Architecture Decision Records (decisiones técnicas) |
 | [docs/clientkosmos-design-system.md](docs/clientkosmos-design-system.md) | Design system: tokens, componentes, tipografía |
-| [deploy/README.md](deploy/README.md) | Instrucciones de despliegue con Docker |
+| [deploy/RAILWAY.md](deploy/RAILWAY.md) | Runbook completo de despliegue en Railway |
 
 ---
 

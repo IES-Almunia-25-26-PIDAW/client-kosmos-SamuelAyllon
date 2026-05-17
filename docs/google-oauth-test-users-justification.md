@@ -103,7 +103,21 @@ Tras estos pasos, **cualquier cuenta de Google** podrá iniciar sesión sin esta
 
 ---
 
-## 7. Referencias
+## 7. Credenciales de prueba
+
+Para facilitar la evaluación, se proporcionan las siguientes cuentas de prueba ya dadas de alta en el sistema:
+
+| Rol           | Email                                 | Contraseña          |
+| ------------- | ------------------------------------- | ------------------- |
+| Admin         | `admin@clientkosmos.com`              | `AdminKosmos2026!`  |
+| Profesional   | `ayllonsevillasamuel62@gmail.com`     | `aYJS9mKdQhVbpNW=`  |
+| Paciente      | `samuelayllonsevilla86@gmail.com`     | `QV2zPPb2N4Unm2K=`  |
+
+Las cuentas de Profesional y Paciente coinciden con las direcciones añadidas como _test users_ en la consola de Google Cloud, por lo que también pueden iniciar sesión con **"Continuar con Google"** además del login con email/contraseña.
+
+---
+
+## 8. Referencias
 
 - [Google — OAuth API verification FAQs](https://support.google.com/cloud/answer/9110914)
 - [Google Search Console — Verificar la propiedad del sitio](https://support.google.com/webmasters/answer/9008080)
