@@ -18,8 +18,8 @@ return new class extends Migration
             $table->unsignedBigInteger('ended_at_ms');
             $table->timestamps();
 
-            $table->unique(['session_recording_id', 'speaker_user_id', 'position']);
-            $table->index(['session_recording_id', 'started_at_ms']);
+            $table->unique(['session_recording_id', 'speaker_user_id', 'position'], 'transcription_segments_recording_speaker_pos_unique');
+            $table->index(['session_recording_id', 'started_at_ms'], 'transcription_segments_recording_started_idx');
         });
     }
 

@@ -9,7 +9,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![PHP](https://img.shields.io/badge/PHP-8.4+-777BB4?style=flat-square&logo=php&logoColor=white)](https://www.php.net)
 [![Chakra UI](https://img.shields.io/badge/Chakra_UI-v3-319795?style=flat-square&logo=chakraui&logoColor=white)](https://chakra-ui.com)
-[![Tests](https://img.shields.io/badge/Tests-389_casos-brightgreen?style=flat-square&logo=checkmarx&logoColor=white)]()
+[![Tests](https://img.shields.io/badge/Tests-509_casos-brightgreen?style=flat-square&logo=checkmarx&logoColor=white)]()
 [![Docker](https://img.shields.io/badge/Docker-samue45%2Fclient--kosmos-2496ED?style=flat-square&logo=docker&logoColor=white)](https://hub.docker.com/r/samue45/client-kosmos)
 [![License](https://img.shields.io/badge/License-MIT-green.svg?style=flat-square)](LICENSE)
 
@@ -70,15 +70,23 @@ Muchos profesionales mezclan cuadernos, hojas de cálculo, carpetas de correo y 
 |--------|-------------|
 | **Dashboard** | Panel de control diario con métricas, alertas y briefing de Kosmo |
 | **Pacientes** | CRUD completo con ficha detallada, pre/post sesión |
+| **Citas y Agenda** | Reserva online, disponibilidad por workspace, recordatorios, auto-expiración con revocación de enlace Meet |
+| **Videoconsulta** | Sala Google Meet generada en backend, recordings, transcripción Whisper con VAD y filtrado de alucinaciones |
+| **Workspaces** | Personal y colaborativo: invitaciones, acuerdos de colaboración, derivaciones (referrals) |
+| **Mensajería** | Chat profesional ↔ paciente vía Reverb (websockets) |
 | **Notas** | Registro de sesiones anidado por paciente |
 | **Acuerdos** | Condiciones del servicio por paciente |
 | **Pagos** | Control de cobros (pendiente / pagado / vencido) |
 | **Documentos** | Archivos adjuntos por paciente |
 | **Consentimientos** | Formularios RGPD y consentimiento informado |
-| **Facturación** | Vista consolidada de ingresos con filtros |
+| **Facturación** | Vista consolidada de ingresos, factura PDF (dompdf) y cobro paciente vía Stripe Checkout |
+| **Notificaciones** | Centro de notificaciones en tiempo real (Reverb) |
+| **Portal Paciente** | Acceso del paciente a su consulta: citas, facturas, mensajes, documentos |
+| **Consultas ofertadas** | Catálogo de servicios del profesional con duración y precio |
 | **Kosmo IA** | Briefings diarios + chat contextual con Llama 3.3 70B |
-| **Ajustes** | Datos de consulta, fiscales y RGPD |
-| **Admin** | Gestión de usuarios del sistema (solo admins) |
+| **Ajustes** | Perfil, password, 2FA, Google OAuth, datos de consulta, fiscales y RGPD |
+| **Admin** | Gestión de usuarios del sistema + **papelera de soft-deleted** con restauración y borrado físico (solo admins) |
+| **Páginas legales** | Rutas públicas `/privacy` y `/terms` (requeridas por la verificación OAuth de Google) |
 
 ### Autenticación y seguridad
 
@@ -138,8 +146,6 @@ Edita `.env` con tu API key de Groq (opcional):
 GROQ_API_KEY=gsk_tu_clave_aqui
 ```
 
-> En Windows, si usas TiDB Cloud como base de datos, descarga también el certificado SSL (ver sección [Variables de Entorno](#variables-de-entorno)).
-
 #### 3. Migrar base de datos con datos de prueba
 
 ```bash
@@ -160,12 +166,22 @@ npm run dev        # Frontend con hot reload
 
 ## Credenciales de Prueba
 
-Tras ejecutar `php artisan migrate:fresh --seed`:
+### Local (tras `php artisan migrate:fresh --seed`)
 
 | Rol | Email | Contraseña | Datos demo |
 |-----|-------|:----------:|------------|
 | **Admin** | admin@clientkosmos.test | `password` | Panel de administración |
 | **Profesional** | natalia@clientkosmos.test | `password` | Consulta con pacientes demo |
+
+### Producción (Railway — entorno de evaluación)
+
+| Rol | Email | Contraseña |
+|-----|-------|------------|
+| **Admin** | admin@clientkosmos.com | `AdminKosmos2026!` |
+| **Profesional** | ayllonsevillasamuel62@gmail.com | `aYJS9mKdQhVbpNW=` |
+| **Paciente** | samuelayllonsevilla86@gmail.com | `QV2zPPb2N4Unm2K=` |
+
+> Las cuentas Profesional y Paciente coinciden con _test users_ del cliente OAuth de Google → también permiten "Continuar con Google". El cliente OAuth está en **modo Testing** por la imposibilidad de verificar el subdominio `*.up.railway.app` en Search Console: ver [docs/google-oauth-test-users-justification.md](docs/google-oauth-test-users-justification.md).
 
 ---
 
@@ -185,7 +201,7 @@ Tras ejecutar `php artisan migrate:fresh --seed`:
 | Google API Client | 2.19+ | Integración con Google Calendar / Meet para videoconsulta |
 | openai-php/client | 0.19 | SDK Kosmo (chat) y Whisper (transcripción), compatible con Groq |
 | barryvdh/laravel-dompdf | 3.x | Generación de facturas PDF |
-| Pest | 3.x | Framework de testing (389 tests, 1.535 aserciones) |
+| Pest | 3.x | Framework de testing (509 tests, 1.887 aserciones) |
 | Larastan / PHPStan | 3.x | Análisis estático nivel 7, 0 errores |
 
 ### Frontend
@@ -207,7 +223,7 @@ Tras ejecutar `php artisan migrate:fresh --seed`:
 | Entorno | Motor | Conexión |
 |---------|-------|----------|
 | Desarrollo local | SQLite | Sin configuración — `DB_CONNECTION=sqlite` |
-| Producción / Docker | MySQL 8 / TiDB Cloud | Puerto 4000, SSL obligatorio |
+| Producción / Docker | MySQL 8 (Railway) | Servicio gestionado, variables inyectadas vía referencia |
 | Tests | SQLite in-memory | Rápido y aislado |
 
 ### IA (Kosmo)
@@ -227,7 +243,7 @@ ClientKosmos usa **SPA monolítica con Inertia.js**: el backend Laravel sirve di
 ```
 ┌─────────────┐    Inertia.js    ┌──────────────────────┐   Eloquent   ┌──────────────────┐
 │   Browser   │ ◄──────────────► │  Laravel Controllers  │ ◄──────────► │  SQLite / MySQL  │
-│  React SPA  │                  │  (Single-Action)      │              │  (TiDB Cloud)    │
+│  React SPA  │                  │  (Single-Action)      │              │   (Railway)      │
 └─────────────┘                  └──────────┬───────────┘              └──────────────────┘
                                              │
                           ┌──────────────────┼──────────────────┐
@@ -271,15 +287,26 @@ client-kosmos-SamuelAyllon/
 │   │   ├── Controllers/          ← Patrón Single-Action (__invoke)
 │   │   │   ├── Dashboard/
 │   │   │   ├── Patient/
+│   │   │   ├── Appointment/
+│   │   │   ├── Schedule/
+│   │   │   ├── Call/             ← Videoconsulta Google Meet
 │   │   │   ├── Note/
 │   │   │   ├── Agreement/
-│   │   │   ├── Payment/
+│   │   │   ├── CollaborationAgreement/
+│   │   │   ├── Workspace/
+│   │   │   ├── Referral/
+│   │   │   ├── OfferedConsultations/
+│   │   │   ├── Message/
+│   │   │   ├── Notification/
 │   │   │   ├── Document/
 │   │   │   ├── ConsentForm/
-│   │   │   ├── Billing/
+│   │   │   ├── Invoice/          ← Facturación + Stripe Checkout
+│   │   │   ├── Webhook/          ← Stripe webhook
+│   │   │   ├── Portal/           ← Vistas del paciente
+│   │   │   ├── Professional/
 │   │   │   ├── Kosmo/
 │   │   │   ├── Onboarding/
-│   │   │   ├── Settings/         ← Consulta + Profile + Password + 2FA
+│   │   │   ├── Settings/         ← Consulta + Profile + Password + 2FA + Google
 │   │   │   ├── Admin/Users/
 │   │   │   └── Auth/
 │   │   └── Middleware/
@@ -297,9 +324,9 @@ client-kosmos-SamuelAyllon/
 ├── routes/
 │   ├── web.php                   ← Todas las rutas
 │   └── settings.php              ← Rutas de configuración de cuenta
-├── tests/Feature/                ← 97 tests (Pest)
+├── tests/Feature/                ← 35 archivos / 509 test cases (Pest)
 ├── docs/                         ← Documentación técnica y de usuario
-├── deploy/                       ← Docker Compose para producción
+├── deploy/                       ← Runbook Railway + docker-compose.local.yml
 ├── Dockerfile
 └── docker-compose.yml
 ```
@@ -395,14 +422,41 @@ GET                  /patients/{patient}/pre-session
 GET                  /patients/{patient}/post-session
 POST, PUT, DEL       /patients/{patient}/notes/...
 POST, PUT, DEL       /patients/{patient}/agreements/...
-POST, PUT, DEL       /patients/{patient}/payments/...
 POST, DEL            /patients/{patient}/documents/...
 POST, PUT            /patients/{patient}/consent-forms/...
-GET                  /billing
+GET, POST, PUT, DEL  /appointments
+GET, PUT             /schedule                        ← Disponibilidad del profesional
+GET                  /calls/{room}                    ← Sala Google Meet
+GET, POST, PUT, DEL  /workspaces
+POST, PUT, DEL       /workspaces/{ws}/collaboration-agreements
+POST, PUT, DEL       /workspaces/{ws}/referrals
+GET, POST, PUT, DEL  /offered-consultations
+GET, POST            /messages
+GET                  /notifications
+GET, POST            /invoices
+GET                  /invoices/{invoice}/pdf
+POST                 /invoices/{invoice}/checkout     ← Stripe Checkout
 GET, POST            /kosmo
 POST                 /kosmo/chat
 POST                 /kosmo/briefings/{briefing}/read
-GET, PUT             /settings
+GET, PUT             /settings                        ← Perfil, password, 2FA, Google, consulta
+```
+
+### Paciente (portal) — `['auth', 'verified']`
+
+```
+GET                  /portal
+GET                  /portal/appointments
+GET                  /portal/invoices
+GET                  /portal/messages
+```
+
+### Endpoints REST reales (no-Inertia)
+
+```
+POST                 /webhooks/stripe                 ← Firma Stripe (sin CSRF)
+POST                 /broadcasting/auth               ← Handshake Reverb
+GET, POST            /auth/google/callback            ← OAuth Google
 ```
 
 ### Admin — `['auth', 'verified', 'admin']`
@@ -424,7 +478,7 @@ DELETE      /admin/users/{user}
 php artisan test --testsuite=Feature   # Ejecutar todos los Feature tests
 ```
 
-**389 test cases** — **1.535 aserciones** — todas en verde ✅
+**509 test cases** — **1.887 aserciones** — todas en verde ✅
 
 Áreas cubiertas por la suite Feature:
 
@@ -468,50 +522,54 @@ docker compose -f docker-compose.local.yml up -d
 | Aplicación | http://localhost:8000 |
 | Mailpit (correo de prueba) | http://localhost:8025 |
 
-### Producción real (VPS + Traefik + HTTPS)
+### Producción real (Railway)
 
-URL pública: **https://clientkosmos.duckdns.org** (subdominio gratuito DuckDNS).
+ClientKosmos está desplegado en [Railway](https://railway.com) con auto-deploy
+desde `main`. Stack: servicio `app` (Docker build desde el `Dockerfile` del repo)
++ servicio `MySQL` (template oficial) + volumen montado en `/app/storage/app`.
+
+URL pública actual: **https://clientkosmos.up.railway.app**
 
 ```bash
-# En el VPS, tras provisioning:
-cd /opt/clientkosmos/deploy
-cp .env.prod.example .env.prod   # rellenar valores
-touch acme.json && chmod 600 acme.json
-docker compose -f docker-compose.prod.yml --env-file .env.prod up -d
+# Operaciones desde local (vía Railway CLI / MCP)
+railway logs --service app --environment production
+railway variables --service app --environment production --json
+railway up --service app                    # Deploy manual (normalmente auto)
 ```
 
-Runbook completo (provisioning del VPS, DNS, certificado ACME,
-secrets de GitHub Actions, troubleshooting): [`deploy/PRODUCTION.md`](deploy/PRODUCTION.md).
+Runbook completo (topología, variables, troubleshooting, MCP de Railway):
+[`deploy/RAILWAY.md`](deploy/RAILWAY.md). La pila legacy VPS + Traefik + DuckDNS
+queda archivada en [`deploy/legacy/`](deploy/legacy/).
 
-### Contenedores
+### Servicios Railway
 
-| Contenedor | Imagen | Rol |
-|------------|--------|-----|
-| `clientkosmos_traefik` | `traefik:v3.1` | Reverse proxy + TLS (Let's Encrypt) |
-| `clientkosmos_app` | `samue45/client-kosmos` (FrankenPHP) | Aplicación Laravel + Caddy embebido |
-| `clientkosmos_db` | `mysql:8.0` | Base de datos (red interna, sin puerto público) |
-| `clientkosmos_redis` | `redis:7-alpine` | Cache + sesiones + cola |
-| `clientkosmos_duckdns` | `linuxserver/duckdns` | Sync de DNS si la IP del VPS es dinámica |
+| Servicio | Tipo | Rol |
+|----------|------|-----|
+| `app` | Docker (repo) | Aplicación Laravel + FrankenPHP, expuesta en `:8000` |
+| `worker` | Docker (repo, mismo image) | Worker de cola (`CONTAINER_ROLE=worker`) — procesa transcripciones, emails, PDFs |
+| `MySQL` | Template oficial Railway | Base de datos, conectada por refs `${{MySQL.MYSQLHOST}}`, etc. |
+| `Cloudflare R2` | Bucket S3-compatible externo | Persistencia de uploads, PDFs y documentos compartida entre `app` y `worker` ([ADR-0032](docs/adr/0032-object-storage-cloudflare-r2.md)) |
+| `Brevo HTTP API` | Servicio externo | Transport de email transaccional (Railway bloquea SMTP saliente) |
 
-### Build multi-stage
+### Build multi-stage (Dockerfile)
 
 | Stage | Base | Acción |
 |-------|------|--------|
 | `deps` | `php:8.4-cli-alpine` | Instala dependencias PHP (Composer, sin dev) |
 | `frontend` | `node:20-alpine` | Compila assets con Vite (`npm run build`) |
-| `final` | `dunglas/frankenphp:1-php8.4-alpine` | Imagen final con Caddy + PHP 8.4 (objetivo ≤ 200 MB) |
+| `final` | `dunglas/frankenphp:1-php8.4-alpine` | Imagen final con Caddy + PHP 8.4 |
 
 ### Entrypoint automático
 
 Al arrancar el contenedor:
-1. Copia `.env.example` → `.env` con las variables del compose.
+1. Copia `.env.example` → `.env` con las variables del entorno (Railway / compose).
 2. Genera `APP_KEY` si está vacía.
 3. Espera a que MySQL acepte conexiones (vía PHP/PDO).
 4. Ejecuta `migrate --force` y `storage:link`.
 5. `db:seed` **solo** si `APP_ENV != production` y la tabla `users` está vacía.
 6. En producción cachea config, rutas y vistas.
-7. Arranca `frankenphp run --config /etc/caddy/Caddyfile` (HTTP plano `:8000`,
-   TLS lo termina Traefik por delante).
+7. Arranca `frankenphp run --config /etc/caddy/Caddyfile` en `:8000`
+   (Railway termina TLS por delante).
 
 ---
 
@@ -535,7 +593,7 @@ GROQ_MODEL=llama-3.3-70b-versatile
 GROQ_CA_BUNDLE=C:/certs/cacert.pem   # Solo Windows
 ```
 
-### Producción (MySQL / TiDB Cloud)
+### Producción (MySQL gestionado en Railway)
 
 ```env
 APP_NAME=ClientKosmos
@@ -543,34 +601,48 @@ APP_ENV=production
 APP_DEBUG=false
 APP_URL=https://tu-dominio.com
 
-# Base de datos (TiDB Cloud Serverless — MySQL compatible)
+# Base de datos — referencias al servicio MySQL del propio proyecto Railway
 DB_CONNECTION=mysql
-DB_HOST=gateway01.eu-central-1.prod.aws.tidbcloud.com
-DB_PORT=4000
-DB_DATABASE=test
-DB_USERNAME=tu_usuario
-DB_PASSWORD=tu_password
-DB_SSL_CA=/ruta/isrgrootx1.pem   # Certificado ISRG Root X1
+DB_HOST=${{ MySQL.MYSQLHOST }}
+DB_PORT=${{ MySQL.MYSQLPORT }}
+DB_DATABASE=${{ MySQL.MYSQLDATABASE }}
+DB_USERNAME=${{ MySQL.MYSQLUSER }}
+DB_PASSWORD=${{ MySQL.MYSQLPASSWORD }}
 
 # IA contextual
 GROQ_API_KEY=gsk_xxxxxxxxxxxxxxxx
 GROQ_BASE_URL=https://api.groq.com/openai/v1
 GROQ_MODEL=llama-3.3-70b-versatile
+
+# Email transaccional — Brevo HTTP API (Railway bloquea egreso SMTP)
+MAIL_MAILER=brevo
+BREVO_API_KEY=xkeysib-xxxxxxxxxxxxxxxx
+MAIL_FROM_ADDRESS=no-reply@clientkosmos.com
+MAIL_FROM_NAME=ClientKosmos
+
+# Almacenamiento de objetos — Cloudflare R2
+FILESYSTEM_DISK=r2
+R2_ACCESS_KEY_ID=xxxxxxxxxxxxxxxx
+R2_SECRET_ACCESS_KEY=xxxxxxxxxxxxxxxx
+R2_BUCKET=clientkosmos-prod
+R2_ENDPOINT=https://<account-id>.r2.cloudflarestorage.com
+
+# Rol del contenedor (app | worker) — gestiona el entrypoint
+CONTAINER_ROLE=app
 ```
 
-### Certificados SSL (solo necesarios en producción con TiDB Cloud)
+### Certificados SSL (Groq en Windows)
 
-> En desarrollo con SQLite **no se necesitan certificados**. En Docker, MySQL corre localmente.
+> En desarrollo con SQLite **no se necesitan certificados**. La BD de producción se accede dentro de la red privada de Railway sin certificado adicional.
 
 | Sistema | Acción |
 |---------|--------|
-| **Windows** | Descargar `isrgrootx1.pem` (TiDB) y `cacert.pem` (Groq) con PowerShell |
+| **Windows** | Descargar `cacert.pem` (Groq) con PowerShell |
 | **Linux / macOS** | Sin acción — certificados del sistema disponibles automáticamente |
 
 ```powershell
 # PowerShell (Windows) — como administrador
 mkdir C:\certs
-Invoke-WebRequest -Uri "https://letsencrypt.org/certs/isrgrootx1.pem" -OutFile "C:\certs\isrgrootx1.pem"
 Invoke-WebRequest -Uri "https://curl.se/ca/cacert.pem" -OutFile "C:\certs\cacert.pem"
 ```
 
@@ -581,13 +653,15 @@ Invoke-WebRequest -Uri "https://curl.se/ca/cacert.pem" -OutFile "C:\certs\cacert
 | Síntoma | Causa probable | Solución |
 |---------|----------------|----------|
 | `cURL error 60` con la IA | PHP/cURL sin certificados CA (Windows) | Descargar `cacert.pem` y configurar `GROQ_CA_BUNDLE` |
-| `cURL error 60` con BD | Falta certificado ISRG Root X1 (TiDB) | Descargar `isrgrootx1.pem` y configurar `DB_SSL_CA` |
 | Error 419 en formularios | Token CSRF expirado | `php artisan config:clear` + borrar cookies |
 | `RoleDoesNotExist` | Seeders no ejecutados | `php artisan migrate:fresh --seed` |
 | Tests fallan con Vite | Manifest de Vite no encontrado | `php artisan view:clear` y volver a ejecutar |
 | Frontend no actualiza | Caché de Vite | Reiniciar `npm run dev` o Ctrl+Shift+R |
 | La app tarda en arrancar (Docker) | MySQL inicializando | Normal. Espera ~60 s y observa `docker compose logs -f app` |
 | Sesiones se invalidan (Docker) | `APP_KEY` cambia en cada contenedor | Fija la `APP_KEY` en el `docker-compose.yml` |
+| Emails de verificación no llegan en Railway | Railway bloquea egreso SMTP en plan Hobby | Usar `MAIL_MAILER=brevo` con `BREVO_API_KEY` (HTTP API, no SMTP) |
+| PDF generado por el worker no se ve en la app | Volumen local no compartido entre servicios Railway | `FILESYSTEM_DISK=r2` con credenciales de Cloudflare R2 |
+| "Acceso bloqueado: ClientKosmos no ha completado la verificación" al iniciar sesión con Google | Cliente OAuth en modo Testing (subdominio `*.up.railway.app` no verificable) | Pedir al admin que añada tu email como _test user_ en Google Cloud Console. Justificación: [docs/google-oauth-test-users-justification.md](docs/google-oauth-test-users-justification.md) |
 
 ---
 
@@ -625,11 +699,12 @@ Los únicos endpoints que **sí actúan como API HTTP pura** son integraciones d
 
 | Documento | Descripción |
 |-----------|-------------|
-| [docs/user_manual.md](docs/user_manual.md) | Manual de uso para el usuario final |
-| [docs/justificate_implementation.md](docs/justificate_implementation.md) | Justificación técnica de decisiones de diseño |
-| [docs/proyect_information.md](docs/proyect_information.md) | Contexto completo, estado actual y estructura |
+| [docs/memoria_tecnica.md](docs/memoria_tecnica.md) | Memoria técnica completa del Proyecto Intermodular DAM |
+| [docs/informe-transparencia-ia.md](docs/informe-transparencia-ia.md) | Declaración de uso de IA en el desarrollo |
+| [docs/google-oauth-test-users-justification.md](docs/google-oauth-test-users-justification.md) | Justificación del cliente OAuth en modo Testing |
+| [docs/adr/](docs/adr/) | Architecture Decision Records (decisiones técnicas) |
 | [docs/clientkosmos-design-system.md](docs/clientkosmos-design-system.md) | Design system: tokens, componentes, tipografía |
-| [deploy/README.md](deploy/README.md) | Instrucciones de despliegue con Docker |
+| [deploy/RAILWAY.md](deploy/RAILWAY.md) | Runbook completo de despliegue en Railway |
 
 ---
 

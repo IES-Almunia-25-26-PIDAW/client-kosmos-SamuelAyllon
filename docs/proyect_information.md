@@ -75,8 +75,8 @@ Profesionales autónomos o en pequeñas consultas que necesitan:
 | Autenticación 2FA | ✅ | TOTP con códigos de recuperación |
 | Modo oscuro / claro | ✅ | Con persistencia en cookie |
 | Docker (desarrollo) | ✅ | Compose con MySQL + Mailpit |
-| Docker (producción) | ✅ | Imagen publicada en Docker Hub |
-| Tests automatizados | ✅ | 97 tests, 487 aserciones |
+| Despliegue producción | ✅ | Railway (auto-deploy desde `main`) — ver [deploy/RAILWAY.md](../deploy/RAILWAY.md) |
+| Tests automatizados | ✅ | 509 tests, 1.887 aserciones |
 
 ### Funcionalidades pendientes / roadmap 🔮
 
@@ -124,7 +124,7 @@ Profesionales autónomos o en pequeñas consultas que necesitan:
 |---------|---------------|-------------|
 | Desarrollo local | SQLite (archivo) | Cero configuración |
 | Tests | SQLite in-memory | Rápido y aislado |
-| Docker / producción | MySQL 8 (TiDB Cloud) | Alta disponibilidad, serverless |
+| Docker / producción | MySQL 8 (Railway) | Servicio gestionado en Railway |
 
 ### IA
 
@@ -394,14 +394,13 @@ APP_URL=http://localhost:8000
 # Desarrollo (SQLite — sin configuración adicional)
 DB_CONNECTION=sqlite
 
-# Producción (MySQL / TiDB Cloud)
+# Producción (MySQL gestionado en Railway)
 DB_CONNECTION=mysql
-DB_HOST=gateway01.eu-central-1.prod.aws.tidbcloud.com
-DB_PORT=4000
-DB_DATABASE=test
-DB_USERNAME=tu_usuario
-DB_PASSWORD=tu_contraseña
-DB_SSL_CA=/ruta/isrgrootx1.pem   # Solo Windows con TiDB
+DB_HOST=${{ MySQL.MYSQLHOST }}
+DB_PORT=${{ MySQL.MYSQLPORT }}
+DB_DATABASE=${{ MySQL.MYSQLDATABASE }}
+DB_USERNAME=${{ MySQL.MYSQLUSER }}
+DB_PASSWORD=${{ MySQL.MYSQLPASSWORD }}
 ```
 
 ### IA (Kosmo)
@@ -435,8 +434,13 @@ El proyecto se desarrolló de forma iterativa en varias fases:
 | **Fase 3** | Pagos, documentos y formularios de consentimiento; módulo de facturación | ✅ |
 | **Fase 4** | Integración Kosmo IA: briefings diarios + chat contextual con Groq/Llama | ✅ |
 | **Fase 5** | Panel de administración; onboarding; ajustes de consulta | ✅ |
-| **Fase 6** | Refactor Single-Action Controllers; tests completos (97); documentación | ✅ |
-| **Fase 7** | Dockerización: multi-stage build + Docker Hub + deploy README | ✅ |
+| **Fase 6** | Refactor Single-Action Controllers; tests completos; documentación | ✅ |
+| **Fase 7** | Dockerización: multi-stage build con FrankenPHP | ✅ |
+| **Fase 8** | Citas, agenda, videoconsulta Google Meet, transcripción Whisper, mensajería Reverb, portal del paciente | ✅ |
+| **Fase 9** | Migración UI Tailwind → Chakra UI v3 (fases 1–5), eliminación de Radix UI | ✅ |
+| **Fase 10** | Google OAuth (profesional + paciente), Calendar vinculado en login Google | ✅ |
+| **Fase 11** | PHPStan nivel 7 con baseline vacía (ADR-0031) | ✅ |
+| **Fase 12** | Migración de despliegue VPS → Railway (auto-deploy, MySQL gestionado, volumen) | ✅ |
 
 ---
 

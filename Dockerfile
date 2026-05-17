@@ -1,3 +1,13 @@
+# syntax=docker/dockerfile:1
+# check=skip=SecretsUsedInArgOrEnv
+# ──────────────────────────────────────────────────────────────────────────────
+# Nota sobre `check=skip=SecretsUsedInArgOrEnv`:
+# El linter detecta "KEY" en `VITE_REVERB_APP_KEY` y lo marca como secreto.
+# Es un falso positivo: ese valor es el identificador *público* de la app
+# Reverb que se hornea en el bundle de cliente para que el navegador pueda
+# suscribirse a canales WebSocket. El secreto real es `REVERB_APP_SECRET`,
+# que se queda en el servidor y NO aparece en este Dockerfile.
+# ──────────────────────────────────────────────────────────────────────────────
 # ==============================================================================
 # Dockerfile de ClientKosmos (Laravel + React) — FrankenPHP
 # ==============================================================================
@@ -31,21 +41,58 @@ RUN composer install \
     --no-interaction \
     --optimize-autoloader
 
+# Trim google/apiclient-services: el paquete trae cientos de servicios Google
+# (~190 MB) y solo usamos Calendar + Oauth2. El script oficial de Google
+# (Google\Task\Composer::cleanup) no corre con --no-scripts, así que limpiamos
+# a mano. Mantenemos el subdir y el .php top-level de cada servicio en uso.
+RUN cd vendor/google/apiclient-services/src && \
+    find . -mindepth 1 -maxdepth 1 -type d \
+        ! -name Calendar ! -name Oauth2 -exec rm -rf {} + && \
+    find . -mindepth 1 -maxdepth 1 -type f -name '*.php' \
+        ! -name Calendar.php ! -name Oauth2.php -delete
+
 
 # ==============================================================================
 # ETAPA 2: Frontend (Vite + React)
 # ==============================================================================
 FROM node:20-alpine AS frontend
 
-# PHP necesario porque Vite invoca artisan durante el build (Wayfinder)
+# Variables VITE_* que Vite hornea en el bundle JS en tiempo de build. Si no
+# se pasan vía --build-arg (o via Railway que las inyecta automáticamente
+# desde las env vars del servicio), Vite cae al valor por defecto del
+# .env.example y el cliente quedará apuntando a localhost.
+ARG VITE_APP_NAME=ClientKosmos
+ARG VITE_REVERB_APP_KEY
+ARG VITE_REVERB_HOST
+ARG VITE_REVERB_PORT
+ARG VITE_REVERB_SCHEME
+# Promocionar a ENV para que `npm run build` (Vite) las vea como process.env.*
+ENV VITE_APP_NAME=$VITE_APP_NAME \
+    VITE_REVERB_APP_KEY=$VITE_REVERB_APP_KEY \
+    VITE_REVERB_HOST=$VITE_REVERB_HOST \
+    VITE_REVERB_PORT=$VITE_REVERB_PORT \
+    VITE_REVERB_SCHEME=$VITE_REVERB_SCHEME
+
+# PHP necesario porque Vite invoca artisan durante el build (Wayfinder).
+# Incluimos todas las extensiones que los ServiceProviders cargan al
+# arrancar Laravel: curl/iconv/intl/bcmath/gd/zip/simplexml son requeridas
+# por Stripe, OpenAI, Google API, Carbon, etc. Sin ellas artisan falla con
+# "extension X not found" antes de poder enumerar rutas para Wayfinder.
 RUN apk add --no-cache php84 php84-tokenizer php84-mbstring php84-xml \
     php84-phar php84-openssl php84-dom php84-xmlwriter php84-ctype \
     php84-pdo php84-pdo_sqlite php84-fileinfo php84-session \
+    php84-curl php84-iconv php84-intl php84-bcmath php84-gd \
+    php84-zip php84-simplexml php84-sodium php84-opcache \
     && ln -sf /usr/bin/php84 /usr/bin/php
 
 WORKDIR /app
 
 COPY --from=deps /app/vendor vendor/
+
+# composer.json / composer.lock son obligatorios en runtime: Laravel los lee
+# para detectar paquetes y versión. Sin ellos, cualquier `artisan` revienta
+# con "file_get_contents(/app/composer.json): Failed to open stream".
+COPY composer.json composer.lock ./
 
 COPY package.json package-lock.json ./
 RUN npm ci
@@ -65,6 +112,25 @@ RUN mkdir -p bootstrap/cache storage/framework/sessions storage/framework/views 
     && chmod -R 775 bootstrap/cache storage
 
 COPY .env.example .env
+
+# Sobreescribir los VITE_REVERB_* en .env con los valores de los ARGs. Vite
+# lee de .env durante `vite build`, y aunque process.env tendría precedencia,
+# escribirlo al fichero garantiza que (a) cualquier mecanismo de lectura
+# alternativo lo vea y (b) la capa rompe cache si los ARGs cambian, forzando
+# rebuild cuando Railway actualiza las VITE_REVERB_* del servicio. Sin esto
+# el bundle se quedaba con wsHost=localhost/key="" del .env.example.
+RUN printf '\nVITE_REVERB_APP_KEY=%s\nVITE_REVERB_HOST=%s\nVITE_REVERB_PORT=%s\nVITE_REVERB_SCHEME=%s\n' \
+    "$VITE_REVERB_APP_KEY" "$VITE_REVERB_HOST" "$VITE_REVERB_PORT" "$VITE_REVERB_SCHEME" >> .env
+
+# Generamos APP_KEY de build (no se usa en runtime — Railway/compose inyecta
+# la real) para que artisan pueda bootear sin warnings de cifrado.
+RUN php artisan key:generate --force --no-interaction
+
+# Pre-generamos los tipos de Wayfinder con verbosidad. Si el plugin de Vite
+# llama después al mismo comando y todo está bien, simplemente regenera. Si
+# algo falla, el error real (stack trace de Laravel) aparece aquí en lugar
+# de quedarse oculto detrás del "Command failed" de Rollup.
+RUN php artisan wayfinder:generate --with-form -v
 
 RUN npm run build
 

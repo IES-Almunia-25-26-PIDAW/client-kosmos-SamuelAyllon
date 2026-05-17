@@ -17,6 +17,7 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { LiveTranscriptPanel } from '@/components/live-transcript-panel';
 import { RecordingIndicator } from '@/components/recording-indicator';
 import { useProfessionalTabRecorder } from '@/hooks/use-professional-tab-recorder';
+import EndCallAction from '@/actions/App/Http/Controllers/Appointment/EndCallAction';
 import axios from '@/lib/axios';
 import type { Auth } from '@/types';
 
@@ -76,7 +77,7 @@ export default function CallRoom({ appointment, exitUrl }: Props) {
     const handleEndSession = async () => {
         if (recorder.status === 'recording') recorder.stopRecording();
         try {
-            await axios.post(`/appointments/${appointment.id}/end-call`);
+            await axios.post(EndCallAction.url(appointment.id));
         } catch {
             // navigate out even on failure
         }

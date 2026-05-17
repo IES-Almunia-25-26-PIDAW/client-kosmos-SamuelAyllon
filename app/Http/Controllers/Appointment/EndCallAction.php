@@ -14,6 +14,14 @@ class EndCallAction extends Controller
 
     public function __invoke(Appointment $appointment): JsonResponse
     {
+        $userId = auth()->id();
+
+        abort_unless(
+            $appointment->patient_id === $userId || $appointment->professional_id === $userId,
+            403,
+            'No tienes acceso a esta cita.'
+        );
+
         abort_if(
             $appointment->status !== 'in_progress',
             422,

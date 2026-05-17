@@ -24,6 +24,10 @@ class FinalizeAndNotifyAction extends Controller
             'Solo el profesional de la cita puede finalizarla.',
         );
 
+        if ($appointment->status !== 'completed') {
+            $appointment->update(['status' => 'completed']);
+        }
+
         $invoice = $generate($appointment);
 
         if ($invoice !== null) {

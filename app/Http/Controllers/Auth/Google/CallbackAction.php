@@ -8,6 +8,7 @@ use App\Services\GoogleAuthService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
@@ -75,6 +76,21 @@ class CallbackAction extends Controller
             }
 
             if ($type === 'professional') {
+                // Bloqueo soft-deleted: el unique index a nivel BD daría 500
+                // si una cuenta previa con el mismo email/google_id está en
+                // la papelera. Mensaje claro en su lugar.
+                $trashed = User::onlyTrashed()
+                    ->where(fn ($q) => $q
+                        ->where('email', $profile['email'])
+                        ->orWhere('google_id', $profile['google_id'])
+                    )
+                    ->exists();
+
+                if ($trashed) {
+                    return redirect()->route('register')
+                        ->withErrors(['google' => 'Esta cuenta de Google ya estuvo registrada anteriormente. Contacta con soporte para reactivarla.']);
+                }
+
                 $user = $this->createProfessional($profile);
             } else {
                 session([
@@ -86,6 +102,14 @@ class CallbackAction extends Controller
 
                 return redirect()->route('auth.google.patient-consents');
             }
+        }
+
+        // Paridad con AuthenticateAction (login email/password): rechazar usuarios
+        // sin rol válido. Esto cubre cuentas que se crearon antes de que la tabla
+        // roles existiera (assignRole falló silenciosa) o que fueron purgadas.
+        if (! $user->hasAnyRole(['admin', 'professional', 'patient'])) {
+            return redirect()->route('login')
+                ->withErrors(['google' => 'Tu cuenta no tiene un rol asignado. Contacta con soporte.']);
         }
 
         Auth::login($user, remember: true);
@@ -103,20 +127,30 @@ class CallbackAction extends Controller
      */
     private function createProfessional(array $profile): User
     {
-        $user = User::create([
-            'name' => $profile['name'],
-            'email' => $profile['email'],
-            'google_id' => $profile['google_id'],
-            'password' => null,
-            'email_verified_at' => $profile['email_verified'] ? now() : null,
-            'google_refresh_token' => $profile['refresh_token'],
-        ]);
+        // Transacción: igual que CreateNewUser, evita usuarios huérfanos si
+        // assignRole() o professionalProfile()->create() fallan tras el insert.
+        return DB::transaction(function () use ($profile) {
+            $user = User::create([
+                'name' => $profile['name'],
+                'email' => $profile['email'],
+                'google_id' => $profile['google_id'],
+                'password' => null,
+                'google_refresh_token' => $profile['refresh_token'],
+            ]);
 
-        $user->assignRole('professional');
-        $user->professionalProfile()->create([
-            'verification_status' => 'pending',
-        ]);
+            // email_verified_at no está en $fillable; aplicar explícitamente
+            // tras el create cuando Google ya verificó la dirección.
+            if ($profile['email_verified']) {
+                $user->email_verified_at = now();
+                $user->save();
+            }
 
-        return $user;
+            $user->assignRole('professional');
+            $user->professionalProfile()->create([
+                'verification_status' => 'pending',
+            ]);
+
+            return $user;
+        });
     }
 }

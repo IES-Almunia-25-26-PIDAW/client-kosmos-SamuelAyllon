@@ -7,6 +7,7 @@ use App\Concerns\ProfileValidationRules;
 use App\Models\User;
 use App\Services\RgpdService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
@@ -53,31 +54,36 @@ class CreateNewUser implements CreatesNewUsers
 
         Validator::make($input, $rules)->validate();
 
-        $user = User::create([
-            'name' => $input['name'],
-            'email' => $input['email'],
-            'password' => Hash::make($input['password']),
-            'phone' => $input['phone'] ?? null,
-            'date_of_birth' => $input['date_of_birth'] ?? null,
-        ]);
-
-        if ($type === 'professional') {
-            $user->assignRole('professional');
-            $user->professionalProfile()->create([
-                'license_number' => $input['license_number'] ?? null,
-                'collegiate_number' => $input['collegiate_number'] ?? null,
-                'specialties' => $input['specialties'] ?? null,
-                'bio' => $input['bio'] ?? null,
-                'verification_status' => 'pending',
+        // Transacción: si assignRole() o profile()->create() fallan (ej. tabla
+        // roles vacía → RoleDoesNotExist), revertir el User::create() para
+        // evitar usuarios huérfanos que luego no pueden hacer login.
+        return DB::transaction(function () use ($input, $type) {
+            $user = User::create([
+                'name' => $input['name'],
+                'email' => $input['email'],
+                'password' => Hash::make($input['password']),
+                'phone' => $input['phone'] ?? null,
+                'date_of_birth' => $input['date_of_birth'] ?? null,
             ]);
-        } else {
-            $user->assignRole('patient');
-            $user->patientProfile()->create([]);
 
-            $request = app(Request::class);
-            $this->rgpdService->storeRegistrationConsents($user, $request);
-        }
+            if ($type === 'professional') {
+                $user->assignRole('professional');
+                $user->professionalProfile()->create([
+                    'license_number' => $input['license_number'] ?? null,
+                    'collegiate_number' => $input['collegiate_number'] ?? null,
+                    'specialties' => $input['specialties'] ?? null,
+                    'bio' => $input['bio'] ?? null,
+                    'verification_status' => 'pending',
+                ]);
+            } else {
+                $user->assignRole('patient');
+                $user->patientProfile()->create([]);
 
-        return $user;
+                $request = app(Request::class);
+                $this->rgpdService->storeRegistrationConsents($user, $request);
+            }
+
+            return $user;
+        });
     }
 }

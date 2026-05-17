@@ -12,10 +12,13 @@
 
 ---
 
-Este directorio contiene el `docker-compose.yml` listo para usar con la imagen publicada en Docker Hub.
-No necesitas clonar el código fuente ni compilar nada — Docker descarga la imagen ya construida.
+Este directorio contiene:
 
-> **¿Buscas el código fuente?** Está en la raíz del repositorio junto con su propio `docker-compose.yml` para desarrollo (que construye la imagen localmente).
+- [`docker-compose.local.yml`](docker-compose.local.yml) — Stack local con Mailpit + MySQL expuesto, para desarrollo.
+- [`RAILWAY.md`](RAILWAY.md) — Runbook del despliegue productivo en Railway.
+- [`legacy/`](legacy/) — Stack VPS+Traefik+DuckDNS preservado por si vuelves a self-hosting.
+
+> **Producción**: ClientKosmos se despliega en [Railway](https://railway.com). Cada push a `main` se construye y publica automáticamente. Detalles en [RAILWAY.md](RAILWAY.md).
 
 ---
 

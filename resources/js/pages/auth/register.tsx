@@ -160,6 +160,18 @@ export default function Register() {
         if (data.password.length < 8) {
             setError('password', 'La contraseña debe tener al menos 8 caracteres');
             valid = false;
+        } else if (!/[A-Z]/.test(data.password)) {
+            setError('password', 'Debe contener una letra mayúscula');
+            valid = false;
+        } else if (!/[a-z]/.test(data.password)) {
+            setError('password', 'Debe contener una letra minúscula');
+            valid = false;
+        } else if (!/[0-9]/.test(data.password)) {
+            setError('password', 'Debe contener un número');
+            valid = false;
+        } else if (!/[^A-Za-z0-9]/.test(data.password)) {
+            setError('password', 'Debe contener un símbolo (!@#$...)');
+            valid = false;
         }
         if (data.password !== data.password_confirmation) {
             setError('password_confirmation', 'Las contraseñas no coinciden');

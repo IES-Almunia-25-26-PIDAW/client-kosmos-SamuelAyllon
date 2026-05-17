@@ -1,6 +1,6 @@
 import { Box, Flex, chakra } from '@chakra-ui/react';
 import { Link, usePage } from '@inertiajs/react';
-import { Shield, Users, ChevronsUpDown } from 'lucide-react';
+import { ChevronsUpDown, Shield, Trash2, Users } from 'lucide-react';
 import React from 'react';
 import { ImpersonationBanner } from '@/components/admin/impersonation-banner';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -69,6 +69,7 @@ function AdminNavUser({ user }: { user: User }) {
 
 const adminNavItems = [
     { href: '/admin', label: 'Usuarios', icon: Users },
+    { href: '/admin/users/trash', label: 'Papelera', icon: Trash2 },
 ];
 
 export default function AdminLayout({ children }: AdminLayoutProps) {

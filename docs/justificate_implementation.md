@@ -15,7 +15,7 @@
 7. [Integración de IA (Kosmo)](#7-integración-de-ia-kosmo)
 8. [Estrategia de testing](#8-estrategia-de-testing)
 9. [Despliegue con Docker](#9-despliegue-con-docker)
-10. [Base de datos: SQLite en desarrollo, TiDB Cloud en producción](#10-base-de-datos-sqlite-en-desarrollo-tidb-cloud-en-producción)
+10. [Base de datos: SQLite en desarrollo, MySQL gestionado en producción](#10-base-de-datos-sqlite-en-desarrollo-mysql-gestionado-en-producción)
 11. [Decisiones de diseño UI/UX](#11-decisiones-de-diseño-uiux)
 
 ---
@@ -414,7 +414,7 @@ La imagen se publica en `samue45/client-kosmos:latest`. El directorio `deploy/` 
 
 ---
 
-## 10. Base de datos: SQLite en desarrollo, TiDB Cloud en producción
+## 10. Base de datos: SQLite en desarrollo, MySQL gestionado en producción
 
 ### Justificación de SQLite en desarrollo
 
@@ -428,11 +428,11 @@ La imagen se publica en `samue45/client-kosmos:latest`. El directorio `deploy/` 
 <env name="DB_DATABASE" value=":memory:"/>
 ```
 
-### Justificación de TiDB Cloud en producción
+### Justificación de MySQL gestionado (Railway) en producción
 
-- **Compatible con MySQL 8** — migraciones y queries idénticos en ambos entornos
-- **Serverless** — no hay servidores que provisionar ni gestionar
-- **Alta disponibilidad** — replicación automática en múltiples zonas
+- **MySQL 8** — migraciones y queries idénticos en ambos entornos
+- **Servicio gestionado en Railway** — provisionado vía template oficial, sin servidores que administrar
+- **Variables inyectadas** mediante referencias del propio servicio MySQL del proyecto
 - **Plan gratuito** suficiente para el proyecto académico
 
 ---

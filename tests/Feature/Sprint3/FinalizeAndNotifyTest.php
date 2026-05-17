@@ -118,6 +118,28 @@ it('also dispatches invoice job and marks invoice as sent when invoice exists', 
     assertActivityLoggedFor($invoice->fresh(), 'updated');
 });
 
+it('marks appointment as completed when finalizing from in_progress', function () {
+    Queue::fake();
+
+    $professional = createProfessional();
+    $patient = createPatient();
+    $appointment = Appointment::factory()->create([
+        'professional_id' => $professional->id,
+        'patient_id' => $patient->id,
+        'service_id' => null,
+        'status' => 'in_progress',
+        'workspace_id' => null,
+        'starts_at' => now()->subMinutes(60),
+        'ends_at' => now()->subMinutes(10),
+    ]);
+
+    $this->actingAs($professional)
+        ->post("/professional/appointments/{$appointment->id}/finalize-and-notify")
+        ->assertRedirect();
+
+    expect($appointment->fresh()->status)->toBe('completed');
+});
+
 it('denies finalize when user is not the appointment professional', function () {
     $professional = createProfessional();
     $otherProfessional = createProfessional();
