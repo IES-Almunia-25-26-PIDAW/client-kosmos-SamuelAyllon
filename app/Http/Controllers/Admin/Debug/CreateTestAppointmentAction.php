@@ -9,10 +9,13 @@ use App\Models\PatientProfile;
 use App\Models\ProfessionalProfile;
 use App\Models\User;
 use App\Models\Workspace;
+use App\Services\GoogleCalendarService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Throwable;
 
 /**
  * Endpoint de debug solo para admin: crea una cita confirmada AHORA entre dos
@@ -28,7 +31,7 @@ use Illuminate\Support\Str;
  */
 class CreateTestAppointmentAction extends Controller
 {
-    public function __invoke(Request $request): JsonResponse
+    public function __invoke(Request $request, GoogleCalendarService $google): JsonResponse
     {
         $email1 = (string) $request->query('professional', 'samuelayllonsevilla86@gmail.com');
         $email2 = (string) $request->query('patient', 'ayllonsevillasamuel62@gmail.com');
@@ -121,7 +124,29 @@ class CreateTestAppointmentAction extends Controller
             ]);
         });
 
-        return response()->json([
+        // Crear evento Google Meet si el profesional tiene Calendar vinculado.
+        // Sin esto, el meeting_url queda en null y al pulsar "Iniciar llamada"
+        // no se abre Google Meet.
+        $meetWarning = null;
+        if ($professional->google_refresh_token === null) {
+            $meetWarning = 'El profesional NO tiene Google Calendar vinculado: el meeting_url queda vacío. Loguéate como él y conecta Google Calendar en Settings antes de probar la videollamada.';
+        } else {
+            try {
+                $meet = $google->createMeetEvent($appointment);
+                $appointment->update([
+                    'meeting_url' => $meet['meet_url'],
+                    'external_calendar_event_id' => $meet['event_id'],
+                ]);
+            } catch (Throwable $e) {
+                Log::warning('CreateTestAppointment: createMeetEvent failed', [
+                    'appointment_id' => $appointment->id,
+                    'error' => $e->getMessage(),
+                ]);
+                $meetWarning = 'Fallo al crear evento Meet: '.$e->getMessage();
+            }
+        }
+
+        return response()->json(array_filter([
             'appointment_id' => $appointment->id,
             'starts_at' => $appointment->starts_at->toIso8601String(),
             'ends_at' => $appointment->ends_at->toIso8601String(),
@@ -133,6 +158,8 @@ class CreateTestAppointmentAction extends Controller
                 'patient' => route('patient.appointments.show', $appointment),
             ],
             'meeting_room_id' => $appointment->meeting_room_id,
-        ]);
+            'meeting_url' => $appointment->fresh()->meeting_url,
+            'meet_warning' => $meetWarning,
+        ]));
     }
 }
