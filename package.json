@@ -35,7 +35,7 @@
         "vitest": "^2.1.9"
     },
     "dependencies": {
-        "@chakra-ui/react": "^3.34.0",
+        "@chakra-ui/react": "^3.35.0",
         "@emotion/react": "^11.14.0",
         "@inertiajs/react": "^2.3.7",
         "@laravel/echo-react": "^2.3.3",
