@@ -37,7 +37,7 @@
     "dependencies": {
         "@chakra-ui/react": "^3.34.0",
         "@emotion/react": "^11.14.0",
-        "@inertiajs/react": "^2.3.7",
+        "@inertiajs/react": "^3.1.1",
         "@laravel/echo-react": "^2.3.3",
         "@types/react": "^19.2.0",
         "@types/react-dom": "^19.2.0",
@@ -47,7 +47,7 @@
         "globals": "^15.14.0",
         "input-otp": "^1.4.2",
         "laravel-echo": "^2.3.4",
-        "laravel-vite-plugin": "^2.0",
+        "laravel-vite-plugin": "^3.1",
         "lucide-react": "^0.475.0",
         "pusher-js": "^8.5.0",
         "react": "^19.2.0",
